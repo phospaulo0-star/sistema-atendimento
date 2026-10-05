@@ -1,0 +1,12 @@
+{
+  "name": "sistema-atendimento",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node servidor.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  }
+}
