@@ -6,82 +6,227 @@ const crypto = require("crypto");
 
 const app = express();
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  express.static(
+    path.join(__dirname, "public")
+  )
+);
 
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+
+const wss =
+  new WebSocket.Server({ server });
 
 const clients = new Map();
 
 wss.on("connection", (ws) => {
-  const id = crypto.randomUUID();
+
+  const id =
+    crypto.randomUUID();
 
   clients.set(id, {
-    ws: ws,
+    ws,
     role: "unknown"
   });
 
-  ws.send(JSON.stringify({
-    type: "connected",
-    id: id
-  }));
+  ws.send(
+    JSON.stringify({
+      type: "connected",
+      id
+    })
+  );
 
   ws.on("message", (raw) => {
-    let message;
+
+    let msg;
 
     try {
-      message = JSON.parse(raw.toString());
-    } catch (error) {
+
+      msg =
+        JSON.parse(
+          raw.toString()
+        );
+
+    } catch {
+
+      return;
+
+    }
+
+    const client =
+      clients.get(id);
+
+    if (!client) {
       return;
     }
 
-    const client = clients.get(id);
+    /*
+     * REGISTRO DO TIPO DE USUÁRIO
+     */
 
-    if (message.type === "register") {
+    if (msg.type === "register") {
+
       client.role =
-        message.role === "receiver"
+        msg.role === "receiver"
           ? "receiver"
           : "sender";
 
-      ws.send(JSON.stringify({
-        type: "registered",
-        role: client.role
-      }));
+      ws.send(
+        JSON.stringify({
+          type: "registered",
+          role: client.role
+        })
+      );
 
       return;
     }
 
-    if (message.type === "send_record") {
-      const data = {
+    /*
+     * ENVIO DE UM ATENDIMENTO
+     */
+
+    if (msg.type === "send_record") {
+
+      const recordId =
+        crypto.randomUUID();
+
+      const payload = {
+
         type: "new_record",
-        record: message.record,
-        sentAt: new Date().toISOString()
+
+        recordId,
+
+        record: msg.record,
+
+        sentAt:
+          new Date().toISOString()
+
       };
 
-      for (const item of clients.values()) {
+      /*
+       * Guarda o ID do atendimento
+       * junto ao remetente.
+       */
+
+      client.lastRecordId =
+        recordId;
+
+      /*
+       * Envia para todas as Mesas
+       * de Recebimento conectadas.
+       */
+
+      for (
+        const c of clients.values()
+      ) {
+
         if (
-          item.role === "receiver" &&
-          item.ws.readyState === WebSocket.OPEN
+          c.role === "receiver" &&
+          c.ws.readyState ===
+            WebSocket.OPEN
         ) {
-          item.ws.send(JSON.stringify(data));
+
+          c.ws.send(
+            JSON.stringify(
+              payload
+            )
+          );
+
         }
+
       }
+
+      return;
     }
+
+    /*
+     * CONFIRMAÇÃO DE RECEBIMENTO
+     */
+
+    if (
+      msg.type ===
+      "confirm_received"
+    ) {
+
+      const horarioRecebimento =
+        new Date().toISOString();
+
+      /*
+       * Procuramos o atendimento
+       * pelo ID informado pela Mesa.
+       */
+
+      const recordId =
+        msg.recordId;
+
+      /*
+       * Enviamos a confirmação
+       * para os Guichês conectados.
+       */
+
+      for (
+        const c of clients.values()
+      ) {
+
+        if (
+          c.role === "sender" &&
+          c.ws.readyState ===
+            WebSocket.OPEN
+        ) {
+
+          c.ws.send(
+            JSON.stringify({
+
+              type:
+                "record_received",
+
+              recordId,
+
+              receivedAt:
+                horarioRecebimento
+
+            })
+          );
+
+        }
+
+      }
+
+      return;
+    }
+
   });
 
   ws.on("close", () => {
+
     clients.delete(id);
+
   });
+
 });
 
-app.get("/health", (req, res) => {
-  res.json({
-    ok: true
-  });
-});
+app.get(
+  "/health",
+  (_req, res) => {
 
-const PORT = process.env.PORT || 3000;
+    res.json({
+      ok: true
+    });
 
-server.listen(PORT, "0.0.0.0", () => {
-  console.log("Servidor iniciado na porta " + PORT);
-});
+  }
+);
+
+const PORT =
+  process.env.PORT || 3000;
+
+server.listen(
+  PORT,
+  "0.0.0.0",
+  () => {
+
+    console.log(
+      `Servidor iniciado na porta ${PORT}`
+    );
+
+  }
+);
