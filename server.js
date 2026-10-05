@@ -19,6 +19,9 @@ const wss =
 
 const clients = new Map();
 
+// Guarda qual Guichê enviou cada atendimento
+const recordOwners = new Map();
+
 wss.on("connection", (ws) => {
 
   const id =
@@ -41,16 +44,12 @@ wss.on("connection", (ws) => {
     let msg;
 
     try {
-
       msg =
         JSON.parse(
           raw.toString()
         );
-
     } catch {
-
       return;
-
     }
 
     const client =
@@ -60,10 +59,7 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    /*
-     * REGISTRO DO TIPO DE USUÁRIO
-     */
-
+    // REGISTRO DO TIPO DE USUÁRIO
     if (msg.type === "register") {
 
       client.role =
@@ -81,41 +77,28 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    /*
-     * ENVIO DE UM ATENDIMENTO
-     */
-
+    // ENVIO DE ATENDIMENTO
     if (msg.type === "send_record") {
 
       const recordId =
+        msg.recordId ||
         crypto.randomUUID();
 
-      const payload = {
-
-        type: "new_record",
-
+      // Guarda quem enviou
+      recordOwners.set(
         recordId,
+        id
+      );
 
+      const payload = {
+        type: "new_record",
+        recordId,
         record: msg.record,
-
         sentAt:
           new Date().toISOString()
-
       };
 
-      /*
-       * Guarda o ID do atendimento
-       * junto ao remetente.
-       */
-
-      client.lastRecordId =
-        recordId;
-
-      /*
-       * Envia para todas as Mesas
-       * de Recebimento conectadas.
-       */
-
+      // Envia para todas as Mesas
       for (
         const c of clients.values()
       ) {
@@ -139,58 +122,53 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    /*
-     * CONFIRMAÇÃO DE RECEBIMENTO
-     */
-
+    // CONFIRMAÇÃO DA MESA
     if (
       msg.type ===
       "confirm_received"
     ) {
 
-      const horarioRecebimento =
-        new Date().toISOString();
-
-      /*
-       * Procuramos o atendimento
-       * pelo ID informado pela Mesa.
-       */
-
       const recordId =
         msg.recordId;
 
-      /*
-       * Enviamos a confirmação
-       * para os Guichês conectados.
-       */
+      const senderId =
+        recordOwners.get(
+          recordId
+        );
 
-      for (
-        const c of clients.values()
+      if (!senderId) {
+        return;
+      }
+
+      const sender =
+        clients.get(senderId);
+
+      if (
+        sender &&
+        sender.ws.readyState ===
+          WebSocket.OPEN
       ) {
 
-        if (
-          c.role === "sender" &&
-          c.ws.readyState ===
-            WebSocket.OPEN
-        ) {
+        sender.ws.send(
+          JSON.stringify({
 
-          c.ws.send(
-            JSON.stringify({
+            type:
+              "record_received",
 
-              type:
-                "record_received",
+            recordId,
 
-              recordId,
+            receivedAt:
+              new Date().toISOString()
 
-              receivedAt:
-                horarioRecebimento
-
-            })
-          );
-
-        }
+          })
+        );
 
       }
+
+      // Atendimento já foi confirmado
+      recordOwners.delete(
+        recordId
+      );
 
       return;
     }
@@ -198,6 +176,22 @@ wss.on("connection", (ws) => {
   });
 
   ws.on("close", () => {
+
+    // Remove atendimentos desse Guichê
+    for (
+      const [
+        recordId,
+        ownerId
+      ] of recordOwners.entries()
+    ) {
+
+      if (ownerId === id) {
+        recordOwners.delete(
+          recordId
+        );
+      }
+
+    }
 
     clients.delete(id);
 
