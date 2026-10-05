@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Sistema de Atendimento</title>
+  <title>Sistema de Atendimento - Polícia Penal MS</title>
 
   <style>
     * {
@@ -14,186 +14,282 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f1f5f9;
-      color: #1e293b;
+      background: #f1f3f5;
+      color: #202124;
     }
 
-    header {
-      background: #0f172a;
+    /* =========================
+       CABEÇALHO INSTITUCIONAL
+       ========================= */
+
+    .topo {
+      background: linear-gradient(135deg, #111111, #252525);
       color: white;
-      padding: 18px 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      border-bottom: 5px solid #c8a84e;
+      box-shadow: 0 3px 12px rgba(0,0,0,.25);
     }
 
-    .header-content {
+    .topo-conteudo {
       max-width: 1200px;
       margin: auto;
+      min-height: 125px;
+      padding: 18px 25px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 20px;
+      gap: 22px;
     }
 
-    .titulo {
-      font-size: 22px;
+    .logo {
+      width: 95px;
+      height: 95px;
+      object-fit: contain;
+      background: white;
+      border-radius: 12px;
+      padding: 5px;
+      flex-shrink: 0;
+    }
+
+    .identidade {
+      flex: 1;
+    }
+
+    .identidade .orgao {
+      font-size: 16px;
       font-weight: bold;
+      letter-spacing: 1.5px;
+      color: #d8d8d8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
     }
 
-    .subtitulo {
-      font-size: 13px;
-      opacity: .75;
-      margin-top: 4px;
+    .identidade h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: .5px;
+      font-weight: 700;
+    }
+
+    .identidade .subtitulo {
+      margin-top: 7px;
+      font-size: 14px;
+      color: #d7d7d7;
     }
 
     .conexao {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 14px;
+      font-size: 13px;
+      white-space: nowrap;
     }
 
     .bolinha {
       width: 11px;
       height: 11px;
       border-radius: 50%;
-      background: #ef4444;
+      background: #f44336;
+      box-shadow: 0 0 8px rgba(244,67,54,.5);
     }
 
     .bolinha.online {
-      background: #22c55e;
+      background: #2e7d32;
+      box-shadow: 0 0 8px rgba(46,125,50,.6);
     }
+
+    /* =========================
+       CONTEÚDO
+       ========================= */
 
     .container {
       max-width: 1200px;
-      margin: 25px auto;
-      padding: 0 20px;
+      margin: 28px auto;
+      padding: 0 18px;
     }
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
+    .titulo-pagina {
       margin-bottom: 20px;
     }
 
-    .card {
+    .titulo-pagina h2 {
+      margin: 0 0 5px;
+      font-size: 24px;
+    }
+
+    .titulo-pagina p {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* =========================
+       CARDS DE ESTATÍSTICAS
+       ========================= */
+
+    .estatisticas {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .card-estatistica {
       background: white;
       border-radius: 10px;
       padding: 18px;
+      border-left: 5px solid #333;
       box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
 
-    .card-titulo {
-      color: #64748b;
+    .card-estatistica .numero {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .card-estatistica .texto {
+      color: #666;
       font-size: 13px;
     }
 
-    .card-numero {
-      font-size: 28px;
-      font-weight: bold;
-      margin-top: 8px;
+    .card-normal {
+      border-left-color: #777;
+    }
+
+    .card-urgente {
+      border-left-color: #b71c1c;
+    }
+
+    .card-enviados {
+      border-left-color: #8b6f1d;
+    }
+
+    /* =========================
+       LAYOUT PRINCIPAL
+       ========================= */
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 20px;
     }
 
     .painel {
       background: white;
       border-radius: 12px;
-      padding: 25px;
+      padding: 22px;
       box-shadow: 0 2px 10px rgba(0,0,0,.08);
-      margin-bottom: 20px;
     }
 
-    .painel-titulo {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 5px;
+    .painel h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 19px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 12px;
     }
 
-    .painel-subtitulo {
-      color: #64748b;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
+    /* =========================
+       FORMULÁRIO
+       ========================= */
 
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 15px;
     }
 
     .campo {
       display: flex;
       flex-direction: column;
+      gap: 6px;
     }
 
-    .campo.completo {
+    .campo-completo {
       grid-column: 1 / -1;
     }
 
     label {
       font-size: 13px;
       font-weight: bold;
-      margin-bottom: 6px;
-      color: #334155;
+      color: #444;
     }
 
     input,
     select,
     textarea {
       width: 100%;
-      border: 1px solid #cbd5e1;
+      padding: 12px 13px;
+      border: 1px solid #cfd3d7;
       border-radius: 7px;
-      padding: 11px 12px;
-      font-size: 15px;
-      outline: none;
+      font-size: 14px;
       background: white;
+      outline: none;
+      transition: .2s;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37,99,235,.12);
+      border-color: #8b6f1d;
+      box-shadow: 0 0 0 3px rgba(139,111,29,.12);
     }
 
     textarea {
-      min-height: 90px;
       resize: vertical;
+      min-height: 95px;
     }
+
+    .ajuda {
+      font-size: 11px;
+      color: #777;
+      margin-top: -2px;
+    }
+
+    /* =========================
+       PRIORIDADE
+       ========================= */
 
     .prioridades {
       display: flex;
       gap: 10px;
-      flex-wrap: wrap;
     }
 
-    .prioridade {
+    .prioridade-opcao {
       flex: 1;
-      min-width: 120px;
     }
 
-    .prioridade input {
+    .prioridade-opcao input {
       display: none;
     }
 
-    .prioridade label {
+    .prioridade-opcao label {
       display: block;
       text-align: center;
-      padding: 11px;
-      border: 1px solid #cbd5e1;
+      padding: 12px;
+      border: 1px solid #ccc;
       border-radius: 7px;
       cursor: pointer;
-      background: #f8fafc;
+      font-weight: bold;
+      transition: .2s;
     }
 
-    .prioridade input:checked + label {
-      background: #2563eb;
-      color: white;
-      border-color: #2563eb;
+    .prioridade-normal:checked + label {
+      background: #eeeeee;
+      border-color: #777;
     }
+
+    .prioridade-urgente:checked + label {
+      background: #ffebee;
+      color: #b71c1c;
+      border-color: #b71c1c;
+    }
+
+    /* =========================
+       BOTÕES
+       ========================= */
 
     .botoes {
       display: flex;
-      justify-content: flex-end;
       gap: 10px;
       margin-top: 20px;
     }
@@ -201,121 +297,181 @@
     button {
       border: none;
       border-radius: 7px;
-      padding: 12px 20px;
-      font-size: 15px;
+      padding: 12px 18px;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
+      transition: .2s;
     }
 
-    .btn-limpar {
-      background: #e2e8f0;
-      color: #334155;
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0,0,0,.15);
     }
 
-    .btn-enviar {
-      background: #2563eb;
+    .btn-principal {
+      background: #222;
       color: white;
-    }
-
-    .btn-enviar:hover {
-      background: #1d4ed8;
-    }
-
-    .btn-limpar:hover {
-      background: #cbd5e1;
-    }
-
-    .lista {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .registro {
-      border: 1px solid #e2e8f0;
-      border-radius: 9px;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      gap: 15px;
-      background: #f8fafc;
-    }
-
-    .registro-info {
       flex: 1;
     }
 
-    .registro-nome {
-      font-weight: bold;
-      font-size: 16px;
+    .btn-limpar {
+      background: #e5e5e5;
+      color: #333;
     }
 
-    .registro-detalhes {
-      color: #64748b;
-      font-size: 13px;
-      margin-top: 5px;
+    .btn-enviar {
+      width: 100%;
+      margin-top: 15px;
+      background: #8b6f1d;
+      color: white;
+      font-size: 15px;
+      padding: 14px;
     }
 
-    .registro-mensagem {
-      margin-top: 8px;
-      font-size: 14px;
-    }
+    /* =========================
+       FILA
+       ========================= */
 
-    .badge {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .badge-normal {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .badge-urgente {
-      background: #fee2e2;
-      color: #991b1b;
+    .fila {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 520px;
+      overflow-y: auto;
     }
 
     .vazio {
       text-align: center;
-      padding: 30px;
-      color: #94a3b8;
+      color: #888;
+      padding: 35px 15px;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      font-size: 14px;
     }
 
-    @media (max-width: 800px) {
-      .cards {
-        grid-template-columns: repeat(2, 1fr);
+    .registro {
+      border: 1px solid #ddd;
+      border-radius: 9px;
+      padding: 14px;
+      background: #fafafa;
+    }
+
+    .registro.urgente {
+      border-left: 5px solid #b71c1c;
+    }
+
+    .registro-topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .registro-nome {
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: bold;
+      background: #e5e5e5;
+    }
+
+    .badge.urgente {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    .registro-info {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .registro-atendimento {
+      margin-top: 7px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .registro-observacao {
+      margin-top: 7px;
+      font-size: 12px;
+      color: #555;
+      background: white;
+      padding: 8px;
+      border-radius: 5px;
+    }
+
+    /* =========================
+       ÚLTIMO RECEBIMENTO
+       ========================= */
+
+    .ultimo {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f7f7f7;
+      border: 1px solid #ddd;
+    }
+
+    .ultimo strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* =========================
+       RESPONSIVO
+       ========================= */
+
+    @media (max-width: 850px) {
+      .estatisticas {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topo-conteudo {
+        flex-wrap: wrap;
+      }
+
+      .logo {
+        width: 75px;
+        height: 75px;
+      }
+
+      .identidade h1 {
+        font-size: 22px;
+      }
+
+      .identidade .orgao {
+        font-size: 12px;
+      }
+
+      .conexao {
+        width: 100%;
+      }
+
+      .estatisticas {
+        grid-template-columns: 1fr 1fr;
       }
 
       .form-grid {
         grid-template-columns: 1fr;
       }
 
-      .campo.completo {
+      .campo-completo {
         grid-column: auto;
-      }
-
-      .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-
-    @media (max-width: 500px) {
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      .botoes {
-        flex-direction: column;
-      }
-
-      button {
-        width: 100%;
       }
     }
   </style>
@@ -323,891 +479,804 @@
 
 <body>
 
-<header>
+  <!-- =========================
+       CABEÇALHO
+       ========================= -->
 
-  <div class="header-content">
+  <header class="topo">
+    <div class="topo-conteudo">
 
-    <div>
-      <div class="titulo">
-        Sistema de Atendimento
+      <!-- Brasão oficial da Polícia Penal de MS -->
+      <img
+        class="logo"
+        src="https://www.agepen.ms.gov.br/wp-content/uploads/2023/06/Brasao-PPMS-site.png"
+        alt="Brasão da Polícia Penal de Mato Grosso do Sul"
+      >
+
+      <div class="identidade">
+        <div class="orgao">
+          POLÍCIA PENAL DE MATO GROSSO DO SUL
+        </div>
+
+        <h1>Sistema de Atendimento</h1>
+
+        <div class="subtitulo">
+          Controle e encaminhamento de atendimentos
+        </div>
       </div>
 
-      <div class="subtitulo">
-        Central de envio e gerenciamento de atendimentos
+      <div class="conexao">
+        <span id="bolinha" class="bolinha"></span>
+        <span id="status">Desconectado</span>
       </div>
+
+    </div>
+  </header>
+
+  <!-- =========================
+       CONTEÚDO
+       ========================= -->
+
+  <main class="container">
+
+    <div class="titulo-pagina">
+      <h2>Guichê de Envio</h2>
+      <p>Cadastre os atendimentos e encaminhe-os para a mesa de recebimento.</p>
     </div>
 
-    <div class="conexao">
+    <!-- ESTATÍSTICAS -->
 
-      <span id="bolinha" class="bolinha"></span>
+    <section class="estatisticas">
 
-      <span id="status">
-        Conectando...
-      </span>
-
-    </div>
-
-  </div>
-
-</header>
-
-
-<div class="container">
-
-
-  <div class="cards">
-
-    <div class="card">
-      <div class="card-titulo">
-        Registros na fila
+      <div class="card-estatistica">
+        <div class="numero" id="totalFila">0</div>
+        <div class="texto">Registros na fila</div>
       </div>
 
-      <div class="card-numero" id="totalFila">
-        0
-      </div>
-    </div>
-
-
-    <div class="card">
-      <div class="card-titulo">
-        Prioridade normal
+      <div class="card-estatistica card-normal">
+        <div class="numero" id="totalNormal">0</div>
+        <div class="texto">Prioridade normal</div>
       </div>
 
-      <div class="card-numero" id="totalNormal">
-        0
-      </div>
-    </div>
-
-
-    <div class="card">
-      <div class="card-titulo">
-        Urgentes
+      <div class="card-estatistica card-urgente">
+        <div class="numero" id="totalUrgente">0</div>
+        <div class="texto">Urgentes</div>
       </div>
 
-      <div class="card-numero" id="totalUrgente">
-        0
-      </div>
-    </div>
-
-
-    <div class="card">
-      <div class="card-titulo">
-        Enviados
+      <div class="card-estatistica card-enviados">
+        <div class="numero" id="totalEnviados">0</div>
+        <div class="texto">Enviados</div>
       </div>
 
-      <div class="card-numero" id="totalEnviados">
-        0
-      </div>
-    </div>
+    </section>
 
-  </div>
+    <!-- PRINCIPAL -->
 
+    <section class="grid">
 
-  <div class="painel">
+      <!-- FORMULÁRIO -->
 
-    <div class="painel-titulo">
-      Novo atendimento
-    </div>
+      <div class="painel">
 
-    <div class="painel-subtitulo">
-      Preencha os dados abaixo para adicionar um atendimento à fila.
-    </div>
+        <h3>Novo atendimento</h3>
 
+        <form id="formAtendimento">
 
-    <div class="form-grid">
+          <div class="form-grid">
 
+            <!-- NOME -->
 
-      <div class="campo">
+            <div class="campo campo-completo">
+              <label for="nome">Nome</label>
+              <input
+                id="nome"
+                type="text"
+                placeholder="Digite o nome"
+                autocomplete="off"
+                required
+              >
+            </div>
 
-        <label for="nome">
-          Nome
-        </label>
+            <!-- IDENTIFICAÇÃO -->
 
-        <input
-          id="nome"
-          type="text"
-          placeholder="Digite o nome"
-        >
+            <div class="campo">
+              <label for="identificacao">Identificação</label>
+              <input
+                id="identificacao"
+                type="text"
+                placeholder="Digite a identificação"
+                autocomplete="off"
+                required
+              >
+            </div>
 
-      </div>
+            <!-- PAVILHÃO -->
 
+            <div class="campo">
+              <label for="pavilhao">Pavilhão</label>
 
-      <div class="campo">
+              <select id="pavilhao" required>
+                <option value="">Selecione</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="DISCIPLINAR">DISCIPLINAR</option>
+                <option value="DISCIPLINAR RISCO">DISCIPLINAR RISCO</option>
+                <option value="CP">CP</option>
+                <option value="VIRTUAL">VIRTUAL</option>
+              </select>
+            </div>
 
-        <label for="identificacao">
-          Identificação
-        </label>
+            <!-- CELA -->
 
-        <input
-          id="identificacao"
-          type="text"
-          placeholder="Ex.: matrícula, código ou documento"
-        >
+            <div class="campo">
+              <label for="cela">Cela</label>
 
-      </div>
+              <input
+                id="cela"
+                list="listaCelas"
+                type="text"
+                placeholder="Digite a cela"
+                autocomplete="off"
+                required
+              >
 
+              <datalist id="listaCelas">
+                <option value="01">
+                <option value="02">
+                <option value="03">
+                <option value="04">
+                <option value="05">
+                <option value="06">
+                <option value="07">
+                <option value="08">
+                <option value="09">
+                <option value="10">
+                <option value="11">
+                <option value="12">
+                <option value="13">
+                <option value="14">
+                <option value="15">
+                <option value="16">
+                <option value="17">
+                <option value="18">
+                <option value="19">
+                <option value="20">
+                <option value="21">
+                <option value="22">
+                <option value="23">
+                <option value="24">
+                <option value="25">
+                <option value="26">
+                <option value="27">
+                <option value="28">
+                <option value="29">
+                <option value="30">
+                <option value="31">
+                <option value="32">
+                <option value="33">
+                <option value="34">
+                <option value="35">
+                <option value="36">
+                <option value="37">
+                <option value="38">
+                <option value="39">
+                <option value="40">
+                <option value="41">
+                <option value="42">
+                <option value="43">
+                <option value="44">
+                <option value="45">
+                <option value="46">
+                <option value="47">
+                <option value="48">
+                <option value="49">
+                <option value="50">
+                <option value="51">
+                <option value="52">
+                <option value="53">
+                <option value="54">
+                <option value="55">
+                <option value="56">
+                <option value="57">
+                <option value="58">
+                <option value="59">
+                <option value="60">
+                <option value="61">
+                <option value="62">
+                <option value="63">
+                <option value="64">
+                <option value="65">
+                <option value="66">
+                <option value="67">
+                <option value="68">
+                <option value="69">
+                <option value="70">
+                <option value="71">
+                <option value="72">
+                <option value="73">
+                <option value="74">
+                <option value="75">
+                <option value="76">
+                <option value="77">
+                <option value="78">
+                <option value="79">
+                <option value="80">
+                <option value="81">
+                <option value="82">
+                <option value="83">
+                <option value="84">
+                <option value="85">
+                <option value="86">
+                <option value="87">
+                <option value="88">
+                <option value="89">
+                <option value="90">
+                <option value="91">
+                <option value="92">
+                <option value="93">
+                <option value="94">
+                <option value="95">
+                <option value="96">
+                <option value="97">
+                <option value="98">
+                <option value="99">
+                <option value="100">
+                <option value="101">
+                <option value="102">
+                <option value="103">
+                <option value="104">
+                <option value="105">
+                <option value="106">
+                <option value="107">
+                <option value="108">
+                <option value="109">
+                <option value="110">
+                <option value="111">
+                <option value="112">
+                <option value="113">
+                <option value="114">
+                <option value="115">
+                <option value="116">
+                <option value="117">
+                <option value="118">
+                <option value="119">
+                <option value="120">
+              </datalist>
 
-      <div class="campo">
+              <div class="ajuda">
+                Digite o número para localizar rapidamente.
+              </div>
+            </div>
 
-        <label for="pavilhao">
-          Pavilhão / Setor
-        </label>
+            <!-- ATENDIMENTO -->
 
-        <input
-          id="pavilhao"
-          type="text"
-          placeholder="Ex.: A"
-        >
+            <div class="campo campo-completo">
+              <label for="atendimento">Atendimento</label>
 
-      </div>
+              <input
+                id="atendimento"
+                list="listaAtendimentos"
+                type="text"
+                placeholder="Digite para localizar o atendimento"
+                autocomplete="off"
+                required
+              >
 
+              <datalist id="listaAtendimentos">
 
-      <div class="campo">
+                <!-- OPÇÕES EXISTENTES -->
 
-        <label for="cela">
-          Cela / Sala
-        </label>
+                <option value="Médico">
+                <option value="Odontológico">
+                <option value="Psicológico">
+                <option value="Jurídico">
+                <option value="Social">
+                <option value="Administrativo">
+                <option value="Outro">
 
-        <input
-          id="cela"
-          type="text"
-          placeholder="Ex.: 023"
-        >
+                <!-- NOVAS OPÇÕES -->
 
-      </div>
+                <option value="PSICOSSOCIAL">
+                <option value="CHEFIA">
+                <option value="7 DIAS NORMAL">
+                <option value="7 DIAS COM TORNOZELEIRA">
+                <option value="ABERTO DOMICILIAR">
+                <option value="ALVARÁ">
+                <option value="SALVO CONDUTO">
+                <option value="LICENÇA JUDICIAL">
+                <option value="DESVIO DE ROTA">
+                <option value="PORTARIA II">
+                <option value="CHEFE DE EQUIPE">
+                <option value="ADMINISTRAÇÃO">
+                <option value="DEFENSORIA">
+                <option value="SETOR DE TRABALHO">
+                <option value="AUTORIZAÇÃO DE SAÍDA">
+                <option value="ADVOGADO(A)">
+                <option value="AUDIÊNCIA">
+                <option value="ESCOLTA">
+                <option value="VIDEOCONFERÊNCIA">
+                <option value="OUTROS">
 
+              </datalist>
 
-      <div class="campo">
+              <div class="ajuda">
+                Comece a digitar para encontrar rapidamente a opção.
+              </div>
+            </div>
 
-        <label for="atendimento">
-          Tipo de atendimento
-        </label>
+            <!-- PRIORIDADE -->
 
-        <select id="atendimento">
+            <div class="campo campo-completo">
 
-          <option value="">
-            Selecione
-          </option>
+              <label>Prioridade</label>
 
-          <option value="Médico">
-            Médico
-          </option>
+              <div class="prioridades">
 
-          <option value="Odontológico">
-            Odontológico
-          </option>
+                <div class="prioridade-opcao">
+                  <input
+                    type="radio"
+                    id="normal"
+                    name="prioridade"
+                    value="Normal"
+                    class="prioridade-normal"
+                    checked
+                  >
+                  <label for="normal">Normal</label>
+                </div>
 
-          <option value="Psicológico">
-            Psicológico
-          </option>
+                <div class="prioridade-opcao">
+                  <input
+                    type="radio"
+                    id="urgente"
+                    name="prioridade"
+                    value="Urgente"
+                    class="prioridade-urgente"
+                  >
+                  <label for="urgente">Urgente</label>
+                </div>
 
-          <option value="Jurídico">
-            Jurídico
-          </option>
+              </div>
 
-          <option value="Social">
-            Social
-          </option>
+            </div>
 
-          <option value="Administrativo">
-            Administrativo
-          </option>
+            <!-- OBSERVAÇÕES -->
 
-          <option value="Outro">
-            Outro
-          </option>
+            <div class="campo campo-completo">
+              <label for="mensagem">Observações</label>
 
-        </select>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label>
-          Prioridade
-        </label>
-
-        <div class="prioridades">
-
-          <div class="prioridade">
-
-            <input
-              type="radio"
-              name="prioridade"
-              id="normal"
-              value="Normal"
-              checked
-            >
-
-            <label for="normal">
-              Normal
-            </label>
+              <textarea
+                id="mensagem"
+                placeholder="Digite alguma observação, se necessário..."
+              ></textarea>
+            </div>
 
           </div>
 
+          <!-- BOTÕES -->
 
-          <div class="prioridade">
+          <div class="botoes">
 
-            <input
-              type="radio"
-              name="prioridade"
-              id="urgente"
-              value="Urgente"
+            <button
+              type="button"
+              class="btn-limpar"
+              id="btnLimpar"
             >
+              Limpar
+            </button>
 
-            <label for="urgente">
-              Urgente
-            </label>
+            <button
+              type="submit"
+              class="btn-principal"
+            >
+              Adicionar à fila
+            </button>
 
+          </div>
+
+        </form>
+
+      </div>
+
+      <!-- FILA -->
+
+      <div class="painel">
+
+        <h3>Fila de atendimento</h3>
+
+        <div id="fila" class="fila">
+
+          <div class="vazio" id="filaVazia">
+            Nenhum atendimento aguardando envio.
+          </div>
+
+        </div>
+
+        <button
+          id="btnEnviar"
+          class="btn-enviar"
+          type="button"
+        >
+          Enviar fila para atendimento
+        </button>
+
+        <div class="ultimo">
+
+          <strong>Último atendimento recebido</strong>
+
+          <div id="ultimoRecebido">
+            Nenhum atendimento recebido ainda.
           </div>
 
         </div>
 
       </div>
 
+    </section>
 
-      <div class="campo completo">
+  </main>
 
-        <label for="observacao">
-          Observações
-        </label>
+  <script>
 
-        <textarea
-          id="observacao"
-          placeholder="Digite alguma observação, se necessário..."
-        ></textarea>
+    /* =========================
+       VARIÁVEIS
+       ========================= */
 
-      </div>
+    let fila = [];
+    let totalEnviados = 0;
+    let ws = null;
 
+    const filaElemento = document.getElementById("fila");
+    const filaVazia = document.getElementById("filaVazia");
 
-    </div>
+    const totalFila = document.getElementById("totalFila");
+    const totalNormal = document.getElementById("totalNormal");
+    const totalUrgente = document.getElementById("totalUrgente");
+    const totalEnviadosElemento = document.getElementById("totalEnviados");
 
+    const statusElemento = document.getElementById("status");
+    const bolinha = document.getElementById("bolinha");
 
-    <div class="botoes">
+    /* =========================
+       ESCAPE HTML
+       ========================= */
 
-      <button
-        class="btn-limpar"
-        onclick="limparFormulario()">
+    function escaparHTML(texto) {
+      return String(texto ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
-        Limpar
+    /* =========================
+       ATUALIZAR ESTATÍSTICAS
+       ========================= */
 
-      </button>
+    function atualizarEstatisticas() {
 
+      totalFila.textContent = fila.length;
 
-      <button
-        class="btn-enviar"
-        onclick="adicionarRegistro()">
+      totalNormal.textContent =
+        fila.filter(item => item.prioridade === "Normal").length;
 
-        Adicionar à fila
+      totalUrgente.textContent =
+        fila.filter(item => item.prioridade === "Urgente").length;
 
-      </button>
+      totalEnviadosElemento.textContent = totalEnviados;
+    }
 
-    </div>
+    /* =========================
+       MOSTRAR FILA
+       ========================= */
 
-  </div>
+    function renderizarFila() {
 
+      filaElemento.innerHTML = "";
 
-  <div class="painel">
+      if (fila.length === 0) {
 
-    <div class="painel-titulo">
-      Fila de atendimentos
-    </div>
+        const vazio = document.createElement("div");
 
-    <div class="painel-subtitulo">
-      Registros que serão enviados para o computador de recebimento.
-    </div>
+        vazio.className = "vazio";
 
+        vazio.textContent =
+          "Nenhum atendimento aguardando envio.";
 
-    <div id="lista" class="lista">
+        filaElemento.appendChild(vazio);
 
-      <div class="vazio">
-        Nenhum atendimento adicionado.
-      </div>
+        atualizarEstatisticas();
 
-    </div>
-
-
-    <div class="botoes">
-
-      <button
-        class="btn-enviar"
-        onclick="enviarFila()">
-
-        Enviar fila para atendimento
-
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <div class="painel">
-
-    <div class="painel-titulo">
-      Último atendimento recebido
-    </div>
-
-    <div id="recebido" class="vazio">
-      Nenhum atendimento recebido.
-    </div>
-
-  </div>
-
-
-</div>
-
-
-<script>
-
-  let socket = null;
-
-  let fila = [];
-
-  let totalEnviados = 0;
-
-
-  function conectar() {
-
-    const protocolo =
-      location.protocol === "https:"
-        ? "wss:"
-        : "ws:";
-
-
-    socket = new WebSocket(
-      protocolo + "//" + location.host
-    );
-
-
-    socket.onopen = function() {
-
-      document.getElementById("status").innerText =
-        "Conectado";
-
-      document.getElementById("bolinha")
-        .classList.add("online");
-
-      registrar();
-
-    };
-
-
-    socket.onclose = function() {
-
-      document.getElementById("status").innerText =
-        "Desconectado. Tentando novamente...";
-
-      document.getElementById("bolinha")
-        .classList.remove("online");
-
-      setTimeout(conectar, 2000);
-
-    };
-
-
-    socket.onerror = function() {
-
-      document.getElementById("status").innerText =
-        "Erro de conexão";
-
-    };
-
-
-    socket.onmessage = function(event) {
-
-      try {
-
-        const data =
-          JSON.parse(event.data);
-
-
-        if (data.type === "new_record") {
-
-          mostrarRecebido(
-            data.record
-          );
-
-        }
-
-      } catch (erro) {
-
-        console.error(
-          "Erro ao receber dados:",
-          erro
-        );
-
+        return;
       }
 
-    };
+      fila.forEach((item, index) => {
 
-  }
+        const registro = document.createElement("div");
 
+        registro.className =
+          "registro " +
+          (item.prioridade === "Urgente" ? "urgente" : "");
 
-  function registrar() {
+        registro.innerHTML = `
 
-    if (
-      socket &&
-      socket.readyState === WebSocket.OPEN
-    ) {
+          <div class="registro-topo">
 
-      socket.send(
-        JSON.stringify({
+            <div class="registro-nome">
+              ${escaparHTML(item.nome)}
+            </div>
 
-          type: "register",
-
-          role: "sender"
-
-        })
-      );
-
-    }
-
-  }
-
-
-  function adicionarRegistro() {
-
-    const nome =
-      document.getElementById("nome").value.trim();
-
-
-    const identificacao =
-      document.getElementById("identificacao").value.trim();
-
-
-    const pavilhao =
-      document.getElementById("pavilhao").value.trim();
-
-
-    const cela =
-      document.getElementById("cela").value.trim();
-
-
-    const atendimento =
-      document.getElementById("atendimento").value;
-
-
-    const observacao =
-      document.getElementById("observacao").value.trim();
-
-
-    const prioridade =
-      document.querySelector(
-        'input[name="prioridade"]:checked'
-      ).value;
-
-
-    if (!nome) {
-
-      alert("Digite o nome.");
-
-      return;
-
-    }
-
-
-    if (!atendimento) {
-
-      alert(
-        "Selecione o tipo de atendimento."
-      );
-
-      return;
-
-    }
-
-
-    const registro = {
-
-      id: Date.now(),
-
-      nome: nome,
-
-      identificacao: identificacao,
-
-      pavilhao: pavilhao,
-
-      cela: cela,
-
-      atendimento: atendimento,
-
-      prioridade: prioridade,
-
-      mensagem: observacao
-
-    };
-
-
-    fila.push(registro);
-
-
-    atualizarLista();
-
-    atualizarIndicadores();
-
-    limparFormulario();
-
-  }
-
-
-  function atualizarLista() {
-
-    const lista =
-      document.getElementById("lista");
-
-
-    if (fila.length === 0) {
-
-      lista.innerHTML =
-        '<div class="vazio">' +
-        'Nenhum atendimento adicionado.' +
-        '</div>';
-
-      return;
-
-    }
-
-
-    lista.innerHTML = "";
-
-
-    fila.forEach(function(registro) {
-
-      const div =
-        document.createElement("div");
-
-
-      div.className =
-        "registro";
-
-
-      const prioridadeClasse =
-        registro.prioridade === "Urgente"
-          ? "badge-urgente"
-          : "badge-normal";
-
-
-      div.innerHTML = `
-
-        <div class="registro-info">
-
-          <div class="registro-nome">
-            ${escaparHTML(registro.nome)}
-          </div>
-
-          <div class="registro-detalhes">
-
-            ${escaparHTML(registro.atendimento)}
-
-            ${registro.pavilhao
-              ? " • Pavilhão: " +
-                escaparHTML(registro.pavilhao)
-              : ""}
-
-            ${registro.cela
-              ? " • Cela/Sala: " +
-                escaparHTML(registro.cela)
-              : ""}
+            <span class="badge ${
+              item.prioridade === "Urgente" ? "urgente" : ""
+            }">
+              ${escaparHTML(item.prioridade)}
+            </span>
 
           </div>
 
+          <div class="registro-info">
+
+            <strong>Identificação:</strong>
+            ${escaparHTML(item.identificacao)}
+            <br>
+
+            <strong>Pavilhão:</strong>
+            ${escaparHTML(item.pavilhao)}
+            &nbsp;&nbsp;
+
+            <strong>Cela:</strong>
+            ${escaparHTML(item.cela)}
+
+          </div>
+
+          <div class="registro-atendimento">
+
+            Atendimento:
+            ${escaparHTML(item.atendimento)}
+
+          </div>
 
           ${
-            registro.identificacao
+            item.mensagem
               ? `
-                <div class="registro-detalhes">
-                  Identificação:
-                  ${escaparHTML(registro.identificacao)}
+                <div class="registro-observacao">
+                  ${escaparHTML(item.mensagem)}
                 </div>
               `
               : ""
           }
 
+        `;
 
-          ${
-            registro.mensagem
-              ? `
-                <div class="registro-mensagem">
-                  ${escaparHTML(registro.mensagem)}
-                </div>
-              `
-              : ""
-          }
+        filaElemento.appendChild(registro);
 
-        </div>
+      });
 
+      atualizarEstatisticas();
+    }
 
-        <div>
+    /* =========================
+       LIMPAR FORMULÁRIO
+       ========================= */
 
-          <span class="badge ${prioridadeClasse}">
+    function limparFormulario() {
 
-            ${escaparHTML(registro.prioridade)}
+      document.getElementById("formAtendimento").reset();
 
-          </span>
-
-        </div>
-
-      `;
-
-
-      lista.appendChild(div);
-
-    });
-
-  }
-
-
-  function enviarFila() {
-
-    if (
-      !socket ||
-      socket.readyState !== WebSocket.OPEN
-    ) {
-
-      alert(
-        "O sistema ainda não está conectado."
-      );
-
-      return;
+      document.getElementById("normal").checked = true;
 
     }
 
+    /* =========================
+       ADICIONAR À FILA
+       ========================= */
 
-    if (fila.length === 0) {
+    document
+      .getElementById("formAtendimento")
+      .addEventListener("submit", function(event) {
 
-      alert(
-        "A fila está vazia."
+        event.preventDefault();
+
+        const registro = {
+
+          nome: document.getElementById("nome").value.trim(),
+
+          identificacao:
+            document.getElementById("identificacao").value.trim(),
+
+          pavilhao:
+            document.getElementById("pavilhao").value,
+
+          cela:
+            document.getElementById("cela").value.trim(),
+
+          atendimento:
+            document.getElementById("atendimento").value.trim(),
+
+          prioridade:
+            document.querySelector(
+              'input[name="prioridade"]:checked'
+            ).value,
+
+          mensagem:
+            document.getElementById("mensagem").value.trim()
+
+        };
+
+        if (
+          !registro.nome ||
+          !registro.identificacao ||
+          !registro.pavilhao ||
+          !registro.cela ||
+          !registro.atendimento
+        ) {
+
+          alert("Preencha todos os campos obrigatórios.");
+
+          return;
+        }
+
+        fila.push(registro);
+
+        renderizarFila();
+
+        limparFormulario();
+
+        document.getElementById("nome").focus();
+
+      });
+
+    /* =========================
+       LIMPAR
+       ========================= */
+
+    document
+      .getElementById("btnLimpar")
+      .addEventListener("click", limparFormulario);
+
+    /* =========================
+       CONEXÃO WEBSOCKET
+       ========================= */
+
+    function conectar() {
+
+      const protocolo =
+        location.protocol === "https:"
+          ? "wss:"
+          : "ws:";
+
+      ws = new WebSocket(
+        protocolo + "//" + location.host
       );
 
-      return;
+      ws.addEventListener("open", function() {
+
+        statusElemento.textContent = "Conectado";
+
+        bolinha.classList.add("online");
+
+        ws.send(
+          JSON.stringify({
+            type: "register",
+            role: "sender"
+          })
+        );
+
+      });
+
+      ws.addEventListener("close", function() {
+
+        statusElemento.textContent =
+          "Reconectando...";
+
+        bolinha.classList.remove("online");
+
+        setTimeout(conectar, 2000);
+
+      });
+
+      ws.addEventListener("error", function() {
+
+        statusElemento.textContent =
+          "Erro de conexão";
+
+        bolinha.classList.remove("online");
+
+      });
+
+      ws.addEventListener("message", function(event) {
+
+        try {
+
+          const data =
+            JSON.parse(event.data);
+
+          if (data.type === "registered") {
+
+            statusElemento.textContent =
+              "Conectado";
+
+          }
+
+        } catch (erro) {
+
+          console.error(erro);
+
+        }
+
+      });
 
     }
 
+    /* =========================
+       ENVIAR FILA
+       ========================= */
 
-    fila.forEach(function(registro) {
+    document
+      .getElementById("btnEnviar")
+      .addEventListener("click", function() {
 
-      socket.send(
-        JSON.stringify({
+        if (fila.length === 0) {
 
-          type: "send_record",
+          alert(
+            "Não há atendimentos na fila para enviar."
+          );
 
-          record: {
-
-            nome: registro.nome,
-
-            identificacao:
-              registro.identificacao,
-
-            pavilhao:
-              registro.pavilhao,
-
-            cela:
-              registro.cela,
-
-            atendimento:
-              registro.atendimento,
-
-            prioridade:
-              registro.prioridade,
-
-            mensagem:
-              registro.mensagem
-
-          }
-
-        })
-      );
-
-
-      totalEnviados++;
-
-    });
-
-
-    alert(
-      fila.length +
-      " atendimento(s) enviado(s)!"
-    );
-
-
-    fila = [];
-
-
-    atualizarLista();
-
-    atualizarIndicadores();
-
-  }
-
-
-  function mostrarRecebido(registro) {
-
-    const area =
-      document.getElementById("recebido");
-
-
-    area.className =
-      "registro";
-
-
-    area.innerHTML = `
-
-      <div class="registro-info">
-
-        <div class="registro-nome">
-
-          ${escaparHTML(registro.nome)}
-
-        </div>
-
-
-        <div class="registro-detalhes">
-
-          Atendimento:
-          ${escaparHTML(registro.atendimento || "")}
-
-          ${
-            registro.pavilhao
-              ? " • Pavilhão: " +
-                escaparHTML(registro.pavilhao)
-              : ""
-          }
-
-          ${
-            registro.cela
-              ? " • Cela/Sala: " +
-                escaparHTML(registro.cela)
-              : ""
-          }
-
-        </div>
-
-
-        ${
-          registro.identificacao
-            ? `
-              <div class="registro-detalhes">
-
-                Identificação:
-                ${escaparHTML(registro.identificacao)}
-
-              </div>
-            `
-            : ""
+          return;
         }
 
+        if (
+          !ws ||
+          ws.readyState !== WebSocket.OPEN
+        ) {
 
-        ${
-          registro.mensagem
-            ? `
-              <div class="registro-mensagem">
+          alert(
+            "O sistema está sem conexão com o servidor."
+          );
 
-                ${escaparHTML(registro.mensagem)}
-
-              </div>
-            `
-            : ""
+          return;
         }
 
-      </div>
+        const quantidade = fila.length;
 
+        fila.forEach(function(registro) {
 
-      <div>
+          ws.send(
+            JSON.stringify({
+              type: "send_record",
+              record: registro
+            })
+          );
 
-        <span class="badge ${
-          registro.prioridade === "Urgente"
-            ? "badge-urgente"
-            : "badge-normal"
-        }">
+        });
 
-          ${escaparHTML(
-            registro.prioridade || "Normal"
-          )}
+        totalEnviados += quantidade;
 
-        </span>
+        fila = [];
 
-      </div>
+        renderizarFila();
 
-    `;
+        document.getElementById("ultimoRecebido").textContent =
+          quantidade === 1
+            ? "1 atendimento enviado para a mesa de recebimento."
+            : quantidade +
+              " atendimentos enviados para a mesa de recebimento.";
 
-  }
+        atualizarEstatisticas();
 
+      });
 
-  function atualizarIndicadores() {
+    /* =========================
+       INICIAR
+       ========================= */
 
-    document.getElementById("totalFila")
-      .innerText = fila.length;
+    renderizarFila();
 
+    conectar();
 
-    const normal =
-      fila.filter(
-        function(item) {
-          return item.prioridade === "Normal";
-        }
-      ).length;
-
-
-    const urgente =
-      fila.filter(
-        function(item) {
-          return item.prioridade === "Urgente";
-        }
-      ).length;
-
-
-    document.getElementById("totalNormal")
-      .innerText = normal;
-
-
-    document.getElementById("totalUrgente")
-      .innerText = urgente;
-
-
-    document.getElementById("totalEnviados")
-      .innerText = totalEnviados;
-
-  }
-
-
-  function limparFormulario() {
-
-    document.getElementById("nome").value = "";
-
-    document.getElementById("identificacao").value = "";
-
-    document.getElementById("pavilhao").value = "";
-
-    document.getElementById("cela").value = "";
-
-    document.getElementById("atendimento").value = "";
-
-    document.getElementById("observacao").value = "";
-
-    document.getElementById("normal").checked = true;
-
-  }
-
-
-  function escaparHTML(texto) {
-
-    const div =
-      document.createElement("div");
-
-    div.textContent =
-      texto || "";
-
-    return div.innerHTML;
-
-  }
-
-
-  conectar();
-
-  atualizarIndicadores();
-
-</script>
+  </script>
 
 </body>
 </html>
