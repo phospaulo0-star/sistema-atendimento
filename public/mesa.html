@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Mesa de Recebimento - Polícia Penal MS</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f1f3f5;
+      color: #202124;
+    }
+
+    .topo {
+      background: linear-gradient(135deg, #111111, #252525);
+      color: white;
+      border-bottom: 5px solid #c8a84e;
+      box-shadow: 0 3px 12px rgba(0,0,0,.25);
+    }
+
+    .topo-conteudo {
+      max-width: 1250px;
+      margin: auto;
+      min-height: 125px;
+      padding: 18px 25px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .logo {
+      width: 95px;
+      height: 95px;
+      object-fit: contain;
+      background: white;
+      border-radius: 12px;
+      padding: 5px;
+      flex-shrink: 0;
+    }
+
+    .identidade {
+      flex: 1;
+    }
+
+    .orgao {
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      color: #d8d8d8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    .subtitulo {
+      margin-top: 7px;
+      font-size: 14px;
+      color: #d7d7d7;
+    }
+
+    .conexao {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .bolinha {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #f44336;
+    }
+
+    .bolinha.online {
+      background: #2e7d32;
+      box-shadow: 0 0 8px rgba(46,125,50,.6);
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: 28px auto;
+      padding: 0 18px;
+    }
+
+    .barra {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .barra h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .barra p {
+      margin: 5px 0 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .btn-som {
+      background: #8b6f1d;
+      color: white;
+      padding: 13px 18px;
+    }
+
+    .btn-som.ativado {
+      background: #2e7d32;
+    }
+
+    .painel {
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+
+    .painel h3 {
+      margin-top: 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 12px;
+    }
+
+    .vazio {
+      text-align: center;
+      color: #888;
+      padding: 55px 20px;
+      border: 2px dashed #ddd;
+      border-radius: 10px;
+    }
+
+    .fila {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .registro {
+      border: 1px solid #ddd;
+      border-left: 7px solid #555;
+      border-radius: 10px;
+      padding: 18px;
+      background: #fafafa;
+    }
+
+    .registro.urgente {
+      border-left-color: #b71c1c;
+      background: #fff8f8;
+    }
+
+    .registro.novo {
+      animation: destaque 1s ease-in-out 3;
+    }
+
+    @keyframes destaque {
+      50% {
+        transform: scale(1.01);
+        box-shadow: 0 0 18px rgba(139,111,29,.35);
+      }
+    }
+
+    .registro-topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 12px;
+    }
+
+    .nome {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: #e5e5e5;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .badge.urgente {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    .informacoes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .info {
+      background: white;
+      border: 1px solid #e1e1e1;
+      border-radius: 7px;
+      padding: 11px;
+    }
+
+    .info-titulo {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: #777;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .info-valor {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .observacao {
+      margin-top: 13px;
+      padding: 12px;
+      background: white;
+      border-radius: 7px;
+      border: 1px solid #ddd;
+    }
+
+    .observacao strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+    }
+
+    .horario {
+      margin-top: 10px;
+      color: #777;
+      font-size: 11px;
+    }
+
+    .contador {
+      display: inline-block;
+      margin-left: 8px;
+      background: #222;
+      color: white;
+      padding: 4px 9px;
+      border-radius: 15px;
+      font-size: 11px;
+    }
+
+    @media (max-width: 850px) {
+      .informacoes {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .barra {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topo-conteudo {
+        flex-wrap: wrap;
+      }
+
+      .logo {
+        width: 75px;
+        height: 75px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .informacoes {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topo">
+
+    <div class="topo-conteudo">
+
+      <img
+        class="logo"
+        src="https://www.agepen.ms.gov.br/wp-content/uploads/2023/06/Brasao-PPMS-site.png"
+        alt="Brasão da Polícia Penal de Mato Grosso do Sul"
+      >
+
+      <div class="identidade">
+
+        <div class="orgao">
+          POLÍCIA PENAL DE MATO GROSSO DO SUL
+        </div>
+
+        <h1>Mesa de Recebimento</h1>
+
+        <div class="subtitulo">
+          Recebimento e acompanhamento dos atendimentos
+        </div>
+
+      </div>
+
+      <div class="conexao">
+
+        <span id="bolinha" class="bolinha"></span>
+
+        <span id="status">
+          Conectando...
+        </span>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <main class="container">
+
+    <div class="barra">
+
+      <div>
+        <h2>
+          Atendimentos recebidos
+          <span id="contador" class="contador">0</span>
+        </h2>
+
+        <p>
+          Os novos atendimentos aparecerão automaticamente nesta tela.
+        </p>
+      </div>
+
+      <button
+        id="btnSom"
+        class="btn-som"
+        type="button"
+      >
+        🔊 Ativar som de alerta
+      </button>
+
+    </div>
+
+    <section class="painel">
+
+      <h3>Fila de atendimento</h3>
+
+      <div id="fila" class="fila">
+
+        <div id="vazio" class="vazio">
+          Aguardando novos atendimentos...
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+
+    let ws = null;
+    let atendimentos = [];
+
+    let audioContext = null;
+    let somAtivado = false;
+
+    const fila = document.getElementById("fila");
+    const contador = document.getElementById("contador");
+    const status = document.getElementById("status");
+    const bolinha = document.getElementById("bolinha");
+    const btnSom = document.getElementById("btnSom");
+
+    function escaparHTML(texto) {
+
+      return String(texto ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+    /*
+     * Ativa o áudio depois de uma ação do usuário.
+     * Isso é necessário porque os navegadores bloqueiam
+     * áudio automático antes da primeira interação.
+     */
+
+    function ativarSom() {
+
+      try {
+
+        audioContext =
+          new (
+            window.AudioContext ||
+            window.webkitAudioContext
+          )();
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+
+        somAtivado = true;
+
+        btnSom.textContent =
+          "🔊 Som de alerta ativado";
+
+        btnSom.classList.add("ativado");
+
+        tocarSomTeste();
+
+      } catch (erro) {
+
+        console.error(
+          "Não foi possível ativar o áudio:",
+          erro
+        );
+
+      }
+
+    }
+
+    function tocarSomTeste() {
+
+      if (!audioContext) return;
+
+      tocarAlerta();
+
+    }
+
+    /*
+     * Alerta sonoro forte:
+     * três tons consecutivos.
+     */
+
+    function tocarAlerta() {
+
+      if (!audioContext) return;
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      const agora =
+        audioContext.currentTime;
+
+      const frequencias = [
+        880,
+        660,
+        880
+      ];
+
+      frequencias.forEach(
+        (frequencia, indice) => {
+
+          const inicio =
+            agora + indice * 0.28;
+
+          const oscilador =
+            audioContext.createOscillator();
+
+          const ganho =
+            audioContext.createGain();
+
+          oscilador.type = "square";
+
+          oscilador.frequency.setValueAtTime(
+            frequencia,
+            inicio
+          );
+
+          ganho.gain.setValueAtTime(
+            0.0001,
+            inicio
+          );
+
+          ganho.gain.exponentialRampToValueAtTime(
+            0.8,
+            inicio + 0.02
+          );
+
+          ganho.gain.exponentialRampToValueAtTime(
+            0.0001,
+            inicio + 0.23
+          );
+
+          oscilador.connect(ganho);
+
+          ganho.connect(audioContext.destination);
+
+          oscilador.start(inicio);
+
+          oscilador.stop(inicio + 0.25);
+
+        }
+      );
+
+    }
+
+    btnSom.addEventListener(
+      "click",
+      ativarSom
+    );
+
+    function formatarHorario(data) {
+
+      if (!data) return "";
+
+      try {
+
+        return new Date(data)
+          .toLocaleString(
+            "pt-BR",
+            {
+              dateStyle: "short",
+              timeStyle: "medium"
+            }
+          );
+
+      } catch {
+
+        return "";
+
+      }
+
+    }
+
+    function renderizar() {
+
+      contador.textContent =
+        atendimentos.length;
+
+      if (atendimentos.length === 0) {
+
+        fila.innerHTML = `
+          <div class="vazio">
+            Aguardando novos atendimentos...
+          </div>
+        `;
+
+        return;
+
+      }
+
+      fila.innerHTML = "";
+
+      atendimentos.forEach(
+        (item) => {
+
+          const registro =
+            document.createElement("div");
+
+          registro.className =
+            "registro " +
+            (
+              item.prioridade === "Urgente"
+                ? "urgente "
+                : ""
+            ) +
+            (
+              item.novo
+                ? "novo"
+                : ""
+            );
+
+          registro.innerHTML = `
+
+            <div class="registro-topo">
+
+              <div class="nome">
+                ${escaparHTML(item.nome)}
+              </div>
+
+              <span class="badge ${
+                item.prioridade === "Urgente"
+                  ? "urgente"
+                  : ""
+              }">
+                ${escaparHTML(item.prioridade)}
+              </span>
+
+            </div>
+
+            <div class="informacoes">
+
+              <div class="info">
+                <span class="info-titulo">
+                  Identificação
+                </span>
+
+                <span class="info-valor">
+                  ${escaparHTML(item.identificacao)}
+                </span>
+              </div>
+
+              <div class="info">
+                <span class="info-titulo">
+                  Pavilhão
+                </span>
+
+                <span class="info-valor">
+                  ${escaparHTML(item.pavilhao)}
+                </span>
+              </div>
+
+              <div class="info">
+                <span class="info-titulo">
+                  Cela
+                </span>
+
+                <span class="info-valor">
+                  ${escaparHTML(item.cela)}
+                </span>
+              </div>
+
+              <div class="info">
+                <span class="info-titulo">
+                  Atendimento
+                </span>
+
+                <span class="info-valor">
+                  ${escaparHTML(item.atendimento)}
+                </span>
+              </div>
+
+            </div>
+
+            ${
+              item.mensagem
+                ? `
+                  <div class="observacao">
+
+                    <strong>
+                      Observações
+                    </strong>
+
+                    ${escaparHTML(item.mensagem)}
+
+                  </div>
+                `
+                : ""
+            }
+
+            <div class="horario">
+
+              Recebido em:
+              ${escaparHTML(
+                formatarHorario(item.recebidoEm)
+              )}
+
+            </div>
+
+          `;
+
+          fila.appendChild(registro);
+
+        }
+      );
+
+    }
+
+    function adicionarAtendimento(
+      registro
+    ) {
+
+      const novoRegistro = {
+
+        ...registro,
+
+        novo: true,
+
+        recebidoEm:
+          new Date().toISOString()
+
+      };
+
+      atendimentos.unshift(
+        novoRegistro
+      );
+
+      renderizar();
+
+      /*
+       * Toca o alerta sempre que chegar
+       * um novo atendimento.
+       */
+
+      if (somAtivado) {
+
+        tocarAlerta();
+
+      }
+
+      /*
+       * Remove o destaque depois de alguns segundos.
+       */
+
+      setTimeout(
+        () => {
+
+          novoRegistro.novo = false;
+
+          renderizar();
+
+        },
+        5000
+      );
+
+    }
+
+    function conectar() {
+
+      const protocolo =
+        location.protocol === "https:"
+          ? "wss:"
+          : "ws:";
+
+      ws = new WebSocket(
+        protocolo +
+        "//" +
+        location.host
+      );
+
+      ws.addEventListener(
+        "open",
+        function() {
+
+          status.textContent =
+            "Conectado";
+
+          bolinha.classList.add(
+            "online"
+          );
+
+          ws.send(
+            JSON.stringify({
+              type: "register",
+              role: "receiver"
+            })
+          );
+
+        }
+      );
+
+      ws.addEventListener(
+        "message",
+        function(event) {
+
+          try {
+
+            const data =
+              JSON.parse(
+                event.data
+              );
+
+            if (
+              data.type ===
+              "new_record"
+            ) {
+
+              adicionarAtendimento(
+                data.record
+              );
+
+            }
+
+          } catch (erro) {
+
+            console.error(
+              "Erro ao processar mensagem:",
+              erro
+            );
+
+          }
+
+        }
+      );
+
+      ws.addEventListener(
+        "close",
+        function() {
+
+          status.textContent =
+            "Reconectando...";
+
+          bolinha.classList.remove(
+            "online"
+          );
+
+          setTimeout(
+            conectar,
+            2000
+          );
+
+        }
+      );
+
+      ws.addEventListener(
+        "error",
+        function() {
+
+          status.textContent =
+            "Erro de conexão";
+
+          bolinha.classList.remove(
+            "online"
+          );
+
+        }
+      );
+
+    }
+
+    renderizar();
+
+    conectar();
+
+  </script>
+
+</body>
+</html>
