@@ -3,227 +3,1209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Sistema de Atendimento</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f4f7;
-      margin: 0;
-      padding: 30px;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 3px 15px rgba(0,0,0,.12);
-    }
-
-    h1 {
-      margin-top: 0;
-    }
-
-    input, textarea, button {
-      width: 100%;
+    * {
       box-sizing: border-box;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 7px;
-      border: 1px solid #ccc;
-      font-size: 16px;
     }
 
-    textarea {
-      height: 120px;
-      resize: vertical;
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
     }
 
-    button {
-      background: #2563eb;
+    header {
+      background: #0f172a;
       color: white;
-      border: none;
-      cursor: pointer;
+      padding: 18px 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .titulo {
+      font-size: 22px;
       font-weight: bold;
     }
 
-    button:hover {
+    .subtitulo {
+      font-size: 13px;
+      opacity: .75;
+      margin-top: 4px;
+    }
+
+    .conexao {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .bolinha {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    .bolinha.online {
+      background: #22c55e;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 25px auto;
+      padding: 0 20px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .card-titulo {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .card-numero {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .painel {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      margin-bottom: 20px;
+    }
+
+    .painel-titulo {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .painel-subtitulo {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .campo {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .campo.completo {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      padding: 11px 12px;
+      font-size: 15px;
+      outline: none;
+      background: white;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,.12);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .prioridades {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .prioridade {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .prioridade input {
+      display: none;
+    }
+
+    .prioridade label {
+      display: block;
+      text-align: center;
+      padding: 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      cursor: pointer;
+      background: #f8fafc;
+    }
+
+    .prioridade input:checked + label {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    .botoes {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      border: none;
+      border-radius: 7px;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-limpar {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .btn-enviar {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-enviar:hover {
       background: #1d4ed8;
     }
 
-    .status {
-      margin: 15px 0;
-      padding: 10px;
-      background: #eee;
-      border-radius: 7px;
+    .btn-limpar:hover {
+      background: #cbd5e1;
     }
 
-    .recebido {
-      margin-top: 20px;
+    .lista {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .registro {
+      border: 1px solid #e2e8f0;
+      border-radius: 9px;
       padding: 15px;
-      background: #e8f5e9;
-      border-radius: 8px;
-      white-space: pre-wrap;
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      background: #f8fafc;
+    }
+
+    .registro-info {
+      flex: 1;
+    }
+
+    .registro-nome {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .registro-detalhes {
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .registro-mensagem {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .badge-normal {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge-urgente {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .vazio {
+      text-align: center;
+      padding: 30px;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 800px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .campo.completo {
+        grid-column: auto;
+      }
+
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .botoes {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 
 <body>
 
+<header>
+
+  <div class="header-content">
+
+    <div>
+      <div class="titulo">
+        Sistema de Atendimento
+      </div>
+
+      <div class="subtitulo">
+        Central de envio e gerenciamento de atendimentos
+      </div>
+    </div>
+
+    <div class="conexao">
+
+      <span id="bolinha" class="bolinha"></span>
+
+      <span id="status">
+        Conectando...
+      </span>
+
+    </div>
+
+  </div>
+
+</header>
+
+
 <div class="container">
 
-  <h1>📡 Sistema de Atendimento</h1>
 
-  <div class="status" id="status">
-    Conectando...
-  </div>
+  <div class="cards">
 
-  <label>Modo:</label>
+    <div class="card">
+      <div class="card-titulo">
+        Registros na fila
+      </div>
 
-  <select id="modo">
-    <option value="sender">Computador que envia</option>
-    <option value="receiver">Computador que recebe</option>
-  </select>
-
-  <input
-    id="nome"
-    type="text"
-    placeholder="Nome"
-  >
-
-  <textarea
-    id="mensagem"
-    placeholder="Digite a informação que deseja enviar..."
-  ></textarea>
-
-  <button onclick="enviar()">
-    Enviar informação
-  </button>
-
-  <div class="recebido">
-    <strong>Informação recebida:</strong>
-
-    <div id="recebida">
-      Nenhuma informação recebida.
+      <div class="card-numero" id="totalFila">
+        0
+      </div>
     </div>
+
+
+    <div class="card">
+      <div class="card-titulo">
+        Prioridade normal
+      </div>
+
+      <div class="card-numero" id="totalNormal">
+        0
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="card-titulo">
+        Urgentes
+      </div>
+
+      <div class="card-numero" id="totalUrgente">
+        0
+      </div>
+    </div>
+
+
+    <div class="card">
+      <div class="card-titulo">
+        Enviados
+      </div>
+
+      <div class="card-numero" id="totalEnviados">
+        0
+      </div>
+    </div>
+
   </div>
+
+
+  <div class="painel">
+
+    <div class="painel-titulo">
+      Novo atendimento
+    </div>
+
+    <div class="painel-subtitulo">
+      Preencha os dados abaixo para adicionar um atendimento à fila.
+    </div>
+
+
+    <div class="form-grid">
+
+
+      <div class="campo">
+
+        <label for="nome">
+          Nome
+        </label>
+
+        <input
+          id="nome"
+          type="text"
+          placeholder="Digite o nome"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label for="identificacao">
+          Identificação
+        </label>
+
+        <input
+          id="identificacao"
+          type="text"
+          placeholder="Ex.: matrícula, código ou documento"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label for="pavilhao">
+          Pavilhão / Setor
+        </label>
+
+        <input
+          id="pavilhao"
+          type="text"
+          placeholder="Ex.: A"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label for="cela">
+          Cela / Sala
+        </label>
+
+        <input
+          id="cela"
+          type="text"
+          placeholder="Ex.: 023"
+        >
+
+      </div>
+
+
+      <div class="campo">
+
+        <label for="atendimento">
+          Tipo de atendimento
+        </label>
+
+        <select id="atendimento">
+
+          <option value="">
+            Selecione
+          </option>
+
+          <option value="Médico">
+            Médico
+          </option>
+
+          <option value="Odontológico">
+            Odontológico
+          </option>
+
+          <option value="Psicológico">
+            Psicológico
+          </option>
+
+          <option value="Jurídico">
+            Jurídico
+          </option>
+
+          <option value="Social">
+            Social
+          </option>
+
+          <option value="Administrativo">
+            Administrativo
+          </option>
+
+          <option value="Outro">
+            Outro
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Prioridade
+        </label>
+
+        <div class="prioridades">
+
+          <div class="prioridade">
+
+            <input
+              type="radio"
+              name="prioridade"
+              id="normal"
+              value="Normal"
+              checked
+            >
+
+            <label for="normal">
+              Normal
+            </label>
+
+          </div>
+
+
+          <div class="prioridade">
+
+            <input
+              type="radio"
+              name="prioridade"
+              id="urgente"
+              value="Urgente"
+            >
+
+            <label for="urgente">
+              Urgente
+            </label>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="campo completo">
+
+        <label for="observacao">
+          Observações
+        </label>
+
+        <textarea
+          id="observacao"
+          placeholder="Digite alguma observação, se necessário..."
+        ></textarea>
+
+      </div>
+
+
+    </div>
+
+
+    <div class="botoes">
+
+      <button
+        class="btn-limpar"
+        onclick="limparFormulario()">
+
+        Limpar
+
+      </button>
+
+
+      <button
+        class="btn-enviar"
+        onclick="adicionarRegistro()">
+
+        Adicionar à fila
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="painel">
+
+    <div class="painel-titulo">
+      Fila de atendimentos
+    </div>
+
+    <div class="painel-subtitulo">
+      Registros que serão enviados para o computador de recebimento.
+    </div>
+
+
+    <div id="lista" class="lista">
+
+      <div class="vazio">
+        Nenhum atendimento adicionado.
+      </div>
+
+    </div>
+
+
+    <div class="botoes">
+
+      <button
+        class="btn-enviar"
+        onclick="enviarFila()">
+
+        Enviar fila para atendimento
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="painel">
+
+    <div class="painel-titulo">
+      Último atendimento recebido
+    </div>
+
+    <div id="recebido" class="vazio">
+      Nenhum atendimento recebido.
+    </div>
+
+  </div>
+
 
 </div>
 
+
 <script>
 
-let socket;
+  let socket = null;
 
-function conectar() {
+  let fila = [];
 
-  const protocolo =
-    location.protocol === "https:"
-      ? "wss:"
-      : "ws:";
+  let totalEnviados = 0;
 
-  socket = new WebSocket(
-    protocolo + "//" + location.host
-  );
 
-  socket.onopen = function() {
+  function conectar() {
 
-    document.getElementById("status").innerText =
-      "🟢 Conectado";
+    const protocolo =
+      location.protocol === "https:"
+        ? "wss:"
+        : "ws:";
 
-    registrar();
-  };
 
-  socket.onclose = function() {
+    socket = new WebSocket(
+      protocolo + "//" + location.host
+    );
 
-    document.getElementById("status").innerText =
-      "🔴 Desconectado. Tentando novamente...";
 
-    setTimeout(conectar, 2000);
-  };
+    socket.onopen = function() {
 
-  socket.onerror = function() {
+      document.getElementById("status").innerText =
+        "Conectado";
 
-    document.getElementById("status").innerText =
-      "⚠️ Erro de conexão";
-  };
+      document.getElementById("bolinha")
+        .classList.add("online");
 
-  socket.onmessage = function(event) {
+      registrar();
 
-    const data = JSON.parse(event.data);
+    };
 
-    if (data.type === "new_record") {
 
-      const texto =
-        "Nome: " +
-        (data.record.nome || "") +
-        "\n\n" +
-        "Mensagem:\n" +
-        (data.record.mensagem || "");
+    socket.onclose = function() {
 
-      document.getElementById("recebida").innerText =
-        texto;
+      document.getElementById("status").innerText =
+        "Desconectado. Tentando novamente...";
+
+      document.getElementById("bolinha")
+        .classList.remove("online");
+
+      setTimeout(conectar, 2000);
+
+    };
+
+
+    socket.onerror = function() {
+
+      document.getElementById("status").innerText =
+        "Erro de conexão";
+
+    };
+
+
+    socket.onmessage = function(event) {
+
+      try {
+
+        const data =
+          JSON.parse(event.data);
+
+
+        if (data.type === "new_record") {
+
+          mostrarRecebido(
+            data.record
+          );
+
+        }
+
+      } catch (erro) {
+
+        console.error(
+          "Erro ao receber dados:",
+          erro
+        );
+
+      }
+
+    };
+
+  }
+
+
+  function registrar() {
+
+    if (
+      socket &&
+      socket.readyState === WebSocket.OPEN
+    ) {
+
+      socket.send(
+        JSON.stringify({
+
+          type: "register",
+
+          role: "sender"
+
+        })
+      );
+
     }
-  };
-}
 
-function registrar() {
-
-  const modo =
-    document.getElementById("modo").value;
-
-  if (socket.readyState === WebSocket.OPEN) {
-
-    socket.send(JSON.stringify({
-      type: "register",
-      role: modo
-    }));
-  }
-}
-
-document.getElementById("modo")
-  .addEventListener("change", registrar);
-
-function enviar() {
-
-  if (!socket || socket.readyState !== WebSocket.OPEN) {
-
-    alert("O computador ainda não está conectado.");
-
-    return;
   }
 
-  const nome =
-    document.getElementById("nome").value;
 
-  const mensagem =
-    document.getElementById("mensagem").value;
+  function adicionarRegistro() {
 
-  if (!mensagem.trim()) {
+    const nome =
+      document.getElementById("nome").value.trim();
 
-    alert("Digite uma mensagem.");
 
-    return;
-  }
+    const identificacao =
+      document.getElementById("identificacao").value.trim();
 
-  socket.send(JSON.stringify({
 
-    type: "send_record",
+    const pavilhao =
+      document.getElementById("pavilhao").value.trim();
 
-    record: {
+
+    const cela =
+      document.getElementById("cela").value.trim();
+
+
+    const atendimento =
+      document.getElementById("atendimento").value;
+
+
+    const observacao =
+      document.getElementById("observacao").value.trim();
+
+
+    const prioridade =
+      document.querySelector(
+        'input[name="prioridade"]:checked'
+      ).value;
+
+
+    if (!nome) {
+
+      alert("Digite o nome.");
+
+      return;
+
+    }
+
+
+    if (!atendimento) {
+
+      alert(
+        "Selecione o tipo de atendimento."
+      );
+
+      return;
+
+    }
+
+
+    const registro = {
+
+      id: Date.now(),
+
       nome: nome,
-      mensagem: mensagem
+
+      identificacao: identificacao,
+
+      pavilhao: pavilhao,
+
+      cela: cela,
+
+      atendimento: atendimento,
+
+      prioridade: prioridade,
+
+      mensagem: observacao
+
+    };
+
+
+    fila.push(registro);
+
+
+    atualizarLista();
+
+    atualizarIndicadores();
+
+    limparFormulario();
+
+  }
+
+
+  function atualizarLista() {
+
+    const lista =
+      document.getElementById("lista");
+
+
+    if (fila.length === 0) {
+
+      lista.innerHTML =
+        '<div class="vazio">' +
+        'Nenhum atendimento adicionado.' +
+        '</div>';
+
+      return;
+
     }
 
-  }));
 
-  document.getElementById("mensagem").value = "";
+    lista.innerHTML = "";
 
-  alert("Informação enviada!");
-}
 
-conectar();
+    fila.forEach(function(registro) {
+
+      const div =
+        document.createElement("div");
+
+
+      div.className =
+        "registro";
+
+
+      const prioridadeClasse =
+        registro.prioridade === "Urgente"
+          ? "badge-urgente"
+          : "badge-normal";
+
+
+      div.innerHTML = `
+
+        <div class="registro-info">
+
+          <div class="registro-nome">
+            ${escaparHTML(registro.nome)}
+          </div>
+
+          <div class="registro-detalhes">
+
+            ${escaparHTML(registro.atendimento)}
+
+            ${registro.pavilhao
+              ? " • Pavilhão: " +
+                escaparHTML(registro.pavilhao)
+              : ""}
+
+            ${registro.cela
+              ? " • Cela/Sala: " +
+                escaparHTML(registro.cela)
+              : ""}
+
+          </div>
+
+
+          ${
+            registro.identificacao
+              ? `
+                <div class="registro-detalhes">
+                  Identificação:
+                  ${escaparHTML(registro.identificacao)}
+                </div>
+              `
+              : ""
+          }
+
+
+          ${
+            registro.mensagem
+              ? `
+                <div class="registro-mensagem">
+                  ${escaparHTML(registro.mensagem)}
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+
+
+        <div>
+
+          <span class="badge ${prioridadeClasse}">
+
+            ${escaparHTML(registro.prioridade)}
+
+          </span>
+
+        </div>
+
+      `;
+
+
+      lista.appendChild(div);
+
+    });
+
+  }
+
+
+  function enviarFila() {
+
+    if (
+      !socket ||
+      socket.readyState !== WebSocket.OPEN
+    ) {
+
+      alert(
+        "O sistema ainda não está conectado."
+      );
+
+      return;
+
+    }
+
+
+    if (fila.length === 0) {
+
+      alert(
+        "A fila está vazia."
+      );
+
+      return;
+
+    }
+
+
+    fila.forEach(function(registro) {
+
+      socket.send(
+        JSON.stringify({
+
+          type: "send_record",
+
+          record: {
+
+            nome: registro.nome,
+
+            identificacao:
+              registro.identificacao,
+
+            pavilhao:
+              registro.pavilhao,
+
+            cela:
+              registro.cela,
+
+            atendimento:
+              registro.atendimento,
+
+            prioridade:
+              registro.prioridade,
+
+            mensagem:
+              registro.mensagem
+
+          }
+
+        })
+      );
+
+
+      totalEnviados++;
+
+    });
+
+
+    alert(
+      fila.length +
+      " atendimento(s) enviado(s)!"
+    );
+
+
+    fila = [];
+
+
+    atualizarLista();
+
+    atualizarIndicadores();
+
+  }
+
+
+  function mostrarRecebido(registro) {
+
+    const area =
+      document.getElementById("recebido");
+
+
+    area.className =
+      "registro";
+
+
+    area.innerHTML = `
+
+      <div class="registro-info">
+
+        <div class="registro-nome">
+
+          ${escaparHTML(registro.nome)}
+
+        </div>
+
+
+        <div class="registro-detalhes">
+
+          Atendimento:
+          ${escaparHTML(registro.atendimento || "")}
+
+          ${
+            registro.pavilhao
+              ? " • Pavilhão: " +
+                escaparHTML(registro.pavilhao)
+              : ""
+          }
+
+          ${
+            registro.cela
+              ? " • Cela/Sala: " +
+                escaparHTML(registro.cela)
+              : ""
+          }
+
+        </div>
+
+
+        ${
+          registro.identificacao
+            ? `
+              <div class="registro-detalhes">
+
+                Identificação:
+                ${escaparHTML(registro.identificacao)}
+
+              </div>
+            `
+            : ""
+        }
+
+
+        ${
+          registro.mensagem
+            ? `
+              <div class="registro-mensagem">
+
+                ${escaparHTML(registro.mensagem)}
+
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+
+
+      <div>
+
+        <span class="badge ${
+          registro.prioridade === "Urgente"
+            ? "badge-urgente"
+            : "badge-normal"
+        }">
+
+          ${escaparHTML(
+            registro.prioridade || "Normal"
+          )}
+
+        </span>
+
+      </div>
+
+    `;
+
+  }
+
+
+  function atualizarIndicadores() {
+
+    document.getElementById("totalFila")
+      .innerText = fila.length;
+
+
+    const normal =
+      fila.filter(
+        function(item) {
+          return item.prioridade === "Normal";
+        }
+      ).length;
+
+
+    const urgente =
+      fila.filter(
+        function(item) {
+          return item.prioridade === "Urgente";
+        }
+      ).length;
+
+
+    document.getElementById("totalNormal")
+      .innerText = normal;
+
+
+    document.getElementById("totalUrgente")
+      .innerText = urgente;
+
+
+    document.getElementById("totalEnviados")
+      .innerText = totalEnviados;
+
+  }
+
+
+  function limparFormulario() {
+
+    document.getElementById("nome").value = "";
+
+    document.getElementById("identificacao").value = "";
+
+    document.getElementById("pavilhao").value = "";
+
+    document.getElementById("cela").value = "";
+
+    document.getElementById("atendimento").value = "";
+
+    document.getElementById("observacao").value = "";
+
+    document.getElementById("normal").checked = true;
+
+  }
+
+
+  function escaparHTML(texto) {
+
+    const div =
+      document.createElement("div");
+
+    div.textContent =
+      texto || "";
+
+    return div.innerHTML;
+
+  }
+
+
+  conectar();
+
+  atualizarIndicadores();
 
 </script>
 
