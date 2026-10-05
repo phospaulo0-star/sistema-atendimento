@@ -137,6 +137,13 @@
       box-shadow: 0 3px 8px rgba(0,0,0,.15);
     }
 
+    button:disabled {
+      cursor: default;
+      opacity: .75;
+      transform: none;
+      box-shadow: none;
+    }
+
     .btn-som {
       background: #8b6f1d;
       color: white;
@@ -192,4 +199,946 @@
     }
 
     .registro.novo {
-      an
+      border-left-color: #c8a84e;
+      background: #fffdf5;
+    }
+
+    .registro.confirmado {
+      border-left-color: #2e7d32;
+      background: #f7fff8;
+    }
+
+    .registro-cabecalho {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 14px;
+    }
+
+    .registro-titulo {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .registro-data {
+      font-size: 12px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .prioridade {
+      background: #555;
+      color: white;
+      border-radius: 20px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .prioridade.urgente {
+      background: #b71c1c;
+    }
+
+    .dados {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .dado {
+      background: white;
+      border: 1px solid #e2e2e2;
+      border-radius: 7px;
+      padding: 10px;
+    }
+
+    .dado-label {
+      display: block;
+      font-size: 11px;
+      color: #777;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .dado-valor {
+      display: block;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .rodape-registro {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .status.confirmado {
+      color: #2e7d32;
+      font-weight: bold;
+    }
+
+    .status.confirmando {
+      color: #8b6f1d;
+      font-weight: bold;
+    }
+
+    .btn-recebido {
+      background: #2e7d32;
+      color: white;
+      min-width: 155px;
+    }
+
+    .btn-recebido.confirmado {
+      background: #1b5e20;
+    }
+
+    .btn-recebido.confirmando {
+      background: #8b6f1d;
+    }
+
+    @media (max-width: 900px) {
+      .topo-conteudo {
+        flex-wrap: wrap;
+      }
+
+      .conexao {
+        width: 100%;
+      }
+
+      .dados {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .barra {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .acoes {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topo-conteudo {
+        padding: 15px;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .orgao {
+        font-size: 12px;
+      }
+
+      .dados {
+        grid-template-columns: 1fr;
+      }
+
+      .registro-cabecalho {
+        flex-direction: column;
+      }
+
+      .btn-recebido {
+        width: 100%;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <header class="topo">
+    <div class="topo-conteudo">
+
+```
+  <img
+    class="logo"
+    src="/logo.png"
+    alt="Polícia Penal MS"
+    onerror="this.style.display='none';"
+  >
+
+  <div class="identidade">
+    <div class="orgao">Polícia Penal de Mato Grosso do Sul</div>
+    <h1>Mesa de Recebimento</h1>
+    <div class="subtitulo">
+      Controle e confirmação dos atendimentos enviados pelos guichês
+    </div>
+  </div>
+
+  <div class="conexao">
+    <span id="bolinha" class="bolinha"></span>
+    <span id="textoConexao">Desconectado</span>
+  </div>
+
+</div>
+```
+
+  </header>
+
+  <main class="container">
+
+```
+<div class="barra">
+
+  <div>
+    <h2>Atendimentos recebidos</h2>
+    <p>Acompanhe os atendimentos enviados pelos guichês.</p>
+  </div>
+
+  <div class="acoes">
+
+    <button
+      id="btnNotificacao"
+      class="btn-notificacao"
+      type="button"
+      onclick="ativarNotificacoes()"
+    >
+      🔔 Ativar notificações
+    </button>
+
+    <button
+      id="btnSom"
+      class="btn-som"
+      type="button"
+      onclick="ativarSom()"
+    >
+      🔊 Ativar som de alerta
+    </button>
+
+  </div>
+
+</div>
+
+<section class="painel">
+
+  <h3>Fila de atendimento</h3>
+
+  <div id="fila" class="fila">
+    <div class="vazio">
+      Nenhum atendimento aguardando recebimento.
+    </div>
+  </div>
+
+</section>
+```
+
+  </main>
+
+  <script>
+    "use strict";
+
+    let socket = null;
+
+    let atendimentos = [];
+
+    let somAtivado = false;
+
+    let audioContext = null;
+
+    let reconectando = false;
+
+    function atualizarConexao(online) {
+      const bolinha = document.getElementById("bolinha");
+      const texto = document.getElementById("textoConexao");
+
+      if (!bolinha || !texto) {
+        return;
+      }
+
+      if (online) {
+        bolinha.classList.add("online");
+        texto.textContent = "Conectado";
+      } else {
+        bolinha.classList.remove("online");
+        texto.textContent = "Desconectado";
+      }
+    }
+
+    function escaparHTML(valor) {
+      if (valor === null || valor === undefined) {
+        return "";
+      }
+
+      return String(valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatarHorario(data) {
+      if (!data) {
+        return "";
+      }
+
+      const d = new Date(data);
+
+      if (Number.isNaN(d.getTime())) {
+        return "";
+      }
+
+      return d.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    }
+
+    function obterPrioridade(item) {
+      return (
+        item.prioridade ||
+        item.record?.prioridade ||
+        "NORMAL"
+      );
+    }
+
+    function obterDado(item, nome) {
+      if (item && item[nome] !== undefined) {
+        return item[nome];
+      }
+
+      if (
+        item &&
+        item.record &&
+        item.record[nome] !== undefined
+      ) {
+        return item.record[nome];
+      }
+
+      return "";
+    }
+
+    function renderizar() {
+      const fila = document.getElementById("fila");
+
+      if (!fila) {
+        return;
+      }
+
+      if (!atendimentos.length) {
+        fila.innerHTML = `
+          <div class="vazio">
+            Nenhum atendimento aguardando recebimento.
+          </div>
+        `;
+
+        return;
+      }
+
+      fila.innerHTML = atendimentos.map((item) => {
+
+        const nome =
+          obterDado(item, "nome") ||
+          "Não informado";
+
+        const identificacao =
+          obterDado(item, "identificacao") ||
+          obterDado(item, "documento") ||
+          "Não informado";
+
+        const pavilhao =
+          obterDado(item, "pavilhao") ||
+          "Não informado";
+
+        const cela =
+          obterDado(item, "cela") ||
+          "Não informado";
+
+        const atendimento =
+          obterDado(item, "atendimento") ||
+          "Não informado";
+
+        const prioridade =
+          obterPrioridade(item);
+
+        const urgente =
+          String(prioridade).toUpperCase() === "URGENTE";
+
+        let classeRegistro = "registro";
+
+        if (urgente) {
+          classeRegistro += " urgente";
+        }
+
+        if (item.novo) {
+          classeRegistro += " novo";
+        }
+
+        if (item.confirmado) {
+          classeRegistro += " confirmado";
+        }
+
+        let statusHTML = "";
+
+        if (item.confirmado) {
+
+          statusHTML = `
+            <div class="status confirmado">
+              ✓ Recebimento confirmado às
+              ${escaparHTML(formatarHorario(item.recebidoEm))}
+            </div>
+          `;
+
+        } else if (item.confirmando) {
+
+          statusHTML = `
+            <div class="status confirmando">
+              Confirmando recebimento...
+            </div>
+          `;
+
+        } else {
+
+          statusHTML = `
+            <div class="status">
+              Aguardando confirmação de recebimento
+            </div>
+          `;
+
+        }
+
+        let botaoHTML = "";
+
+        if (item.confirmado) {
+
+          botaoHTML = `
+            <button
+              class="btn-recebido confirmado"
+              type="button"
+              disabled
+            >
+              ✓ RECEBIDO
+            </button>
+          `;
+
+        } else if (item.confirmando) {
+
+          botaoHTML = `
+            <button
+              class="btn-recebido confirmando"
+              type="button"
+              disabled
+            >
+              CONFIRMANDO...
+            </button>
+          `;
+
+        } else {
+
+          botaoHTML = `
+            <button
+              class="btn-recebido"
+              type="button"
+              onclick="confirmarRecebimento('${escaparHTML(item.recordId)}')"
+            >
+              RECEBIDO
+            </button>
+          `;
+
+        }
+
+        return `
+          <article class="${classeRegistro}">
+
+            <div class="registro-cabecalho">
+
+              <div>
+                <div class="registro-titulo">
+                  ${escaparHTML(nome)}
+                </div>
+
+                <div class="registro-data">
+                  Enviado em:
+                  ${escaparHTML(formatarHorario(item.sentAt))}
+                </div>
+              </div>
+
+              <div class="prioridade ${urgente ? "urgente" : ""}">
+                ${escaparHTML(prioridade)}
+              </div>
+
+            </div>
+
+            <div class="dados">
+
+              <div class="dado">
+                <span class="dado-label">Nome</span>
+                <span class="dado-valor">
+                  ${escaparHTML(nome)}
+                </span>
+              </div>
+
+              <div class="dado">
+                <span class="dado-label">Identificação</span>
+                <span class="dado-valor">
+                  ${escaparHTML(identificacao)}
+                </span>
+              </div>
+
+              <div class="dado">
+                <span class="dado-label">Pavilhão</span>
+                <span class="dado-valor">
+                  ${escaparHTML(pavilhao)}
+                </span>
+              </div>
+
+              <div class="dado">
+                <span class="dado-label">Cela</span>
+                <span class="dado-valor">
+                  ${escaparHTML(cela)}
+                </span>
+              </div>
+
+              <div class="dado">
+                <span class="dado-label">Atendimento</span>
+                <span class="dado-valor">
+                  ${escaparHTML(atendimento)}
+                </span>
+              </div>
+
+            </div>
+
+            <div class="rodape-registro">
+
+              ${statusHTML}
+
+              ${botaoHTML}
+
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+    }
+
+    function ativarSom() {
+
+      try {
+
+        const AudioCtx =
+          window.AudioContext ||
+          window.webkitAudioContext;
+
+        if (!AudioCtx) {
+          alert("O navegador não suporta áudio.");
+          return;
+        }
+
+        if (!audioContext) {
+          audioContext = new AudioCtx();
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+
+        somAtivado = true;
+
+        const botao =
+          document.getElementById("btnSom");
+
+        if (botao) {
+          botao.classList.add("ativado");
+          botao.textContent = "🔊 Som ativado";
+        }
+
+        tocarSom();
+
+      } catch (erro) {
+
+        console.error(
+          "Erro ao ativar som:",
+          erro
+        );
+
+      }
+    }
+
+    function tocarSom() {
+
+      if (!somAtivado || !audioContext) {
+        return;
+      }
+
+      try {
+
+        const agora =
+          audioContext.currentTime;
+
+        const oscilador =
+          audioContext.createOscillator();
+
+        const ganho =
+          audioContext.createGain();
+
+        oscilador.type = "sine";
+
+        oscilador.frequency.setValueAtTime(
+          880,
+          agora
+        );
+
+        oscilador.frequency.setValueAtTime(
+          660,
+          agora + 0.18
+        );
+
+        ganho.gain.setValueAtTime(
+          0.0001,
+          agora
+        );
+
+        ganho.gain.exponentialRampToValueAtTime(
+          0.35,
+          agora + 0.02
+        );
+
+        ganho.gain.exponentialRampToValueAtTime(
+          0.0001,
+          agora + 0.45
+        );
+
+        oscilador.connect(ganho);
+        ganho.connect(audioContext.destination);
+
+        oscilador.start(agora);
+        oscilador.stop(agora + 0.5);
+
+      } catch (erro) {
+
+        console.error(
+          "Erro ao reproduzir som:",
+          erro
+        );
+
+      }
+    }
+
+    async function ativarNotificacoes() {
+
+      if (!("Notification" in window)) {
+
+        alert(
+          "Este navegador não suporta notificações."
+        );
+
+        return;
+
+      }
+
+      try {
+
+        const permissao =
+          await Notification.requestPermission();
+
+        const botao =
+          document.getElementById("btnNotificacao");
+
+        if (permissao === "granted") {
+
+          if (botao) {
+            botao.textContent =
+              "🔔 Notificações ativadas";
+          }
+
+          new Notification(
+            "Mesa de Recebimento",
+            {
+              body:
+                "As notificações foram ativadas com sucesso."
+            }
+          );
+
+        } else {
+
+          if (botao) {
+            botao.textContent =
+              "🔔 Notificações bloqueadas";
+          }
+
+        }
+
+      } catch (erro) {
+
+        console.error(
+          "Erro nas notificações:",
+          erro
+        );
+
+      }
+    }
+
+    function notificarNovoAtendimento(item) {
+
+      if (
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+
+        const nome =
+          obterDado(item, "nome") ||
+          "Atendimento";
+
+        new Notification(
+          "Novo atendimento recebido",
+          {
+            body:
+              `${nome} aguarda recebimento na Mesa.`
+          }
+        );
+
+      }
+    }
+
+    function confirmarRecebimento(recordId) {
+
+      const item =
+        atendimentos.find(
+          atendimento =>
+            atendimento.recordId === recordId
+        );
+
+      if (!item) {
+        return;
+      }
+
+      if (item.confirmado || item.confirmando) {
+        return;
+      }
+
+      if (
+        !socket ||
+        socket.readyState !== WebSocket.OPEN
+      ) {
+
+        alert(
+          "A Mesa está desconectada do servidor."
+        );
+
+        return;
+
+      }
+
+      item.confirmando = true;
+      item.novo = false;
+
+      renderizar();
+
+      socket.send(
+        JSON.stringify({
+          type: "confirm_received",
+          recordId: recordId
+        })
+      );
+
+    }
+
+    function processarConfirmacao(data) {
+
+      const item =
+        atendimentos.find(
+          atendimento =>
+            atendimento.recordId === data.recordId
+        );
+
+      if (!item) {
+        return;
+      }
+
+      item.confirmado = true;
+      item.confirmando = false;
+      item.recebidoEm = data.receivedAt;
+      item.novo = false;
+
+      renderizar();
+
+    }
+
+    function adicionarAtendimento(data) {
+
+      if (!data || !data.recordId) {
+        return;
+      }
+
+      const existente =
+        atendimentos.some(
+          item =>
+            item.recordId === data.recordId
+        );
+
+      if (existente) {
+        return;
+      }
+
+      const item = {
+        recordId: data.recordId,
+        record: data.record || {},
+        sentAt: data.sentAt || null,
+        recebidoEm: null,
+        confirmado: false,
+        confirmando: false,
+        novo: true
+      };
+
+      atendimentos.unshift(item);
+
+      renderizar();
+
+      tocarSom();
+
+      notificarNovoAtendimento(item);
+
+    }
+
+    function conectar() {
+
+      if (socket) {
+
+        try {
+          socket.close();
+        } catch (_) {}
+
+      }
+
+      const protocolo =
+        window.location.protocol === "https:"
+          ? "wss:"
+          : "ws:";
+
+      const url =
+        `${protocolo}//${window.location.host}`;
+
+      socket = new WebSocket(url);
+
+      socket.addEventListener(
+        "open",
+        () => {
+
+          reconectando = false;
+
+          atualizarConexao(true);
+
+          socket.send(
+            JSON.stringify({
+              type: "register",
+              role: "receiver"
+            })
+          );
+
+        }
+      );
+
+      socket.addEventListener(
+        "message",
+        (event) => {
+
+          let data;
+
+          try {
+
+            data =
+              JSON.parse(event.data);
+
+          } catch (erro) {
+
+            console.error(
+              "Mensagem inválida recebida:",
+              erro
+            );
+
+            return;
+
+          }
+
+          if (data.type === "new_record") {
+
+            adicionarAtendimento(data);
+
+            return;
+
+          }
+
+          if (data.type === "record_received") {
+
+            processarConfirmacao(data);
+
+            return;
+
+          }
+
+        }
+      );
+
+      socket.addEventListener(
+        "close",
+        () => {
+
+          atualizarConexao(false);
+
+          if (!reconectando) {
+
+            reconectando = true;
+
+            setTimeout(() => {
+
+              reconectando = false;
+              conectar();
+
+            }, 3000);
+
+          }
+
+        }
+      );
+
+      socket.addEventListener(
+        "error",
+        (erro) => {
+
+          console.error(
+            "Erro no WebSocket:",
+            erro
+          );
+
+        }
+      );
+
+    }
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
+
+        renderizar();
+        conectar();
+
+      }
+    );
+  </script>
+
+</body>
+</html>
