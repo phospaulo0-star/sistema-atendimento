@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -204,16 +205,18 @@
       }
     }
   </style>
+
 </head>
 
 <body>
 
 <header>
 
-  <img
-    src="https://www.agepen.ms.gov.br/wp-content/uploads/2023/06/Brasao-PPMS-site.png"
-    alt="Polícia Penal MS"
-  >
+<img
+src="https://www.agepen.ms.gov.br/wp-content/uploads/2023/06/Brasao-PPMS-site.png"
+alt="Polícia Penal MS"
+
+>
 
   <div>
     <h1>POLÍCIA PENAL DE MATO GROSSO DO SUL</h1>
@@ -226,154 +229,187 @@
 
   <div class="card">
 
-    <div
-      id="statusConexao"
-      class="status offline"
+```
+<div
+  id="statusConexao"
+  class="status offline"
+>
+  🔴 Conectando ao servidor...
+</div>
+
+<h2>Novo Atendimento</h2>
+
+<div class="grid">
+
+  <div class="campo">
+
+    <label for="nome">
+      Nome
+    </label>
+
+    <input
+      id="nome"
+      type="text"
+      placeholder="Digite o nome"
     >
-      🔴 Conectando ao servidor...
-    </div>
-
-    <h2>Novo Atendimento</h2>
-
-    <div class="grid">
-
-      <div class="campo">
-        <label for="pavilhao">
-          Pavilhão
-        </label>
-
-        <select id="pavilhao">
-
-          <option value="">
-            Selecione
-          </option>
-
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
-          <option>D</option>
-          <option>DISCIPLINAR</option>
-          <option>DISCIPLINAR RISCO</option>
-          <option>CP</option>
-          <option>VIRTUAL</option>
-
-        </select>
-      </div>
-
-      <div class="campo">
-
-        <label for="cela">
-          Cela
-        </label>
-
-        <input
-          id="cela"
-          list="listaCela"
-          placeholder="Digite ou selecione a cela"
-        >
-
-        <datalist id="listaCela">
-        </datalist>
-
-      </div>
-
-      <div class="campo">
-
-        <label for="atendimento">
-          Atendimento
-        </label>
-
-        <input
-          id="atendimento"
-          list="listaAtendimento"
-          placeholder="Digite ou selecione"
-        >
-
-        <datalist id="listaAtendimento">
-
-          <option value="Médico">
-          <option value="Odontológico">
-          <option value="Psicológico">
-          <option value="Jurídico">
-          <option value="Social">
-          <option value="Administrativo">
-          <option value="Outro">
-
-          <option value="PSICOSSOCIAL">
-          <option value="CHEFIA">
-          <option value="7 DIAS NORMAL">
-          <option value="7 DIAS COM TORNOZELEIRA">
-          <option value="ABERTO DOMICILIAR">
-          <option value="ALVARÁ">
-          <option value="SALVO CONDUTO">
-          <option value="LICENÇA JUDICIAL">
-          <option value="DESVIO DE ROTA">
-          <option value="PORTARIA II">
-          <option value="CHEFE DE EQUIPE">
-          <option value="ADMINISTRAÇÃO">
-          <option value="DEFENSORIA">
-          <option value="SETOR DE TRABALHO">
-          <option value="AUTORIZAÇÃO DE SAÍDA">
-          <option value="ADVOGADO(A)">
-          <option value="AUDIÊNCIA">
-          <option value="ESCOLTA">
-          <option value="VIDEOCONFERÊNCIA">
-          <option value="OUTROS">
-
-        </datalist>
-
-      </div>
-
-    </div>
-
-    <button
-      class="btn-adicionar"
-      onclick="adicionarFila()"
-    >
-      ➕ ADICIONAR À FILA
-    </button>
 
   </div>
 
+  <div class="campo">
 
-  <div class="card">
+    <label for="identificacao">
+      Identificação
+    </label>
 
-    <h2>Fila de Atendimento</h2>
-
-    <div id="fila">
-
-      <div class="sem-confirmacao">
-        Nenhum atendimento na fila.
-      </div>
-
-    </div>
-
-    <button
-      class="btn-enviar"
-      onclick="enviarFila()"
+    <input
+      id="identificacao"
+      type="text"
+      placeholder="Digite a identificação"
     >
-      📤 ENVIAR PARA A MESA
-    </button>
 
   </div>
 
+  <div class="campo">
 
-  <div class="card">
+    <label for="pavilhao">
+      Pavilhão
+    </label>
 
-    <h2>Últimos Atendimentos</h2>
+    <select id="pavilhao">
 
-    <div id="historico">
+      <option value="">
+        Selecione
+      </option>
 
-      <div class="sem-confirmacao">
-        Nenhum atendimento enviado ainda.
-      </div>
+      <option>A</option>
+      <option>B</option>
+      <option>C</option>
+      <option>D</option>
+      <option>DISCIPLINAR</option>
+      <option>DISCIPLINAR RISCO</option>
+      <option>CP</option>
+      <option>VIRTUAL</option>
 
-    </div>
+    </select>
+
+  </div>
+
+  <div class="campo">
+
+    <label for="cela">
+      Cela
+    </label>
+
+    <input
+      id="cela"
+      list="listaCela"
+      placeholder="Digite ou selecione a cela"
+    >
+
+    <datalist id="listaCela">
+    </datalist>
+
+  </div>
+
+  <div class="campo">
+
+    <label for="atendimento">
+      Atendimento
+    </label>
+
+    <input
+      id="atendimento"
+      list="listaAtendimento"
+      placeholder="Digite ou selecione"
+    >
+
+    <datalist id="listaAtendimento">
+
+      <option value="Médico">
+      <option value="Odontológico">
+      <option value="Psicológico">
+      <option value="Jurídico">
+      <option value="Social">
+      <option value="Administrativo">
+      <option value="Outro">
+
+      <option value="PSICOSSOCIAL">
+      <option value="CHEFIA">
+      <option value="7 DIAS NORMAL">
+      <option value="7 DIAS COM TORNOZELEIRA">
+      <option value="ABERTO DOMICILIAR">
+      <option value="ALVARÁ">
+      <option value="SALVO CONDUTO">
+      <option value="LICENÇA JUDICIAL">
+      <option value="DESVIO DE ROTA">
+      <option value="PORTARIA II">
+      <option value="CHEFE DE EQUIPE">
+      <option value="ADMINISTRAÇÃO">
+      <option value="DEFENSORIA">
+      <option value="SETOR DE TRABALHO">
+      <option value="AUTORIZAÇÃO DE SAÍDA">
+      <option value="ADVOGADO(A)">
+      <option value="AUDIÊNCIA">
+      <option value="ESCOLTA">
+      <option value="VIDEOCONFERÊNCIA">
+      <option value="OUTROS">
+
+    </datalist>
 
   </div>
 
 </div>
 
+<button
+  class="btn-adicionar"
+  onclick="adicionarFila()"
+>
+  ➕ ADICIONAR À FILA
+</button>
+```
+
+  </div>
+
+  <div class="card">
+
+```
+<h2>Fila de Atendimento</h2>
+
+<div id="fila">
+
+  <div class="sem-confirmacao">
+    Nenhum atendimento na fila.
+  </div>
+
+</div>
+
+<button
+  class="btn-enviar"
+  onclick="enviarFila()"
+>
+  📤 ENVIAR PARA A MESA
+</button>
+```
+
+  </div>
+
+  <div class="card">
+
+```
+<h2>Últimos Atendimentos</h2>
+
+<div id="historico">
+
+  <div class="sem-confirmacao">
+    Nenhum atendimento enviado ainda.
+  </div>
+
+</div>
+```
+
+  </div>
+
+</div>
 
 <script>
 
@@ -564,6 +600,16 @@
 
   function adicionarFila() {
 
+    const nome =
+      document.getElementById(
+        "nome"
+      ).value.trim();
+
+    const identificacao =
+      document.getElementById(
+        "identificacao"
+      ).value.trim();
+
     const pavilhao =
       document.getElementById(
         "pavilhao"
@@ -581,13 +627,15 @@
 
 
     if (
+      !nome ||
+      !identificacao ||
       !pavilhao ||
       !cela ||
       !atendimento
     ) {
 
       alert(
-        "Preencha Pavilhão, Cela e Atendimento."
+        "Preencha Nome, Identificação, Pavilhão, Cela e Atendimento."
       );
 
       return;
@@ -597,6 +645,8 @@
 
     const registro = {
 
+      nome,
+      identificacao,
       pavilhao,
       cela,
       atendimento
@@ -608,6 +658,14 @@
       registro
     );
 
+
+    document.getElementById(
+      "nome"
+    ).value = "";
+
+    document.getElementById(
+      "identificacao"
+    ).value = "";
 
     document.getElementById(
       "pavilhao"
@@ -663,8 +721,12 @@
             <div class="fila-item">
 
               <strong>
-                ${index + 1}. ${item.atendimento}
+                ${index + 1}. ${item.nome}
               </strong>
+
+              Identificação:
+              ${item.identificacao}
+              <br>
 
               Pavilhão:
               ${item.pavilhao}
@@ -672,6 +734,10 @@
 
               Cela:
               ${item.cela}
+              <br>
+
+              Atendimento:
+              ${item.atendimento}
 
             </div>
           `;
@@ -896,15 +962,26 @@
               <div class="fila-item">
 
                 <strong>
-                  ${item.registro.atendimento}
+                  ${item.registro.nome}
                 </strong>
+
+                Identificação:
+                ${item.registro.identificacao}
+
+                <br>
 
                 Pavilhão:
                 ${item.registro.pavilhao}
+
                 <br>
 
                 Cela:
                 ${item.registro.cela}
+
+                <br>
+
+                Atendimento:
+                ${item.registro.atendimento}
 
                 <br><br>
 
