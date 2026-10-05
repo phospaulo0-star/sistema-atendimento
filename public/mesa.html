@@ -114,14 +114,40 @@
       font-size: 14px;
     }
 
+    .acoes {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: none;
+      border-radius: 7px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0,0,0,.15);
+    }
+
     .btn-som {
       background: #8b6f1d;
       color: white;
-      padding: 13px 18px;
     }
 
     .btn-som.ativado {
       background: #2e7d32;
+    }
+
+    .btn-notificacao {
+      background: #333;
+      color: white;
     }
 
     .painel {
@@ -249,6 +275,39 @@
       font-size: 11px;
     }
 
+    .recebimento {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .status-recebimento {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .status-recebimento.confirmado {
+      color: #2e7d32;
+      font-weight: bold;
+    }
+
+    .btn-recebido {
+      background: #2e7d32;
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-recebido:disabled {
+      background: #aaa;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
     .contador {
       display: inline-block;
       margin-left: 8px;
@@ -268,6 +327,10 @@
         flex-direction: column;
         align-items: flex-start;
       }
+
+      .acoes {
+        justify-content: flex-start;
+      }
     }
 
     @media (max-width: 600px) {
@@ -286,6 +349,15 @@
 
       .informacoes {
         grid-template-columns: 1fr;
+      }
+
+      .recebimento {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-recebido {
+        width: 100%;
       }
     }
   </style>
@@ -336,33 +408,60 @@
     <div class="barra">
 
       <div>
+
         <h2>
           Atendimentos recebidos
-          <span id="contador" class="contador">0</span>
+          <span
+            id="contador"
+            class="contador"
+          >
+            0
+          </span>
         </h2>
 
         <p>
           Os novos atendimentos aparecerão automaticamente nesta tela.
         </p>
+
       </div>
 
-      <button
-        id="btnSom"
-        class="btn-som"
-        type="button"
-      >
-        🔊 Ativar som de alerta
-      </button>
+      <div class="acoes">
+
+        <button
+          id="btnNotificacao"
+          class="btn-notificacao"
+          type="button"
+        >
+          🔔 Ativar notificações
+        </button>
+
+        <button
+          id="btnSom"
+          class="btn-som"
+          type="button"
+        >
+          🔊 Ativar som de alerta
+        </button>
+
+      </div>
 
     </div>
 
     <section class="painel">
 
-      <h3>Fila de atendimento</h3>
+      <h3>
+        Fila de atendimento
+      </h3>
 
-      <div id="fila" class="fila">
+      <div
+        id="fila"
+        class="fila"
+      >
 
-        <div id="vazio" class="vazio">
+        <div
+          id="vazio"
+          class="vazio"
+        >
           Aguardando novos atendimentos...
         </div>
 
@@ -375,32 +474,37 @@
   <script>
 
     let ws = null;
+
     let atendimentos = [];
 
     let audioContext = null;
+
     let somAtivado = false;
 
-    const fila = document.getElementById("fila");
-    const contador = document.getElementById("contador");
-    const status = document.getElementById("status");
-    const bolinha = document.getElementById("bolinha");
-    const btnSom = document.getElementById("btnSom");
+    const fila =
+      document.getElementById("fila");
 
-    function escaparHTML(texto) {
+    const contador =
+      document.getElementById("contador");
 
-      return String(texto ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    const status =
+      document.getElementById("status");
 
-    }
+    const bolinha =
+      document.getElementById("bolinha");
+
+    const btnSom =
+      document.getElementById("btnSom");
+
+    const btnNotificacao =
+      document.getElementById(
+        "btnNotificacao"
+      );
 
     /*
-     * Ativa o áudio depois de uma ação do usuário.
-     * Isso é necessário porque os navegadores bloqueiam
-     * áudio automático antes da primeira interação.
+     * ============================
+     * SOM
+     * ============================
      */
 
     function ativarSom() {
@@ -413,8 +517,13 @@
             window.webkitAudioContext
           )();
 
-        if (audioContext.state === "suspended") {
+        if (
+          audioContext.state ===
+          "suspended"
+        ) {
+
           audioContext.resume();
+
         }
 
         somAtivado = true;
@@ -422,14 +531,16 @@
         btnSom.textContent =
           "🔊 Som de alerta ativado";
 
-        btnSom.classList.add("ativado");
+        btnSom.classList.add(
+          "ativado"
+        );
 
-        tocarSomTeste();
+        tocarAlerta();
 
       } catch (erro) {
 
         console.error(
-          "Não foi possível ativar o áudio:",
+          "Erro ao ativar áudio:",
           erro
         );
 
@@ -437,25 +548,19 @@
 
     }
 
-    function tocarSomTeste() {
-
-      if (!audioContext) return;
-
-      tocarAlerta();
-
-    }
-
-    /*
-     * Alerta sonoro forte:
-     * três tons consecutivos.
-     */
-
     function tocarAlerta() {
 
-      if (!audioContext) return;
+      if (!audioContext) {
+        return;
+      }
 
-      if (audioContext.state === "suspended") {
+      if (
+        audioContext.state ===
+        "suspended"
+      ) {
+
         audioContext.resume();
+
       }
 
       const agora =
@@ -468,46 +573,65 @@
       ];
 
       frequencias.forEach(
-        (frequencia, indice) => {
+        (
+          frequencia,
+          indice
+        ) => {
 
           const inicio =
-            agora + indice * 0.28;
+            agora +
+            indice * 0.28;
 
           const oscilador =
-            audioContext.createOscillator();
+            audioContext
+              .createOscillator();
 
           const ganho =
-            audioContext.createGain();
+            audioContext
+              .createGain();
 
-          oscilador.type = "square";
+          oscilador.type =
+            "square";
 
-          oscilador.frequency.setValueAtTime(
-            frequencia,
+          oscilador.frequency
+            .setValueAtTime(
+              frequencia,
+              inicio
+            );
+
+          ganho.gain
+            .setValueAtTime(
+              0.0001,
+              inicio
+            );
+
+          ganho.gain
+            .exponentialRampToValueAtTime(
+              0.8,
+              inicio + 0.02
+            );
+
+          ganho.gain
+            .exponentialRampToValueAtTime(
+              0.0001,
+              inicio + 0.23
+            );
+
+          oscilador.connect(
+            ganho
+          );
+
+          ganho.connect(
+            audioContext.destination
+          );
+
+          oscilador.start(
             inicio
           );
 
-          ganho.gain.setValueAtTime(
-            0.0001,
-            inicio
+          oscilador.stop(
+            inicio + 0.25
           );
-
-          ganho.gain.exponentialRampToValueAtTime(
-            0.8,
-            inicio + 0.02
-          );
-
-          ganho.gain.exponentialRampToValueAtTime(
-            0.0001,
-            inicio + 0.23
-          );
-
-          oscilador.connect(ganho);
-
-          ganho.connect(audioContext.destination);
-
-          oscilador.start(inicio);
-
-          oscilador.stop(inicio + 0.25);
 
         }
       );
@@ -519,9 +643,170 @@
       ativarSom
     );
 
-    function formatarHorario(data) {
+    /*
+     * ============================
+     * NOTIFICAÇÕES
+     * ============================
+     */
 
-      if (!data) return "";
+    async function ativarNotificacoes() {
+
+      if (
+        !("Notification" in window)
+      ) {
+
+        alert(
+          "Este navegador não oferece suporte a notificações."
+        );
+
+        return;
+
+      }
+
+      try {
+
+        const permissao =
+          await Notification.requestPermission();
+
+        if (
+          permissao === "granted"
+        ) {
+
+          btnNotificacao.textContent =
+            "🔔 Notificações ativadas";
+
+        } else {
+
+          btnNotificacao.textContent =
+            "🔕 Notificações bloqueadas";
+
+        }
+
+      } catch (erro) {
+
+        console.error(
+          "Erro ao solicitar notificações:",
+          erro
+        );
+
+      }
+
+    }
+
+    btnNotificacao.addEventListener(
+      "click",
+      ativarNotificacoes
+    );
+
+    function mostrarNotificacao(
+      registro
+    ) {
+
+      if (
+        !("Notification" in window)
+      ) {
+
+        return;
+
+      }
+
+      if (
+        Notification.permission !==
+        "granted"
+      ) {
+
+        return;
+
+      }
+
+      const titulo =
+        "NOVO ATENDIMENTO RECEBIDO";
+
+      const texto =
+        registro.nome +
+        " — " +
+        registro.atendimento;
+
+      try {
+
+        const notificacao =
+          new Notification(
+            titulo,
+            {
+              body: texto,
+              requireInteraction: true
+            }
+          );
+
+        notificacao.onclick =
+          function() {
+
+            window.focus();
+
+            notificacao.close();
+
+          };
+
+      } catch (erro) {
+
+        console.error(
+          "Erro na notificação:",
+          erro
+        );
+
+      }
+
+    }
+
+    /*
+     * ============================
+     * HTML SEGURO
+     * ============================
+     */
+
+    function escaparHTML(
+      texto
+    ) {
+
+      return String(
+        texto ?? ""
+      )
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+
+    }
+
+    /*
+     * ============================
+     * HORÁRIO
+     * ============================
+     */
+
+    function formatarHorario(
+      data
+    ) {
+
+      if (!data) {
+        return "";
+      }
 
       try {
 
@@ -529,8 +814,10 @@
           .toLocaleString(
             "pt-BR",
             {
-              dateStyle: "short",
-              timeStyle: "medium"
+              dateStyle:
+                "short",
+              timeStyle:
+                "medium"
             }
           );
 
@@ -542,12 +829,21 @@
 
     }
 
+    /*
+     * ============================
+     * RENDERIZAÇÃO
+     * ============================
+     */
+
     function renderizar() {
 
       contador.textContent =
         atendimentos.length;
 
-      if (atendimentos.length === 0) {
+      if (
+        atendimentos.length ===
+        0
+      ) {
 
         fila.innerHTML = `
           <div class="vazio">
@@ -562,15 +858,21 @@
       fila.innerHTML = "";
 
       atendimentos.forEach(
-        (item) => {
+        (
+          item,
+          index
+        ) => {
 
           const registro =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
 
           registro.className =
             "registro " +
             (
-              item.prioridade === "Urgente"
+              item.prioridade ===
+              "Urgente"
                 ? "urgente "
                 : ""
             ) +
@@ -585,15 +887,20 @@
             <div class="registro-topo">
 
               <div class="nome">
-                ${escaparHTML(item.nome)}
+                ${escaparHTML(
+                  item.nome
+                )}
               </div>
 
               <span class="badge ${
-                item.prioridade === "Urgente"
+                item.prioridade ===
+                "Urgente"
                   ? "urgente"
                   : ""
               }">
-                ${escaparHTML(item.prioridade)}
+                ${escaparHTML(
+                  item.prioridade
+                )}
               </span>
 
             </div>
@@ -601,43 +908,59 @@
             <div class="informacoes">
 
               <div class="info">
+
                 <span class="info-titulo">
                   Identificação
                 </span>
 
                 <span class="info-valor">
-                  ${escaparHTML(item.identificacao)}
+                  ${escaparHTML(
+                    item.identificacao
+                  )}
                 </span>
+
               </div>
 
               <div class="info">
+
                 <span class="info-titulo">
                   Pavilhão
                 </span>
 
                 <span class="info-valor">
-                  ${escaparHTML(item.pavilhao)}
+                  ${escaparHTML(
+                    item.pavilhao
+                  )}
                 </span>
+
               </div>
 
               <div class="info">
+
                 <span class="info-titulo">
                   Cela
                 </span>
 
                 <span class="info-valor">
-                  ${escaparHTML(item.cela)}
+                  ${escaparHTML(
+                    item.cela
+                  )}
                 </span>
+
               </div>
 
               <div class="info">
+
                 <span class="info-titulo">
                   Atendimento
                 </span>
 
                 <span class="info-valor">
-                  ${escaparHTML(item.atendimento)}
+                  ${escaparHTML(
+                    item.atendimento
+                  )}
                 </span>
+
               </div>
 
             </div>
@@ -651,7 +974,9 @@
                       Observações
                     </strong>
 
-                    ${escaparHTML(item.mensagem)}
+                    ${escaparHTML(
+                      item.mensagem
+                    )}
 
                   </div>
                 `
@@ -660,34 +985,182 @@
 
             <div class="horario">
 
-              Recebido em:
+              Enviado em:
               ${escaparHTML(
-                formatarHorario(item.recebidoEm)
+                formatarHorario(
+                  item.enviadoEm
+                )
               )}
+
+            </div>
+
+            <div class="recebimento">
+
+              <div
+                class="status-recebimento ${
+                  item.confirmado
+                    ? "confirmado"
+                    : ""
+                }"
+              >
+
+                ${
+                  item.confirmado
+                    ? "✓ Recebimento confirmado às " +
+                      formatarHorario(
+                        item.recebidoEm
+                      )
+                    : "Aguardando confirmação de recebimento"
+                }
+
+              </div>
+
+              <button
+                class="btn-recebido"
+                data-index="${index}"
+                ${
+                  item.confirmado
+                    ? "disabled"
+                    : ""
+                }
+              >
+
+                ${
+                  item.confirmado
+                    ? "✓ RECEBIDO"
+                    : "RECEBIDO"
+                }
+
+              </button>
 
             </div>
 
           `;
 
-          fila.appendChild(registro);
+          fila.appendChild(
+            registro
+          );
 
         }
       );
 
+      document
+        .querySelectorAll(
+          ".btn-recebido"
+        )
+        .forEach(
+          (
+            botao
+          ) => {
+
+            botao.addEventListener(
+              "click",
+              function() {
+
+                const index =
+                  Number(
+                    this.dataset.index
+                  );
+
+                confirmarRecebimento(
+                  index
+                );
+
+              }
+            );
+
+          }
+        );
+
     }
 
+    /*
+     * ============================
+     * CONFIRMAR RECEBIMENTO
+     * ============================
+     */
+
+    function confirmarRecebimento(
+      index
+    ) {
+
+      const item =
+        atendimentos[index];
+
+      if (!item) {
+        return;
+      }
+
+      if (
+        item.confirmado
+      ) {
+        return;
+      }
+
+      if (
+        !ws ||
+        ws.readyState !==
+        WebSocket.OPEN
+      ) {
+
+        alert(
+          "O sistema está sem conexão com o servidor."
+        );
+
+        return;
+
+      }
+
+      ws.send(
+        JSON.stringify({
+
+          type:
+            "confirm_received",
+
+          recordId:
+            item.recordId
+
+        })
+      );
+
+      /*
+       * Marcamos localmente como confirmado.
+       */
+
+      item.confirmado = true;
+
+      item.recebidoEm =
+        new Date().toISOString();
+
+      item.novo = false;
+
+      renderizar();
+
+    }
+
+    /*
+     * ============================
+     * NOVO ATENDIMENTO
+     * ============================
+     */
+
     function adicionarAtendimento(
-      registro
+      data
     ) {
 
       const novoRegistro = {
 
-        ...registro,
+        ...data.record,
+
+        recordId:
+          data.recordId,
+
+        enviadoEm:
+          data.sentAt,
 
         novo: true,
 
-        recebidoEm:
-          new Date().toISOString()
+        confirmado: false
 
       };
 
@@ -698,24 +1171,34 @@
       renderizar();
 
       /*
-       * Toca o alerta sempre que chegar
-       * um novo atendimento.
+       * Som
        */
 
-      if (somAtivado) {
+      if (
+        somAtivado
+      ) {
 
         tocarAlerta();
 
       }
 
       /*
-       * Remove o destaque depois de alguns segundos.
+       * Notificação
+       */
+
+      mostrarNotificacao(
+        novoRegistro
+      );
+
+      /*
+       * Remove destaque
        */
 
       setTimeout(
-        () => {
+        function() {
 
-          novoRegistro.novo = false;
+          novoRegistro.novo =
+            false;
 
           renderizar();
 
@@ -725,18 +1208,26 @@
 
     }
 
+    /*
+     * ============================
+     * WEBSOCKET
+     * ============================
+     */
+
     function conectar() {
 
       const protocolo =
-        location.protocol === "https:"
+        location.protocol ===
+        "https:"
           ? "wss:"
           : "ws:";
 
-      ws = new WebSocket(
-        protocolo +
-        "//" +
-        location.host
-      );
+      ws =
+        new WebSocket(
+          protocolo +
+          "//" +
+          location.host
+        );
 
       ws.addEventListener(
         "open",
@@ -751,8 +1242,10 @@
 
           ws.send(
             JSON.stringify({
-              type: "register",
-              role: "receiver"
+              type:
+                "register",
+              role:
+                "receiver"
             })
           );
 
@@ -776,7 +1269,7 @@
             ) {
 
               adicionarAtendimento(
-                data.record
+                data
               );
 
             }
