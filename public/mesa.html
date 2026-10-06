@@ -198,6 +198,112 @@ button {
 
 }
 
+  .somente-impressao {
+  display: none;
+}
+
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background: white;
+    color: black;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+  }
+
+  header {
+    padding: 8px 0;
+    background: white;
+    color: black;
+    border-bottom: 2px solid #000;
+  }
+
+  header h1 {
+    font-size: 15px;
+  }
+
+  header p {
+    font-size: 10px;
+    margin: 2px 0 0;
+  }
+
+  main {
+    margin: 8px 0;
+    padding: 0;
+    max-width: none;
+  }
+
+  .top,
+  .conexao,
+  .painel {
+    display: none !important;
+  }
+
+  .somente-impressao {
+    display: block;
+  }
+
+  .lista-impressao {
+    width: 100%;
+  }
+
+  .grupo-impressao {
+    margin-bottom: 10px;
+    break-inside: avoid;
+  }
+
+  .grupo-impressao h2 {
+    font-size: 13px;
+    margin: 8px 0 3px;
+    padding: 3px 5px;
+    border-bottom: 1px solid #000;
+  }
+
+  .tabela-impressao {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .tabela-impressao th,
+  .tabela-impressao td {
+    border-bottom: 1px solid #ccc;
+    padding: 3px 5px;
+    text-align: left;
+    line-height: 1.2;
+  }
+
+  .tabela-impressao th {
+    font-size: 9px;
+    text-transform: uppercase;
+  }
+
+  .tabela-impressao td {
+    font-size: 10px;
+  }
+
+  .tabela-impressao th:nth-child(1),
+  .tabela-impressao td:nth-child(1) {
+    width: 65%;
+  }
+
+  .tabela-impressao th:nth-child(2),
+  .tabela-impressao td:nth-child(2) {
+    width: 20%;
+  }
+
+  .tabela-impressao th:nth-child(3),
+  .tabela-impressao td:nth-child(3) {
+    width: 15%;
+  }
+
+}
+  
 @media print {
 
   .acoes,
@@ -269,9 +375,9 @@ Acompanhe e confirme os atendimentos enviados pelos guichês.
 
 <button
   class="dark"
-  onclick="window.print()"
+  onclick="imprimirLista()"
 >
-🖨️ Imprimir A4
+🖨️ Imprimir lista
 </button>
 
 </div>
@@ -287,7 +393,11 @@ Acompanhe e confirme os atendimentos enviados pelos guichês.
 </div>
 
 
-<section class="painel">
+<section
+  id="listaImpressao"
+  class="somente-impressao lista-impressao"
+>
+</section>
 
 <h3>
 Fila de atendimento
@@ -902,6 +1012,140 @@ function notificar(item) {
     );
 
   }
+
+}
+
+
+function imprimirLista() {
+
+  const area =
+    document.getElementById(
+      "listaImpressao"
+    );
+
+  const grupos = {};
+
+  lista.forEach(item => {
+
+    const registro =
+      item.record || {};
+
+    const atendimento =
+      registro.atendimento ||
+      "Outros";
+
+    if (!grupos[atendimento]) {
+      grupos[atendimento] = [];
+    }
+
+    grupos[atendimento].push(
+      registro
+    );
+
+  });
+
+
+  const atendimentos =
+    Object.keys(grupos)
+      .sort((a, b) =>
+        a.localeCompare(
+          b,
+          "pt-BR"
+        )
+      );
+
+
+  if (!atendimentos.length) {
+
+    area.innerHTML = `
+      <p>
+        Nenhum atendimento para imprimir.
+      </p>
+    `;
+
+  } else {
+
+    area.innerHTML =
+      atendimentos
+        .map(atendimento => {
+
+          const registros =
+            grupos[atendimento];
+
+          const linhas =
+            registros
+              .map(registro => {
+
+                return `
+                  <tr>
+
+                    <td>
+                      ${esc(
+                        registro.nome ||
+                        "Não informado"
+                      )}
+                    </td>
+
+                    <td>
+                      ${esc(
+                        registro.pavilhao ||
+                        ""
+                      )}
+                    </td>
+
+                    <td>
+                      ${esc(
+                        registro.cela ||
+                        ""
+                      )}
+                    </td>
+
+                  </tr>
+                `;
+
+              })
+              .join("");
+
+
+          return `
+            <section
+              class="grupo-impressao"
+            >
+
+              <h2>
+                ${esc(atendimento)}
+              </h2>
+
+              <table
+                class="tabela-impressao"
+              >
+
+                <thead>
+
+                  <tr>
+                    <th>Nome</th>
+                    <th>Pavilhão</th>
+                    <th>Cela</th>
+                  </tr>
+
+                </thead>
+
+                <tbody>
+                  ${linhas}
+                </tbody>
+
+              </table>
+
+            </section>
+          `;
+
+        })
+        .join("");
+
+  }
+
+
+  window.print();
 
 }
 
