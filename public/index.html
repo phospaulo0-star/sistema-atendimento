@@ -1,858 +1,534 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guichê V2 - Sistema de Atendimento</title>
 
-<meta charset="UTF-8">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f2f2;
+      color: #222;
+    }
 
-<title>
-Guichê de Atendimento — V2
-</title>
+    header {
+      background: #111;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
 
-<style>
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
 
-* {
-  box-sizing: border-box;
-}
+    header .cpaig {
+      margin-top: 6px;
+      color: #f2c94c;
+      font-size: 18px;
+      font-weight: bold;
+    }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f2f3f5;
-  color: #222;
-}
+    header .subtitulo {
+      margin-top: 8px;
+      font-size: 16px;
+    }
 
-header {
-  background: #111;
-  color: white;
-  padding: 20px;
-  border-bottom: 4px solid #c7a84b;
-}
+    main {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
 
-header h1 {
-  margin: 0;
-  font-size: 22px;
-}
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    }
 
-header p {
-  margin: 6px 0 0;
-  color: #ddd;
-}
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
 
-main {
-  max-width: 1050px;
-  margin: 25px auto;
-  padding: 0 16px;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
 
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 18px;
-  box-shadow: 0 2px 9px rgba(0,0,0,.08);
-}
+    .campo {
+      display: flex;
+      flex-direction: column;
+    }
 
-.status {
-  padding: 11px;
-  border-radius: 7px;
-  background: #f9dddd;
-  color: #8a1f1f;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
+    .campo.full {
+      grid-column: 1 / -1;
+    }
 
-.status.online {
-  background: #ddf3e1;
-  color: #17652b;
-}
+    label {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 16px;
+      background: white;
+    }
 
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-label {
-  font-weight: bold;
-}
+    .botoes {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
 
-input,
-select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #bbb;
-  border-radius: 7px;
-  font-size: 16px;
-}
+    .btn-adicionar {
+      background: #333;
+      color: white;
+    }
 
-button {
-  border: 0;
-  border-radius: 7px;
-  padding: 13px 18px;
-  font-weight: bold;
-  font-size: 15px;
-  cursor: pointer;
-}
+    .btn-enviar {
+      background: #16803c;
+      color: white;
+    }
 
-.primary {
-  width: 100%;
-  margin-top: 16px;
-  background: #222;
-  color: white;
-}
+    .btn-enviar:hover {
+      background: #10652f;
+    }
 
-.send {
-  width: 100%;
-  margin-top: 12px;
-  background: #c7a84b;
-  color: #111;
-}
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      background: #eee;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
 
-.item {
-  border-left: 5px solid #c7a84b;
-  background: #fafafa;
-  padding: 13px;
-  border-radius: 7px;
-  margin: 9px 0;
-}
+    .status.online {
+      background: #d9f5df;
+      color: #176b2e;
+    }
 
-.badge {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 5px 9px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
-  background: #fff1c7;
-  color: #745800;
-}
+    .status.offline {
+      background: #ffe0e0;
+      color: #9b1c1c;
+    }
 
-.badge.ok {
-  background: #d9f2dd;
-  color: #1c6828;
-}
+    .fila-item,
+    .historico-item {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
 
-.muted {
-  color: #777;
-}
+    .historico-topo {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
 
-.empty {
-  padding: 25px;
-  text-align: center;
-  color: #777;
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-}
+    .nome {
+      font-weight: bold;
+      font-size: 18px;
+    }
 
-@media(max-width:700px) {
+    .badge {
+      display: inline-block;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #ddd;
+    }
 
-  .grid {
-    grid-template-columns: 1fr;
-  }
+    .badge.pendente {
+      background: #ffe4a3;
+      color: #765300;
+    }
 
-  header h1 {
-    font-size: 18px;
-  }
+    .badge.recebido {
+      background: #ccefd4;
+      color: #176b2e;
+    }
 
-}
+    .controles-historico {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
 
-</style>
+    .controles-historico label {
+      margin: 0;
+    }
 
+    .controles-historico select {
+      max-width: 220px;
+    }
+
+    .vazio {
+      color: #777;
+      text-align: center;
+      padding: 20px;
+    }
+
+    @media (max-width: 700px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .campo.full {
+        grid-column: auto;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-
-<h1>
-POLÍCIA PENAL DE MATO GROSSO DO SUL
-</h1>
-
-<p>
-Sistema de Atendimento — Guichê V2
-</p>
-
+  <h1>POLÍCIA PENAL DE MATO GROSSO DO SUL</h1>
+  <div class="cpaig">CPAIG</div>
+  <div class="subtitulo">Sistema de Atendimento — Guichê V2</div>
 </header>
 
 <main>
 
-<section class="card">
+  <div id="status" class="status offline">
+    ● Desconectado
+  </div>
 
-<div
-  id="status"
-  class="status"
->
-🔴 Conectando ao servidor...
-</div>
+  <section class="card">
 
-<h2>
-Novo atendimento
-</h2>
+    <h2>Novo atendimento</h2>
 
-<div class="grid">
+    <div class="grid">
 
-<div class="campo">
+      <div class="campo">
+        <label for="nome">Nome do interno</label>
+        <input
+          type="text"
+          id="nome"
+          autocomplete="off"
+          placeholder="Digite o nome"
+        >
+      </div>
 
-<label>Nome</label>
+      <div class="campo">
+        <label for="rgi">RGI</label>
+        <input
+          type="text"
+          id="rgi"
+          autocomplete="off"
+          placeholder="Digite o RGI"
+        >
+      </div>
 
-<input
-  id="nome"
-  placeholder="Digite o nome"
->
+      <div class="campo">
+        <label for="pavilhao">Pavilhão</label>
+        <select id="pavilhao">
+          <option value="">Selecione</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="DISCIPLINAR">DISCIPLINAR</option>
+          <option value="DISCIPLINAR RISCO">DISCIPLINAR RISCO</option>
+          <option value="CP">CP</option>
+          <option value="VIRTUAL">VIRTUAL</option>
+        </select>
+      </div>
 
-</div>
+      <div class="campo">
+        <label for="cela">Cela</label>
+        <select id="cela">
+          <option value="">Selecione</option>
+        </select>
+      </div>
 
-<div class="campo">
+      <div class="campo">
+        <label for="atendimento">Atendimento</label>
+        <select id="atendimento">
+          <option value="">Selecione</option>
+          <option value="Jurídico">Jurídico</option>
+          <option value="Psicossocial">Psicossocial</option>
+          <option value="Médico">Médico</option>
+          <option value="Odontologia">Odontologia</option>
+          <option value="Trabalho">Trabalho</option>
+          <option value="Chefia">Chefia</option>
+          <option value="Chefe de equipe">Chefe de equipe</option>
+          <option value="Portaria II">Portaria II</option>
+          <option value="Identificação">Identificação</option>
+          <option value="Limpeza">Limpeza</option>
+          <option value="Advogado(a)">Advogado(a)</option>
+          <option value="Visita Assistida">Visita Assistida</option>
+          <option value="Autorização de Saída">Autorização de Saída</option>
+          <option value="Audiência">Audiência</option>
+          <option value="Escolta">Escolta</option>
+          <option value="Videoconferência">Videoconferência</option>
+          <option value="Defensoria">Defensoria</option>
+          <option value="Administração">Administração</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
 
-<label>Identificação</label>
+      <div class="campo full">
+        <label for="assunto">Assunto</label>
+        <input
+          type="text"
+          id="assunto"
+          autocomplete="off"
+          placeholder="Digite o assunto, se necessário"
+        >
+      </div>
 
-<input
-  id="identificacao"
-  placeholder="Digite a identificação"
->
+    </div>
 
-</div>
+    <div class="botoes">
+      <button
+        class="btn-adicionar"
+        onclick="adicionar()"
+      >
+        ADICIONAR À FILA
+      </button>
 
-<div class="campo">
+      <button
+        class="btn-enviar"
+        onclick="enviar()"
+      >
+        ENVIAR PARA A MESA
+      </button>
+    </div>
 
-<label>Pavilhão</label>
+  </section>
 
-<select id="pavilhao">
+  <section class="card">
 
-<option value="">
-Selecione
-</option>
+    <h2>Fila atual</h2>
 
-<option>A</option>
-<option>B</option>
-<option>C</option>
-<option>D</option>
-<option>DISCIPLINAR</option>
-<option>DISCIPLINAR RISCO</option>
-<option>CP</option>
-<option>VIRTUAL</option>
+    <div id="fila"></div>
 
-</select>
+  </section>
 
-</div>
+  <section class="card">
 
-<div class="campo">
+    <h2>Histórico de atendimentos enviados</h2>
 
-<label>
-Cela (01–120)
-</label>
+    <div class="controles-historico">
 
-<input
-  id="cela"
-  list="celas"
-  inputmode="numeric"
-  placeholder="Ex.: 01"
->
+      <label for="ordemHistorico">
+        Visualizar:
+      </label>
 
-<datalist id="celas"></datalist>
+      <select
+        id="ordemHistorico"
+        onchange="renderHistorico()"
+      >
+        <option value="envio">
+          Ordem de envio
+        </option>
 
-</div>
+        <option value="atendimento">
+          Por atendimento
+        </option>
+      </select>
 
-<div class="campo">
+    </div>
 
-<label>
-Atendimento
-</label>
+    <div id="historico"></div>
 
-<input
-  id="atendimento"
-  list="tipos"
-  placeholder="Digite ou selecione"
->
-
-<datalist id="tipos">
-
-<option value="Médico">
-<option value="Odontologia">
-<option value="Psicossocial">
-<option value="Jurídico">
-<option value="Trabalho">
-<option value="Chefia">
-<option value="Chefe de equipe">
-<option value="Portaria II">
-<option value="Identificação">
-<option value="Limpeza">
-<option value="Advogado(a)">
-<option value="Visita Assistida">
-<option value="Autorização de Saída">
-<option value="Audiência">
-<option value="Escolta">
-<option value="Videoconferência">
-<option value="Defensoria">
-<option value="Administração">
-<option value="Outros">
-
-</datalist>
-
-</div>
-
-<div class="campo">
-
-<label>
-Assunto
-</label>
-
-<input
-  id="assunto"
-  placeholder="Opcional"
->
-
-</div>
-
-</div>
-
-<button
-  class="primary"
-  onclick="adicionar()"
->
-➕ ADICIONAR À FILA
-</button>
-
-</section>
-
-
-<section class="card">
-
-<h2>
-Fila
-</h2>
-
-<div
-  id="fila"
-  class="empty"
->
-Nenhum atendimento na fila.
-</div>
-
-<button
-  class="send"
-  onclick="enviar()"
->
-📤 ENVIAR PARA A MESA
-</button>
-
-</section>
-
-
-<section class="card">
-
-<h2>
-Últimos atendimentos
-</h2>
-
-<div
-  id="historico"
-  class="empty"
->
-Nenhum atendimento enviado ainda.
-</div>
-
-</section>
+  </section>
 
 </main>
 
-
 <script>
 
-let ws = null;
+  const WS_URL =
+    (location.protocol === "https:" ? "wss://" : "ws://") +
+    location.host;
 
-let fila = [];
+  let ws = null;
 
-let historico =
-  JSON.parse(
-    localStorage.getItem(
-      "atendimentoV2Historico"
-    ) || "[]"
-  );
+  let fila = [];
 
-
-for (
-  let n = 1;
-  n <= 120;
-  n++
-) {
-
-  const option =
-    document.createElement(
-      "option"
+  let historico =
+    JSON.parse(
+      localStorage.getItem(
+        "atendimentoV2Historico"
+      ) || "[]"
     );
 
-  option.value =
-    String(n).padStart(2,"0");
-
-  document
-    .getElementById("celas")
-    .appendChild(option);
-
-}
-
-
-function esc(valor) {
-
-  return String(
-    valor == null ? "" : valor
-  )
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/"/g,"&quot;");
-
-}
-
-
-function hora(valor) {
-
-  return valor
-    ? new Date(valor)
-        .toLocaleString("pt-BR")
-    : "";
-
-}
-
-
-function renderFila() {
-
-  const elemento =
-    document.getElementById(
-      "fila"
+  let outbox =
+    JSON.parse(
+      localStorage.getItem(
+        "atendimentoV2Outbox"
+      ) || "[]"
     );
 
-  if (!fila.length) {
+  const nomeEl =
+    document.getElementById("nome");
 
-    elemento.innerHTML =
-      '<div class="empty">' +
-      'Nenhum atendimento na fila.' +
-      '</div>';
+  const rgiEl =
+    document.getElementById("rgi");
 
-    return;
+  const pavilhaoEl =
+    document.getElementById("pavilhao");
+
+  const celaEl =
+    document.getElementById("cela");
+
+  const atendimentoEl =
+    document.getElementById("atendimento");
+
+  const assuntoEl =
+    document.getElementById("assunto");
+
+  const statusEl =
+    document.getElementById("status");
+
+  const filaEl =
+    document.getElementById("fila");
+
+  const historicoEl =
+    document.getElementById("historico");
+
+
+  // Cria as opções de cela 01 até 120
+  for (let i = 1; i <= 120; i++) {
+
+    const numero =
+      String(i).padStart(2, "0");
+
+    const option =
+      document.createElement("option");
+
+    option.value = numero;
+    option.textContent = numero;
+
+    celaEl.appendChild(option);
   }
 
-  elemento.innerHTML =
-    fila.map(
-      (registro, indice) => {
 
-        return `
-        <div class="item">
+  function salvarHistorico() {
 
-        <b>
-        ${indice + 1}.
-        ${esc(registro.nome)}
-        </b>
-
-        <br>
-
-        Identificação:
-        ${esc(registro.identificacao)}
-
-        <br>
-
-        Pavilhão:
-        ${esc(registro.pavilhao)}
-
-        <br>
-
-        Cela:
-        ${esc(registro.cela)}
-
-        <br>
-
-        Atendimento:
-        ${esc(registro.atendimento)}
-
-        ${
-          registro.assunto
-            ? "<br>Assunto: " +
-              esc(registro.assunto)
-            : ""
-        }
-
-        </div>
-        `;
-
-      }
-    ).join("");
-
-}
-
-
-function renderHistorico() {
-
-  const elemento =
-    document.getElementById(
-      "historico"
+    localStorage.setItem(
+      "atendimentoV2Historico",
+      JSON.stringify(historico)
     );
-
-  if (!historico.length) {
-
-    elemento.innerHTML =
-      '<div class="empty">' +
-      'Nenhum atendimento enviado ainda.' +
-      '</div>';
-
-    return;
   }
 
-  elemento.innerHTML =
-    historico
-      .slice(0,20)
-      .map(
-        registro => {
 
-          return `
-          <div class="item">
+  function salvarOutbox() {
 
-          <b>
-          ${esc(
-            registro.registro.nome
-          )}
-          </b>
-
-          <br>
-
-          ${esc(
-            registro.registro.atendimento
-          )}
-
-          — Cela
-          ${esc(
-            registro.registro.cela
-          )}
-
-          <br>
-
-          <span class="muted">
-          Enviado:
-          ${hora(
-            registro.enviadoEm
-          )}
-          </span>
-
-          <br>
-
-          <span
-            class="badge
-            ${
-              registro.recebidoEm
-                ? "ok"
-                : ""
-            }"
-          >
-
-          ${
-            registro.recebidoEm
-              ? "✓ RECEBIDO ÀS " +
-                hora(
-                  registro.recebidoEm
-                )
-              : "⏳ AGUARDANDO MESA"
-          }
-
-          </span>
-
-          </div>
-          `;
-
-        }
-      )
-      .join("");
-
-}
+    localStorage.setItem(
+      "atendimentoV2Outbox",
+      JSON.stringify(outbox)
+    );
+  }
 
 
-function limpar() {
+  function gerarId() {
 
-  [
-    "nome",
-    "identificacao",
-    "pavilhao",
-    "cela",
-    "atendimento",
-    "assunto"
-  ]
-  .forEach(
-    id => {
-
-      document
-        .getElementById(id)
-        .value = "";
-
+    if (
+      window.crypto &&
+      crypto.randomUUID
+    ) {
+      return crypto.randomUUID();
     }
-  );
 
-}
-
-
-function adicionar() {
-
-  const valorCela =
-    document
-      .getElementById("cela")
-      .value
-      .trim();
-
-  const registro = {
-
-    nome:
-      document
-        .getElementById("nome")
-        .value
-        .trim(),
-
-    identificacao:
-      document
-        .getElementById(
-          "identificacao"
-        )
-        .value
-        .trim(),
-
-    pavilhao:
-      document
-        .getElementById(
-          "pavilhao"
-        )
-        .value,
-
-    cela:
-      valorCela.padStart(2,"0"),
-
-    atendimento:
-      document
-        .getElementById(
-          "atendimento"
-        )
-        .value
-        .trim(),
-
-    assunto:
-      document
-        .getElementById(
-          "assunto"
-        )
-        .value
-        .trim()
-
-  };
-
-
-  if (
-    !registro.nome ||
-    !registro.identificacao ||
-    !registro.pavilhao ||
-    !valorCela ||
-    !registro.atendimento
-  ) {
-
-    alert(
-      "Preencha Nome, Identificação, " +
-      "Pavilhão, Cela e Atendimento."
+    return (
+      Date.now().toString(36) +
+      Math.random()
+        .toString(36)
+        .substring(2)
     );
-
-    return;
   }
 
 
-  if (
-    !/^\d+$/.test(valorCela) ||
-    Number(valorCela) < 1 ||
-    Number(valorCela) > 120
-  ) {
+  function atualizarStatus(online) {
 
-    alert(
-      "A cela deve estar entre 01 e 120."
-    );
+    if (online) {
 
-    return;
-  }
+      statusEl.textContent =
+        "● Conectado à MESA";
 
-
-  fila.push(registro);
-
-  limpar();
-
-  renderFila();
-
-}
-
-
-function enviar() {
-
-  if (!fila.length) {
-
-    alert(
-      "Não há atendimentos na fila."
-    );
-
-    return;
-  }
-
-
-  if (
-    !ws ||
-    ws.readyState !==
-    WebSocket.OPEN
-  ) {
-
-    alert(
-      "O Guichê não está conectado."
-    );
-
-    return;
-  }
-
-
-  fila.forEach(
-    registro => {
-
-      const recordId =
-        crypto.randomUUID();
-
-      historico.unshift({
-
-        recordId,
-
-        registro,
-
-        enviadoEm:
-          new Date()
-            .toISOString(),
-
-        recebidoEm:
-          null
-
-      });
-
-
-      ws.send(
-        JSON.stringify({
-
-          type:
-            "send_record",
-
-          recordId,
-
-          record:
-            registro
-
-        })
-      );
-
-    }
-  );
-
-
-  fila = [];
-
-  localStorage.setItem(
-    "atendimentoV2Historico",
-    JSON.stringify(
-      historico
-    )
-  );
-
-  renderFila();
-
-  renderHistorico();
-
-}
-
-
-function conectar() {
-
-  const protocolo =
-    location.protocol ===
-    "https:"
-      ? "wss:"
-      : "ws:";
-
-
-  ws =
-    new WebSocket(
-      protocolo +
-      "//" +
-      location.host
-    );
-
-
-  ws.onopen =
-    () => {
-
-      const status =
-        document.getElementById(
-          "status"
-        );
-
-      status.className =
+      statusEl.className =
         "status online";
 
-      status.textContent =
-        "🟢 Conectado ao servidor";
+    } else {
+
+      statusEl.textContent =
+        "● MESA desconectada — atendimentos enviados ficarão pendentes";
+
+      statusEl.className =
+        "status offline";
+    }
+  }
 
 
-      ws.send(
-        JSON.stringify({
+  function conectar() {
 
-          type:
-            "register",
+    try {
 
-          role:
-            "sender"
+      ws = new WebSocket(WS_URL);
 
-        })
-      );
+      ws.onopen = () => {
 
-    };
+        atualizarStatus(true);
 
-
-  ws.onclose =
-    () => {
-
-      const status =
-        document.getElementById(
-          "status"
+        ws.send(
+          JSON.stringify({
+            type: "register",
+            role: "sender"
+          })
         );
 
-      status.className =
-        "status";
-
-      status.textContent =
-        "🔴 Desconectado — tentando reconectar...";
+        enviarPendentes();
+      };
 
 
-      setTimeout(
-        conectar,
-        3000
-      );
+      ws.onmessage = (event) => {
 
-    };
+        let mensagem;
 
+        try {
 
-  ws.onmessage =
-    event => {
+          mensagem =
+            JSON.parse(event.data);
 
-      try {
+        } catch {
 
-        const mensagem =
-          JSON.parse(
-            event.data
-          );
+          return;
+        }
 
 
         if (
@@ -860,46 +536,532 @@ function conectar() {
           "record_received"
         ) {
 
-          const registro =
+          const item =
             historico.find(
-              item =>
-                item.recordId ===
+              x =>
+                x.recordId ===
                 mensagem.recordId
             );
 
+          if (item) {
 
-          if (registro) {
-
-            registro.recebidoEm =
+            item.recebidoEm =
               mensagem.receivedAt;
 
-
-            localStorage.setItem(
-              "atendimentoV2Historico",
-              JSON.stringify(
-                historico
-              )
-            );
-
-
-            renderHistorico();
-
+            salvarHistorico();
           }
 
+
+          outbox =
+            outbox.filter(
+              x =>
+                x.recordId !==
+                mensagem.recordId
+            );
+
+          salvarOutbox();
+
+          renderHistorico();
         }
 
-      } catch (_) {}
-
-    };
-
-}
+      };
 
 
-renderFila();
+      ws.onclose = () => {
 
-renderHistorico();
+        atualizarStatus(false);
 
-conectar();
+        setTimeout(
+          conectar,
+          3000
+        );
+      };
+
+
+      ws.onerror = () => {
+
+        atualizarStatus(false);
+      };
+
+    } catch {
+
+      atualizarStatus(false);
+
+      setTimeout(
+        conectar,
+        3000
+      );
+    }
+  }
+
+
+  function enviarPendentes() {
+
+    if (
+      !ws ||
+      ws.readyState !==
+        WebSocket.OPEN
+    ) {
+      return;
+    }
+
+
+    for (
+      const item of outbox
+    ) {
+
+      ws.send(
+        JSON.stringify({
+          type: "send_record",
+          recordId: item.recordId,
+          record: item.record
+        })
+      );
+    }
+  }
+
+
+  function adicionar() {
+
+    const nome =
+      nomeEl.value.trim();
+
+    const rgi =
+      rgiEl.value.trim();
+
+    const pavilhao =
+      pavilhaoEl.value;
+
+    const cela =
+      celaEl.value;
+
+    const atendimento =
+      atendimentoEl.value;
+
+    const assunto =
+      assuntoEl.value.trim();
+
+
+    if (
+      !nome ||
+      !rgi ||
+      !pavilhao ||
+      !cela ||
+      !atendimento
+    ) {
+
+      alert(
+        "Preencha Nome, RGI, Pavilhão, Cela e Atendimento."
+      );
+
+      return;
+    }
+
+
+    fila.push({
+
+      id: gerarId(),
+
+      nome,
+
+      rgi,
+
+      pavilhao,
+
+      cela,
+
+      atendimento,
+
+      assunto
+
+    });
+
+
+    renderFila();
+
+    limparCampos();
+  }
+
+
+  function renderFila() {
+
+    if (!fila.length) {
+
+      filaEl.innerHTML =
+        '<div class="vazio">Nenhum atendimento na fila.</div>';
+
+      return;
+    }
+
+
+    filaEl.innerHTML =
+      fila.map(
+        item => `
+
+          <div class="fila-item">
+
+            <div class="nome">
+              ${escapeHtml(item.nome)}
+            </div>
+
+            <div>
+              RGI: ${escapeHtml(item.rgi)}
+            </div>
+
+            <div>
+              Pavilhão:
+              ${escapeHtml(item.pavilhao)}
+              —
+              Cela:
+              ${escapeHtml(item.cela)}
+            </div>
+
+            <div>
+              Atendimento:
+              ${escapeHtml(item.atendimento)}
+            </div>
+
+            ${
+              item.assunto
+                ? `
+                  <div>
+                    Assunto:
+                    ${escapeHtml(item.assunto)}
+                  </div>
+                `
+                : ""
+            }
+
+          </div>
+        `
+      )
+      .join("");
+  }
+
+
+  function enviar() {
+
+    if (!fila.length) {
+
+      alert(
+        "Não há atendimento na fila."
+      );
+
+      return;
+    }
+
+
+    const agora =
+      new Date().toISOString();
+
+
+    const novos =
+      fila.map(item => {
+
+        const record = {
+
+          nome: item.nome,
+
+          rgi: item.rgi,
+
+          pavilhao:
+            item.pavilhao,
+
+          cela:
+            item.cela,
+
+          atendimento:
+            item.atendimento,
+
+          assunto:
+            item.assunto
+
+        };
+
+
+        const registro = {
+
+          recordId:
+            item.id,
+
+          ...record,
+
+          enviadoEm:
+            agora,
+
+          recebidoEm:
+            null
+
+        };
+
+
+        historico.push(
+          registro
+        );
+
+
+        outbox.push({
+
+          recordId:
+            item.id,
+
+          record
+
+        });
+
+
+        return item;
+      });
+
+
+    salvarHistorico();
+
+    salvarOutbox();
+
+
+    fila = [];
+
+    renderFila();
+
+    renderHistorico();
+
+
+    enviarPendentes();
+
+
+    if (
+      ws &&
+      ws.readyState ===
+        WebSocket.OPEN
+    ) {
+
+      alert(
+        novos.length === 1
+          ? "Atendimento enviado para a MESA."
+          : "Atendimentos enviados para a MESA."
+      );
+
+    } else {
+
+      alert(
+        "A MESA está desconectada. O atendimento foi salvo e será enviado automaticamente quando a conexão voltar."
+      );
+    }
+
+  }
+
+
+  function limparCampos() {
+
+    nomeEl.value = "";
+
+    rgiEl.value = "";
+
+    pavilhaoEl.value = "";
+
+    celaEl.value = "";
+
+    atendimentoEl.value = "";
+
+    assuntoEl.value = "";
+
+    nomeEl.focus();
+  }
+
+
+  function renderHistorico() {
+
+    if (!historico.length) {
+
+      historicoEl.innerHTML =
+        '<div class="vazio">Nenhum atendimento enviado.</div>';
+
+      return;
+    }
+
+
+    const ordem =
+      document.getElementById(
+        "ordemHistorico"
+      ).value;
+
+
+    const lista =
+      historico
+        .slice()
+        .sort(
+          (a, b) => {
+
+            if (
+              ordem ===
+              "atendimento"
+            ) {
+
+              const cmp =
+                String(
+                  a.atendimento
+                ).localeCompare(
+                  String(
+                    b.atendimento
+                  ),
+                  "pt-BR"
+                );
+
+              if (cmp !== 0) {
+                return cmp;
+              }
+            }
+
+            return (
+              new Date(
+                b.enviadoEm
+              ) -
+              new Date(
+                a.enviadoEm
+              )
+            );
+          }
+        );
+
+
+    historicoEl.innerHTML =
+      lista
+        .map(item => {
+
+          const pendente =
+            !item.recebidoEm;
+
+          const enviado =
+            formatarData(
+              item.enviadoEm
+            );
+
+          const recebido =
+            item.recebidoEm
+              ? formatarData(
+                  item.recebidoEm
+                )
+              : "Aguardando MESA";
+
+
+          return `
+
+            <div class="historico-item">
+
+              <div class="historico-topo">
+
+                <div class="nome">
+                  ${escapeHtml(item.nome)}
+                </div>
+
+                <span
+                  class="badge ${
+                    pendente
+                      ? "pendente"
+                      : "recebido"
+                  }"
+                >
+                  ${
+                    pendente
+                      ? "PENDENTE"
+                      : "RECEBIDO"
+                  }
+                </span>
+
+              </div>
+
+              <div>
+                RGI:
+                ${escapeHtml(item.rgi)}
+              </div>
+
+              <div>
+                Pavilhão:
+                ${escapeHtml(item.pavilhao)}
+                —
+                Cela:
+                ${escapeHtml(item.cela)}
+              </div>
+
+              <div>
+                Atendimento:
+                <strong>
+                  ${escapeHtml(item.atendimento)}
+                </strong>
+              </div>
+
+              ${
+                item.assunto
+                  ? `
+                    <div>
+                      Assunto:
+                      ${escapeHtml(item.assunto)}
+                    </div>
+                  `
+                  : ""
+              }
+
+              <div>
+                Enviado:
+                ${enviado}
+              </div>
+
+              <div>
+                Recebido:
+                ${recebido}
+              </div>
+
+            </div>
+          `;
+        })
+        .join("");
+  }
+
+
+  function formatarData(data) {
+
+    if (!data) {
+      return "-";
+    }
+
+    return new Date(data)
+      .toLocaleString(
+        "pt-BR"
+      );
+  }
+
+
+  function escapeHtml(valor) {
+
+    return String(valor ?? "")
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+      .replace(
+        /</g,
+        "&lt;"
+      )
+      .replace(
+        />/g,
+        "&gt;"
+      )
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+      .replace(
+        /'/g,
+        "&#039;"
+      );
+  }
+
+
+  renderFila();
+
+  renderHistorico();
+
+  conectar();
 
 </script>
 
