@@ -185,6 +185,181 @@ button {
   border-radius: 8px;
 }
 
+
+/* ============================= */
+/* ÁREA EXCLUSIVA DA IMPRESSÃO */
+/* ============================= */
+
+.somente-impressao {
+  display: none;
+}
+
+.lista-impressao {
+  width: 100%;
+}
+
+.grupo-impressao {
+  width: 100%;
+  margin-bottom: 10px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.grupo-impressao h2 {
+  font-size: 13px;
+  margin: 7px 0 3px;
+  padding: 3px 5px;
+  border-bottom: 1px solid #000;
+}
+
+.tabela-impressao {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tabela-impressao th,
+.tabela-impressao td {
+  border-bottom: 1px solid #ccc;
+  padding: 3px 5px;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.tabela-impressao th {
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.tabela-impressao td {
+  font-size: 10px;
+}
+
+.tabela-impressao th:nth-child(1),
+.tabela-impressao td:nth-child(1) {
+  width: 65%;
+}
+
+.tabela-impressao th:nth-child(2),
+.tabela-impressao td:nth-child(2) {
+  width: 20%;
+}
+
+.tabela-impressao th:nth-child(3),
+.tabela-impressao td:nth-child(3) {
+  width: 15%;
+}
+
+
+/* ============================= */
+/* IMPRESSÃO */
+/* ============================= */
+
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  /*
+    Esconde tudo durante a impressão.
+    A área da lista será liberada logo abaixo.
+  */
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  /*
+    Mostra SOMENTE a lista criada
+    para impressão.
+  */
+
+  #listaImpressao,
+  #listaImpressao * {
+    visibility: visible !important;
+  }
+
+  #listaImpressao {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  .grupo-impressao {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 10px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .grupo-impressao h2 {
+    font-size: 13px !important;
+    margin: 6px 0 3px 0 !important;
+    padding: 3px 5px !important;
+    border-bottom: 1px solid #000 !important;
+  }
+
+  .tabela-impressao {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 0 !important;
+  }
+
+  .tabela-impressao th,
+  .tabela-impressao td {
+    border-bottom: 1px solid #ccc !important;
+    padding: 3px 5px !important;
+    text-align: left !important;
+    line-height: 1.2 !important;
+  }
+
+  .tabela-impressao th {
+    font-size: 9px !important;
+    text-transform: uppercase !important;
+  }
+
+  .tabela-impressao td {
+    font-size: 10px !important;
+  }
+
+  .tabela-impressao th:nth-child(1),
+  .tabela-impressao td:nth-child(1) {
+    width: 65% !important;
+  }
+
+  .tabela-impressao th:nth-child(2),
+  .tabela-impressao td:nth-child(2) {
+    width: 20% !important;
+  }
+
+  .tabela-impressao th:nth-child(3),
+  .tabela-impressao td:nth-child(3) {
+    width: 15% !important;
+  }
+
+}
+
+
+/* ============================= */
+/* CELULAR */
+/* ============================= */
+
 @media(max-width:700px) {
 
   .top {
@@ -198,132 +373,13 @@ button {
 
 }
 
-  .somente-impressao {
-  display: none;
-}
-
-@media print {
-
-  @page {
-    size: A4 portrait;
-    margin: 10mm;
-  }
-
-  html,
-  body {
-    margin: 0;
-    padding: 0;
-    background: white;
-    color: black;
-    font-family: Arial, sans-serif;
-  }
-
-  /* Esconde absolutamente tudo da tela */
-  body > header,
-  body > main {
-    display: none !important;
-  }
-
-  /* Mostra somente a lista de impressão */
-  body::after {
-    display: none !important;
-  }
-
-  /* A lista será recriada como elemento de impressão */
-  .somente-impressao {
-    display: block !important;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  .lista-impressao {
-    display: block !important;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-
-  .grupo-impressao {
-    display: block;
-    width: 100%;
-    margin: 0 0 10px 0;
-    padding: 0;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .grupo-impressao h2 {
-    font-size: 13px;
-    margin: 6px 0 3px 0;
-    padding: 3px 5px;
-    border-bottom: 1px solid #000;
-  }
-
-  .tabela-impressao {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    margin: 0;
-  }
-
-  .tabela-impressao th,
-  .tabela-impressao td {
-    border-bottom: 1px solid #ccc;
-    padding: 3px 5px;
-    text-align: left;
-    line-height: 1.2;
-  }
-
-  .tabela-impressao th {
-    font-size: 9px;
-    text-transform: uppercase;
-  }
-
-  .tabela-impressao td {
-    font-size: 10px;
-  }
-
-  .tabela-impressao th:nth-child(1),
-  .tabela-impressao td:nth-child(1) {
-    width: 65%;
-  }
-
-  .tabela-impressao th:nth-child(2),
-  .tabela-impressao td:nth-child(2) {
-    width: 20%;
-  }
-
-  .tabela-impressao th:nth-child(3),
-  .tabela-impressao td:nth-child(3) {
-    width: 15%;
-  }
-
-}
-  
-@media print {
-
-  .acoes,
-  .conexao,
-  .receber {
-    display: none;
-  }
-
-  .item {
-    break-inside: avoid;
-  }
-
-  .painel {
-    box-shadow: none;
-  }
-
-}
-
 </style>
 
 </head>
 
+
 <body>
+
 
 <header>
 
@@ -337,6 +393,12 @@ Mesa de Recebimento — Sistema de Atendimento V2
 
 </header>
 
+
+<main>
+
+
+<div class="top">
+
 <div>
 
 <h2>
@@ -349,6 +411,7 @@ Acompanhe e confirme os atendimentos enviados pelos guichês.
 
 </div>
 
+
 <div class="acoes">
 
 <button
@@ -358,6 +421,7 @@ Acompanhe e confirme os atendimentos enviados pelos guichês.
 🔔 Notificações
 </button>
 
+
 <button
   id="somBtn"
   class="gold"
@@ -365,6 +429,7 @@ Acompanhe e confirme os atendimentos enviados pelos guichês.
 >
 🔊 Som
 </button>
+
 
 <button
   class="dark"
@@ -385,9 +450,13 @@ Acompanhe e confirme os atendimentos enviados pelos guichês.
 🔴 Desconectado
 </div>
 
+
+<section class="painel">
+
 <h3>
 Fila de atendimento
 </h3>
+
 
 <div
   id="fila"
@@ -402,7 +471,19 @@ Nenhum atendimento aguardando recebimento.
 
 </section>
 
+
 </main>
+
+
+<!-- ================================= -->
+<!-- SOMENTE A ÁREA ABAIXO SERÁ IMPRESSA -->
+<!-- ================================= -->
+
+<section
+  id="listaImpressao"
+  class="somente-impressao lista-impressao"
+>
+</section>
 
 
 <script>
@@ -415,6 +496,10 @@ let som = false;
 
 let audio = null;
 
+
+/* ============================= */
+/* PROTEÇÃO DE TEXTO */
+/* ============================= */
 
 function esc(valor) {
 
@@ -431,6 +516,10 @@ function esc(valor) {
 }
 
 
+/* ============================= */
+/* DATA / HORA */
+/* ============================= */
+
 function hora(valor) {
 
   return valor
@@ -440,6 +529,10 @@ function hora(valor) {
 
 }
 
+
+/* ============================= */
+/* TELA NORMAL */
+/* ============================= */
 
 function render() {
 
@@ -457,6 +550,7 @@ function render() {
       '</div>';
 
     return;
+
   }
 
 
@@ -486,6 +580,7 @@ function render() {
         )}
         </h3>
 
+
         <div class="hora">
 
         Enviado em:
@@ -499,6 +594,7 @@ function render() {
 
 
         <div class="grid">
+
 
         <div class="dado">
 
@@ -575,6 +671,7 @@ function render() {
 
         </div>
 
+
         </div>
 
 
@@ -623,6 +720,7 @@ function render() {
 
         </button>
 
+
         </article>
 
         `;
@@ -632,6 +730,10 @@ function render() {
 
 }
 
+
+/* ============================= */
+/* CONFIRMAR RECEBIMENTO */
+/* ============================= */
 
 function confirmar(id) {
 
@@ -652,6 +754,7 @@ function confirmar(id) {
   ) {
 
     return;
+
   }
 
 
@@ -674,6 +777,10 @@ function confirmar(id) {
 
 }
 
+
+/* ============================= */
+/* CONEXÃO WEBSOCKET */
+/* ============================= */
 
 function conectar() {
 
@@ -700,8 +807,10 @@ function conectar() {
           "conexao"
         );
 
+
       conexao.className =
         "conexao online";
+
 
       conexao.textContent =
         "🟢 Conectado ao servidor";
@@ -730,8 +839,10 @@ function conectar() {
           "conexao"
         );
 
+
       conexao.className =
         "conexao";
+
 
       conexao.textContent =
         "🔴 Desconectado — reconectando...";
@@ -755,6 +866,10 @@ function conectar() {
             event.data
           );
 
+
+        /* ========================= */
+        /* NOVO ATENDIMENTO */
+        /* ========================= */
 
         if (
           mensagem.type ===
@@ -800,6 +915,10 @@ function conectar() {
         }
 
 
+        /* ========================= */
+        /* CONFIRMAÇÃO */
+        /* ========================= */
+
         if (
           mensagem.type ===
           "record_received"
@@ -824,6 +943,7 @@ function conectar() {
             item.recebidoEm =
               mensagem.receivedAt;
 
+
             render();
 
           }
@@ -836,6 +956,10 @@ function conectar() {
 
 }
 
+
+/* ============================= */
+/* SOM */
+/* ============================= */
 
 function ativarSom() {
 
@@ -888,14 +1012,17 @@ function tocar() {
   ) {
 
     return;
+
   }
 
 
   const oscilador =
     audio.createOscillator();
 
+
   const ganho =
     audio.createGain();
+
 
   const tempo =
     audio.currentTime;
@@ -929,12 +1056,16 @@ function tocar() {
     ganho
   );
 
+
   ganho.connect(
     audio.destination
   );
 
 
-  oscilador.start(tempo);
+  oscilador.start(
+    tempo
+  );
+
 
   oscilador.stop(
     tempo + 0.45
@@ -942,6 +1073,10 @@ function tocar() {
 
 }
 
+
+/* ============================= */
+/* NOTIFICAÇÕES */
+/* ============================= */
 
 async function ativarNotificacao() {
 
@@ -984,15 +1119,18 @@ function notificar(item) {
     "granted"
   ) {
 
+    const nome =
+      item.record &&
+      item.record.nome
+        ? item.record.nome
+        : "Atendimento";
+
+
     new Notification(
       "Novo atendimento",
       {
         body:
-          (
-            item.record &&
-            item.record.nome
-          ) ||
-          "Atendimento" +
+          nome +
           " aguarda recebimento."
       }
     );
@@ -1002,6 +1140,10 @@ function notificar(item) {
 }
 
 
+/* ============================= */
+/* IMPRESSÃO DA LISTA */
+/* ============================= */
+
 function imprimirLista() {
 
   const area =
@@ -1009,20 +1151,34 @@ function imprimirLista() {
       "listaImpressao"
     );
 
+
   const grupos = {};
+
+
+  /*
+    Agrupa todos os atendimentos
+    pelo tipo de atendimento.
+  */
 
   lista.forEach(item => {
 
     const registro =
       item.record || {};
 
+
     const atendimento =
       registro.atendimento ||
       "Outros";
 
-    if (!grupos[atendimento]) {
+
+    if (
+      !grupos[atendimento]
+    ) {
+
       grupos[atendimento] = [];
+
     }
+
 
     grupos[atendimento].push(
       registro
@@ -1033,74 +1189,107 @@ function imprimirLista() {
 
   const atendimentos =
     Object.keys(grupos)
-      .sort((a, b) =>
-        a.localeCompare(
-          b,
-          "pt-BR"
-        )
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "pt-BR"
+          )
       );
 
 
-  if (!atendimentos.length) {
+  /* ========================= */
+  /* NENHUM ATENDIMENTO */
+  /* ========================= */
+
+  if (
+    !atendimentos.length
+  ) {
 
     area.innerHTML = `
-      <p>
+
+      <p
+        style="
+          font-family:Arial;
+          font-size:12px;
+        "
+      >
         Nenhum atendimento para imprimir.
       </p>
+
     `;
 
-  } else {
+    window.print();
 
-    area.innerHTML =
-      atendimentos
-        .map(atendimento => {
+    return;
+
+  }
+
+
+  /* ========================= */
+  /* MONTA A LISTA */
+  /* ========================= */
+
+  area.innerHTML =
+    atendimentos
+      .map(
+        atendimento => {
 
           const registros =
             grupos[atendimento];
 
+
           const linhas =
             registros
-              .map(registro => {
+              .map(
+                registro => {
 
-                return `
-                  <tr>
+                  return `
 
-                    <td>
-                      ${esc(
-                        registro.nome ||
-                        "Não informado"
-                      )}
-                    </td>
+                    <tr>
 
-                    <td>
-                      ${esc(
-                        registro.pavilhao ||
-                        ""
-                      )}
-                    </td>
+                      <td>
+                        ${esc(
+                          registro.nome ||
+                          "Não informado"
+                        )}
+                      </td>
 
-                    <td>
-                      ${esc(
-                        registro.cela ||
-                        ""
-                      )}
-                    </td>
+                      <td>
+                        ${esc(
+                          registro.pavilhao ||
+                          ""
+                        )}
+                      </td>
 
-                  </tr>
-                `;
+                      <td>
+                        ${esc(
+                          registro.cela ||
+                          ""
+                        )}
+                      </td>
 
-              })
+                    </tr>
+
+                  `;
+
+                }
+              )
               .join("");
 
 
           return `
+
             <section
               class="grupo-impressao"
             >
 
               <h2>
-                ${esc(atendimento)}
+                ${esc(
+                  atendimento
+                )}
               </h2>
+
 
               <table
                 class="tabela-impressao"
@@ -1109,38 +1298,69 @@ function imprimirLista() {
                 <thead>
 
                   <tr>
-                    <th>Nome</th>
-                    <th>Pavilhão</th>
-                    <th>Cela</th>
+
+                    <th>
+                      Nome
+                    </th>
+
+                    <th>
+                      Pavilhão
+                    </th>
+
+                    <th>
+                      Cela
+                    </th>
+
                   </tr>
 
                 </thead>
 
+
                 <tbody>
+
                   ${linhas}
+
                 </tbody>
 
               </table>
 
             </section>
+
           `;
 
-        })
-        .join("");
+        }
+      )
+      .join("");
 
-  }
 
+  /*
+    Pequeno atraso para garantir
+    que a lista esteja pronta antes
+    de abrir a janela de impressão.
+  */
 
-  window.print();
+  setTimeout(
+    () => {
+
+      window.print();
+
+    },
+    100
+  );
 
 }
 
+
+/* ============================= */
+/* INICIALIZAÇÃO */
+/* ============================= */
 
 render();
 
 conectar();
 
 </script>
+
 
 </body>
 
