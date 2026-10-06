@@ -1,1352 +1,1185 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
->
-
-<title>
-Mesa de Recebimento — V2
-</title>
-
-<style>
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f1f3f5;
-  color: #222;
-}
-
-header {
-  background: #111;
-  color: white;
-  padding: 18px 22px;
-  border-bottom: 5px solid #c7a84b;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-header p {
-  margin: 6px 0 0;
-  color: #ddd;
-}
-
-main {
-  max-width: 1200px;
-  margin: 25px auto;
-  padding: 0 16px;
-}
-
-.top {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  align-items: center;
-  margin-bottom: 18px;
-}
-
-.acoes {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-button {
-  border: 0;
-  border-radius: 7px;
-  padding: 11px 15px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.dark {
-  background: #333;
-  color: white;
-}
-
-.gold {
-  background: #8b6f1d;
-  color: white;
-}
-
-.conexao {
-  padding: 10px;
-  border-radius: 7px;
-  background: #f9dddd;
-  color: #8a1f1f;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
-.conexao.online {
-  background: #ddf3e1;
-  color: #17652b;
-}
-
-.painel {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow:
-    0 2px 10px rgba(0,0,0,.08);
-}
-
-.fila {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.item {
-  border: 1px solid #ddd;
-  border-left: 7px solid #c7a84b;
-  border-radius: 9px;
-  padding: 16px;
-  background: #fffdf5;
-}
-
-.item.confirmado {
-  border-left-color: #2e7d32;
-  background: #f7fff8;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns:
-    repeat(3,1fr);
-  gap: 10px;
-  margin: 14px 0;
-}
-
-.dado {
-  background: white;
-  border: 1px solid #e2e2e2;
-  border-radius: 7px;
-  padding: 10px;
-}
-
-.label {
-  display: block;
-  font-size: 11px;
-  color: #777;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.valor {
-  font-weight: bold;
-  word-break: break-word;
-}
-
-.hora {
-  font-size: 12px;
-  color: #777;
-}
-
-.status {
-  font-weight: bold;
-  color: #777;
-  margin: 8px 0;
-}
-
-.status.ok {
-  color: #2e7d32;
-}
-
-.receber {
-  width: 100%;
-  background: #2e7d32;
-  color: white;
-  font-size: 16px;
-}
-
-.receber:disabled {
-  opacity: .8;
-}
-
-.vazio {
-  text-align: center;
-  color: #777;
-  padding: 50px;
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-}
-
-
-/* ============================= */
-/* ÁREA EXCLUSIVA DA IMPRESSÃO */
-/* ============================= */
-
-.somente-impressao {
-  display: none;
-}
-
-.lista-impressao {
-  width: 100%;
-}
-
-.grupo-impressao {
-  width: 100%;
-  margin-bottom: 10px;
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
-
-.grupo-impressao h2 {
-  font-size: 13px;
-  margin: 7px 0 3px;
-  padding: 3px 5px;
-  border-bottom: 1px solid #000;
-}
-
-.tabela-impressao {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.tabela-impressao th,
-.tabela-impressao td {
-  border-bottom: 1px solid #ccc;
-  padding: 3px 5px;
-  text-align: left;
-  line-height: 1.2;
-}
-
-.tabela-impressao th {
-  font-size: 9px;
-  text-transform: uppercase;
-}
-
-.tabela-impressao td {
-  font-size: 10px;
-}
-
-.tabela-impressao th:nth-child(1),
-.tabela-impressao td:nth-child(1) {
-  width: 65%;
-}
-
-.tabela-impressao th:nth-child(2),
-.tabela-impressao td:nth-child(2) {
-  width: 20%;
-}
-
-.tabela-impressao th:nth-child(3),
-.tabela-impressao td:nth-child(3) {
-  width: 15%;
-}
-
-
-/* ============================= */
-/* IMPRESSÃO */
-/* ============================= */
-
-@media print {
-
-  @page {
-    size: A4 portrait;
-    margin: 10mm;
-  }
-
-  html,
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-  }
-
-  /*
-    Esconde tudo durante a impressão.
-    A área da lista será liberada logo abaixo.
-  */
-
-  body * {
-    visibility: hidden !important;
-  }
-
-  /*
-    Mostra SOMENTE a lista criada
-    para impressão.
-  */
-
-  #listaImpressao,
-  #listaImpressao * {
-    visibility: visible !important;
-  }
-
-  #listaImpressao {
-    display: block !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-  }
-
-  .grupo-impressao {
-    display: block !important;
-    width: 100% !important;
-    margin-bottom: 10px !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-
-  .grupo-impressao h2 {
-    font-size: 13px !important;
-    margin: 6px 0 3px 0 !important;
-    padding: 3px 5px !important;
-    border-bottom: 1px solid #000 !important;
-  }
-
-  .tabela-impressao {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    table-layout: fixed !important;
-    margin: 0 !important;
-  }
-
-  .tabela-impressao th,
-  .tabela-impressao td {
-    border-bottom: 1px solid #ccc !important;
-    padding: 3px 5px !important;
-    text-align: left !important;
-    line-height: 1.2 !important;
-  }
-
-  .tabela-impressao th {
-    font-size: 9px !important;
-    text-transform: uppercase !important;
-  }
-
-  .tabela-impressao td {
-    font-size: 10px !important;
-  }
-
-  .tabela-impressao th:nth-child(1),
-  .tabela-impressao td:nth-child(1) {
-    width: 65% !important;
-  }
-
-  .tabela-impressao th:nth-child(2),
-  .tabela-impressao td:nth-child(2) {
-    width: 20% !important;
-  }
-
-  .tabela-impressao th:nth-child(3),
-  .tabela-impressao td:nth-child(3) {
-    width: 15% !important;
-  }
-
-}
-
-
-/* ============================= */
-/* CELULAR */
-/* ============================= */
-
-@media(max-width:700px) {
-
-  .top {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-}
-
-</style>
-
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Mesa de Atendimento V2</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f2f2;
+      color: #222;
+    }
+
+    header {
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .cpaig {
+      margin-top: 6px;
+      color: #f2c94c;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .subtitulo {
+      margin-top: 8px;
+      font-size: 16px;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .online {
+      background: #d9f5df;
+      color: #176b2e;
+    }
+
+    .offline {
+      background: #ffe0e0;
+      color: #9b1c1c;
+    }
+
+    .botoes {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn {
+      background: #333;
+      color: white;
+    }
+
+    .btn-print {
+      background: #1769aa;
+      color: white;
+    }
+
+    .btn-receber {
+      background: #16803c;
+      color: white;
+    }
+
+    .controles {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .controles label {
+      font-weight: bold;
+    }
+
+    .controles select {
+      padding: 10px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .item {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+
+    .item.pendente {
+      border-left: 6px solid #e2a400;
+    }
+
+    .item.confirmado {
+      border-left: 6px solid #16803c;
+    }
+
+    .item-topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .nome {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .badge-pendente {
+      background: #ffe4a3;
+      color: #765300;
+    }
+
+    .badge-confirmado {
+      background: #ccefd4;
+      color: #176b2e;
+    }
+
+    .dados {
+      line-height: 1.7;
+    }
+
+    .vazio {
+      text-align: center;
+      color: #777;
+      padding: 25px;
+    }
+
+    #listaImpressao {
+      display: none;
+    }
+
+    @media print {
+
+      body * {
+        visibility: hidden !important;
+      }
+
+      #listaImpressao,
+      #listaImpressao * {
+        visibility: visible !important;
+      }
+
+      #listaImpressao {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+      }
+
+      #listaImpressao h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      #listaImpressao h2 {
+        margin-top: 20px;
+        border-bottom: 1px solid #000;
+        padding-bottom: 5px;
+      }
+
+      #listaImpressao table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+      }
+
+      #listaImpressao th,
+      #listaImpressao td {
+        border: 1px solid #000;
+        padding: 6px;
+        font-size: 12px;
+      }
+
+      #listaImpressao th {
+        font-weight: bold;
+      }
+    }
+
+  </style>
 </head>
-
 
 <body>
 
-
 <header>
 
-<h1>
-POLÍCIA PENAL DE MATO GROSSO DO SUL
-</h1>
+  <h1>
+    POLÍCIA PENAL DE MATO GROSSO DO SUL
+  </h1>
 
-<p>
-Mesa de Recebimento — Sistema de Atendimento V2
-</p>
+  <div class="cpaig">
+    CPAIG
+  </div>
+
+  <div class="subtitulo">
+    Mesa de Recebimento — Sistema de Atendimento V2
+  </div>
 
 </header>
 
 
 <main>
 
-
-<div class="top">
-
-<div>
-
-<h2>
-Atendimentos recebidos
-</h2>
-
-<p>
-Acompanhe e confirme os atendimentos enviados pelos guichês.
-</p>
-
-</div>
+  <div
+    id="status"
+    class="status offline"
+  >
+    ● Desconectado
+  </div>
 
 
-<div class="acoes">
+  <section class="card">
 
-<button
-  class="dark"
-  onclick="ativarNotificacao()"
->
-🔔 Notificações
-</button>
+    <div class="botoes">
 
+      <button
+        class="btn"
+        onclick="ativarNotificacoes()"
+      >
+        🔔 NOTIFICAÇÕES
+      </button>
 
-<button
-  id="somBtn"
-  class="gold"
-  onclick="ativarSom()"
->
-🔊 Som
-</button>
+      <button
+        class="btn"
+        onclick="alternarSom()"
+        id="btnSom"
+      >
+        🔊 SOM: ON
+      </button>
 
+      <button
+        class="btn-print"
+        onclick="imprimirLista()"
+      >
+        🖨️ IMPRIMIR LISTA
+      </button>
 
-<button
-  class="dark"
-  onclick="imprimirLista()"
->
-🖨️ Imprimir lista
-</button>
+    </div>
 
-</div>
-
-</div>
-
-
-<div
-  id="conexao"
-  class="conexao"
->
-🔴 Desconectado
-</div>
+  </section>
 
 
-<section class="painel">
+  <section class="card">
 
-<h3>
-Fila de atendimento
-</h3>
+    <h2>
+      Histórico de atendimentos recebidos
+    </h2>
+
+    <div class="controles">
+
+      <label for="ordemMesa">
+        Visualizar:
+      </label>
+
+      <select
+        id="ordemMesa"
+        onchange="render()"
+      >
+
+        <option value="envio">
+          Ordem de envio
+        </option>
+
+        <option value="atendimento">
+          Por atendimento
+        </option>
+
+      </select>
+
+    </div>
 
 
-<div
-  id="fila"
-  class="fila"
->
+    <div id="fila"></div>
 
-<div class="vazio">
-Nenhum atendimento aguardando recebimento.
-</div>
+  </section>
 
-</div>
 
-</section>
-
+  <div id="listaImpressao"></div>
 
 </main>
 
 
-<!-- ================================= -->
-<!-- SOMENTE A ÁREA ABAIXO SERÁ IMPRESSA -->
-<!-- ================================= -->
-
-<section
-  id="listaImpressao"
-  class="somente-impressao lista-impressao"
->
-</section>
-
-
 <script>
 
-let ws = null;
+  const WS_URL =
+    (location.protocol === "https:" ? "wss://" : "ws://") +
+    location.host;
 
-let lista = [];
+  let ws = null;
 
-let som = false;
-
-let audio = null;
-
-
-/* ============================= */
-/* PROTEÇÃO DE TEXTO */
-/* ============================= */
-
-function esc(valor) {
-
-  return String(
-    valor == null
-      ? ""
-      : valor
-  )
-  .replace(/&/g,"&amp;")
-  .replace(/</g,"&lt;")
-  .replace(/>/g,"&gt;")
-  .replace(/"/g,"&quot;");
-
-}
+  let somAtivo = true;
 
 
-/* ============================= */
-/* DATA / HORA */
-/* ============================= */
-
-function hora(valor) {
-
-  return valor
-    ? new Date(valor)
-        .toLocaleString("pt-BR")
-    : "";
-
-}
+  let lista =
+    JSON.parse(
+      localStorage.getItem(
+        "mesaAtendimentosV2"
+      ) || "[]"
+    );
 
 
-/* ============================= */
-/* TELA NORMAL */
-/* ============================= */
-
-function render() {
-
-  const elemento =
+  const filaEl =
     document.getElementById(
       "fila"
     );
 
-
-  if (!lista.length) {
-
-    elemento.innerHTML =
-      '<div class="vazio">' +
-      'Nenhum atendimento aguardando recebimento.' +
-      '</div>';
-
-    return;
-
-  }
-
-
-  elemento.innerHTML =
-    lista.map(
-      item => {
-
-        const registro =
-          item.record || {};
-
-
-        return `
-
-        <article
-          class="item
-          ${
-            item.confirmado
-              ? "confirmado"
-              : ""
-          }"
-        >
-
-        <h3>
-        ${esc(
-          registro.nome ||
-          "Não informado"
-        )}
-        </h3>
-
-
-        <div class="hora">
-
-        Enviado em:
-        ${esc(
-          hora(
-            item.sentAt
-          )
-        )}
-
-        </div>
-
-
-        <div class="grid">
-
-
-        <div class="dado">
-
-        <span class="label">
-        Identificação
-        </span>
-
-        <span class="valor">
-        ${esc(
-          registro.identificacao
-        )}
-        </span>
-
-        </div>
-
-
-        <div class="dado">
-
-        <span class="label">
-        Pavilhão
-        </span>
-
-        <span class="valor">
-        ${esc(
-          registro.pavilhao
-        )}
-        </span>
-
-        </div>
-
-
-        <div class="dado">
-
-        <span class="label">
-        Cela
-        </span>
-
-        <span class="valor">
-        ${esc(
-          registro.cela
-        )}
-        </span>
-
-        </div>
-
-
-        <div class="dado">
-
-        <span class="label">
-        Atendimento
-        </span>
-
-        <span class="valor">
-        ${esc(
-          registro.atendimento
-        )}
-        </span>
-
-        </div>
-
-
-        <div class="dado">
-
-        <span class="label">
-        Assunto
-        </span>
-
-        <span class="valor">
-        ${esc(
-          registro.assunto ||
-          "—"
-        )}
-        </span>
-
-        </div>
-
-
-        </div>
-
-
-        <div
-          class="status
-          ${
-            item.confirmado
-              ? "ok"
-              : ""
-          }"
-        >
-
-        ${
-          item.confirmado
-            ? "✓ RECEBIDO ÀS " +
-              esc(
-                hora(
-                  item.recebidoEm
-                )
-              )
-            : "⏳ Aguardando confirmação da Mesa"
-        }
-
-        </div>
-
-
-        <button
-          class="receber"
-          ${
-            item.confirmado
-              ? "disabled"
-              : ""
-          }
-          onclick="
-            confirmar(
-              '${esc(item.recordId)}'
-            )
-          "
-        >
-
-        ${
-          item.confirmado
-            ? "✓ RECEBIDO"
-            : "RECEBIDO"
-        }
-
-        </button>
-
-
-        </article>
-
-        `;
-
-      }
-    ).join("");
-
-}
-
-
-/* ============================= */
-/* CONFIRMAR RECEBIMENTO */
-/* ============================= */
-
-function confirmar(id) {
-
-  const item =
-    lista.find(
-      registro =>
-        registro.recordId ===
-        id
+  const statusEl =
+    document.getElementById(
+      "status"
     );
 
 
-  if (
-    !item ||
-    item.confirmado ||
-    !ws ||
-    ws.readyState !==
-    WebSocket.OPEN
+  function salvar() {
+
+    localStorage.setItem(
+      "mesaAtendimentosV2",
+      JSON.stringify(lista)
+    );
+  }
+
+
+  function atualizarStatus(
+    online
   ) {
 
-    return;
+    if (online) {
 
+      statusEl.textContent =
+        "● Conectado";
+
+      statusEl.className =
+        "status online";
+
+    } else {
+
+      statusEl.textContent =
+        "● Desconectado — aguardando reconexão";
+
+      statusEl.className =
+        "status offline";
+    }
   }
 
 
-  item.confirmando = true;
+  function conectar() {
 
-  render();
+    try {
 
-
-  ws.send(
-    JSON.stringify({
-
-      type:
-        "confirm_received",
-
-      recordId:
-        id
-
-    })
-  );
-
-}
-
-
-/* ============================= */
-/* CONEXÃO WEBSOCKET */
-/* ============================= */
-
-function conectar() {
-
-  const protocolo =
-    location.protocol ===
-    "https:"
-      ? "wss:"
-      : "ws:";
-
-
-  ws =
-    new WebSocket(
-      protocolo +
-      "//" +
-      location.host
-    );
-
-
-  ws.onopen =
-    () => {
-
-      const conexao =
-        document.getElementById(
-          "conexao"
+      ws =
+        new WebSocket(
+          WS_URL
         );
 
 
-      conexao.className =
-        "conexao online";
+      ws.onopen = () => {
 
-
-      conexao.textContent =
-        "🟢 Conectado ao servidor";
-
-
-      ws.send(
-        JSON.stringify({
-
-          type:
-            "register",
-
-          role:
-            "receiver"
-
-        })
-      );
-
-    };
-
-
-  ws.onclose =
-    () => {
-
-      const conexao =
-        document.getElementById(
-          "conexao"
+        atualizarStatus(
+          true
         );
 
-
-      conexao.className =
-        "conexao";
-
-
-      conexao.textContent =
-        "🔴 Desconectado — reconectando...";
-
-
-      setTimeout(
-        conectar,
-        3000
-      );
-
-    };
+        ws.send(
+          JSON.stringify({
+            type: "register",
+            role: "receiver"
+          })
+        );
+      };
 
 
-  ws.onmessage =
-    event => {
+      ws.onmessage = (
+        event
+      ) => {
 
-      try {
+        let mensagem;
 
-        const mensagem =
-          JSON.parse(
-            event.data
-          );
+        try {
 
+          mensagem =
+            JSON.parse(
+              event.data
+            );
 
-        /* ========================= */
-        /* NOVO ATENDIMENTO */
-        /* ========================= */
+        } catch {
+
+          return;
+        }
+
 
         if (
           mensagem.type ===
           "new_record"
         ) {
 
-          if (
-            !lista.some(
-              item =>
-                item.recordId ===
-                mensagem.recordId
-            )
-          ) {
+          receberAtendimento(
+            mensagem
+          );
 
-            lista.unshift({
-
-              recordId:
-                mensagem.recordId,
-
-              record:
-                mensagem.record ||
-                {},
-
-              sentAt:
-                mensagem.sentAt,
-
-              confirmado:
-                false
-
-            });
-
-
-            render();
-
-            tocar();
-
-            notificar(
-              mensagem
-            );
-
-          }
-
+          return;
         }
 
-
-        /* ========================= */
-        /* CONFIRMAÇÃO */
-        /* ========================= */
 
         if (
           mensagem.type ===
           "record_received"
         ) {
 
-          const item =
-            lista.find(
-              registro =>
-                registro.recordId ===
-                mensagem.recordId
-            );
-
-
-          if (item) {
-
-            item.confirmado =
-              true;
-
-            item.confirmando =
-              false;
-
-            item.recebidoEm =
-              mensagem.receivedAt;
-
-
-            render();
-
-          }
-
+          confirmarLocal(
+            mensagem.recordId,
+            mensagem.receivedAt
+          );
         }
 
-      } catch (_) {}
+      };
+
+
+      ws.onclose = () => {
+
+        atualizarStatus(
+          false
+        );
+
+        setTimeout(
+          conectar,
+          3000
+        );
+      };
+
+
+      ws.onerror = () => {
+
+        atualizarStatus(
+          false
+        );
+      };
+
+
+    } catch {
+
+      atualizarStatus(
+        false
+      );
+
+      setTimeout(
+        conectar,
+        3000
+      );
+    }
+  }
+
+
+  function receberAtendimento(
+    mensagem
+  ) {
+
+    const existente =
+      lista.find(
+        item =>
+          item.recordId ===
+          mensagem.recordId
+      );
+
+
+    if (existente) {
+
+      /*
+       * O atendimento já existe no histórico.
+       * Não cria duplicado.
+       */
+
+      render();
+
+      return;
+    }
+
+
+    const item = {
+
+      recordId:
+        mensagem.recordId,
+
+      ...(
+        mensagem.record ||
+        {}
+      ),
+
+      enviadoEm:
+        mensagem.sentAt ||
+        new Date().toISOString(),
+
+      recebidoEm:
+        null
 
     };
 
-}
 
-
-/* ============================= */
-/* SOM */
-/* ============================= */
-
-function ativarSom() {
-
-  const AudioContext =
-    window.AudioContext ||
-    window.webkitAudioContext;
-
-
-  if (!AudioContext) {
-    return;
-  }
-
-
-  audio =
-    audio ||
-    new AudioContext();
-
-
-  if (
-    audio.state ===
-    "suspended"
-  ) {
-
-    audio.resume();
-
-  }
-
-
-  som = true;
-
-
-  document
-    .getElementById(
-      "somBtn"
-    )
-    .textContent =
-    "🔊 Som ativado";
-
-
-  tocar();
-
-}
-
-
-function tocar() {
-
-  if (
-    !som ||
-    !audio
-  ) {
-
-    return;
-
-  }
-
-
-  const oscilador =
-    audio.createOscillator();
-
-
-  const ganho =
-    audio.createGain();
-
-
-  const tempo =
-    audio.currentTime;
-
-
-  oscilador.frequency.value =
-    880;
-
-
-  ganho.gain.setValueAtTime(
-    0.0001,
-    tempo
-  );
-
-
-  ganho.gain
-    .exponentialRampToValueAtTime(
-      0.25,
-      tempo + 0.02
+    lista.unshift(
+      item
     );
 
+    salvar();
 
-  ganho.gain
-    .exponentialRampToValueAtTime(
-      0.0001,
-      tempo + 0.4
-    );
-
-
-  oscilador.connect(
-    ganho
-  );
-
-
-  ganho.connect(
-    audio.destination
-  );
-
-
-  oscilador.start(
-    tempo
-  );
-
-
-  oscilador.stop(
-    tempo + 0.45
-  );
-
-}
-
-
-/* ============================= */
-/* NOTIFICAÇÕES */
-/* ============================= */
-
-async function ativarNotificacao() {
-
-  if (
-    "Notification"
-    in window
-  ) {
-
-    const permissao =
-      await Notification
-        .requestPermission();
+    render();
 
 
     if (
-      permissao ===
-      "granted"
+      somAtivo
+    ) {
+      tocarSom();
+    }
+
+
+    mostrarNotificacao(
+      item
+    );
+  }
+
+
+  function receberConfirmacao(
+    recordId
+  ) {
+
+    if (
+      !ws ||
+      ws.readyState !==
+        WebSocket.OPEN
+    ) {
+      return;
+    }
+
+
+    ws.send(
+      JSON.stringify({
+        type:
+          "confirm_received",
+        recordId
+      })
+    );
+  }
+
+
+  function marcarRecebido(
+    recordId
+  ) {
+
+    const item =
+      lista.find(
+        x =>
+          x.recordId ===
+          recordId
+      );
+
+
+    if (!item) {
+      return;
+    }
+
+
+    if (
+      item.recebidoEm
+    ) {
+      return;
+    }
+
+
+    const agora =
+      new Date().toISOString();
+
+
+    item.recebidoEm =
+      agora;
+
+
+    salvar();
+
+    render();
+
+
+    receberConfirmacao(
+      recordId
+    );
+  }
+
+
+  function confirmarLocal(
+    recordId,
+    receivedAt
+  ) {
+
+    const item =
+      lista.find(
+        x =>
+          x.recordId ===
+          recordId
+      );
+
+
+    if (!item) {
+      return;
+    }
+
+
+    item.recebidoEm =
+      item.recebidoEm ||
+      receivedAt;
+
+
+    salvar();
+
+    render();
+  }
+
+
+  function render() {
+
+    if (!lista.length) {
+
+      filaEl.innerHTML =
+        '<div class="vazio">Nenhum atendimento recebido.</div>';
+
+      return;
+    }
+
+
+    const ordem =
+      document.getElementById(
+        "ordemMesa"
+      ).value;
+
+
+    const ordenada =
+      lista
+        .slice()
+        .sort(
+          (a, b) => {
+
+            if (
+              ordem ===
+              "atendimento"
+            ) {
+
+              const cmp =
+                String(
+                  a.atendimento ||
+                  ""
+                ).localeCompare(
+                  String(
+                    b.atendimento ||
+                    ""
+                  ),
+                  "pt-BR"
+                );
+
+              if (
+                cmp !== 0
+              ) {
+                return cmp;
+              }
+            }
+
+
+            return (
+              new Date(
+                b.enviadoEm ||
+                0
+              ) -
+              new Date(
+                a.enviadoEm ||
+                0
+              )
+            );
+          }
+        );
+
+
+    filaEl.innerHTML =
+      ordenada
+        .map(
+          item => {
+
+            const confirmado =
+              !!item.recebidoEm;
+
+
+            return `
+
+              <div
+                class="item ${
+                  confirmado
+                    ? "confirmado"
+                    : "pendente"
+                }"
+              >
+
+                <div
+                  class="item-topo"
+                >
+
+                  <div
+                    class="nome"
+                  >
+                    ${escapeHtml(
+                      item.nome
+                    )}
+                  </div>
+
+                  <span
+                    class="badge ${
+                      confirmado
+                        ? "badge-confirmado"
+                        : "badge-pendente"
+                    }"
+                  >
+                    ${
+                      confirmado
+                        ? "RECEBIDO"
+                        : "AGUARDANDO RECEBIMENTO"
+                    }
+                  </span>
+
+                </div>
+
+
+                <div
+                  class="dados"
+                >
+
+                  <div>
+                    <strong>RGI:</strong>
+                    ${escapeHtml(
+                      item.rgi ||
+                      ""
+                    )}
+                  </div>
+
+                  <div>
+                    <strong>Pavilhão:</strong>
+                    ${escapeHtml(
+                      item.pavilhao ||
+                      ""
+                    )}
+                  </div>
+
+                  <div>
+                    <strong>Cela:</strong>
+                    ${escapeHtml(
+                      item.cela ||
+                      ""
+                    )}
+                  </div>
+
+                  <div>
+                    <strong>Atendimento:</strong>
+                    ${escapeHtml(
+                      item.atendimento ||
+                      ""
+                    )}
+                  </div>
+
+                  ${
+                    item.assunto
+                      ? `
+                        <div>
+                          <strong>Assunto:</strong>
+                          ${escapeHtml(
+                            item.assunto
+                          )}
+                        </div>
+                      `
+                      : ""
+                  }
+
+                  <div>
+                    <strong>Enviado em:</strong>
+                    ${formatarData(
+                      item.enviadoEm
+                    )}
+                  </div>
+
+                  ${
+                    item.recebidoEm
+                      ? `
+                        <div>
+                          <strong>Recebido em:</strong>
+                          ${formatarData(
+                            item.recebidoEm
+                          )}
+                        </div>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+
+                ${
+                  !confirmado
+                    ? `
+                      <div
+                        style="margin-top:15px;"
+                      >
+
+                        <button
+                          class="btn-receber"
+                          onclick="marcarRecebido('${item.recordId}')"
+                        >
+                          ✓ RECEBIDO
+                        </button>
+
+                      </div>
+                    `
+                    : ""
+                }
+
+              </div>
+
+            `;
+          }
+        )
+        .join("");
+  }
+
+
+  function formatarData(
+    data
+  ) {
+
+    if (!data) {
+      return "-";
+    }
+
+    return new Date(
+      data
+    ).toLocaleString(
+      "pt-BR"
+    );
+  }
+
+
+  function escapeHtml(
+    valor
+  ) {
+
+    return String(
+      valor ?? ""
+    )
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+      .replace(
+        /</g,
+        "&lt;"
+      )
+      .replace(
+        />/g,
+        "&gt;"
+      )
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+      .replace(
+        /'/g,
+        "&#039;"
+      );
+  }
+
+
+  function alternarSom() {
+
+    somAtivo =
+      !somAtivo;
+
+
+    document.getElementById(
+      "btnSom"
+    ).textContent =
+      somAtivo
+        ? "🔊 SOM: ON"
+        : "🔇 SOM: OFF";
+  }
+
+
+  function tocarSom() {
+
+    try {
+
+      const audio =
+        new Audio();
+
+      audio.src =
+        "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=";
+
+      audio.play()
+        .catch(() => {});
+
+    } catch {}
+  }
+
+
+  async function ativarNotificacoes() {
+
+    if (
+      !("Notification" in window)
     ) {
 
+      alert(
+        "Este navegador não oferece notificações."
+      );
+
+      return;
+    }
+
+
+    const permissao =
+      await Notification.requestPermission();
+
+
+    if (
+      permissao === "granted"
+    ) {
+
+      alert(
+        "Notificações ativadas."
+      );
+
+    } else {
+
+      alert(
+        "As notificações não foram autorizadas."
+      );
+    }
+  }
+
+
+  function mostrarNotificacao(
+    item
+  ) {
+
+    if (
+      !("Notification" in window)
+    ) {
+      return;
+    }
+
+
+    if (
+      Notification.permission !==
+      "granted"
+    ) {
+      return;
+    }
+
+
+    try {
+
       new Notification(
-        "Mesa de Recebimento",
+        "Novo atendimento",
         {
           body:
-            "Notificações ativadas."
+            item.nome +
+            " — " +
+            item.atendimento
         }
       );
 
-    }
-
+    } catch {}
   }
 
-}
+
+  function imprimirLista() {
+
+    const area =
+      document.getElementById(
+        "listaImpressao"
+      );
 
 
-function notificar(item) {
+    if (!lista.length) {
 
-  if (
-    "Notification"
-    in window &&
-    Notification.permission ===
-    "granted"
-  ) {
+      alert(
+        "Não há atendimentos para imprimir."
+      );
 
-    const nome =
-      item.record &&
-      item.record.nome
-        ? item.record.nome
-        : "Atendimento";
+      return;
+    }
 
 
-    new Notification(
-      "Novo atendimento",
-      {
-        body:
-          nome +
-          " aguarda recebimento."
+    const grupos = {};
+
+
+    lista.forEach(
+      item => {
+
+        const tipo =
+          item.atendimento ||
+          "Sem atendimento";
+
+        if (
+          !grupos[tipo]
+        ) {
+          grupos[tipo] = [];
+        }
+
+        grupos[tipo].push(
+          item
+        );
       }
     );
 
-  }
 
-}
+    let html = `
 
+      <h1>
+        POLÍCIA PENAL DE MATO GROSSO DO SUL
+      </h1>
 
-/* ============================= */
-/* IMPRESSÃO DA LISTA */
-/* ============================= */
+      <div
+        style="
+          text-align:center;
+          font-weight:bold;
+          margin-bottom:20px;
+        "
+      >
+        CPAIG — LISTA DE ATENDIMENTOS
+      </div>
 
-function imprimirLista() {
-
-  const area =
-    document.getElementById(
-      "listaImpressao"
-    );
-
-
-  const grupos = {};
-
-
-  /*
-    Agrupa todos os atendimentos
-    pelo tipo de atendimento.
-  */
-
-  lista.forEach(item => {
-
-    const registro =
-      item.record || {};
+    `;
 
 
-    const atendimento =
-      registro.atendimento ||
-      "Outros";
-
-
-    if (
-      !grupos[atendimento]
-    ) {
-
-      grupos[atendimento] = [];
-
-    }
-
-
-    grupos[atendimento].push(
-      registro
-    );
-
-  });
-
-
-  const atendimentos =
-    Object.keys(grupos)
+    Object.keys(
+      grupos
+    )
       .sort(
-        (a,b) =>
+        (a, b) =>
           a.localeCompare(
             b,
             "pt-BR"
           )
+      )
+      .forEach(
+        atendimento => {
+
+          html += `
+
+            <h2>
+              ${escapeHtml(
+                atendimento
+              )}
+            </h2>
+
+            <table>
+
+              <thead>
+
+                <tr>
+                  <th>Nome</th>
+                  <th>Pavilhão</th>
+                  <th>Cela</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                ${grupos[
+                  atendimento
+                ]
+                  .map(
+                    item => `
+
+                      <tr>
+
+                        <td>
+                          ${escapeHtml(
+                            item.nome
+                          )}
+                        </td>
+
+                        <td>
+                          ${escapeHtml(
+                            item.pavilhao ||
+                            ""
+                          )}
+                        </td>
+
+                        <td>
+                          ${escapeHtml(
+                            item.cela ||
+                            ""
+                          )}
+                        </td>
+
+                      </tr>
+
+                    `
+                  )
+                  .join("")}
+
+              </tbody>
+
+            </table>
+
+          `;
+        }
       );
 
 
-  /* ========================= */
-  /* NENHUM ATENDIMENTO */
-  /* ========================= */
+    area.innerHTML =
+      html;
 
-  if (
-    !atendimentos.length
-  ) {
-
-    area.innerHTML = `
-
-      <p
-        style="
-          font-family:Arial;
-          font-size:12px;
-        "
-      >
-        Nenhum atendimento para imprimir.
-      </p>
-
-    `;
 
     window.print();
-
-    return;
-
   }
 
 
-  /* ========================= */
-  /* MONTA A LISTA */
-  /* ========================= */
+  render();
 
-  area.innerHTML =
-    atendimentos
-      .map(
-        atendimento => {
-
-          const registros =
-            grupos[atendimento];
-
-
-          const linhas =
-            registros
-              .map(
-                registro => {
-
-                  return `
-
-                    <tr>
-
-                      <td>
-                        ${esc(
-                          registro.nome ||
-                          "Não informado"
-                        )}
-                      </td>
-
-                      <td>
-                        ${esc(
-                          registro.pavilhao ||
-                          ""
-                        )}
-                      </td>
-
-                      <td>
-                        ${esc(
-                          registro.cela ||
-                          ""
-                        )}
-                      </td>
-
-                    </tr>
-
-                  `;
-
-                }
-              )
-              .join("");
-
-
-          return `
-
-            <section
-              class="grupo-impressao"
-            >
-
-              <h2>
-                ${esc(
-                  atendimento
-                )}
-              </h2>
-
-
-              <table
-                class="tabela-impressao"
-              >
-
-                <thead>
-
-                  <tr>
-
-                    <th>
-                      Nome
-                    </th>
-
-                    <th>
-                      Pavilhão
-                    </th>
-
-                    <th>
-                      Cela
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                  ${linhas}
-
-                </tbody>
-
-              </table>
-
-            </section>
-
-          `;
-
-        }
-      )
-      .join("");
-
-  window.print();
-}
-
-
-/* ============================= */
-/* INICIALIZAÇÃO */
-/* ============================= */
-
-render();
-
-conectar();
+  conectar();
 
 </script>
 
-
 </body>
-
 </html>
