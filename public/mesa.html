@@ -1332,22 +1332,7 @@ function imprimirLista() {
       )
       .join("");
 
-
-  /*
-    Pequeno atraso para garantir
-    que a lista esteja pronta antes
-    de abrir a janela de impressão.
-  */
-
-  setTimeout(
-    () => {
-
-      window.print();
-
-    },
-    100
-  );
-
+  window.print();
 }
 
 
