@@ -1,1144 +1,917 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Mesa de Recebimento - Polícia Penal MS</title>
+<meta charset="UTF-8">
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
 
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f1f3f5;
-      color: #202124;
-    }
+<title>
+Mesa de Recebimento — V2
+</title>
 
-    .topo {
-      background: linear-gradient(135deg, #111111, #252525);
-      color: white;
-      border-bottom: 5px solid #c8a84e;
-      box-shadow: 0 3px 12px rgba(0,0,0,.25);
-    }
+<style>
 
-    .topo-conteudo {
-      max-width: 1250px;
-      margin: auto;
-      min-height: 125px;
-      padding: 18px 25px;
-      display: flex;
-      align-items: center;
-      gap: 22px;
-    }
+* {
+  box-sizing: border-box;
+}
 
-    .logo {
-      width: 95px;
-      height: 95px;
-      object-fit: contain;
-      background: white;
-      border-radius: 12px;
-      padding: 5px;
-      flex-shrink: 0;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f3f5;
+  color: #222;
+}
 
-    .identidade {
-      flex: 1;
-    }
+header {
+  background: #111;
+  color: white;
+  padding: 18px 22px;
+  border-bottom: 5px solid #c7a84b;
+}
 
-    .orgao {
-      font-size: 16px;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      color: #d8d8d8;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
+header h1 {
+  margin: 0;
+  font-size: 24px;
+}
 
-    h1 {
-      margin: 0;
-      font-size: 30px;
-    }
+header p {
+  margin: 6px 0 0;
+  color: #ddd;
+}
 
-    .subtitulo {
-      margin-top: 7px;
-      font-size: 14px;
-      color: #d7d7d7;
-    }
+main {
+  max-width: 1200px;
+  margin: 25px auto;
+  padding: 0 16px;
+}
 
-    .conexao {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      white-space: nowrap;
-    }
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 18px;
+}
 
-    .bolinha {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      background: #f44336;
-    }
+.acoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-    .bolinha.online {
-      background: #2e7d32;
-      box-shadow: 0 0 8px rgba(46,125,50,.6);
-    }
+button {
+  border: 0;
+  border-radius: 7px;
+  padding: 11px 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .container {
-      max-width: 1250px;
-      margin: 28px auto;
-      padding: 0 18px;
-    }
+.dark {
+  background: #333;
+  color: white;
+}
 
-    .barra {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
+.gold {
+  background: #8b6f1d;
+  color: white;
+}
 
-    .barra h2 {
-      margin: 0;
-      font-size: 24px;
-    }
+.conexao {
+  padding: 10px;
+  border-radius: 7px;
+  background: #f9dddd;
+  color: #8a1f1f;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
 
-    .barra p {
-      margin: 5px 0 0;
-      color: #666;
-      font-size: 14px;
-    }
+.conexao.online {
+  background: #ddf3e1;
+  color: #17652b;
+}
 
-    .acoes {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
+.painel {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow:
+    0 2px 10px rgba(0,0,0,.08);
+}
 
-    button {
-      border: none;
-      border-radius: 7px;
-      padding: 12px 18px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: .2s;
-    }
+.fila {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(0,0,0,.15);
-    }
+.item {
+  border: 1px solid #ddd;
+  border-left: 7px solid #c7a84b;
+  border-radius: 9px;
+  padding: 16px;
+  background: #fffdf5;
+}
 
-    button:disabled {
-      cursor: default;
-      opacity: .75;
-      transform: none;
-      box-shadow: none;
-    }
+.item.confirmado {
+  border-left-color: #2e7d32;
+  background: #f7fff8;
+}
 
-    .btn-som {
-      background: #8b6f1d;
-      color: white;
-    }
+.grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3,1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
 
-    .btn-som.ativado {
-      background: #2e7d32;
-    }
+.dado {
+  background: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 7px;
+  padding: 10px;
+}
 
-    .btn-notificacao {
-      background: #333;
-      color: white;
-    }
+.label {
+  display: block;
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
 
-    .painel {
-      background: white;
-      border-radius: 12px;
-      padding: 22px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.08);
-    }
+.valor {
+  font-weight: bold;
+  word-break: break-word;
+}
 
-    .painel h3 {
-      margin-top: 0;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 12px;
-    }
+.hora {
+  font-size: 12px;
+  color: #777;
+}
 
-    .vazio {
-      text-align: center;
-      color: #888;
-      padding: 55px 20px;
-      border: 2px dashed #ddd;
-      border-radius: 10px;
-    }
+.status {
+  font-weight: bold;
+  color: #777;
+  margin: 8px 0;
+}
 
-    .fila {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+.status.ok {
+  color: #2e7d32;
+}
 
-    .registro {
-      border: 1px solid #ddd;
-      border-left: 7px solid #555;
-      border-radius: 10px;
-      padding: 18px;
-      background: #fafafa;
-    }
+.receber {
+  width: 100%;
+  background: #2e7d32;
+  color: white;
+  font-size: 16px;
+}
 
-    .registro.urgente {
-      border-left-color: #b71c1c;
-      background: #fff8f8;
-    }
+.receber:disabled {
+  opacity: .8;
+}
 
-    .registro.novo {
-      border-left-color: #c8a84e;
-      background: #fffdf5;
-    }
+.vazio {
+  text-align: center;
+  color: #777;
+  padding: 50px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+}
 
-    .registro.confirmado {
-      border-left-color: #2e7d32;
-      background: #f7fff8;
-    }
+@media(max-width:700px) {
 
-    .registro-cabecalho {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 15px;
-      margin-bottom: 14px;
-    }
+  .top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .registro-titulo {
-      font-size: 18px;
-      font-weight: bold;
-    }
+  .grid {
+    grid-template-columns: 1fr;
+  }
 
-    .registro-data {
-      font-size: 12px;
-      color: #777;
-      margin-top: 4px;
-    }
+}
 
-    .prioridade {
-      background: #555;
-      color: white;
-      border-radius: 20px;
-      padding: 6px 10px;
-      font-size: 11px;
-      font-weight: bold;
-      white-space: nowrap;
-    }
+@media print {
 
-    .prioridade.urgente {
-      background: #b71c1c;
-    }
+  .acoes,
+  .conexao,
+  .receber {
+    display: none;
+  }
 
-    .dados {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
-    }
+  .item {
+    break-inside: avoid;
+  }
 
-    .dado {
-      background: white;
-      border: 1px solid #e2e2e2;
-      border-radius: 7px;
-      padding: 10px;
-    }
+  .painel {
+    box-shadow: none;
+  }
 
-    .dado-label {
-      display: block;
-      font-size: 11px;
-      color: #777;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
+}
 
-    .dado-valor {
-      display: block;
-      font-weight: bold;
-      word-break: break-word;
-    }
-
-    .rodape-registro {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .status {
-      font-size: 13px;
-      color: #666;
-    }
-
-    .status.confirmado {
-      color: #2e7d32;
-      font-weight: bold;
-    }
-
-    .status.confirmando {
-      color: #8b6f1d;
-      font-weight: bold;
-    }
-
-    .btn-recebido {
-      background: #2e7d32;
-      color: white;
-      min-width: 155px;
-    }
-
-    .btn-recebido.confirmado {
-      background: #1b5e20;
-    }
-
-    .btn-recebido.confirmando {
-      background: #8b6f1d;
-    }
-
-    @media (max-width: 900px) {
-      .topo-conteudo {
-        flex-wrap: wrap;
-      }
-
-      .conexao {
-        width: 100%;
-      }
-
-      .dados {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .barra {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .acoes {
-        justify-content: flex-start;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .topo-conteudo {
-        padding: 15px;
-      }
-
-      .logo {
-        width: 70px;
-        height: 70px;
-      }
-
-      h1 {
-        font-size: 22px;
-      }
-
-      .orgao {
-        font-size: 12px;
-      }
-
-      .dados {
-        grid-template-columns: 1fr;
-      }
-
-      .registro-cabecalho {
-        flex-direction: column;
-      }
-
-      .btn-recebido {
-        width: 100%;
-      }
-    }
-  </style>
+</style>
 
 </head>
 
 <body>
 
-  <header class="topo">
-    <div class="topo-conteudo">
+<header>
 
-```
-  <img
-    class="logo"
-    src="/logo.png"
-    alt="Polícia Penal MS"
-    onerror="this.style.display='none';"
-  >
+<h1>
+POLÍCIA PENAL DE MATO GROSSO DO SUL
+</h1>
 
-  <div class="identidade">
-    <div class="orgao">Polícia Penal de Mato Grosso do Sul</div>
-    <h1>Mesa de Recebimento</h1>
-    <div class="subtitulo">
-      Controle e confirmação dos atendimentos enviados pelos guichês
-    </div>
-  </div>
+<p>
+Mesa de Recebimento — Sistema de Atendimento V2
+</p>
 
-  <div class="conexao">
-    <span id="bolinha" class="bolinha"></span>
-    <span id="textoConexao">Desconectado</span>
-  </div>
+</header>
 
-</div>
-```
+<main>
 
-  </header>
+<div class="top">
 
-  <main class="container">
+<div>
 
-```
-<div class="barra">
+<h2>
+Atendimentos recebidos
+</h2>
 
-  <div>
-    <h2>Atendimentos recebidos</h2>
-    <p>Acompanhe os atendimentos enviados pelos guichês.</p>
-  </div>
-
-  <div class="acoes">
-
-    <button
-      id="btnNotificacao"
-      class="btn-notificacao"
-      type="button"
-      onclick="ativarNotificacoes()"
-    >
-      🔔 Ativar notificações
-    </button>
-
-    <button
-      id="btnSom"
-      class="btn-som"
-      type="button"
-      onclick="ativarSom()"
-    >
-      🔊 Ativar som de alerta
-    </button>
-
-  </div>
+<p>
+Acompanhe e confirme os atendimentos enviados pelos guichês.
+</p>
 
 </div>
+
+<div class="acoes">
+
+<button
+  class="dark"
+  onclick="ativarNotificacao()"
+>
+🔔 Notificações
+</button>
+
+<button
+  id="somBtn"
+  class="gold"
+  onclick="ativarSom()"
+>
+🔊 Som
+</button>
+
+<button
+  class="dark"
+  onclick="window.print()"
+>
+🖨️ Imprimir A4
+</button>
+
+</div>
+
+</div>
+
+
+<div
+  id="conexao"
+  class="conexao"
+>
+🔴 Desconectado
+</div>
+
 
 <section class="painel">
 
-  <h3>Fila de atendimento</h3>
+<h3>
+Fila de atendimento
+</h3>
 
-  <div id="fila" class="fila">
-    <div class="vazio">
-      Nenhum atendimento aguardando recebimento.
-    </div>
-  </div>
+<div
+  id="fila"
+  class="fila"
+>
+
+<div class="vazio">
+Nenhum atendimento aguardando recebimento.
+</div>
+
+</div>
 
 </section>
-```
 
-  </main>
+</main>
 
-  <script>
-    "use strict";
 
-    let socket = null;
+<script>
 
-    let atendimentos = [];
+let ws = null;
 
-    let somAtivado = false;
+let lista = [];
 
-    let audioContext = null;
+let som = false;
 
-    let reconectando = false;
+let audio = null;
 
-    function atualizarConexao(online) {
-      const bolinha = document.getElementById("bolinha");
-      const texto = document.getElementById("textoConexao");
 
-      if (!bolinha || !texto) {
-        return;
-      }
+function esc(valor) {
 
-      if (online) {
-        bolinha.classList.add("online");
-        texto.textContent = "Conectado";
-      } else {
-        bolinha.classList.remove("online");
-        texto.textContent = "Desconectado";
-      }
-    }
+  return String(
+    valor == null
+      ? ""
+      : valor
+  )
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;");
 
-    function escaparHTML(valor) {
-      if (valor === null || valor === undefined) {
-        return "";
-      }
+}
 
-      return String(valor)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
 
-    function formatarHorario(data) {
-      if (!data) {
-        return "";
-      }
+function hora(valor) {
 
-      const d = new Date(data);
+  return valor
+    ? new Date(valor)
+        .toLocaleString("pt-BR")
+    : "";
 
-      if (Number.isNaN(d.getTime())) {
-        return "";
-      }
+}
 
-      return d.toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit"
-      });
-    }
 
-    function obterPrioridade(item) {
-      return (
-        item.prioridade ||
-        item.record?.prioridade ||
-        "NORMAL"
-      );
-    }
+function render() {
 
-    function obterDado(item, nome) {
-      if (item && item[nome] !== undefined) {
-        return item[nome];
-      }
+  const elemento =
+    document.getElementById(
+      "fila"
+    );
 
-      if (
-        item &&
-        item.record &&
-        item.record[nome] !== undefined
-      ) {
-        return item.record[nome];
-      }
 
-      return "";
-    }
+  if (!lista.length) {
 
-    function renderizar() {
-      const fila = document.getElementById("fila");
+    elemento.innerHTML =
+      '<div class="vazio">' +
+      'Nenhum atendimento aguardando recebimento.' +
+      '</div>';
 
-      if (!fila) {
-        return;
-      }
+    return;
+  }
 
-      if (!atendimentos.length) {
-        fila.innerHTML = `
-          <div class="vazio">
-            Nenhum atendimento aguardando recebimento.
-          </div>
-        `;
 
-        return;
-      }
+  elemento.innerHTML =
+    lista.map(
+      item => {
 
-      fila.innerHTML = atendimentos.map((item) => {
+        const registro =
+          item.record || {};
 
-        const nome =
-          obterDado(item, "nome") ||
-          "Não informado";
-
-        const identificacao =
-          obterDado(item, "identificacao") ||
-          obterDado(item, "documento") ||
-          "Não informado";
-
-        const pavilhao =
-          obterDado(item, "pavilhao") ||
-          "Não informado";
-
-        const cela =
-          obterDado(item, "cela") ||
-          "Não informado";
-
-        const atendimento =
-          obterDado(item, "atendimento") ||
-          "Não informado";
-
-        const prioridade =
-          obterPrioridade(item);
-
-        const urgente =
-          String(prioridade).toUpperCase() === "URGENTE";
-
-        let classeRegistro = "registro";
-
-        if (urgente) {
-          classeRegistro += " urgente";
-        }
-
-        if (item.novo) {
-          classeRegistro += " novo";
-        }
-
-        if (item.confirmado) {
-          classeRegistro += " confirmado";
-        }
-
-        let statusHTML = "";
-
-        if (item.confirmado) {
-
-          statusHTML = `
-            <div class="status confirmado">
-              ✓ Recebimento confirmado às
-              ${escaparHTML(formatarHorario(item.recebidoEm))}
-            </div>
-          `;
-
-        } else if (item.confirmando) {
-
-          statusHTML = `
-            <div class="status confirmando">
-              Confirmando recebimento...
-            </div>
-          `;
-
-        } else {
-
-          statusHTML = `
-            <div class="status">
-              Aguardando confirmação de recebimento
-            </div>
-          `;
-
-        }
-
-        let botaoHTML = "";
-
-        if (item.confirmado) {
-
-          botaoHTML = `
-            <button
-              class="btn-recebido confirmado"
-              type="button"
-              disabled
-            >
-              ✓ RECEBIDO
-            </button>
-          `;
-
-        } else if (item.confirmando) {
-
-          botaoHTML = `
-            <button
-              class="btn-recebido confirmando"
-              type="button"
-              disabled
-            >
-              CONFIRMANDO...
-            </button>
-          `;
-
-        } else {
-
-          botaoHTML = `
-            <button
-              class="btn-recebido"
-              type="button"
-              onclick="confirmarRecebimento('${escaparHTML(item.recordId)}')"
-            >
-              RECEBIDO
-            </button>
-          `;
-
-        }
 
         return `
-          <article class="${classeRegistro}">
 
-            <div class="registro-cabecalho">
+        <article
+          class="item
+          ${
+            item.confirmado
+              ? "confirmado"
+              : ""
+          }"
+        >
 
-              <div>
-                <div class="registro-titulo">
-                  ${escaparHTML(nome)}
-                </div>
+        <h3>
+        ${esc(
+          registro.nome ||
+          "Não informado"
+        )}
+        </h3>
 
-                <div class="registro-data">
-                  Enviado em:
-                  ${escaparHTML(formatarHorario(item.sentAt))}
-                </div>
-              </div>
+        <div class="hora">
 
-              <div class="prioridade ${urgente ? "urgente" : ""}">
-                ${escaparHTML(prioridade)}
-              </div>
+        Enviado em:
+        ${esc(
+          hora(
+            item.sentAt
+          )
+        )}
 
-            </div>
+        </div>
 
-            <div class="dados">
 
-              <div class="dado">
-                <span class="dado-label">Nome</span>
-                <span class="dado-valor">
-                  ${escaparHTML(nome)}
-                </span>
-              </div>
+        <div class="grid">
 
-              <div class="dado">
-                <span class="dado-label">Identificação</span>
-                <span class="dado-valor">
-                  ${escaparHTML(identificacao)}
-                </span>
-              </div>
+        <div class="dado">
 
-              <div class="dado">
-                <span class="dado-label">Pavilhão</span>
-                <span class="dado-valor">
-                  ${escaparHTML(pavilhao)}
-                </span>
-              </div>
+        <span class="label">
+        Identificação
+        </span>
 
-              <div class="dado">
-                <span class="dado-label">Cela</span>
-                <span class="dado-valor">
-                  ${escaparHTML(cela)}
-                </span>
-              </div>
+        <span class="valor">
+        ${esc(
+          registro.identificacao
+        )}
+        </span>
 
-              <div class="dado">
-                <span class="dado-label">Atendimento</span>
-                <span class="dado-valor">
-                  ${escaparHTML(atendimento)}
-                </span>
-              </div>
+        </div>
 
-            </div>
 
-            <div class="rodape-registro">
+        <div class="dado">
 
-              ${statusHTML}
+        <span class="label">
+        Pavilhão
+        </span>
 
-              ${botaoHTML}
+        <span class="valor">
+        ${esc(
+          registro.pavilhao
+        )}
+        </span>
 
-            </div>
+        </div>
 
-          </article>
+
+        <div class="dado">
+
+        <span class="label">
+        Cela
+        </span>
+
+        <span class="valor">
+        ${esc(
+          registro.cela
+        )}
+        </span>
+
+        </div>
+
+
+        <div class="dado">
+
+        <span class="label">
+        Atendimento
+        </span>
+
+        <span class="valor">
+        ${esc(
+          registro.atendimento
+        )}
+        </span>
+
+        </div>
+
+
+        <div class="dado">
+
+        <span class="label">
+        Assunto
+        </span>
+
+        <span class="valor">
+        ${esc(
+          registro.assunto ||
+          "—"
+        )}
+        </span>
+
+        </div>
+
+        </div>
+
+
+        <div
+          class="status
+          ${
+            item.confirmado
+              ? "ok"
+              : ""
+          }"
+        >
+
+        ${
+          item.confirmado
+            ? "✓ RECEBIDO ÀS " +
+              esc(
+                hora(
+                  item.recebidoEm
+                )
+              )
+            : "⏳ Aguardando confirmação da Mesa"
+        }
+
+        </div>
+
+
+        <button
+          class="receber"
+          ${
+            item.confirmado
+              ? "disabled"
+              : ""
+          }
+          onclick="
+            confirmar(
+              '${esc(item.recordId)}'
+            )
+          "
+        >
+
+        ${
+          item.confirmado
+            ? "✓ RECEBIDO"
+            : "RECEBIDO"
+        }
+
+        </button>
+
+        </article>
+
         `;
 
-      }).join("");
-    }
-
-    function ativarSom() {
-
-      try {
-
-        const AudioCtx =
-          window.AudioContext ||
-          window.webkitAudioContext;
-
-        if (!AudioCtx) {
-          alert("O navegador não suporta áudio.");
-          return;
-        }
-
-        if (!audioContext) {
-          audioContext = new AudioCtx();
-        }
-
-        if (audioContext.state === "suspended") {
-          audioContext.resume();
-        }
-
-        somAtivado = true;
-
-        const botao =
-          document.getElementById("btnSom");
-
-        if (botao) {
-          botao.classList.add("ativado");
-          botao.textContent = "🔊 Som ativado";
-        }
-
-        tocarSom();
-
-      } catch (erro) {
-
-        console.error(
-          "Erro ao ativar som:",
-          erro
-        );
-
       }
-    }
+    ).join("");
 
-    function tocarSom() {
+}
 
-      if (!somAtivado || !audioContext) {
-        return;
-      }
 
-      try {
+function confirmar(id) {
 
-        const agora =
-          audioContext.currentTime;
+  const item =
+    lista.find(
+      registro =>
+        registro.recordId ===
+        id
+    );
 
-        const oscilador =
-          audioContext.createOscillator();
 
-        const ganho =
-          audioContext.createGain();
+  if (
+    !item ||
+    item.confirmado ||
+    !ws ||
+    ws.readyState !==
+    WebSocket.OPEN
+  ) {
 
-        oscilador.type = "sine";
+    return;
+  }
 
-        oscilador.frequency.setValueAtTime(
-          880,
-          agora
+
+  item.confirmando = true;
+
+  render();
+
+
+  ws.send(
+    JSON.stringify({
+
+      type:
+        "confirm_received",
+
+      recordId:
+        id
+
+    })
+  );
+
+}
+
+
+function conectar() {
+
+  const protocolo =
+    location.protocol ===
+    "https:"
+      ? "wss:"
+      : "ws:";
+
+
+  ws =
+    new WebSocket(
+      protocolo +
+      "//" +
+      location.host
+    );
+
+
+  ws.onopen =
+    () => {
+
+      const conexao =
+        document.getElementById(
+          "conexao"
         );
 
-        oscilador.frequency.setValueAtTime(
-          660,
-          agora + 0.18
-        );
+      conexao.className =
+        "conexao online";
 
-        ganho.gain.setValueAtTime(
-          0.0001,
-          agora
-        );
+      conexao.textContent =
+        "🟢 Conectado ao servidor";
 
-        ganho.gain.exponentialRampToValueAtTime(
-          0.35,
-          agora + 0.02
-        );
 
-        ganho.gain.exponentialRampToValueAtTime(
-          0.0001,
-          agora + 0.45
-        );
-
-        oscilador.connect(ganho);
-        ganho.connect(audioContext.destination);
-
-        oscilador.start(agora);
-        oscilador.stop(agora + 0.5);
-
-      } catch (erro) {
-
-        console.error(
-          "Erro ao reproduzir som:",
-          erro
-        );
-
-      }
-    }
-
-    async function ativarNotificacoes() {
-
-      if (!("Notification" in window)) {
-
-        alert(
-          "Este navegador não suporta notificações."
-        );
-
-        return;
-
-      }
-
-      try {
-
-        const permissao =
-          await Notification.requestPermission();
-
-        const botao =
-          document.getElementById("btnNotificacao");
-
-        if (permissao === "granted") {
-
-          if (botao) {
-            botao.textContent =
-              "🔔 Notificações ativadas";
-          }
-
-          new Notification(
-            "Mesa de Recebimento",
-            {
-              body:
-                "As notificações foram ativadas com sucesso."
-            }
-          );
-
-        } else {
-
-          if (botao) {
-            botao.textContent =
-              "🔔 Notificações bloqueadas";
-          }
-
-        }
-
-      } catch (erro) {
-
-        console.error(
-          "Erro nas notificações:",
-          erro
-        );
-
-      }
-    }
-
-    function notificarNovoAtendimento(item) {
-
-      if (
-        "Notification" in window &&
-        Notification.permission === "granted"
-      ) {
-
-        const nome =
-          obterDado(item, "nome") ||
-          "Atendimento";
-
-        new Notification(
-          "Novo atendimento recebido",
-          {
-            body:
-              `${nome} aguarda recebimento na Mesa.`
-          }
-        );
-
-      }
-    }
-
-    function confirmarRecebimento(recordId) {
-
-      const item =
-        atendimentos.find(
-          atendimento =>
-            atendimento.recordId === recordId
-        );
-
-      if (!item) {
-        return;
-      }
-
-      if (item.confirmado || item.confirmando) {
-        return;
-      }
-
-      if (
-        !socket ||
-        socket.readyState !== WebSocket.OPEN
-      ) {
-
-        alert(
-          "A Mesa está desconectada do servidor."
-        );
-
-        return;
-
-      }
-
-      item.confirmando = true;
-      item.novo = false;
-
-      renderizar();
-
-      socket.send(
+      ws.send(
         JSON.stringify({
-          type: "confirm_received",
-          recordId: recordId
+
+          type:
+            "register",
+
+          role:
+            "receiver"
+
         })
       );
 
-    }
+    };
 
-    function processarConfirmacao(data) {
 
-      const item =
-        atendimentos.find(
-          atendimento =>
-            atendimento.recordId === data.recordId
+  ws.onclose =
+    () => {
+
+      const conexao =
+        document.getElementById(
+          "conexao"
         );
 
-      if (!item) {
-        return;
-      }
+      conexao.className =
+        "conexao";
 
-      item.confirmado = true;
-      item.confirmando = false;
-      item.recebidoEm = data.receivedAt;
-      item.novo = false;
+      conexao.textContent =
+        "🔴 Desconectado — reconectando...";
 
-      renderizar();
 
-    }
-
-    function adicionarAtendimento(data) {
-
-      if (!data || !data.recordId) {
-        return;
-      }
-
-      const existente =
-        atendimentos.some(
-          item =>
-            item.recordId === data.recordId
-        );
-
-      if (existente) {
-        return;
-      }
-
-      const item = {
-        recordId: data.recordId,
-        record: data.record || {},
-        sentAt: data.sentAt || null,
-        recebidoEm: null,
-        confirmado: false,
-        confirmando: false,
-        novo: true
-      };
-
-      atendimentos.unshift(item);
-
-      renderizar();
-
-      tocarSom();
-
-      notificarNovoAtendimento(item);
-
-    }
-
-    function conectar() {
-
-      if (socket) {
-
-        try {
-          socket.close();
-        } catch (_) {}
-
-      }
-
-      const protocolo =
-        window.location.protocol === "https:"
-          ? "wss:"
-          : "ws:";
-
-      const url =
-        `${protocolo}//${window.location.host}`;
-
-      socket = new WebSocket(url);
-
-      socket.addEventListener(
-        "open",
-        () => {
-
-          reconectando = false;
-
-          atualizarConexao(true);
-
-          socket.send(
-            JSON.stringify({
-              type: "register",
-              role: "receiver"
-            })
-          );
-
-        }
+      setTimeout(
+        conectar,
+        3000
       );
 
-      socket.addEventListener(
-        "message",
-        (event) => {
+    };
 
-          let data;
 
-          try {
+  ws.onmessage =
+    event => {
 
-            data =
-              JSON.parse(event.data);
+      try {
 
-          } catch (erro) {
+        const mensagem =
+          JSON.parse(
+            event.data
+          );
 
-            console.error(
-              "Mensagem inválida recebida:",
-              erro
+
+        if (
+          mensagem.type ===
+          "new_record"
+        ) {
+
+          if (
+            !lista.some(
+              item =>
+                item.recordId ===
+                mensagem.recordId
+            )
+          ) {
+
+            lista.unshift({
+
+              recordId:
+                mensagem.recordId,
+
+              record:
+                mensagem.record ||
+                {},
+
+              sentAt:
+                mensagem.sentAt,
+
+              confirmado:
+                false
+
+            });
+
+
+            render();
+
+            tocar();
+
+            notificar(
+              mensagem
             );
 
-            return;
-
           }
 
-          if (data.type === "new_record") {
+        }
 
-            adicionarAtendimento(data);
 
-            return;
+        if (
+          mensagem.type ===
+          "record_received"
+        ) {
 
-          }
+          const item =
+            lista.find(
+              registro =>
+                registro.recordId ===
+                mensagem.recordId
+            );
 
-          if (data.type === "record_received") {
 
-            processarConfirmacao(data);
+          if (item) {
 
-            return;
+            item.confirmado =
+              true;
+
+            item.confirmando =
+              false;
+
+            item.recebidoEm =
+              mensagem.receivedAt;
+
+            render();
 
           }
 
         }
-      );
 
-      socket.addEventListener(
-        "close",
-        () => {
+      } catch (_) {}
 
-          atualizarConexao(false);
+    };
 
-          if (!reconectando) {
+}
 
-            reconectando = true;
 
-            setTimeout(() => {
+function ativarSom() {
 
-              reconectando = false;
-              conectar();
+  const AudioContext =
+    window.AudioContext ||
+    window.webkitAudioContext;
 
-            }, 3000);
 
-          }
+  if (!AudioContext) {
+    return;
+  }
 
-        }
-      );
 
-      socket.addEventListener(
-        "error",
-        (erro) => {
+  audio =
+    audio ||
+    new AudioContext();
 
-          console.error(
-            "Erro no WebSocket:",
-            erro
-          );
 
+  if (
+    audio.state ===
+    "suspended"
+  ) {
+
+    audio.resume();
+
+  }
+
+
+  som = true;
+
+
+  document
+    .getElementById(
+      "somBtn"
+    )
+    .textContent =
+    "🔊 Som ativado";
+
+
+  tocar();
+
+}
+
+
+function tocar() {
+
+  if (
+    !som ||
+    !audio
+  ) {
+
+    return;
+  }
+
+
+  const oscilador =
+    audio.createOscillator();
+
+  const ganho =
+    audio.createGain();
+
+  const tempo =
+    audio.currentTime;
+
+
+  oscilador.frequency.value =
+    880;
+
+
+  ganho.gain.setValueAtTime(
+    0.0001,
+    tempo
+  );
+
+
+  ganho.gain
+    .exponentialRampToValueAtTime(
+      0.25,
+      tempo + 0.02
+    );
+
+
+  ganho.gain
+    .exponentialRampToValueAtTime(
+      0.0001,
+      tempo + 0.4
+    );
+
+
+  oscilador.connect(
+    ganho
+  );
+
+  ganho.connect(
+    audio.destination
+  );
+
+
+  oscilador.start(tempo);
+
+  oscilador.stop(
+    tempo + 0.45
+  );
+
+}
+
+
+async function ativarNotificacao() {
+
+  if (
+    "Notification"
+    in window
+  ) {
+
+    const permissao =
+      await Notification
+        .requestPermission();
+
+
+    if (
+      permissao ===
+      "granted"
+    ) {
+
+      new Notification(
+        "Mesa de Recebimento",
+        {
+          body:
+            "Notificações ativadas."
         }
       );
 
     }
 
-    document.addEventListener(
-      "DOMContentLoaded",
-      () => {
+  }
 
-        renderizar();
-        conectar();
+}
 
+
+function notificar(item) {
+
+  if (
+    "Notification"
+    in window &&
+    Notification.permission ===
+    "granted"
+  ) {
+
+    new Notification(
+      "Novo atendimento",
+      {
+        body:
+          (
+            item.record &&
+            item.record.nome
+          ) ||
+          "Atendimento" +
+          " aguarda recebimento."
       }
     );
-  </script>
+
+  }
+
+}
+
+
+render();
+
+conectar();
+
+</script>
 
 </body>
+
 </html>
