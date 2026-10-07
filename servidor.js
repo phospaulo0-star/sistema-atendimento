@@ -11,13 +11,19 @@ app.use(
   )
 );
 
-const server =
-  http.createServer(app);
+const server = http.createServer(app);
 
-const wss =
-  new WebSocket.Server({
-    server
-  });
+const wss = new WebSocket.Server({
+  server
+});
+
+/*
+=========================================================
+VERSÃO
+=========================================================
+*/
+
+const VERSAO = "2.8.0";
 
 /*
 =========================================================
@@ -48,12 +54,11 @@ const pendentes = new Map();
 RECUSAS PENDENTES
 =========================================================
 
-A recusa fica armazenada até o GUICHÊ confirmar
+A recusa permanece armazenada até o GUICHÊ confirmar
 que recebeu a informação.
 */
 
 const recusasPendentes = new Map();
-
 
 /*
 =========================================================
@@ -61,14 +66,14 @@ FUNÇÕES AUXILIARES
 =========================================================
 */
 
-function enviar(ws, dados){
+function enviar(ws, dados) {
 
-  if(
+  if (
     ws &&
     ws.readyState === WebSocket.OPEN
-  ){
+  ) {
 
-    try{
+    try {
 
       ws.send(
         JSON.stringify(dados)
@@ -76,7 +81,7 @@ function enviar(ws, dados){
 
       return true;
 
-    }catch(erro){
+    } catch (erro) {
 
       console.error(
         "Erro ao enviar mensagem:",
@@ -88,7 +93,6 @@ function enviar(ws, dados){
   }
 
   return false;
-
 }
 
 
@@ -96,18 +100,17 @@ function transmitirParaRole(
   role,
   dados,
   ignorarWs = null
-){
+) {
 
-  for(
+  for (
     const cliente of clientes.values()
-  ){
+  ) {
 
-    if(
+    if (
       cliente.role === role &&
       cliente.ws !== ignorarWs &&
-      cliente.ws.readyState ===
-        WebSocket.OPEN
-    ){
+      cliente.ws.readyState === WebSocket.OPEN
+    ) {
 
       enviar(
         cliente.ws,
@@ -121,22 +124,19 @@ function transmitirParaRole(
 }
 
 
-function encontrarClientePorId(
-  clientId
-){
+function encontrarClientePorId(clientId) {
 
-  if(!clientId){
+  if (!clientId) {
     return null;
   }
 
-  for(
+  for (
     const cliente of clientes.values()
-  ){
+  ) {
 
-    if(
-      cliente.clientId ===
-      clientId
-    ){
+    if (
+      cliente.clientId === clientId
+    ) {
 
       return cliente;
 
@@ -145,7 +145,95 @@ function encontrarClientePorId(
   }
 
   return null;
+}
 
+
+/*
+=========================================================
+ENVIAR RECUSA AO GUICHÊ
+=========================================================
+*/
+
+function enviarRecusaAoGuiche(recusa) {
+
+  if (!recusa || !recusa.ownerId) {
+    return false;
+  }
+
+  const guiche =
+    encontrarClientePorId(
+      recusa.ownerId
+    );
+
+  if (!guiche) {
+    return false;
+  }
+
+  return enviar(
+    guiche.ws,
+    {
+      type: "record_refused",
+
+      recordId:
+        recusa.recordId,
+
+      record:
+        recusa.record,
+
+      reason:
+        recusa.reason,
+
+      refusedAt:
+        recusa.refusedAt,
+
+      ownerId:
+        recusa.ownerId,
+
+      status:
+        "recusado"
+    }
+  );
+}
+
+
+/*
+=========================================================
+ENVIAR ATENDIMENTO PARA AS MESAS
+=========================================================
+*/
+
+function transmitirNovoAtendimento(
+  pendente
+) {
+
+  if (!pendente) {
+    return;
+  }
+
+  transmitirParaRole(
+    "receiver",
+    {
+      type: "new_record",
+
+      recordId:
+        pendente.recordId,
+
+      record:
+        pendente.record,
+
+      createdAt:
+        pendente.createdAt,
+
+      updatedAt:
+        pendente.updatedAt,
+
+      reenvio:
+        !!(
+          pendente.record &&
+          pendente.record.reenvio
+        )
+    }
+  );
 }
 
 
@@ -194,7 +282,7 @@ wss.on(
       "message",
       (mensagem) => {
 
-        try{
+        try {
 
           const dados =
             JSON.parse(
@@ -208,10 +296,10 @@ wss.on(
           ===============================================
           */
 
-          if(
+          if (
             dados.type ===
             "register"
-          ){
+          ) {
 
             cliente.role =
               dados.role ||
@@ -235,20 +323,20 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Enviar ao receptor todos os atendimentos
-            que ainda estão pendentes.
+            MESA:
+            entregar todos os atendimentos pendentes.
             ---------------------------------------------
             */
 
-            if(
+            if (
               cliente.role ===
               "receiver"
-            ){
+            ) {
 
-              for(
+              for (
                 const pendente
                 of pendentes.values()
-              ){
+              ) {
 
                 enviar(
                   ws,
@@ -263,7 +351,16 @@ wss.on(
                       pendente.record,
 
                     createdAt:
-                      pendente.createdAt
+                      pendente.createdAt,
+
+                    updatedAt:
+                      pendente.updatedAt,
+
+                    reenvio:
+                      !!(
+                        pendente.record &&
+                        pendente.record.reenvio
+                      )
                   }
                 );
 
@@ -274,44 +371,29 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Se for GUICHÊ, entregar recusas pendentes
-            que pertencem a ele.
+            GUICHÊ:
+            entregar recusas que ainda não foram
+            confirmadas.
             ---------------------------------------------
             */
 
-            if(
+            if (
               cliente.role ===
               "sender"
-            ){
+            ) {
 
-              for(
+              for (
                 const recusa
                 of recusasPendentes.values()
-              ){
+              ) {
 
-                if(
+                if (
                   recusa.ownerId ===
                   cliente.clientId
-                ){
+                ) {
 
-                  enviar(
-                    ws,
-                    {
-                      type:
-                        "record_refused",
-
-                      recordId:
-                        recusa.recordId,
-
-                      record:
-                        recusa.record,
-
-                      reason:
-                        recusa.reason,
-
-                      refusedAt:
-                        recusa.refusedAt
-                    }
+                  enviarRecusaAoGuiche(
+                    recusa
                   );
 
                 }
@@ -321,7 +403,6 @@ wss.on(
             }
 
             return;
-
           }
 
 
@@ -331,15 +412,15 @@ wss.on(
           ===============================================
           */
 
-          if(
+          if (
             dados.type ===
             "send_record"
-          ){
+          ) {
 
             const recordId =
               dados.recordId;
 
-            if(!recordId){
+            if (!recordId) {
 
               enviar(
                 ws,
@@ -347,7 +428,8 @@ wss.on(
                   type:
                     "send_result",
 
-                  ok:false,
+                  ok:
+                    false,
 
                   error:
                     "recordId não informado."
@@ -355,8 +437,8 @@ wss.on(
               );
 
               return;
-
             }
+
 
             const agora =
               new Date()
@@ -365,8 +447,8 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Se esse atendimento já tinha sido recusado,
-            um novo envio cancela a recusa pendente.
+            Um novo envio cancela uma recusa pendente
+            anterior do mesmo atendimento.
             ---------------------------------------------
             */
 
@@ -377,7 +459,7 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Guardar/atualizar atendimento pendente.
+            Recuperar atendimento anterior.
             ---------------------------------------------
             */
 
@@ -386,13 +468,47 @@ wss.on(
                 recordId
               );
 
+
+            /*
+            ---------------------------------------------
+            Montar registro.
+            ---------------------------------------------
+            */
+
+            const registro =
+              dados.record ||
+              {};
+
+
+            /*
+            ---------------------------------------------
+            Garantir informações importantes do reenvio.
+            ---------------------------------------------
+            */
+
+            if (
+              registro.reenvio === true
+            ) {
+
+              registro.reenvio =
+                true;
+
+              registro.reenviadoEm =
+                registro.reenviadoEm ||
+                agora;
+
+              registro.status =
+                "aguardando_mesa";
+
+            }
+
+
             const pendente = {
 
               recordId,
 
               record:
-                dados.record ||
-                {},
+                registro,
 
               ownerId:
                 dados.ownerId ||
@@ -402,12 +518,14 @@ wss.on(
 
               createdAt:
                 anterior?.createdAt ||
+                registro.createdAt ||
                 agora,
 
               updatedAt:
                 agora
 
             };
+
 
             pendentes.set(
               recordId,
@@ -417,36 +535,28 @@ wss.on(
 
             console.log(
               "Atendimento enviado:",
-              recordId
+              recordId,
+              "owner:",
+              pendente.ownerId,
+              "reenvio:",
+              !!registro.reenvio
             );
 
 
             /*
             ---------------------------------------------
-            Enviar para todas as MESAS conectadas.
+            Enviar para todas as MESAS.
             ---------------------------------------------
             */
 
-            transmitirParaRole(
-              "receiver",
-              {
-                type:
-                  "new_record",
-
-                recordId,
-
-                record:
-                  pendente.record,
-
-                createdAt:
-                  pendente.createdAt
-              }
+            transmitirNovoAtendimento(
+              pendente
             );
 
 
             /*
             ---------------------------------------------
-            Confirmar ao GUICHÊ que o servidor recebeu.
+            Confirmar ao GUICHÊ.
             ---------------------------------------------
             */
 
@@ -456,14 +566,17 @@ wss.on(
                 type:
                   "send_result",
 
-                ok:true,
+                ok:
+                  true,
 
-                recordId
+                recordId,
+
+                reenvio:
+                  !!registro.reenvio
               }
             );
 
             return;
-
           }
 
 
@@ -473,13 +586,14 @@ wss.on(
           ===============================================
           */
 
-          if(
+          if (
             dados.type ===
             "confirm_received"
-          ){
+          ) {
 
             const recordId =
               dados.recordId;
+
 
             const pendente =
               pendentes.get(
@@ -489,9 +603,7 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Mesmo que o servidor tenha reiniciado e
-            perdido o pendente, ainda avisamos o GUICHÊ
-            se o ownerId estiver disponível.
+            Descobrir o GUICHÊ dono.
             ---------------------------------------------
             */
 
@@ -501,12 +613,12 @@ wss.on(
               null;
 
 
-            if(
+            if (
               pendente &&
               dados.ownerId &&
               pendente.ownerId !==
                 dados.ownerId
-            ){
+            ) {
 
               ownerId =
                 pendente.ownerId;
@@ -526,14 +638,14 @@ wss.on(
             ---------------------------------------------
             */
 
-            if(ownerId){
+            if (ownerId) {
 
               const guiche =
                 encontrarClientePorId(
                   ownerId
                 );
 
-              if(guiche){
+              if (guiche) {
 
                 enviar(
                   guiche.ws,
@@ -555,8 +667,7 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Avisar todas as MESAS para manter a situação
-            sincronizada.
+            Avisar as MESAS.
             ---------------------------------------------
             */
 
@@ -576,8 +687,7 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Depois que a Mesa recebeu, o pendente deixa
-            de existir no servidor.
+            Retirar dos pendentes.
             ---------------------------------------------
             */
 
@@ -592,11 +702,13 @@ wss.on(
                 type:
                   "confirm_result",
 
-                ok:true,
+                ok:
+                  true,
 
                 recordId
               }
             );
+
 
             console.log(
               "Atendimento recebido:",
@@ -604,7 +716,6 @@ wss.on(
             );
 
             return;
-
           }
 
 
@@ -612,20 +723,18 @@ wss.on(
           ===============================================
           REFUSE_RECORD
           ===============================================
-
-          A MESA envia esta mensagem quando recusa
-          um atendimento.
           */
 
-          if(
+          if (
             dados.type ===
             "refuse_record"
-          ){
+          ) {
 
             const recordId =
               dados.recordId;
 
-            if(!recordId){
+
+            if (!recordId) {
 
               enviar(
                 ws,
@@ -633,7 +742,8 @@ wss.on(
                   type:
                     "refuse_result",
 
-                  ok:false,
+                  ok:
+                    false,
 
                   error:
                     "recordId não informado."
@@ -641,9 +751,14 @@ wss.on(
               );
 
               return;
-
             }
 
+
+            /*
+            ---------------------------------------------
+            Procurar primeiro nos pendentes.
+            ---------------------------------------------
+            */
 
             const pendente =
               pendentes.get(
@@ -653,29 +768,51 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Descobrir quem é o dono do atendimento.
+            Determinar o GUICHÊ dono.
             ---------------------------------------------
             */
 
             const ownerId =
               pendente?.ownerId ||
               dados.ownerId ||
+              dados.record?.ownerId ||
               null;
 
 
-            const registro =
-              dados.record ||
-              pendente?.record ||
-              {};
+            /*
+            ---------------------------------------------
+            Registro enviado pela MESA.
+            ---------------------------------------------
+            */
 
+            const registro = {
+
+              ...(pendente?.record || {}),
+              ...(dados.record || {})
+
+            };
+
+
+            /*
+            ---------------------------------------------
+            Motivo da recusa.
+            ---------------------------------------------
+            */
 
             const motivo =
               String(
-                dados.reason ||
-                dados.motivoRecusa ||
+                dados.reason ??
+                dados.motivoRecusa ??
+                registro.motivoRecusa ??
                 "Motivo não informado."
               ).trim();
 
+
+            /*
+            ---------------------------------------------
+            Data/hora da recusa.
+            ---------------------------------------------
+            */
 
             const refusedAt =
               dados.refusedAt ||
@@ -685,9 +822,19 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Criar registro de recusa.
+            Criar objeto definitivo da recusa.
             ---------------------------------------------
             */
+
+            registro.status =
+              "recusado";
+
+            registro.motivoRecusa =
+              motivo;
+
+            registro.recusadoEm =
+              refusedAt;
+
 
             const recusa = {
 
@@ -708,7 +855,7 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Guardar a recusa até o GUICHÊ confirmar.
+            Guardar no servidor.
             ---------------------------------------------
             */
 
@@ -720,10 +867,7 @@ wss.on(
 
             /*
             ---------------------------------------------
-            REMOVER imediatamente dos pendentes.
-
-            Isso garante que a MESA não continue mostrando
-            o atendimento recusado.
+            Retirar imediatamente da fila da MESA.
             ---------------------------------------------
             */
 
@@ -733,53 +877,65 @@ wss.on(
 
 
             console.log(
-              "Atendimento recusado:",
-              recordId,
+              "===================================="
+            );
+
+            console.log(
+              "ATENDIMENTO RECUSADO"
+            );
+
+            console.log(
+              "recordId:",
+              recordId
+            );
+
+            console.log(
+              "ownerId:",
+              ownerId
+            );
+
+            console.log(
+              "motivo:",
               motivo
+            );
+
+            console.log(
+              "===================================="
             );
 
 
             /*
             ---------------------------------------------
-            Enviar recusa para o GUICHÊ.
+            ENVIAR PARA O GUICHÊ
             ---------------------------------------------
             */
 
-            if(ownerId){
+            const enviadoAoGuiche =
+              enviarRecusaAoGuiche(
+                recusa
+              );
 
-              const guiche =
-                encontrarClientePorId(
-                  ownerId
-                );
 
-              if(guiche){
+            /*
+            ---------------------------------------------
+            Se o GUICHÊ estiver desconectado,
+            a recusa permanece em recusasPendentes.
+            ---------------------------------------------
+            */
 
-                enviar(
-                  guiche.ws,
-                  {
-                    type:
-                      "record_refused",
+            if (!enviadoAoGuiche) {
 
-                    recordId,
-
-                    record:
-                      registro,
-
-                    reason:
-                      motivo,
-
-                    refusedAt
-                  }
-                );
-
-              }
+              console.log(
+                "GUICHÊ offline. Recusa armazenada para entrega posterior:",
+                recordId
+              );
 
             }
 
 
             /*
             ---------------------------------------------
-            Remover das outras MESAS conectadas.
+            Remover das outras MESAS.
             ---------------------------------------------
             */
 
@@ -802,8 +958,7 @@ wss.on(
 
             /*
             ---------------------------------------------
-            Confirmar para a MESA que a recusa foi
-            registrada pelo servidor.
+            Confirmar para a MESA.
             ---------------------------------------------
             */
 
@@ -813,16 +968,19 @@ wss.on(
                 type:
                   "refuse_result",
 
-                ok:true,
+                ok:
+                  true,
 
                 recordId,
 
-                refusedAt
+                refusedAt,
+
+                deliveredToGuiche:
+                  enviadoAoGuiche
               }
             );
 
             return;
-
           }
 
 
@@ -830,25 +988,31 @@ wss.on(
           ===============================================
           CONFIRM_REFUSAL_RECEIVED
           ===============================================
-
-          O GUICHÊ envia esta mensagem depois que recebeu
-          a recusa.
           */
 
-          if(
+          if (
             dados.type ===
             "confirm_refusal_received"
-          ){
+          ) {
 
             const recordId =
               dados.recordId;
+
 
             const recusa =
               recusasPendentes.get(
                 recordId
               );
 
-            if(!recusa){
+
+            /*
+            ---------------------------------------------
+            Se já não estiver na fila, considerar
+            confirmado.
+            ---------------------------------------------
+            */
+
+            if (!recusa) {
 
               enviar(
                 ws,
@@ -856,32 +1020,32 @@ wss.on(
                   type:
                     "confirm_refusal_result",
 
-                  ok:true,
+                  ok:
+                    true,
 
                   recordId,
 
-                  alreadyConfirmed:true
+                  alreadyConfirmed:
+                    true
                 }
               );
 
               return;
-
             }
 
 
             /*
             ---------------------------------------------
-            Segurança: somente o GUICHÊ dono pode
-            confirmar a recusa.
+            Segurança.
             ---------------------------------------------
             */
 
-            if(
+            if (
               recusa.ownerId &&
               dados.ownerId &&
               recusa.ownerId !==
                 dados.ownerId
-            ){
+            ) {
 
               enviar(
                 ws,
@@ -889,7 +1053,8 @@ wss.on(
                   type:
                     "confirm_refusal_result",
 
-                  ok:false,
+                  ok:
+                    false,
 
                   recordId,
 
@@ -899,9 +1064,14 @@ wss.on(
               );
 
               return;
-
             }
 
+
+            /*
+            ---------------------------------------------
+            Retirar recusa da fila do servidor.
+            ---------------------------------------------
+            */
 
             recusasPendentes.delete(
               recordId
@@ -914,7 +1084,8 @@ wss.on(
                 type:
                   "confirm_refusal_result",
 
-                ok:true,
+                ok:
+                  true,
 
                 recordId
               }
@@ -927,7 +1098,36 @@ wss.on(
             );
 
             return;
+          }
 
+
+          /*
+          ===============================================
+          RECORD_STATUS
+          ===============================================
+
+          Permite sincronização futura de status.
+          ===============================================
+          */
+
+          if (
+            dados.type ===
+            "record_status"
+          ) {
+
+            const recordId =
+              dados.recordId;
+
+            const status =
+              dados.status;
+
+            console.log(
+              "Atualização de status:",
+              recordId,
+              status
+            );
+
+            return;
           }
 
 
@@ -937,10 +1137,10 @@ wss.on(
           ===============================================
           */
 
-          if(
+          if (
             dados.type ===
             "ping"
-          ){
+          ) {
 
             enviar(
               ws,
@@ -955,10 +1155,9 @@ wss.on(
             );
 
             return;
-
           }
 
-        }catch(erro){
+        } catch (erro) {
 
           console.error(
             "Erro ao processar mensagem:",
@@ -1034,14 +1233,15 @@ HEALTH CHECK
 
 app.get(
   "/health",
-  (req,res) => {
+  (req, res) => {
 
     res.json({
 
-      ok:true,
+      ok:
+        true,
 
       version:
-        "2.7.0",
+        VERSAO,
 
       clientes:
         clientes.size,
@@ -1070,15 +1270,15 @@ STATUS
 
 app.get(
   "/status",
-  (req,res) => {
+  (req, res) => {
 
     const listaClientes =
       [];
 
-    for(
+    for (
       const cliente
       of clientes.values()
-    ){
+    ) {
 
       listaClientes.push({
 
@@ -1099,12 +1299,14 @@ app.get(
 
     }
 
+
     res.json({
 
-      ok:true,
+      ok:
+        true,
 
       version:
-        "2.7.0",
+        VERSAO,
 
       clientes:
         listaClientes,
@@ -1114,6 +1316,7 @@ app.get(
           pendentes.values()
         ).map(
           item => ({
+
             recordId:
               item.recordId,
 
@@ -1125,6 +1328,7 @@ app.get(
 
             updatedAt:
               item.updatedAt
+
           })
         ),
 
@@ -1133,6 +1337,7 @@ app.get(
           recusasPendentes.values()
         ).map(
           item => ({
+
             recordId:
               item.recordId,
 
@@ -1144,6 +1349,7 @@ app.get(
 
             refusedAt:
               item.refusedAt
+
           })
         )
 
@@ -1169,7 +1375,7 @@ server.listen(
   () => {
 
     console.log(
-      `Servidor V2.7.0 funcionando na porta ${PORT}`
+      `Servidor V${VERSAO} funcionando na porta ${PORT}`
     );
 
   }
