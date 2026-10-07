@@ -6,9 +6,7 @@
 <title>Mesa de Atendimento - CPAIG</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
@@ -95,40 +93,18 @@ button:hover{
   filter:brightness(.96);
 }
 
-.btn-blue{
-  background:#2563eb;
-  color:#fff;
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
 }
 
-.btn-green{
-  background:#15803d;
-  color:#fff;
-}
-
-.btn-orange{
-  background:#ea580c;
-  color:#fff;
-}
-
-.btn-red{
-  background:#dc2626;
-  color:#fff;
-}
-
-.btn-gray{
-  background:#64748b;
-  color:#fff;
-}
-
-.btn-yellow{
-  background:#eab308;
-  color:#111827;
-}
-
-.btn-dark{
-  background:#1e293b;
-  color:#fff;
-}
+.btn-blue{background:#2563eb;color:#fff}
+.btn-green{background:#15803d;color:#fff}
+.btn-orange{background:#ea580c;color:#fff}
+.btn-red{background:#dc2626;color:#fff}
+.btn-gray{background:#64748b;color:#fff}
+.btn-yellow{background:#eab308;color:#111827}
+.btn-dark{background:#1e293b;color:#fff}
 
 .section{
   background:#fff;
@@ -469,19 +445,12 @@ textarea{
   display:block;
 }
 
-.toast.success{
-  background:#166534;
-}
-
-.toast.error{
-  background:#991b1b;
-}
-
-.toast.warning{
-  background:#92400e;
-}
+.toast.success{background:#166534}
+.toast.error{background:#991b1b}
+.toast.warning{background:#92400e}
 
 @media(max-width:800px){
+
   .print-grid{
     grid-template-columns:1fr;
   }
@@ -496,6 +465,7 @@ textarea{
 }
 
 @media print{
+
   @page{
     size:A4 portrait;
     margin:5mm;
@@ -525,76 +495,181 @@ textarea{
 
 <header>
   <div class="header-top">
+
     <div class="logo-area">
       <h1>MESA DE ATENDIMENTO</h1>
-      <div class="sub">POLÍCIA PENAL DE MATO GROSSO DO SUL</div>
-      <div class="cpaig">CPAIG</div>
+
+      <div class="sub">
+        POLÍCIA PENAL DE MATO GROSSO DO SUL
+      </div>
+
+      <div class="cpaig">
+        CPAIG
+      </div>
     </div>
 
     <div class="status">
-      <span id="statusDot" class="status-dot"></span>
-      <span id="statusTexto">Conectando...</span>
+
+      <span
+        id="statusDot"
+        class="status-dot"
+      ></span>
+
+      <span id="statusTexto">
+        Conectando...
+      </span>
+
     </div>
+
   </div>
 </header>
 
 <div class="container">
 
   <div class="toolbar">
-    <button class="btn-green" onclick="receberTodos()">✅ RECEBER TODOS</button>
-    <button class="btn-blue" onclick="abrirImpressao()">🖨️ IMPRIMIR</button>
-    <button class="btn-dark" onclick="abrirGuardados()">📁 ATENDIMENTOS GUARDADOS</button>
-    <button class="btn-gray" onclick="toggleSom()" id="btnSom">🔊 SOM: ATIVO</button>
+
+    <button
+      class="btn-green"
+      onclick="receberTodos()"
+    >
+      ✅ RECEBER TODOS
+    </button>
+
+    <button
+      class="btn-blue"
+      onclick="abrirImpressao()"
+    >
+      🖨️ IMPRIMIR
+    </button>
+
+    <button
+      class="btn-dark"
+      onclick="abrirGuardados()"
+    >
+      📁 ATENDIMENTOS GUARDADOS
+    </button>
+
+    <button
+      class="btn-gray"
+      onclick="toggleSom()"
+      id="btnSom"
+    >
+      🔊 SOM: ATIVO
+    </button>
+
   </div>
 
   <section class="section">
+
     <div class="section-header">
-      <h2>📥 ATENDIMENTOS PENDENTES</h2>
-      <span class="counter" id="contadorPendentes">0</span>
+
+      <h2>
+        📥 ATENDIMENTOS PENDENTES
+      </h2>
+
+      <span
+        class="counter"
+        id="contadorPendentes"
+      >
+        0
+      </span>
+
     </div>
 
     <div class="section-body">
+
       <div id="pendentesContainer"></div>
+
     </div>
+
   </section>
 
   <section class="section">
+
     <div class="section-header">
-      <h2>📋 HISTÓRICO DE ATENDIMENTOS</h2>
-      <span class="counter" id="contadorHistorico">0</span>
+
+      <h2>
+        📋 HISTÓRICO DE ATENDIMENTOS
+      </h2>
+
+      <span
+        class="counter"
+        id="contadorHistorico"
+      >
+        0
+      </span>
+
     </div>
 
     <div class="section-body">
+
       <div class="toolbar">
-        <button class="btn-gray" onclick="ordenarHistorico('envio')">
+
+        <button
+          class="btn-gray"
+          onclick="ordenarHistorico('envio')"
+        >
           ↕ ORDEM DE ENVIO
         </button>
 
-        <button class="btn-gray" onclick="ordenarHistorico('atendimento')">
+        <button
+          class="btn-gray"
+          onclick="ordenarHistorico('atendimento')"
+        >
           ↕ POR ATENDIMENTO
         </button>
+
       </div>
 
       <div id="historicoContainer"></div>
+
     </div>
+
   </section>
 
 </div>
 
-<div id="toast" class="toast"></div>
+<div
+  id="toast"
+  class="toast"
+></div>
 
-<!-- MODAL RECUSA -->
-<div id="modalRecusa" class="modal-overlay">
+<!-- =====================================================
+     MODAL RECUSA
+===================================================== -->
+
+<div
+  id="modalRecusa"
+  class="modal-overlay"
+>
+
   <div class="modal">
+
     <div class="modal-header">
-      <h3>❌ RECUSAR ATENDIMENTO</h3>
-      <button class="close" onclick="fecharRecusa()">×</button>
+
+      <h3>
+        ❌ RECUSAR ATENDIMENTO
+      </h3>
+
+      <button
+        class="close"
+        onclick="fecharRecusa()"
+      >
+        ×
+      </button>
+
     </div>
 
     <div class="modal-body">
-      <div id="dadosRecusa" class="small" style="margin-bottom:12px;"></div>
+
+      <div
+        id="dadosRecusa"
+        class="small"
+        style="margin-bottom:12px;"
+      ></div>
 
       <div class="form-group">
+
         <label for="recusaMotivo">
           Motivo da recusa
         </label>
@@ -603,58 +678,128 @@ textarea{
           id="recusaMotivo"
           placeholder="Digite o motivo que deverá ser visualizado no GUICHÊ..."
         ></textarea>
+
       </div>
+
     </div>
 
     <div class="modal-footer">
-      <button class="btn-gray" onclick="fecharRecusa()">CANCELAR</button>
-      <button class="btn-red" onclick="confirmarRecusa()">❌ CONFIRMAR RECUSA</button>
+
+      <button
+        class="btn-gray"
+        onclick="fecharRecusa()"
+      >
+        CANCELAR
+      </button>
+
+      <button
+        class="btn-red"
+        onclick="confirmarRecusa()"
+      >
+        ❌ CONFIRMAR RECUSA
+      </button>
+
     </div>
+
   </div>
+
 </div>
 
-<!-- MODAL GUARDADOS -->
-<div id="modalGuardados" class="modal-overlay">
+<!-- =====================================================
+     MODAL GUARDADOS
+===================================================== -->
+
+<div
+  id="modalGuardados"
+  class="modal-overlay"
+>
+
   <div class="modal">
+
     <div class="modal-header">
-      <h3>📁 ATENDIMENTOS GUARDADOS</h3>
-      <button class="close" onclick="fecharGuardados()">×</button>
+
+      <h3>
+        📁 ATENDIMENTOS GUARDADOS
+      </h3>
+
+      <button
+        class="close"
+        onclick="fecharGuardados()"
+      >
+        ×
+      </button>
+
     </div>
 
     <div class="modal-body">
+
       <div class="toolbar">
+
         <input
           id="filtroGuardados"
           placeholder="Pesquisar por nome, atendimento, RGI ou data..."
           oninput="renderGuardados()"
         >
+
       </div>
 
       <div id="guardadosContainer"></div>
+
     </div>
 
     <div class="modal-footer">
-      <button class="btn-gray" onclick="fecharGuardados()">FECHAR</button>
+
+      <button
+        class="btn-gray"
+        onclick="fecharGuardados()"
+      >
+        FECHAR
+      </button>
+
     </div>
+
   </div>
+
 </div>
 
-<!-- MODAL IMPRESSÃO -->
-<div id="modalImpressao" class="modal-overlay">
+<!-- =====================================================
+     MODAL IMPRESSÃO
+===================================================== -->
+
+<div
+  id="modalImpressao"
+  class="modal-overlay"
+>
+
   <div class="modal">
+
     <div class="modal-header">
-      <h3>🖨️ IMPRESSÃO</h3>
-      <button class="close" onclick="fecharImpressao()">×</button>
+
+      <h3>
+        🖨️ IMPRESSÃO
+      </h3>
+
+      <button
+        class="close"
+        onclick="fecharImpressao()"
+      >
+        ×
+      </button>
+
     </div>
 
     <div class="modal-body">
 
       <div class="form-group">
-        <label>Tipo de impressão</label>
+
+        <label>
+          Tipo de impressão
+        </label>
 
         <div class="radio-group">
 
           <label class="radio-option">
+
             <input
               type="radio"
               name="modoPrint"
@@ -662,94 +807,143 @@ textarea{
               checked
               onchange="alterarModoImpressao()"
             >
+
             Por atendimento
+
           </label>
 
           <label class="radio-option">
+
             <input
               type="radio"
               name="modoPrint"
               value="geral"
               onchange="alterarModoImpressao()"
             >
+
             Por atendimento geral
+
           </label>
 
           <label class="radio-option">
+
             <input
               type="radio"
               name="modoPrint"
               value="data"
               onchange="alterarModoImpressao()"
             >
+
             Por data
+
           </label>
 
         </div>
+
       </div>
 
-      <!-- POR ATENDIMENTO -->
-      <div id="grupoPrintAtendimento">
+      <div
+        id="grupoPrintAtendimento"
+      >
 
         <div class="print-grid">
 
           <div class="form-group">
-            <label>Atendimentos</label>
 
-            <div id="listaAtendimentosImpressao" class="checkbox-list"></div>
+            <label>
+              Atendimentos
+            </label>
+
+            <div
+              id="listaAtendimentosImpressao"
+              class="checkbox-list"
+            ></div>
+
           </div>
 
           <div class="form-group">
-            <label>Pavilhão — filtro opcional</label>
 
-            <div id="listaPavilhoesAtendimento" class="checkbox-list"></div>
+            <label>
+              Pavilhão — filtro opcional
+            </label>
 
-            <div class="small" style="margin-top:6px;">
+            <div
+              id="listaPavilhoesAtendimento"
+              class="checkbox-list"
+            ></div>
+
+            <div
+              class="small"
+              style="margin-top:6px;"
+            >
               Os pavilhões são carregados da base Excel de internos.
             </div>
+
           </div>
 
         </div>
 
       </div>
 
-      <!-- GERAL -->
-      <div id="grupoPrintGeral" style="display:none;">
+      <div
+        id="grupoPrintGeral"
+        style="display:none;"
+      >
 
         <div class="form-group">
-          <label>Pavilhão — filtro opcional</label>
 
-          <div id="listaPavilhoesGeral" class="checkbox-list"></div>
+          <label>
+            Pavilhão — filtro opcional
+          </label>
 
-          <div class="small" style="margin-top:6px;">
+          <div
+            id="listaPavilhoesGeral"
+            class="checkbox-list"
+          ></div>
+
+          <div
+            class="small"
+            style="margin-top:6px;"
+          >
             Deixe todos desmarcados para imprimir todos os pavilhões.
           </div>
+
         </div>
 
       </div>
 
-      <!-- POR DATA -->
-      <div id="grupoPrintData" style="display:none;">
+      <div
+        id="grupoPrintData"
+        style="display:none;"
+      >
 
         <div class="print-grid">
 
           <div>
 
             <div class="form-group">
+
               <label for="printData">
                 Data do atendimento
               </label>
 
-              <input type="date" id="printData">
+              <input
+                type="date"
+                id="printData"
+              >
+
             </div>
 
             <div class="form-group">
 
-              <label>Filtro de atendimento</label>
+              <label>
+                Filtro de atendimento
+              </label>
 
               <div class="radio-group">
 
                 <label class="radio-option">
+
                   <input
                     type="radio"
                     name="tipoData"
@@ -757,17 +951,22 @@ textarea{
                     checked
                     onchange="alterarTipoData()"
                   >
+
                   Todos
+
                 </label>
 
                 <label class="radio-option">
+
                   <input
                     type="radio"
                     name="tipoData"
                     value="atendimentos"
                     onchange="alterarTipoData()"
                   >
+
                   Atendimentos
+
                 </label>
 
               </div>
@@ -783,15 +982,29 @@ textarea{
               class="form-group"
               style="display:none;"
             >
-              <label>Atendimentos</label>
 
-              <div id="listaAtendimentosData" class="checkbox-list"></div>
+              <label>
+                Atendimentos
+              </label>
+
+              <div
+                id="listaAtendimentosData"
+                class="checkbox-list"
+              ></div>
+
             </div>
 
             <div class="form-group">
-              <label>Pavilhão — filtro opcional</label>
 
-              <div id="listaPavilhoesData" class="checkbox-list"></div>
+              <label>
+                Pavilhão — filtro opcional
+              </label>
+
+              <div
+                id="listaPavilhoesData"
+                class="checkbox-list"
+              ></div>
+
             </div>
 
           </div>
@@ -809,15 +1022,31 @@ textarea{
     </div>
 
     <div class="modal-footer">
-      <button class="btn-gray" onclick="fecharImpressao()">CANCELAR</button>
-      <button class="btn-blue" onclick="executarImpressao()">🖨️ IMPRIMIR</button>
+
+      <button
+        class="btn-gray"
+        onclick="fecharImpressao()"
+      >
+        CANCELAR
+      </button>
+
+      <button
+        class="btn-blue"
+        onclick="executarImpressao()"
+      >
+        🖨️ IMPRIMIR
+      </button>
+
     </div>
 
   </div>
+
 </div>
 
-<!-- ÁREA DE IMPRESSÃO -->
-<div id="areaImpressao" style="display:none;"></div>
+<div
+  id="areaImpressao"
+  style="display:none;"
+></div>
 
 <script>
 "use strict";
@@ -826,12 +1055,23 @@ textarea{
    CONFIGURAÇÕES
 ============================================================ */
 
-const STORAGE_HISTORICO = "mesaAtendimentosV23";
-const STORAGE_ARQUIVO = "mesaAtendimentosV23Arquivo";
-const STORAGE_PENDENTES = "mesaAtendimentosV24Pendentes";
-const STORAGE_SOM = "mesaAtendimentosV24Som";
+const STORAGE_HISTORICO =
+  "mesaAtendimentosV23";
 
-const STORAGE_BASE_EXCEL = "atendimentoV23BaseInternos";
+const STORAGE_ARQUIVO =
+  "mesaAtendimentosV23Arquivo";
+
+const STORAGE_PENDENTES =
+  "mesaAtendimentosV24Pendentes";
+
+const STORAGE_RECUSAS_ENVIO =
+  "mesaAtendimentosV26RecusasEnvio";
+
+const STORAGE_SOM =
+  "mesaAtendimentosV24Som";
+
+const STORAGE_BASE_EXCEL =
+  "atendimentoV23BaseInternos";
 
 const ATENDIMENTOS = [
   "Jurídico",
@@ -862,18 +1102,33 @@ const ATENDIMENTOS = [
   "Outros"
 ];
 
+/* ============================================================
+   VARIÁVEIS
+============================================================ */
+
 let socket = null;
+
 let reconnectTimer = null;
 
+let heartbeatTimer = null;
+
+let retryDelay = 1000;
+
 let pendentes = [];
+
 let historico = [];
+
 let arquivo = [];
+
+let recusasEnvio = [];
 
 let somAtivo = true;
 
 let recordIdRecusaAtual = null;
 
 let ordemHistorico = "envio";
+
+let ultimaConexao = 0;
 
 /* ============================================================
    UTILITÁRIOS
@@ -884,38 +1139,55 @@ function $(id){
 }
 
 function gerarId(){
-  if(window.crypto && crypto.randomUUID){
+
+  if(
+    window.crypto &&
+    crypto.randomUUID
+  ){
     return crypto.randomUUID();
   }
 
   return "mesa-" +
     Date.now() +
     "-" +
-    Math.random().toString(36).slice(2);
+    Math.random()
+      .toString(36)
+      .slice(2);
 }
 
-function salvarJSON(chave, valor){
-  localStorage.setItem(chave, JSON.stringify(valor));
+function salvarJSON(chave,valor){
+
+  localStorage.setItem(
+    chave,
+    JSON.stringify(valor)
+  );
 }
 
-function lerJSON(chave, padrao){
+function lerJSON(chave,padrao){
+
   try{
-    const valor = localStorage.getItem(chave);
+
+    const valor =
+      localStorage.getItem(chave);
 
     if(!valor){
       return padrao;
     }
 
-    const convertido = JSON.parse(valor);
+    const convertido =
+      JSON.parse(valor);
 
     return convertido ?? padrao;
 
   }catch(e){
+
     return padrao;
+
   }
 }
 
 function escapeHtml(valor){
+
   return String(valor ?? "")
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
@@ -925,6 +1197,7 @@ function escapeHtml(valor){
 }
 
 function normalizar(valor){
+
   return String(valor ?? "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g,"")
@@ -933,61 +1206,103 @@ function normalizar(valor){
 }
 
 function formatarDataHora(valor){
+
   if(!valor){
     return "-";
   }
 
-  const d = new Date(valor);
+  const d =
+    new Date(valor);
 
   if(Number.isNaN(d.getTime())){
     return String(valor);
   }
 
-  return d.toLocaleString("pt-BR");
+  return d.toLocaleString(
+    "pt-BR"
+  );
 }
 
 function formatarData(valor){
+
   if(!valor){
     return "-";
   }
 
-  if(/^\d{4}-\d{2}-\d{2}$/.test(String(valor))){
-    const [ano,mes,dia] = String(valor).split("-");
+  if(
+    /^\d{4}-\d{2}-\d{2}$/
+      .test(String(valor))
+  ){
+
+    const [
+      ano,
+      mes,
+      dia
+    ] =
+      String(valor).split("-");
+
     return `${dia}/${mes}/${ano}`;
   }
 
-  const d = new Date(valor);
+  const d =
+    new Date(valor);
 
   if(Number.isNaN(d.getTime())){
     return String(valor);
   }
 
-  return d.toLocaleDateString("pt-BR");
+  return d.toLocaleDateString(
+    "pt-BR"
+  );
 }
 
-function mostrarToast(mensagem,tipo=""){
-  const toast = $("toast");
+function mostrarToast(
+  mensagem,
+  tipo=""
+){
 
-  toast.textContent = mensagem;
-  toast.className = "toast show " + tipo;
+  const toast =
+    $("toast");
 
-  clearTimeout(mostrarToast.timer);
+  toast.textContent =
+    mensagem;
 
-  mostrarToast.timer = setTimeout(()=>{
-    toast.className = "toast";
-  },3500);
+  toast.className =
+    "toast show " + tipo;
+
+  clearTimeout(
+    mostrarToast.timer
+  );
+
+  mostrarToast.timer =
+    setTimeout(()=>{
+      toast.className =
+        "toast";
+    },3500);
 }
 
-function valorRegistro(registro,...nomes){
-  for(const nome of nomes){
+function valorRegistro(
+  registro,
+  ...nomes
+){
+
+  for(
+    const nome of nomes
+  ){
+
     if(
       registro &&
       registro[nome] !== undefined &&
       registro[nome] !== null &&
-      String(registro[nome]).trim() !== ""
+      String(
+        registro[nome]
+      ).trim() !== ""
     ){
+
       return registro[nome];
+
     }
+
   }
 
   return "";
@@ -1014,35 +1329,54 @@ function salvarTudo(){
     arquivo
   );
 
+  salvarJSON(
+    STORAGE_RECUSAS_ENVIO,
+    recusasEnvio
+  );
+
   localStorage.setItem(
     STORAGE_SOM,
-    somAtivo ? "1" : "0"
+    somAtivo
+      ? "1"
+      : "0"
   );
 }
 
 function carregarTudo(){
 
-  pendentes = lerJSON(
-    STORAGE_PENDENTES,
-    []
-  );
+  pendentes =
+    lerJSON(
+      STORAGE_PENDENTES,
+      []
+    );
 
-  historico = lerJSON(
-    STORAGE_HISTORICO,
-    []
-  );
+  historico =
+    lerJSON(
+      STORAGE_HISTORICO,
+      []
+    );
 
-  arquivo = lerJSON(
-    STORAGE_ARQUIVO,
-    []
-  );
+  arquivo =
+    lerJSON(
+      STORAGE_ARQUIVO,
+      []
+    );
+
+  recusasEnvio =
+    lerJSON(
+      STORAGE_RECUSAS_ENVIO,
+      []
+    );
 
   somAtivo =
-    localStorage.getItem(STORAGE_SOM) !== "0";
+    localStorage.getItem(
+      STORAGE_SOM
+    ) !== "0";
 
   atualizarBotaoSom();
 
   renderPendentes();
+
   renderHistorico();
 }
 
@@ -1052,7 +1386,8 @@ function carregarTudo(){
 
 function atualizarBotaoSom(){
 
-  const btn = $("btnSom");
+  const btn =
+    $("btnSom");
 
   if(!btn){
     return;
@@ -1066,7 +1401,8 @@ function atualizarBotaoSom(){
 
 function toggleSom(){
 
-  somAtivo = !somAtivo;
+  somAtivo =
+    !somAtivo;
 
   salvarTudo();
 
@@ -1093,13 +1429,20 @@ function tocarSom(){
       return;
     }
 
-    const ctx = new AudioContext();
+    const ctx =
+      new AudioContext();
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+    const osc =
+      ctx.createOscillator();
 
-    osc.frequency.value = 880;
-    osc.type = "sine";
+    const gain =
+      ctx.createGain();
+
+    osc.frequency.value =
+      880;
+
+    osc.type =
+      "sine";
 
     gain.gain.setValueAtTime(
       0.0001,
@@ -1117,10 +1460,16 @@ function tocarSom(){
     );
 
     osc.connect(gain);
-    gain.connect(ctx.destination);
+
+    gain.connect(
+      ctx.destination
+    );
 
     osc.start();
-    osc.stop(ctx.currentTime + 0.4);
+
+    osc.stop(
+      ctx.currentTime + 0.4
+    );
 
   }catch(e){}
 }
@@ -1141,62 +1490,104 @@ function tocarRecusa(){
       return;
     }
 
-    const ctx = new AudioContext();
+    const ctx =
+      new AudioContext();
 
-    [660,520,400].forEach((freq,index)=>{
+    [660,520,400]
+      .forEach(
+        (freq,index)=>{
 
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+          const osc =
+            ctx.createOscillator();
 
-      osc.frequency.value = freq;
-      osc.type = "sine";
+          const gain =
+            ctx.createGain();
 
-      const inicio =
-        ctx.currentTime + index * 0.15;
+          osc.frequency.value =
+            freq;
 
-      gain.gain.setValueAtTime(
-        0.0001,
-        inicio
+          osc.type =
+            "sine";
+
+          const inicio =
+            ctx.currentTime +
+            index * 0.15;
+
+          gain.gain.setValueAtTime(
+            0.0001,
+            inicio
+          );
+
+          gain.gain.exponentialRampToValueAtTime(
+            0.2,
+            inicio + 0.02
+          );
+
+          gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            inicio + 0.13
+          );
+
+          osc.connect(gain);
+
+          gain.connect(
+            ctx.destination
+          );
+
+          osc.start(inicio);
+
+          osc.stop(
+            inicio + 0.15
+          );
+
+        }
       );
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.2,
-        inicio + 0.02
-      );
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        inicio + 0.13
-      );
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(inicio);
-      osc.stop(inicio + 0.15);
-
-    });
 
   }catch(e){}
+}
+
+/* ============================================================
+   STATUS DA CONEXÃO
+============================================================ */
+
+function definirStatus(
+  online,
+  texto
+){
+
+  $("statusDot")
+    .classList
+    .toggle(
+      "online",
+      online
+    );
+
+  $("statusTexto")
+    .textContent =
+    texto;
 }
 
 /* ============================================================
    WEBSOCKET
 ============================================================ */
 
-function definirStatus(online,texto){
-
-  $("statusDot").classList.toggle(
-    "online",
-    online
-  );
-
-  $("statusTexto").textContent = texto;
-}
-
 function conectarServidor(){
 
-  clearTimeout(reconnectTimer);
+  clearTimeout(
+    reconnectTimer
+  );
+
+  if(
+    socket &&
+    (
+      socket.readyState ===
+        WebSocket.OPEN ||
+      socket.readyState ===
+        WebSocket.CONNECTING
+    )
+  ){
+    return;
+  }
 
   definirStatus(
     false,
@@ -1210,9 +1601,12 @@ function conectarServidor(){
         ? "wss:"
         : "ws:";
 
-    socket = new WebSocket(
-      protocolo + "//" + location.host
-    );
+    socket =
+      new WebSocket(
+        protocolo +
+        "//" +
+        location.host
+      );
 
   }catch(e){
 
@@ -1225,28 +1619,32 @@ function conectarServidor(){
     "open",
     ()=>{
 
+      ultimaConexao =
+        Date.now();
+
+      retryDelay =
+        1000;
+
       definirStatus(
         true,
         "Mesa conectada"
       );
 
-      socket.send(
-        JSON.stringify({
-          type:"register",
-          role:"receiver"
-        })
-      );
+      enviarMensagem({
+        type:"register",
+        role:"receiver"
+      });
 
       mostrarToast(
         "Mesa conectada ao servidor.",
         "success"
       );
 
-      /*
-       * Se a Mesa tiver recebido novamente um registro que já
-       * existia localmente, confirmamos novamente ao servidor.
-       */
       reenviarConfirmacoesConhecidas();
+
+      reenviarRecusasPendentes();
+
+      iniciarHeartbeat();
 
     }
   );
@@ -1258,13 +1656,22 @@ function conectarServidor(){
       let mensagem;
 
       try{
+
         mensagem =
-          JSON.parse(event.data);
+          JSON.parse(
+            event.data
+          );
+
       }catch(e){
+
         return;
+
       }
 
-      tratarMensagemServidor(mensagem);
+      tratarMensagemServidor(
+        mensagem
+      );
+
     }
   );
 
@@ -1272,9 +1679,11 @@ function conectarServidor(){
     "close",
     ()=>{
 
+      pararHeartbeat();
+
       definirStatus(
         false,
-        "Desconectada — tentando reconectar"
+        "Desconectada — reconectando..."
       );
 
       agendarReconexao();
@@ -1288,77 +1697,204 @@ function conectarServidor(){
 
       definirStatus(
         false,
-        "Erro de conexão"
+        "Reconectando..."
       );
 
-  });
-
+    }
+  );
 }
 
 function agendarReconexao(){
 
-  clearTimeout(reconnectTimer);
+  clearTimeout(
+    reconnectTimer
+  );
 
   reconnectTimer =
     setTimeout(
-      conectarServidor,
-      3000
+      ()=>{
+
+        conectarServidor();
+
+        retryDelay =
+          Math.min(
+            retryDelay * 2,
+            10000
+          );
+
+      },
+      retryDelay
     );
 }
 
-function enviarMensagem(dados){
+function iniciarHeartbeat(){
+
+  pararHeartbeat();
+
+  heartbeatTimer =
+    setInterval(
+      ()=>{
+
+        if(
+          socket &&
+          socket.readyState ===
+            WebSocket.OPEN
+        ){
+
+          try{
+
+            socket.send(
+              JSON.stringify({
+                type:"ping"
+              })
+            );
+
+          }catch(e){}
+
+        }
+
+      },
+      12000
+    );
+}
+
+function pararHeartbeat(){
+
+  clearInterval(
+    heartbeatTimer
+  );
+
+  heartbeatTimer =
+    null;
+}
+
+function enviarMensagem(
+  dados
+){
 
   if(
     socket &&
-    socket.readyState === WebSocket.OPEN
+    socket.readyState ===
+      WebSocket.OPEN
   ){
 
-    socket.send(
-      JSON.stringify(dados)
-    );
+    try{
 
-    return true;
+      socket.send(
+        JSON.stringify(dados)
+      );
+
+      return true;
+
+    }catch(e){
+
+      return false;
+
+    }
+
   }
 
   return false;
 }
 
-function tratarMensagemServidor(mensagem){
+function tratarMensagemServidor(
+  mensagem
+){
 
-  if(mensagem.type === "connected"){
+  if(
+    mensagem.type ===
+    "connected"
+  ){
     return;
   }
 
-  if(mensagem.type === "registered"){
-    return;
-  }
-
-  if(mensagem.type === "new_record"){
-
-    receberNovoRegistro(mensagem);
+  if(
+    mensagem.type ===
+    "registered"
+  ){
 
     return;
   }
 
-  if(mensagem.type === "confirm_result"){
+  if(
+    mensagem.type ===
+    "server_ping"
+  ){
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "pong"
+  ){
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "new_record"
+  ){
+
+    receberNovoRegistro(
+      mensagem
+    );
+
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "confirm_result"
+  ){
 
     if(
       mensagem.ok === false &&
       mensagem.message
     ){
-      mostrarToast(
-        mensagem.message,
-        "warning"
-      );
+
+      /*
+       * "alreadyConfirmed" não é erro real.
+       */
+      if(
+        !mensagem.alreadyConfirmed
+      ){
+
+        mostrarToast(
+          mensagem.message,
+          "warning"
+        );
+
+      }
+
     }
 
     return;
   }
 
-  if(mensagem.type === "error"){
+  if(
+    mensagem.type ===
+    "refuse_result"
+  ){
+
+    if(mensagem.ok === true){
+
+      removerRecusaDaFila(
+        mensagem.recordId
+      );
+
+    }
+
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "error"
+  ){
 
     mostrarToast(
-      mensagem.message || "Erro no servidor.",
+      mensagem.message ||
+      "Erro no servidor.",
       "error"
     );
 
@@ -1367,10 +1903,12 @@ function tratarMensagemServidor(mensagem){
 }
 
 /* ============================================================
-   RECEBIMENTO DE NOVOS REGISTROS
+   NOVO REGISTRO
 ============================================================ */
 
-function obterRegistroDaMensagem(mensagem){
+function obterRegistroDaMensagem(
+  mensagem
+){
 
   const registro = {
     ...(mensagem.record || {})
@@ -1381,74 +1919,98 @@ function obterRegistroDaMensagem(mensagem){
     registro.recordId ||
     gerarId();
 
-  registro.recordId = recordId;
+  registro.recordId =
+    recordId;
 
   if(!registro.enviadoEm){
+
     registro.enviadoEm =
       mensagem.sentAt ||
       new Date().toISOString();
+
   }
 
   return registro;
 }
 
-function localizarRegistroLocal(recordId){
+function localizarRegistroLocal(
+  recordId
+){
 
-  const p = pendentes.find(
-    item => item.recordId === recordId
-  );
+  const p =
+    pendentes.find(
+      item =>
+        item.recordId ===
+        recordId
+    );
 
   if(p){
+
     return {
       tipo:"pendente",
       registro:p
     };
+
   }
 
-  const h = historico.find(
-    item => item.recordId === recordId
-  );
+  const h =
+    historico.find(
+      item =>
+        item.recordId ===
+        recordId
+    );
 
   if(h){
+
     return {
       tipo:"historico",
       registro:h
     };
+
   }
 
-  const a = arquivo.find(
-    item => item.recordId === recordId
-  );
+  const a =
+    arquivo.find(
+      item =>
+        item.recordId ===
+        recordId
+    );
 
   if(a){
+
     return {
       tipo:"arquivo",
       registro:a
     };
+
   }
 
   return null;
 }
 
-function receberNovoRegistro(mensagem){
+function receberNovoRegistro(
+  mensagem
+){
 
   const registro =
-    obterRegistroDaMensagem(mensagem);
+    obterRegistroDaMensagem(
+      mensagem
+    );
 
   const recordId =
     registro.recordId;
 
-  /*
-   * Se a Mesa já recebeu esse cadastro anteriormente,
-   * o servidor pode estar reenviando porque o GUICHÊ
-   * tentou novamente depois de uma queda.
-   *
-   * Nesse caso não criamos duplicata.
-   * Apenas confirmamos novamente.
-   */
   const conhecido =
-    localizarRegistroLocal(recordId);
+    localizarRegistroLocal(
+      recordId
+    );
 
+  /*
+   * DUPLICATA:
+   *
+   * O GUICHÊ pode reenviar porque perdeu a conexão.
+   * Não criaremos outra linha.
+   */
   if(conhecido){
 
     const status =
@@ -1474,18 +2036,22 @@ function receberNovoRegistro(mensagem){
   }
 
   /*
-   * Caso seja um novo registro, ele entra apenas
-   * na área PENDENTES.
-   *
-   * Ainda NÃO entra no histórico.
+   * NOVO:
+   * entra somente nos pendentes.
    */
   const pendente = {
     ...registro,
-    status:"aguardando_recebimento",
-    recebidoEm:null
+
+    status:
+      "aguardando_recebimento",
+
+    recebidoEm:
+      null
   };
 
-  pendentes.push(pendente);
+  pendentes.push(
+    pendente
+  );
 
   salvarTudo();
 
@@ -1503,11 +2069,15 @@ function receberNovoRegistro(mensagem){
    RECEBER INDIVIDUAL
 ============================================================ */
 
-function receberUm(recordId){
+function receberUm(
+  recordId
+){
 
   const indice =
     pendentes.findIndex(
-      item => item.recordId === recordId
+      item =>
+        item.recordId ===
+        recordId
     );
 
   if(indice < 0){
@@ -1520,20 +2090,22 @@ function receberUm(recordId){
   const recebidoEm =
     new Date().toISOString();
 
-  registro.status = "recebido";
-  registro.recebidoEm = recebidoEm;
+  registro.status =
+    "recebido";
+
+  registro.recebidoEm =
+    recebidoEm;
 
   pendentes.splice(
     indice,
     1
   );
 
-  /*
-   * Evita duplicação no histórico.
-   */
   const existente =
     historico.find(
-      item => item.recordId === recordId
+      item =>
+        item.recordId ===
+        recordId
     );
 
   if(existente){
@@ -1554,6 +2126,7 @@ function receberUm(recordId){
   salvarTudo();
 
   renderPendentes();
+
   renderHistorico();
 
   enviarMensagem({
@@ -1590,46 +2163,54 @@ function receberTodos(){
   const recebidoEm =
     new Date().toISOString();
 
-  lista.forEach(registro=>{
+  lista.forEach(
+    registro=>{
 
-    registro.status = "recebido";
-    registro.recebidoEm = recebidoEm;
+      registro.status =
+        "recebido";
 
-    const existente =
-      historico.find(
-        item =>
-          item.recordId ===
-          registro.recordId
-      );
+      registro.recebidoEm =
+        recebidoEm;
 
-    if(existente){
+      const existente =
+        historico.find(
+          item =>
+            item.recordId ===
+            registro.recordId
+        );
 
-      Object.assign(
-        existente,
-        registro
-      );
+      if(existente){
 
-    }else{
+        Object.assign(
+          existente,
+          registro
+        );
 
-      historico.push(
-        registro
-      );
+      }else{
+
+        historico.push(
+          registro
+        );
+
+      }
+
+      enviarMensagem({
+        type:"confirm_received",
+        recordId:
+          registro.recordId,
+        receivedAt:
+          recebidoEm
+      });
 
     }
-
-    enviarMensagem({
-      type:"confirm_received",
-      recordId:registro.recordId,
-      receivedAt
-    });
-
-  });
+  );
 
   pendentes = [];
 
   salvarTudo();
 
   renderPendentes();
+
   renderHistorico();
 
   mostrarToast(
@@ -1644,37 +2225,112 @@ function receberTodos(){
 
 function reenviarConfirmacoesConhecidas(){
 
-  /*
-   * A Mesa confirma novamente registros que já foram
-   * recebidos/guardados quando o servidor volta.
-   *
-   * Isso impede que um GUICHÊ fique eternamente aguardando
-   * por uma confirmação perdida durante uma queda do servidor.
-   */
   const conhecidos = [
     ...historico,
     ...arquivo
   ];
 
-  conhecidos.forEach(registro=>{
+  conhecidos.forEach(
+    registro=>{
 
-    if(
-      registro.status === "recebido" ||
-      registro.status === "guardado"
-    ){
+      if(
+        registro.status ===
+          "recebido" ||
+        registro.status ===
+          "guardado"
+      ){
 
-      enviarMensagem({
-        type:"confirm_received",
-        recordId:registro.recordId,
-        receivedAt:
-          registro.recebidoEm ||
-          registro.guardadoEm ||
-          new Date().toISOString()
-      });
+        enviarMensagem({
+          type:"confirm_received",
+
+          recordId:
+            registro.recordId,
+
+          receivedAt:
+            registro.recebidoEm ||
+            registro.guardadoEm ||
+            new Date().toISOString()
+        });
+
+      }
 
     }
+  );
+}
 
-  });
+/* ============================================================
+   FILA LOCAL DE RECUSAS
+============================================================ */
+
+function adicionarRecusaNaFila(
+  registro
+){
+
+  const indice =
+    recusasEnvio.findIndex(
+      item =>
+        item.recordId ===
+        registro.recordId
+    );
+
+  if(indice >= 0){
+
+    recusasEnvio[indice] =
+      registro;
+
+  }else{
+
+    recusasEnvio.push(
+      registro
+    );
+
+  }
+
+  salvarTudo();
+}
+
+function removerRecusaDaFila(
+  recordId
+){
+
+  const antes =
+    recusasEnvio.length;
+
+  recusasEnvio =
+    recusasEnvio.filter(
+      item =>
+        item.recordId !==
+        recordId
+    );
+
+  if(
+    antes !==
+    recusasEnvio.length
+  ){
+
+    salvarTudo();
+
+  }
+}
+
+function reenviarRecusasPendentes(){
+
+  if(!recusasEnvio.length){
+    return;
+  }
+
+  const copia =
+    [...recusasEnvio];
+
+  copia.forEach(
+    registro=>{
+
+      enviarRecusaParaGuiche(
+        registro
+      );
+
+    }
+  );
 }
 
 /* ============================================================
@@ -1686,7 +2342,8 @@ function renderPendentes(){
   const container =
     $("pendentesContainer");
 
-  $("contadorPendentes").textContent =
+  $("contadorPendentes")
+    .textContent =
     pendentes.length;
 
   if(!pendentes.length){
@@ -1703,14 +2360,21 @@ function renderPendentes(){
   const lista =
     [...pendentes].sort(
       (a,b)=>
-        new Date(a.enviadoEm || 0) -
-        new Date(b.enviadoEm || 0)
+        new Date(
+          a.enviadoEm || 0
+        ) -
+        new Date(
+          b.enviadoEm || 0
+        )
     );
 
   let html = `
     <div class="table-wrap">
+
       <table>
+
         <thead>
+
           <tr>
             <th>Ordem</th>
             <th>Nome do interno</th>
@@ -1721,141 +2385,162 @@ function renderPendentes(){
             <th>Enviado em</th>
             <th>Ação</th>
           </tr>
+
         </thead>
+
         <tbody>
   `;
 
-  lista.forEach((registro,index)=>{
+  lista.forEach(
+    (registro,index)=>{
 
-    const nome =
-      valorRegistro(
-        registro,
-        "nome",
-        "nomeInterno",
-        "NOME DO INTERNO"
-      );
+      const nome =
+        valorRegistro(
+          registro,
+          "nome",
+          "nomeInterno",
+          "NOME DO INTERNO"
+        );
 
-    const rgi =
-      valorRegistro(
-        registro,
-        "rgi",
-        "RGI"
-      );
+      const rgi =
+        valorRegistro(
+          registro,
+          "rgi",
+          "RGI"
+        );
 
-    const pavilhao =
-      valorRegistro(
-        registro,
-        "pavilhao",
-        "PAVILHÃO"
-      );
+      const pavilhao =
+        valorRegistro(
+          registro,
+          "pavilhao",
+          "PAVILHÃO"
+        );
 
-    const cela =
-      valorRegistro(
-        registro,
-        "cela",
-        "CELA"
-      );
+      const cela =
+        valorRegistro(
+          registro,
+          "cela",
+          "CELA"
+        );
 
-    const atendimento =
-      valorRegistro(
-        registro,
-        "atendimento",
-        "nomeAtendimento",
-        "Nome do Atendimento"
-      );
+      const atendimento =
+        valorRegistro(
+          registro,
+          "atendimento",
+          "nomeAtendimento",
+          "Nome do Atendimento"
+        );
 
-    const dataAtendimento =
-      valorRegistro(
-        registro,
-        "dataAtendimento",
-        "data_atendimento",
-        "data"
-      );
+      const dataAtendimento =
+        valorRegistro(
+          registro,
+          "dataAtendimento",
+          "data_atendimento",
+          "data"
+        );
 
-    html += `
-      <tr>
+      html += `
+        <tr>
 
-        <td>
-          <span class="badge badge-pending">
-            ${index + 1}
-          </span>
-        </td>
+          <td>
+            <span class="badge badge-pending">
+              ${index + 1}
+            </span>
+          </td>
 
-        <td>
-          <strong>
-            ${escapeHtml(nome)}
-          </strong>
-        </td>
+          <td>
+            <strong>
+              ${escapeHtml(nome)}
+            </strong>
+          </td>
 
-        <td>
-          ${escapeHtml(rgi)}
-        </td>
+          <td>
+            ${escapeHtml(rgi)}
+          </td>
 
-        <td class="print-pavcela">
-          ${escapeHtml(pavilhao)}
-          /
-          ${escapeHtml(cela)}
-        </td>
+          <td class="print-pavcela">
+            ${escapeHtml(pavilhao)}
+            /
+            ${escapeHtml(cela)}
+          </td>
 
-        <td>
-          ${escapeHtml(atendimento)}
-        </td>
+          <td>
+            ${escapeHtml(atendimento)}
+          </td>
 
-        <td>
-          ${escapeHtml(
-            formatarData(dataAtendimento)
-          )}
-        </td>
+          <td>
+            ${escapeHtml(
+              formatarData(
+                dataAtendimento
+              )
+            )}
+          </td>
 
-        <td>
-          ${escapeHtml(
-            formatarDataHora(
-              registro.enviadoEm
-            )
-          )}
-        </td>
+          <td>
+            ${escapeHtml(
+              formatarDataHora(
+                registro.enviadoEm
+              )
+            )}
+          </td>
 
-        <td>
-          <div class="actions">
+          <td>
 
-            <button
-              class="btn-green"
-              onclick="receberUm('${escapeHtml(registro.recordId)}')"
-            >
-              ✅ RECEBIDO
-            </button>
+            <div class="actions">
 
-            <button
-              class="btn-red"
-              onclick="abrirRecusa('${escapeHtml(registro.recordId)}')"
-            >
-              ❌ RECUSAR
-            </button>
+              <button
+                class="btn-green"
+                onclick="receberUm('${escapeHtml(recordIdSeguro(registro.recordId))}')"
+              >
+                ✅ RECEBIDO
+              </button>
 
-          </div>
-        </td>
+              <button
+                class="btn-red"
+                onclick="abrirRecusa('${escapeHtml(recordIdSeguro(registro.recordId))}')"
+              >
+                ❌ RECUSAR
+              </button>
 
-      </tr>
-    `;
+            </div>
 
-  });
+          </td>
+
+        </tr>
+      `;
+
+    }
+  );
 
   html += `
         </tbody>
+
       </table>
+
     </div>
   `;
 
-  container.innerHTML = html;
+  container.innerHTML =
+    html;
+}
+
+function recordIdSeguro(valor){
+
+  return String(valor ?? "")
+    .replaceAll("'","")
+    .replaceAll('"',"");
 }
 
 /* ============================================================
    HISTÓRICO
 ============================================================ */
 
-function ordenarHistorico(tipo){
+function ordenarHistorico(
+  tipo
+){
 
-  ordemHistorico = tipo;
+  ordemHistorico =
+    tipo;
 
   renderHistorico();
 }
@@ -1865,7 +2550,8 @@ function renderHistorico(){
   const container =
     $("historicoContainer");
 
-  $("contadorHistorico").textContent =
+  $("contadorHistorico")
+    .textContent =
     historico.length;
 
   if(!historico.length){
@@ -1882,52 +2568,61 @@ function renderHistorico(){
   const lista =
     [...historico];
 
-  if(ordemHistorico === "atendimento"){
+  if(
+    ordemHistorico ===
+    "atendimento"
+  ){
 
-    lista.sort((a,b)=>{
+    lista.sort(
+      (a,b)=>{
 
-      const aa =
-        normalizar(
-          valorRegistro(
-            a,
-            "atendimento",
-            "nomeAtendimento"
-          )
+        const aa =
+          normalizar(
+            valorRegistro(
+              a,
+              "atendimento",
+              "nomeAtendimento"
+            )
+          );
+
+        const bb =
+          normalizar(
+            valorRegistro(
+              b,
+              "atendimento",
+              "nomeAtendimento"
+            )
+          );
+
+        return aa.localeCompare(
+          bb,
+          "pt-BR"
         );
 
-      const bb =
-        normalizar(
-          valorRegistro(
-            b,
-            "atendimento",
-            "nomeAtendimento"
-          )
-        );
-
-      return aa.localeCompare(
-        bb,
-        "pt-BR"
-      );
-
-    });
+      }
+    );
 
   }else{
 
-    lista.sort((a,b)=>
-      new Date(
-        a.enviadoEm || 0
-      ) -
-      new Date(
-        b.enviadoEm || 0
-      )
+    lista.sort(
+      (a,b)=>
+        new Date(
+          a.enviadoEm || 0
+        ) -
+        new Date(
+          b.enviadoEm || 0
+        )
     );
 
   }
 
   let html = `
     <div class="table-wrap">
+
       <table>
+
         <thead>
+
           <tr>
             <th>Nome do interno</th>
             <th>RGI</th>
@@ -1938,225 +2633,250 @@ function renderHistorico(){
             <th>Informação</th>
             <th>Ação</th>
           </tr>
+
         </thead>
+
         <tbody>
   `;
 
-  lista.forEach(registro=>{
+  lista.forEach(
+    registro=>{
 
-    const nome =
-      valorRegistro(
-        registro,
-        "nome",
-        "nomeInterno",
-        "NOME DO INTERNO"
-      );
+      const nome =
+        valorRegistro(
+          registro,
+          "nome",
+          "nomeInterno",
+          "NOME DO INTERNO"
+        );
 
-    const rgi =
-      valorRegistro(
-        registro,
-        "rgi",
-        "RGI"
-      );
+      const rgi =
+        valorRegistro(
+          registro,
+          "rgi",
+          "RGI"
+        );
 
-    const pavilhao =
-      valorRegistro(
-        registro,
-        "pavilhao",
-        "PAVILHÃO"
-      );
+      const pavilhao =
+        valorRegistro(
+          registro,
+          "pavilhao",
+          "PAVILHÃO"
+        );
 
-    const cela =
-      valorRegistro(
-        registro,
-        "cela",
-        "CELA"
-      );
+      const cela =
+        valorRegistro(
+          registro,
+          "cela",
+          "CELA"
+        );
 
-    const atendimento =
-      valorRegistro(
-        registro,
-        "atendimento",
-        "nomeAtendimento"
-      );
+      const atendimento =
+        valorRegistro(
+          registro,
+          "atendimento",
+          "nomeAtendimento"
+        );
 
-    const dataAtendimento =
-      valorRegistro(
-        registro,
-        "dataAtendimento",
-        "data_atendimento",
-        "data"
-      );
+      const dataAtendimento =
+        valorRegistro(
+          registro,
+          "dataAtendimento",
+          "data_atendimento",
+          "data"
+        );
 
-    let statusHtml = "";
-    let infoHtml = "";
-    let acaoHtml = "";
+      let statusHtml = "";
 
-    if(registro.status === "recusado"){
+      let infoHtml = "";
 
-      statusHtml = `
-        <span class="badge badge-refused">
-          ❌ RECUSADO
-        </span>
-      `;
+      let acaoHtml = "";
 
-      infoHtml = `
-        <div class="refusal-box">
-          <strong>Motivo da recusa:</strong><br>
-          ${escapeHtml(
-            registro.motivoRecusa ||
-            "Motivo não informado."
-          )}
+      if(
+        registro.status ===
+        "recusado"
+      ){
 
-          <div class="small" style="margin-top:6px;">
-            Recusado em:
+        statusHtml = `
+          <span class="badge badge-refused">
+            ❌ RECUSADO
+          </span>
+        `;
+
+        infoHtml = `
+          <div class="refusal-box">
+
+            <strong>
+              Motivo da recusa:
+            </strong>
+
+            <br>
+
             ${escapeHtml(
-              formatarDataHora(
-                registro.recusadoEm
+              registro.motivoRecusa ||
+              "Motivo não informado."
+            )}
+
+            <div
+              class="small"
+              style="margin-top:6px;"
+            >
+              Recusado em:
+              ${escapeHtml(
+                formatarDataHora(
+                  registro.recusadoEm
+                )
+              )}
+            </div>
+
+          </div>
+        `;
+
+        acaoHtml = `
+          <span class="small">
+            Retornado ao GUICHÊ
+          </span>
+        `;
+
+      }else if(
+        registro.status ===
+        "guardado"
+      ){
+
+        statusHtml = `
+          <span class="badge badge-guarded">
+            🗄️ GUARDADO
+          </span>
+        `;
+
+        infoHtml = `
+          Guardado em:
+          ${escapeHtml(
+            formatarDataHora(
+              registro.guardadoEm
+            )
+          )}
+        `;
+
+        acaoHtml = `
+          <span class="small">
+            Arquivado
+          </span>
+        `;
+
+      }else{
+
+        statusHtml = `
+          <span class="badge badge-received">
+            ✅ RECEBIDO
+          </span>
+        `;
+
+        infoHtml = `
+          Recebido em:
+          ${escapeHtml(
+            formatarDataHora(
+              registro.recebidoEm
+            )
+          )}
+        `;
+
+        acaoHtml = `
+          <div class="actions">
+
+            <button
+              class="btn-yellow"
+              onclick="guardarAtendimento('${escapeHtml(recordIdSeguro(registro.recordId))}')"
+            >
+              🗄️ GUARDAR
+            </button>
+
+            <button
+              class="btn-red"
+              onclick="excluirHistorico('${escapeHtml(recordIdSeguro(registro.recordId))}')"
+            >
+              🗑️ EXCLUIR
+            </button>
+
+          </div>
+        `;
+
+      }
+
+      html += `
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHtml(nome)}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(rgi)}
+          </td>
+
+          <td class="print-pavcela">
+            ${escapeHtml(pavilhao)}
+            /
+            ${escapeHtml(cela)}
+          </td>
+
+          <td>
+            ${escapeHtml(atendimento)}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatarData(
+                dataAtendimento
               )
             )}
-          </div>
-        </div>
-      `;
+          </td>
 
-      /*
-       * IMPORTANTE:
-       * O recusado NÃO recebe botão de arquivar na Mesa.
-       *
-       * Ele já saiu da Mesa e foi encaminhado ao GUICHÊ.
-       */
-      acaoHtml = `
-        <span class="small">
-          Retornado ao GUICHÊ
-        </span>
-      `;
+          <td>
+            ${statusHtml}
+          </td>
 
-    }else if(registro.status === "guardado"){
+          <td>
+            ${infoHtml}
+          </td>
 
-      statusHtml = `
-        <span class="badge badge-guarded">
-          🗄️ GUARDADO
-        </span>
-      `;
+          <td>
+            ${acaoHtml}
+          </td>
 
-      infoHtml = `
-        Guardado em:
-        ${escapeHtml(
-          formatarDataHora(
-            registro.guardadoEm
-          )
-        )}
-      `;
-
-      acaoHtml = `
-        <span class="small">
-          Arquivado
-        </span>
-      `;
-
-    }else{
-
-      statusHtml = `
-        <span class="badge badge-received">
-          ✅ RECEBIDO
-        </span>
-      `;
-
-      infoHtml = `
-        Recebido em:
-        ${escapeHtml(
-          formatarDataHora(
-            registro.recebidoEm
-          )
-        )}
-      `;
-
-      acaoHtml = `
-        <div class="actions">
-
-          <button
-            class="btn-yellow"
-            onclick="guardarAtendimento('${escapeHtml(registro.recordId)}')"
-          >
-            🗄️ GUARDAR
-          </button>
-
-          <button
-            class="btn-red"
-            onclick="excluirHistorico('${escapeHtml(registro.recordId)}')"
-          >
-            🗑️ EXCLUIR
-          </button>
-
-        </div>
+        </tr>
       `;
 
     }
-
-    html += `
-      <tr>
-
-        <td>
-          <strong>
-            ${escapeHtml(nome)}
-          </strong>
-        </td>
-
-        <td>
-          ${escapeHtml(rgi)}
-        </td>
-
-        <td class="print-pavcela">
-          ${escapeHtml(pavilhao)}
-          /
-          ${escapeHtml(cela)}
-        </td>
-
-        <td>
-          ${escapeHtml(atendimento)}
-        </td>
-
-        <td>
-          ${escapeHtml(
-            formatarData(dataAtendimento)
-          )}
-        </td>
-
-        <td>
-          ${statusHtml}
-        </td>
-
-        <td>
-          ${infoHtml}
-        </td>
-
-        <td>
-          ${acaoHtml}
-        </td>
-
-      </tr>
-    `;
-
-  });
+  );
 
   html += `
         </tbody>
+
       </table>
+
     </div>
   `;
 
-  container.innerHTML = html;
+  container.innerHTML =
+    html;
 }
 
 /* ============================================================
    RECUSA
 ============================================================ */
 
-function abrirRecusa(recordId){
+function abrirRecusa(
+  recordId
+){
 
   const registro =
     pendentes.find(
-      item => item.recordId === recordId
+      item =>
+        item.recordId ===
+        recordId
     );
 
   if(!registro){
@@ -2194,27 +2914,34 @@ function abrirRecusa(recordId){
       "CELA"
     );
 
-  $("dadosRecusa").innerHTML = `
-    <strong>Interno:</strong>
-    ${escapeHtml(nome)}
-    &nbsp; | &nbsp;
+  $("dadosRecusa")
+    .innerHTML = `
+      <strong>Interno:</strong>
+      ${escapeHtml(nome)}
+      &nbsp; | &nbsp;
 
-    <strong>Atendimento:</strong>
-    ${escapeHtml(atendimento)}
-    &nbsp; | &nbsp;
+      <strong>Atendimento:</strong>
+      ${escapeHtml(atendimento)}
+      &nbsp; | &nbsp;
 
-    <strong>Pav/Cela:</strong>
-    ${escapeHtml(pavilhao)}/${escapeHtml(cela)}
-  `;
+      <strong>Pav/Cela:</strong>
+      ${escapeHtml(pavilhao)}/${escapeHtml(cela)}
+    `;
 
-  $("recusaMotivo").value = "";
+  $("recusaMotivo")
+    .value = "";
 
   $("modalRecusa")
-    .classList.add("show");
+    .classList
+    .add("show");
 
-  setTimeout(()=>{
-    $("recusaMotivo").focus();
-  },100);
+  setTimeout(
+    ()=>{
+      $("recusaMotivo")
+        .focus();
+    },
+    100
+  );
 }
 
 function fecharRecusa(){
@@ -2222,10 +2949,12 @@ function fecharRecusa(){
   recordIdRecusaAtual =
     null;
 
-  $("recusaMotivo").value = "";
+  $("recusaMotivo")
+    .value = "";
 
   $("modalRecusa")
-    .classList.remove("show");
+    .classList
+    .remove("show");
 }
 
 function confirmarRecusa(){
@@ -2246,7 +2975,8 @@ function confirmarRecusa(){
       "warning"
     );
 
-    $("recusaMotivo").focus();
+    $("recusaMotivo")
+      .focus();
 
     return;
   }
@@ -2272,32 +3002,28 @@ function confirmarRecusa(){
     new Date().toISOString();
 
   /*
-   * O registro é retirado da lista de pendentes
-   * e NÃO entra no histórico da Mesa.
+   * REMOVE DA MESA IMEDIATAMENTE.
    */
   pendentes.splice(
     indice,
     1
   );
 
-  /*
-   * Guardamos o motivo dentro do próprio cadastro
-   * para que o GUICHÊ possa visualizar e editar.
-   */
   const recusado = {
+
     ...registro,
 
-    status:"recusado",
+    status:
+      "recusado",
 
-    motivoRecusa:motivo,
+    motivoRecusa:
+      motivo,
 
     recusadoEm,
 
-    recebidoEm:null,
+    recebidoEm:
+      null,
 
-    /*
-     * Histórico das recusas.
-     */
     historicoRecusas:[
       ...(registro.historicoRecusas || []),
       {
@@ -2306,15 +3032,21 @@ function confirmarRecusa(){
         origem:"MESA"
       }
     ]
+
   };
+
+  /*
+   * Salva uma cópia local caso o WebSocket esteja
+   * momentaneamente desconectado.
+   */
+  adicionarRecusaNaFila(
+    recusado
+  );
 
   salvarTudo();
 
   renderPendentes();
 
-  /*
-   * Envia para o GUICHÊ.
-   */
   const enviado =
     enviarRecusaParaGuiche(
       recusado
@@ -2334,49 +3066,54 @@ function confirmarRecusa(){
   }else{
 
     mostrarToast(
-      "Recusa registrada. Aguardando conexão com o GUICHÊ.",
+      "Recusa registrada. Será enviada automaticamente quando a conexão voltar.",
       "warning"
     );
 
   }
 }
 
-/*
- * A recusa é enviada ao servidor.
- *
- * O servidor deverá encaminhar ao GUICHÊ.
- */
-function enviarRecusaParaGuiche(registro){
+function enviarRecusaParaGuiche(
+  registro
+){
 
-  return enviarMensagem({
+  const enviado =
+    enviarMensagem({
 
-    type:"refuse_record",
+      type:
+        "refuse_record",
 
-    recordId:
-      registro.recordId,
+      recordId:
+        registro.recordId,
 
-    record:{
-      ...registro
-    },
+      record:{
+        ...registro
+      },
 
-    refusedAt:
-      registro.recusadoEm,
+      refusedAt:
+        registro.recusadoEm,
 
-    reason:
-      registro.motivoRecusa
+      reason:
+        registro.motivoRecusa
 
-  });
+    });
+
+  return enviado;
 }
 
 /* ============================================================
-   GUARDAR ATENDIMENTO RECEBIDO
+   GUARDAR
 ============================================================ */
 
-function guardarAtendimento(recordId){
+function guardarAtendimento(
+  recordId
+){
 
   const indice =
     historico.findIndex(
-      item => item.recordId === recordId
+      item =>
+        item.recordId ===
+        recordId
     );
 
   if(indice < 0){
@@ -2386,7 +3123,10 @@ function guardarAtendimento(recordId){
   const registro =
     historico[indice];
 
-  if(registro.status !== "recebido"){
+  if(
+    registro.status !==
+    "recebido"
+  ){
 
     mostrarToast(
       "Somente atendimentos recebidos podem ser guardados.",
@@ -2414,6 +3154,7 @@ function guardarAtendimento(recordId){
   salvarTudo();
 
   renderHistorico();
+
   renderGuardados();
 
   mostrarToast(
@@ -2422,58 +3163,15 @@ function guardarAtendimento(recordId){
   );
 }
 
-function guardarTodos(){
-
-  const recebidos =
-    historico.filter(
-      item => item.status === "recebido"
-    );
-
-  if(!recebidos.length){
-
-    mostrarToast(
-      "Não há atendimentos recebidos para guardar.",
-      "warning"
-    );
-
-    return;
-  }
-
-  const agora =
-    new Date().toISOString();
-
-  recebidos.forEach(registro=>{
-
-    registro.status = "guardado";
-    registro.guardadoEm = agora;
-
-    arquivo.push(
-      registro
-    );
-
-  });
-
-  historico =
-    historico.filter(
-      item => item.status !== "recebido"
-    );
-
-  salvarTudo();
-
-  renderHistorico();
-  renderGuardados();
-
-  mostrarToast(
-    `${recebidos.length} atendimento(s) guardado(s).`,
-    "success"
-  );
-}
-
-function excluirHistorico(recordId){
+function excluirHistorico(
+  recordId
+){
 
   const indice =
     historico.findIndex(
-      item => item.recordId === recordId
+      item =>
+        item.recordId ===
+        recordId
     );
 
   if(indice < 0){
@@ -2485,7 +3183,9 @@ function excluirHistorico(recordId){
       "Deseja realmente excluir este atendimento do histórico?"
     )
   ){
+
     return;
+
   }
 
   historico.splice(
@@ -2512,13 +3212,15 @@ function abrirGuardados(){
   renderGuardados();
 
   $("modalGuardados")
-    .classList.add("show");
+    .classList
+    .add("show");
 }
 
 function fecharGuardados(){
 
   $("modalGuardados")
-    .classList.remove("show");
+    .classList
+    .remove("show");
 }
 
 function renderGuardados(){
@@ -2528,7 +3230,8 @@ function renderGuardados(){
 
   const filtro =
     normalizar(
-      $("filtroGuardados")?.value || ""
+      $("filtroGuardados")
+        ?.value || ""
     );
 
   let lista =
@@ -2537,45 +3240,56 @@ function renderGuardados(){
   if(filtro){
 
     lista =
-      lista.filter(registro=>{
+      lista.filter(
+        registro=>{
 
-        const texto = [
-          valorRegistro(
-            registro,
-            "nome",
-            "nomeInterno"
-          ),
-          valorRegistro(
-            registro,
-            "rgi"
-          ),
-          valorRegistro(
-            registro,
-            "pavilhao"
-          ),
-          valorRegistro(
-            registro,
-            "cela"
-          ),
-          valorRegistro(
-            registro,
-            "atendimento",
-            "nomeAtendimento"
-          ),
-          formatarData(
+          const texto = [
+
             valorRegistro(
               registro,
-              "dataAtendimento",
-              "data"
+              "nome",
+              "nomeInterno"
+            ),
+
+            valorRegistro(
+              registro,
+              "rgi"
+            ),
+
+            valorRegistro(
+              registro,
+              "pavilhao"
+            ),
+
+            valorRegistro(
+              registro,
+              "cela"
+            ),
+
+            valorRegistro(
+              registro,
+              "atendimento",
+              "nomeAtendimento"
+            ),
+
+            formatarData(
+              valorRegistro(
+                registro,
+                "dataAtendimento",
+                "data"
+              )
             )
-          )
-        ]
-        .join(" ");
 
-        return normalizar(texto)
-          .includes(filtro);
+          ].join(" ");
 
-      });
+          return normalizar(
+            texto
+          ).includes(
+            filtro
+          );
+
+        }
+      );
 
   }
 
@@ -2602,8 +3316,11 @@ function renderGuardados(){
 
   let html = `
     <div class="table-wrap">
+
       <table>
+
         <thead>
+
           <tr>
             <th>Nome</th>
             <th>RGI</th>
@@ -2613,122 +3330,130 @@ function renderGuardados(){
             <th>Status</th>
             <th>Guardado em</th>
           </tr>
+
         </thead>
+
         <tbody>
   `;
 
-  lista.forEach(registro=>{
+  lista.forEach(
+    registro=>{
 
-    let statusHtml =
-      `<span class="badge badge-guarded">🗄️ GUARDADO</span>`;
+      let statusHtml =
+        `<span class="badge badge-guarded">🗄️ GUARDADO</span>`;
 
-    let info = "";
+      let info = "";
 
-    if(
-      registro.motivoRecusa ||
-      registro.historicoRecusas?.length
-    ){
+      if(
+        registro.motivoRecusa ||
+        registro.historicoRecusas?.length
+      ){
 
-      statusHtml =
-        `<span class="badge badge-refused">❌ RECUSADO / GUARDADO</span>`;
+        statusHtml =
+          `<span class="badge badge-refused">❌ RECUSADO / GUARDADO</span>`;
 
-      info = `
-        <div class="refusal-box">
-          ${escapeHtml(
-            registro.motivoRecusa ||
-            ""
-          )}
-        </div>
-      `;
-    }
+        info = `
+          <div class="refusal-box">
+            ${escapeHtml(
+              registro.motivoRecusa ||
+              ""
+            )}
+          </div>
+        `;
 
-    html += `
-      <tr>
+      }
 
-        <td>
-          <strong>
+      html += `
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHtml(
+                valorRegistro(
+                  registro,
+                  "nome",
+                  "nomeInterno"
+                )
+              )}
+            </strong>
+          </td>
+
+          <td>
             ${escapeHtml(
               valorRegistro(
                 registro,
-                "nome",
-                "nomeInterno"
+                "rgi"
               )
             )}
-          </strong>
-        </td>
+          </td>
 
-        <td>
-          ${escapeHtml(
-            valorRegistro(
-              registro,
-              "rgi"
-            )
-          )}
-        </td>
-
-        <td class="print-pavcela">
-          ${escapeHtml(
-            valorRegistro(
-              registro,
-              "pavilhao"
-            )
-          )}
-          /
-          ${escapeHtml(
-            valorRegistro(
-              registro,
-              "cela"
-            )
-          )}
-        </td>
-
-        <td>
-          ${escapeHtml(
-            valorRegistro(
-              registro,
-              "atendimento",
-              "nomeAtendimento"
-            )
-          )}
-        </td>
-
-        <td>
-          ${escapeHtml(
-            formatarData(
+          <td class="print-pavcela">
+            ${escapeHtml(
               valorRegistro(
                 registro,
-                "dataAtendimento",
-                "data"
+                "pavilhao"
               )
-            )
-          )}
-        </td>
+            )}
+            /
+            ${escapeHtml(
+              valorRegistro(
+                registro,
+                "cela"
+              )
+            )}
+          </td>
 
-        <td>
-          ${statusHtml}
-          ${info}
-        </td>
+          <td>
+            ${escapeHtml(
+              valorRegistro(
+                registro,
+                "atendimento",
+                "nomeAtendimento"
+              )
+            )}
+          </td>
 
-        <td>
-          ${escapeHtml(
-            formatarDataHora(
-              registro.guardadoEm
-            )
-          )}
-        </td>
+          <td>
+            ${escapeHtml(
+              formatarData(
+                valorRegistro(
+                  registro,
+                  "dataAtendimento",
+                  "data"
+                )
+              )
+            )}
+          </td>
 
-      </tr>
-    `;
+          <td>
+            ${statusHtml}
+            ${info}
+          </td>
 
-  });
+          <td>
+            ${escapeHtml(
+              formatarDataHora(
+                registro.guardadoEm
+              )
+            )}
+          </td>
+
+        </tr>
+      `;
+
+    }
+  );
 
   html += `
         </tbody>
+
       </table>
+
     </div>
   `;
 
-  container.innerHTML = html;
+  container.innerHTML =
+    html;
 }
 
 /* ============================================================
@@ -2749,20 +3474,23 @@ function abrirImpressao(){
   alterarModoImpressao();
 
   $("modalImpressao")
-    .classList.add("show");
+    .classList
+    .add("show");
 }
 
 function fecharImpressao(){
 
   $("modalImpressao")
-    .classList.remove("show");
+    .classList
+    .remove("show");
 }
 
 function obterModoImpressao(){
 
   return document.querySelector(
     'input[name="modoPrint"]:checked'
-  )?.value || "atendimento";
+  )?.value ||
+    "atendimento";
 }
 
 function alterarModoImpressao(){
@@ -2788,17 +3516,30 @@ function alterarModoImpressao(){
         ? "block"
         : "none";
 
-  if(modo === "atendimento"){
+  if(
+    modo === "atendimento"
+  ){
+
     preencherAtendimentosImpressao();
+
   }
 
-  if(modo === "geral"){
+  if(
+    modo === "geral"
+  ){
+
     preencherPavilhoesGerais();
+
   }
 
-  if(modo === "data"){
+  if(
+    modo === "data"
+  ){
+
     preencherAtendimentosData();
+
     alterarTipoData();
+
   }
 }
 
@@ -2807,7 +3548,8 @@ function alterarTipoData(){
   const tipo =
     document.querySelector(
       'input[name="tipoData"]:checked'
-    )?.value || "todos";
+    )?.value ||
+    "todos";
 
   $("grupoAtendimentosData")
     .style.display =
@@ -2821,30 +3563,39 @@ function preencherAtendimentosImpressao(){
   const container =
     $("listaAtendimentosImpressao");
 
-  const selecionados =
-    obterIdsMarcados(
-      "listaAtendimentosImpressao"
-    );
+  if(!container){
+    return;
+  }
 
   container.innerHTML =
-    ATENDIMENTOS.map((atendimento,index)=>{
+    ATENDIMENTOS
+      .map(
+        (atendimento,index)=>{
 
-      const id =
-        "printAt_" + index;
+          const id =
+            "printAt_" +
+            index;
 
-      return `
-        <label class="checkbox-item">
-          <input
-            type="checkbox"
-            id="${id}"
-            value="${escapeHtml(atendimento)}"
-            ${selecionados.length === 0 ? "checked" : ""}
-          >
-          ${escapeHtml(atendimento)}
-        </label>
-      `;
+          return `
+            <label class="checkbox-item">
 
-    }).join("");
+              <input
+                type="checkbox"
+                id="${id}"
+                value="${escapeHtml(atendimento)}"
+                checked
+              >
+
+              ${escapeHtml(
+                atendimento
+              )}
+
+            </label>
+          `;
+
+        }
+      )
+      .join("");
 }
 
 function preencherAtendimentosData(){
@@ -2852,34 +3603,40 @@ function preencherAtendimentosData(){
   const container =
     $("listaAtendimentosData");
 
+  if(!container){
+    return;
+  }
+
   container.innerHTML =
-    ATENDIMENTOS.map((atendimento,index)=>{
+    ATENDIMENTOS
+      .map(
+        (atendimento,index)=>{
 
-      const id =
-        "printDataAt_" + index;
+          const id =
+            "printDataAt_" +
+            index;
 
-      return `
-        <label class="checkbox-item">
-          <input
-            type="checkbox"
-            id="${id}"
-            value="${escapeHtml(atendimento)}"
-          >
-          ${escapeHtml(atendimento)}
-        </label>
-      `;
+          return `
+            <label class="checkbox-item">
 
-    }).join("");
+              <input
+                type="checkbox"
+                id="${id}"
+                value="${escapeHtml(atendimento)}"
+              >
+
+              ${escapeHtml(
+                atendimento
+              )}
+
+            </label>
+          `;
+
+        }
+      )
+      .join("");
 }
 
-/*
- * IMPORTANTE:
- *
- * Os pavilhões não são uma lista independente criada
- * artificialmente para a impressão.
- *
- * Eles vêm da BASE EXCEL dos internos.
- */
 function obterPavilhoesDaBaseExcel(){
 
   try{
@@ -2888,40 +3645,53 @@ function obterPavilhoesDaBaseExcel(){
       JSON.parse(
         localStorage.getItem(
           STORAGE_BASE_EXCEL
-        ) || "[]"
+        ) ||
+        "[]"
       );
 
-    if(!Array.isArray(base)){
+    if(
+      !Array.isArray(base)
+    ){
+
       return [];
+
     }
 
     const conjunto =
       new Set();
 
-    base.forEach(item=>{
+    base.forEach(
+      item=>{
 
-      const pavilhao =
-        valorRegistro(
-          item,
-          "pavilhao",
-          "PAVILHÃO",
-          "PAVILHAO"
-        );
+        const pavilhao =
+          valorRegistro(
+            item,
+            "pavilhao",
+            "PAVILHÃO",
+            "PAVILHAO"
+          );
 
-      if(
-        pavilhao &&
-        String(pavilhao).trim()
-      ){
+        if(
+          pavilhao &&
+          String(
+            pavilhao
+          ).trim()
+        ){
 
-        conjunto.add(
-          String(pavilhao).trim()
-        );
+          conjunto.add(
+            String(
+              pavilhao
+            ).trim()
+          );
+
+        }
 
       }
+    );
 
-    });
-
-    return [...conjunto].sort(
+    return [
+      ...conjunto
+    ].sort(
       (a,b)=>
         a.localeCompare(
           b,
@@ -2940,15 +3710,10 @@ function obterPavilhoesDaBaseExcel(){
   }
 }
 
-function obterPavilhoesImpressao(){
-
-  return obterPavilhoesDaBaseExcel();
-}
-
 function preencherPavilhoesImpressao(){
 
   const pavilhoes =
-    obterPavilhoesImpressao();
+    obterPavilhoesDaBaseExcel();
 
   preencherListaPavilhoes(
     $("listaPavilhoesAtendimento"),
@@ -2977,7 +3742,7 @@ function preencherPavilhoesImpressao(){
       "block";
 
     mensagem.textContent =
-      "Nenhum pavilhão foi encontrado na base Excel de internos. Carregue a base Excel pelo GUICHÊ para disponibilizar os pavilhões.";
+      "Nenhum pavilhão foi encontrado na base Excel de internos.";
 
   }else{
 
@@ -2986,6 +3751,7 @@ function preencherPavilhoesImpressao(){
 
     mensagem.textContent =
       "";
+
   }
 }
 
@@ -3016,26 +3782,34 @@ function preencherListaPavilhoes(
   }
 
   container.innerHTML =
-    pavilhoes.map((pavilhao,index)=>{
+    pavilhoes
+      .map(
+        (pavilhao,index)=>{
 
-      return `
-        <label class="checkbox-item">
+          return `
+            <label class="checkbox-item">
 
-          <input
-            type="checkbox"
-            id="${prefixo}${index}"
-            value="${escapeHtml(pavilhao)}"
-          >
+              <input
+                type="checkbox"
+                id="${prefixo}${index}"
+                value="${escapeHtml(pavilhao)}"
+              >
 
-          ${escapeHtml(pavilhao)}
+              ${escapeHtml(
+                pavilhao
+              )}
 
-        </label>
-      `;
+            </label>
+          `;
 
-    }).join("");
+        }
+      )
+      .join("");
 }
 
-function obterIdsMarcados(containerId){
+function obterIdsMarcados(
+  containerId
+){
 
   const container =
     $(containerId);
@@ -3049,7 +3823,8 @@ function obterIdsMarcados(containerId){
       'input[type="checkbox"]:checked'
     )
   ].map(
-    input => input.value
+    input =>
+      input.value
   );
 }
 
@@ -3080,31 +3855,31 @@ function todosOsRegistrosParaImpressao(){
   const mapa =
     new Map();
 
-  /*
-   * Ordem de prioridade:
-   * pendente -> histórico -> arquivo.
-   *
-   * O último registro conhecido substitui o anterior.
-   */
   [
     ...pendentes,
     ...historico,
     ...arquivo
-  ].forEach(registro=>{
+  ].forEach(
+    registro=>{
 
-    if(!registro.recordId){
-      registro.recordId =
-        gerarId();
+      if(!registro.recordId){
+
+        registro.recordId =
+          gerarId();
+
+      }
+
+      mapa.set(
+        registro.recordId,
+        {...registro}
+      );
+
     }
+  );
 
-    mapa.set(
-      registro.recordId,
-      {...registro}
-    );
-
-  });
-
-  return [...mapa.values()];
+  return [
+    ...mapa.values()
+  ];
 }
 
 function filtroPorAtendimento(
@@ -3142,10 +3917,6 @@ function filtroPorPavilhao(
   pavilhoes
 ){
 
-  /*
-   * Nenhum pavilhão selecionado =
-   * todos os pavilhões.
-   */
   if(!pavilhoes.length){
     return registros;
   }
@@ -3187,15 +3958,26 @@ function dataRegistroParaImpressao(
     return "";
   }
 
-  if(/^\d{4}-\d{2}-\d{2}$/.test(String(valor))){
+  if(
+    /^\d{4}-\d{2}-\d{2}$/
+      .test(String(valor))
+  ){
+
     return String(valor);
+
   }
 
   const d =
     new Date(valor);
 
-  if(Number.isNaN(d.getTime())){
+  if(
+    Number.isNaN(
+      d.getTime()
+    )
+  ){
+
     return "";
+
   }
 
   const ano =
@@ -3222,7 +4004,10 @@ function obterDadosParaImpressao(){
   let registros =
     todosOsRegistrosParaImpressao();
 
-  if(modo === "atendimento"){
+  if(
+    modo ===
+    "atendimento"
+  ){
 
     const atendimentos =
       obterAtendimentosSelecionados(
@@ -3263,7 +4048,10 @@ function obterDadosParaImpressao(){
 
   }
 
-  if(modo === "geral"){
+  if(
+    modo ===
+    "geral"
+  ){
 
     const pavilhoes =
       obterPavilhoesSelecionados(
@@ -3285,7 +4073,10 @@ function obterDadosParaImpressao(){
 
   }
 
-  if(modo === "data"){
+  if(
+    modo ===
+    "data"
+  ){
 
     const data =
       $("printData").value;
@@ -3301,7 +4092,8 @@ function obterDadosParaImpressao(){
     const tipo =
       document.querySelector(
         'input[name="tipoData"]:checked'
-      )?.value || "todos";
+      )?.value ||
+      "todos";
 
     registros =
       registros.filter(
@@ -3324,7 +4116,10 @@ function obterDadosParaImpressao(){
 
     let grupos = [];
 
-    if(tipo === "atendimentos"){
+    if(
+      tipo ===
+      "atendimentos"
+    ){
 
       grupos =
         obterAtendimentosSelecionados(
@@ -3347,11 +4142,6 @@ function obterDadosParaImpressao(){
 
     }else{
 
-      /*
-       * Quando for TODOS, criamos grupos somente
-       * para os atendimentos que realmente possuem
-       * registros na data.
-       */
       grupos =
         ATENDIMENTOS.filter(
           atendimento =>
@@ -3364,7 +4154,9 @@ function obterDadosParaImpressao(){
                     "nomeAtendimento"
                   )
                 ) ===
-                normalizar(atendimento)
+                normalizar(
+                  atendimento
+                )
             )
         );
 
@@ -3382,12 +4174,13 @@ function obterDadosParaImpressao(){
   return {
     modo,
     registros,
-    grupos:ATENDIMENTOS
+    grupos:
+      ATENDIMENTOS
   };
 }
 
 /* ============================================================
-   GERAÇÃO DA IMPRESSÃO
+   IMPRESSÃO
 ============================================================ */
 
 function agruparPorAtendimento(
@@ -3445,118 +4238,125 @@ function gerarPaginaImpressao(
         )
     );
 
-  ordenados.forEach(registro=>{
+  ordenados.forEach(
+    registro=>{
 
-    const nome =
-      valorRegistro(
-        registro,
-        "nome",
-        "nomeInterno",
-        "NOME DO INTERNO"
-      );
+      const nome =
+        valorRegistro(
+          registro,
+          "nome",
+          "nomeInterno",
+          "NOME DO INTERNO"
+        );
 
-    const rgi =
-      valorRegistro(
-        registro,
-        "rgi",
-        "RGI"
-      );
+      const rgi =
+        valorRegistro(
+          registro,
+          "rgi",
+          "RGI"
+        );
 
-    const pavilhao =
-      valorRegistro(
-        registro,
-        "pavilhao",
-        "PAVILHÃO",
-        "PAVILHAO"
-      );
+      const pavilhao =
+        valorRegistro(
+          registro,
+          "pavilhao",
+          "PAVILHÃO",
+          "PAVILHAO"
+        );
 
-    const cela =
-      valorRegistro(
-        registro,
-        "cela",
-        "CELA"
-      );
+      const cela =
+        valorRegistro(
+          registro,
+          "cela",
+          "CELA"
+        );
 
-    const atendimento =
-      valorRegistro(
-        registro,
-        "atendimento",
-        "nomeAtendimento"
-      );
+      const atendimento =
+        valorRegistro(
+          registro,
+          "atendimento",
+          "nomeAtendimento"
+        );
 
-    const dataAtendimento =
-      valorRegistro(
-        registro,
-        "dataAtendimento",
-        "data_atendimento",
-        "data"
-      );
+      const dataAtendimento =
+        valorRegistro(
+          registro,
+          "dataAtendimento",
+          "data_atendimento",
+          "data"
+        );
 
-    let status = "";
+      let status = "";
 
-    if(registro.status === "recusado"){
+      if(
+        registro.status ===
+        "recusado"
+      ){
 
-      status =
-        "RECUSADO";
+        status =
+          "RECUSADO";
 
-    }else if(
-      registro.status === "guardado"
-    ){
+      }else if(
+        registro.status ===
+        "guardado"
+      ){
 
-      status =
-        "GUARDADO";
+        status =
+          "GUARDADO";
 
-    }else if(
-      registro.status === "recebido"
-    ){
+      }else if(
+        registro.status ===
+        "recebido"
+      ){
 
-      status =
-        "RECEBIDO";
+        status =
+          "RECEBIDO";
 
-    }else{
+      }else{
 
-      status =
-        "AGUARDANDO";
+        status =
+          "AGUARDANDO";
+
+      }
+
+      linhas += `
+        <tr>
+
+          <td>
+            ${escapeHtml(nome)}
+          </td>
+
+          <td>
+            ${escapeHtml(rgi)}
+          </td>
+
+          <td class="print-pavcela">
+            ${escapeHtml(pavilhao)}
+            /
+            ${escapeHtml(cela)}
+          </td>
+
+          <td>
+            ${escapeHtml(atendimento)}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatarData(
+                dataAtendimento
+              )
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(status)}
+          </td>
+
+        </tr>
+      `;
 
     }
-
-    linhas += `
-      <tr>
-
-        <td>
-          ${escapeHtml(nome)}
-        </td>
-
-        <td>
-          ${escapeHtml(rgi)}
-        </td>
-
-        <td class="print-pavcela">
-          ${escapeHtml(pavilhao)}
-          /
-          ${escapeHtml(cela)}
-        </td>
-
-        <td>
-          ${escapeHtml(atendimento)}
-        </td>
-
-        <td>
-          ${escapeHtml(
-            formatarData(
-              dataAtendimento
-            )
-          )}
-        </td>
-
-        <td>
-          ${escapeHtml(status)}
-        </td>
-
-      </tr>
-    `;
-
-  });
+  );
 
   return `
     <div class="print-page">
@@ -3591,6 +4391,7 @@ function gerarPaginaImpressao(
       <table class="print-table">
 
         <thead>
+
           <tr>
             <th>Nome do interno</th>
             <th>RGI</th>
@@ -3599,6 +4400,7 @@ function gerarPaginaImpressao(
             <th>Data</th>
             <th>Status</th>
           </tr>
+
         </thead>
 
         <tbody>
@@ -3630,7 +4432,9 @@ function executarImpressao(){
     return;
   }
 
-  if(!dados.registros.length){
+  if(
+    !dados.registros.length
+  ){
 
     mostrarToast(
       "Nenhum atendimento encontrado para os filtros selecionados.",
@@ -3642,18 +4446,8 @@ function executarImpressao(){
 
   const paginas = [];
 
-  /*
-   * Cada atendimento selecionado terá sua própria página.
-   *
-   * Não criamos uma página geral inicial.
-   */
-  if(
-    dados.modo === "atendimento" ||
-    dados.modo === "geral" ||
-    dados.modo === "data"
-  ){
-
-    dados.grupos.forEach(atendimento=>{
+  dados.grupos.forEach(
+    atendimento=>{
 
       const grupo =
         agruparPorAtendimento(
@@ -3667,7 +4461,10 @@ function executarImpressao(){
 
       let subtitulo = "";
 
-      if(dados.modo === "data"){
+      if(
+        dados.modo ===
+        "data"
+      ){
 
         subtitulo =
           "Data: " +
@@ -3685,9 +4482,8 @@ function executarImpressao(){
         )
       );
 
-    });
-
-  }
+    }
+  );
 
   if(!paginas.length){
 
@@ -3699,17 +4495,83 @@ function executarImpressao(){
     return;
   }
 
-  $("areaImpressao").innerHTML =
+  $("areaImpressao")
+    .innerHTML =
     paginas.join("");
 
   fecharImpressao();
 
-  setTimeout(()=>{
-
-    window.print();
-
-  },250);
+  setTimeout(
+    ()=>{
+      window.print();
+    },
+    250
+  );
 }
+
+/* ============================================================
+   EVENTOS DE CONEXÃO DO APARELHO
+============================================================ */
+
+window.addEventListener(
+  "online",
+  ()=>{
+
+    mostrarToast(
+      "Conexão de rede restabelecida. Reconectando...",
+      "success"
+    );
+
+    retryDelay =
+      1000;
+
+    conectarServidor();
+
+  }
+);
+
+window.addEventListener(
+  "offline",
+  ()=>{
+
+    definirStatus(
+      false,
+      "Sem conexão de rede"
+    );
+
+  }
+);
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      if(
+        !socket ||
+        socket.readyState !==
+          WebSocket.OPEN
+      ){
+
+        retryDelay =
+          1000;
+
+        conectarServidor();
+
+      }else{
+
+        reenviarRecusasPendentes();
+
+      }
+
+    }
+
+  }
+);
 
 /* ============================================================
    INICIALIZAÇÃO
@@ -3720,15 +4582,13 @@ function inicializar(){
   carregarTudo();
 
   preencherAtendimentosImpressao();
+
   preencherAtendimentosData();
+
   preencherPavilhoesImpressao();
 
   conectarServidor();
 
-  /*
-   * Atualiza a tela caso a base Excel seja alterada
-   * pelo GUICHÊ em outra aba do mesmo navegador.
-   */
   window.addEventListener(
     "storage",
     event=>{
@@ -3745,15 +4605,32 @@ function inicializar(){
     }
   );
 
-  /*
-   * Também atualiza os pavilhões periodicamente,
-   * sem alterar os atendimentos.
-   */
   setInterval(
     preencherPavilhoesImpressao,
     10000
   );
 
+  /*
+   * Caso uma recusa tenha ficado salva localmente
+   * porque a conexão caiu exatamente no momento da
+   * recusa, tentamos novamente periodicamente.
+   */
+  setInterval(
+    ()=>{
+
+      if(
+        socket &&
+        socket.readyState ===
+          WebSocket.OPEN
+      ){
+
+        reenviarRecusasPendentes();
+
+      }
+
+    },
+    5000
+  );
 }
 
 window.addEventListener(
@@ -3817,19 +4694,26 @@ $("modalImpressao")
   );
 
 /* ============================================================
-   TECLA ESC
+   ESC
 ============================================================ */
 
 document.addEventListener(
   "keydown",
   event=>{
 
-    if(event.key !== "Escape"){
+    if(
+      event.key !==
+      "Escape"
+    ){
+
       return;
+
     }
 
     fecharRecusa();
+
     fecharGuardados();
+
     fecharImpressao();
 
   }
