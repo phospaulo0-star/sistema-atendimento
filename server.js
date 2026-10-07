@@ -1,453 +1,286 @@
+"use strict";
+
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
-const crypto = require("crypto");
 const path = require("path");
 
 const app = express();
-
-app.use(express.static(path.join(__dirname, "public")));
-
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// ======================================================
-// CONFIGURAÇÃO
-// ======================================================
+const PORT = process.env.PORT || 3000;
 
-const VERSION = "2.6.0";
+/*
+============================================================
+SERVIDOR DO SISTEMA DE ATENDIMENTO
+VERSÃO 2.7.0
 
-// Clientes conectados
+FLUXO DA RECUSA
+
+GUICHÊ
+   |
+   | send_record
+   v
+SERVIDOR
+   |
+   v
+MESA
+   |
+   | refuse_record
+   v
+SERVIDOR
+   |
+   | record_refused
+   v
+MESMO GUICHÊ QUE ENVIOU
+   |
+   v
+status = recusado
+   |
+   +-- EDITAR
+   +-- REENVIAR
+   +-- ARQUIVAR
+============================================================
+*/
+
+app.use(express.static(path.join(__dirname)));
+
+app.get("/health", (req, res) => {
+  res.json({
+    ok: true,
+    sistema: "sistema-atendimento",
+    versao: "2.7.0",
+    data: new Date().toISOString()
+  });
+});
+
+app.get("/status", (req, res) => {
+  res.json({
+    ok: true,
+    versao: "2.7.0",
+    clientes: clientes.size,
+    pendentesMesa: pendentes.size,
+    recusasPendentes: recusasPendentes.size,
+    data: new Date().toISOString()
+  });
+});
+
+/*
+============================================================
+ESTRUTURAS
+============================================================
+*/
+
+/*
+clientes
+
+id => {
+  ws,
+  role,
+  conectadoEm
+}
+*/
 const clientes = new Map();
 
-// Atendimentos aguardando a MESA receber
+/*
+pendentes
+
+recordId => {
+  recordId,
+  record,
+  ownerId,
+  criadoEm,
+  atualizadoEm
+}
+*/
 const pendentes = new Map();
 
-// Recusas que ainda precisam chegar ao GUICHÊ
-// Ficam armazenadas até o GUICHÊ confirmar o recebimento.
+/*
+recusasPendentes
+
+recordId => {
+  recordId,
+  record,
+  ownerId,
+  reason,
+  refusedAt
+}
+*/
 const recusasPendentes = new Map();
 
-// ======================================================
-// FUNÇÕES AUXILIARES
-// ======================================================
+let contadorClientes = 0;
 
-function enviar(ws, dados) {
-  if (!ws) return false;
+/*
+============================================================
+UTILITÁRIOS
+============================================================
+*/
+
+function gerarClientId() {
+  contadorClientes++;
+
+  return (
+    "cliente-" +
+    Date.now() +
+    "-" +
+    contadorClientes +
+    "-" +
+    Math.random()
+      .toString(36)
+      .slice(2, 8)
+  );
+}
+
+function agora() {
+  return new Date().toISOString();
+}
+
+function enviar(ws, mensagem) {
+  if (!ws) {
+    return false;
+  }
 
   if (ws.readyState !== WebSocket.OPEN) {
     return false;
   }
 
   try {
-    ws.send(JSON.stringify(dados));
+    ws.send(JSON.stringify(mensagem));
     return true;
   } catch (erro) {
-    console.error("Erro ao enviar WebSocket:", erro.message);
+    console.error("Erro ao enviar WebSocket:", erro);
     return false;
   }
 }
 
-function transmitirParaRecebedores(dados, excluirWs = null) {
-  for (const cliente of clientes.values()) {
-    if (
-      cliente.role === "receiver" &&
-      cliente.ws !== excluirWs
-    ) {
-      enviar(cliente.ws, dados);
+function enviarParaCliente(clientId, mensagem) {
+  const cliente = clientes.get(clientId);
+
+  if (!cliente) {
+    return false;
+  }
+
+  return enviar(cliente.ws, mensagem);
+}
+
+function transmitirParaRole(role, mensagem, excluirId = null) {
+  let quantidade = 0;
+
+  for (const [id, cliente] of clientes.entries()) {
+    if (id === excluirId) {
+      continue;
+    }
+
+    if (cliente.role !== role) {
+      continue;
+    }
+
+    if (enviar(cliente.ws, mensagem)) {
+      quantidade++;
     }
   }
+
+  return quantidade;
 }
+
+function registrarCliente(ws, role) {
+  const clientId = gerarClientId();
+
+  clientes.set(clientId, {
+    ws,
+    role,
+    conectadoEm: agora()
+  });
+
+  ws.clientId = clientId;
+  ws.role = role;
+
+  return clientId;
+}
+
+function removerCliente(ws) {
+  if (!ws || !ws.clientId) {
+    return;
+  }
+
+  const id = ws.clientId;
+
+  clientes.delete(id);
+
+  console.log(
+    `[CONEXÃO] Cliente removido: ${id}`
+  );
+}
+
+/*
+============================================================
+REENVIAR PENDENTES PARA UMA MESA
+============================================================
+*/
 
 function enviarPendentesParaMesa(ws) {
-  for (const item of pendentes.values()) {
+  for (const [recordId, item] of pendentes.entries()) {
     enviar(ws, {
       type: "new_record",
-      recordId: item.recordId,
-      record: item.record,
-      sentAt: item.sentAt
-    });
-  }
-}
-
-function enviarRecusasParaGuiche(ws) {
-  for (const item of recusasPendentes.values()) {
-    enviar(ws, {
-      type: "record_refused",
-      recordId: item.recordId,
-      record: item.record,
-      refusedAt: item.refusedAt,
-      reason: item.reason
-    });
-  }
-}
-
-// ======================================================
-// PROCESSAMENTO DE ENVIO DO GUICHÊ
-// ======================================================
-
-function processarEnvioRegistro(cliente, mensagem) {
-  const registro = {
-    ...(mensagem.record || {})
-  };
-
-  const recordId =
-    mensagem.recordId ||
-    registro.recordId ||
-    crypto.randomUUID();
-
-  registro.recordId = recordId;
-
-  // ----------------------------------------------------
-  // Se já existe, atualiza o registro.
-  // Isso é importante para REENVIAR depois de uma recusa.
-  // ----------------------------------------------------
-
-  if (pendentes.has(recordId)) {
-    const existente = pendentes.get(recordId);
-
-    existente.record = registro;
-    existente.ownerId = cliente.id;
-    existente.sentAt = new Date().toISOString();
-
-    pendentes.set(recordId, existente);
-  } else {
-    pendentes.set(recordId, {
       recordId,
-      record: registro,
-      sentAt: new Date().toISOString(),
-      ownerId: cliente.id
+      record: item.record
     });
   }
-
-  // ----------------------------------------------------
-  // Se esse atendimento estava na fila de recusas,
-  // significa que o GUICHÊ está reenviando.
-  // Remove a recusa pendente do servidor.
-  // ----------------------------------------------------
-
-  recusasPendentes.delete(recordId);
-
-  const item = pendentes.get(recordId);
-
-  const atendimento = {
-    type: "new_record",
-    recordId: item.recordId,
-    record: item.record,
-    sentAt: item.sentAt
-  };
-
-  // ----------------------------------------------------
-  // ENVIO IMEDIATO PARA TODAS AS MESAS CONECTADAS
-  // ----------------------------------------------------
-
-  transmitirParaRecebedores(atendimento);
-
-  // Confirma ao próprio GUICHÊ que o servidor recebeu
-  enviar(cliente.ws, {
-    type: "send_result",
-    recordId,
-    ok: true,
-    sentAt: item.sentAt
-  });
 }
 
-// ======================================================
-// PROCESSAMENTO DE RECEBIMENTO PELA MESA
-// ======================================================
+/*
+============================================================
+REENVIAR RECUSAS PARA UM GUICHÊ
+============================================================
+*/
 
-function processarConfirmacaoRecebimento(cliente, mensagem) {
-  const recordId = mensagem.recordId;
+function enviarRecusasParaGuiche(clientId) {
+  for (const [recordId, recusa] of recusasPendentes.entries()) {
 
-  if (!recordId) {
-    enviar(cliente.ws, {
-      type: "error",
-      message: "Confirmação sem recordId."
-    });
+    /*
+     * Só entrega para o GUICHÊ que é dono daquele atendimento.
+     */
+    if (recusa.ownerId !== clientId) {
+      continue;
+    }
 
-    return;
-  }
-
-  const item = pendentes.get(recordId);
-
-  // ----------------------------------------------------
-  // Se não está mais em pendentes, pode ser uma
-  // confirmação duplicada depois de uma reconexão.
-  // ----------------------------------------------------
-
-  if (!item) {
-    enviar(cliente.ws, {
-      type: "confirm_result",
-      recordId,
-      ok: false,
-      alreadyConfirmed: true,
-      message: "Atendimento já confirmado ou não encontrado."
-    });
-
-    return;
-  }
-
-  const receivedAt =
-    mensagem.receivedAt ||
-    new Date().toISOString();
-
-  const confirmacao = {
-    type: "record_received",
-    recordId,
-    receivedAt
-  };
-
-  // ----------------------------------------------------
-  // AVISA O GUICHÊ
-  // ----------------------------------------------------
-
-  const sender = clientes.get(item.ownerId);
-
-  if (sender) {
-    enviar(sender.ws, confirmacao);
-  }
-
-  // ----------------------------------------------------
-  // AVISA AS OUTRAS MESAS
-  // ----------------------------------------------------
-
-  transmitirParaRecebedores(
-    confirmacao,
-    cliente.ws
-  );
-
-  // ----------------------------------------------------
-  // AGORA O ATENDIMENTO DEIXA DE SER PENDENTE
-  // ----------------------------------------------------
-
-  pendentes.delete(recordId);
-
-  enviar(cliente.ws, {
-    type: "confirm_result",
-    recordId,
-    ok: true,
-    receivedAt
-  });
-
-  console.log(
-    `[RECEBIDO] ${recordId}`
-  );
-}
-
-// ======================================================
-// PROCESSAMENTO DE RECUSA
-// ======================================================
-
-function processarRecusaMesa(cliente, mensagem) {
-  const recordId = mensagem.recordId;
-
-  if (!recordId) {
-    enviar(cliente.ws, {
-      type: "error",
-      message: "Recusa sem recordId."
-    });
-
-    return;
-  }
-
-  const item = pendentes.get(recordId);
-
-  // ----------------------------------------------------
-  // Se não encontrou nos pendentes, pode ser uma recusa
-  // duplicada. Não cria atendimento novo.
-  // ----------------------------------------------------
-
-  if (!item) {
-    enviar(cliente.ws, {
-      type: "refuse_result",
-      recordId,
-      ok: false,
-      message: "Atendimento já processado ou não encontrado."
-    });
-
-    return;
-  }
-
-  const recusadoEm =
-    mensagem.refusedAt ||
-    new Date().toISOString();
-
-  const motivo =
-    String(
-      mensagem.reason ||
-      mensagem.motivoRecusa ||
-      ""
-    ).trim();
-
-  const registroRecusado = {
-    ...item.record,
-    ...(mensagem.record || {}),
-    recordId,
-
-    status: "recusado",
-
-    motivoRecusa: motivo,
-
-    recusadoEm,
-
-    // O atendimento volta para o GUICHÊ,
-    // portanto não fica como recebido.
-    recebidoEm: null
-  };
-
-  const recusa = {
-    recordId,
-    record: registroRecusado,
-    refusedAt: recusadoEm,
-    reason: motivo,
-    ownerId: item.ownerId
-  };
-
-  // ----------------------------------------------------
-  // MUITO IMPORTANTE:
-  //
-  // A recusa fica armazenada até o GUICHÊ receber.
-  //
-  // Assim, mesmo que o GUICHÊ esteja desligado,
-  // a recusa NÃO será perdida.
-  // ----------------------------------------------------
-
-  recusasPendentes.set(
-    recordId,
-    recusa
-  );
-
-  // O atendimento deixa de estar aguardando a MESA.
-  pendentes.delete(recordId);
-
-  // ----------------------------------------------------
-  // TENTA ENTREGAR IMEDIATAMENTE AO GUICHÊ
-  // ----------------------------------------------------
-
-  const sender = clientes.get(item.ownerId);
-
-  let entregueAgora = false;
-
-  if (sender) {
-    entregueAgora = enviar(
-      sender.ws,
-      {
-        type: "record_refused",
-        recordId,
-        record: registroRecusado,
-        refusedAt: recusadoEm,
-        reason: motivo
-      }
-    );
-  }
-
-  // ----------------------------------------------------
-  // AVISA OUTRAS MESAS QUE O ATENDIMENTO FOI PROCESSADO
-  // ----------------------------------------------------
-
-  transmitirParaRecebedores(
-    {
+    enviarParaCliente(clientId, {
       type: "record_refused",
       recordId,
-      refusedAt: recusadoEm,
-      reason: motivo
-    },
-    cliente.ws
-  );
-
-  // ----------------------------------------------------
-  // RESPONDE À MESA
-  // ----------------------------------------------------
-
-  enviar(cliente.ws, {
-    type: "refuse_result",
-    recordId,
-    ok: true,
-    deliveredToGuiche: entregueAgora,
-    refusedAt: recusadoEm
-  });
-
-  console.log(
-    `[RECUSADO] ${recordId} | motivo: ${motivo}`
-  );
-}
-
-// ======================================================
-// CONFIRMAÇÃO DE RECEBIMENTO DA RECUSA PELO GUICHÊ
-// ======================================================
-
-function processarConfirmacaoRecusa(cliente, mensagem) {
-  const recordId = mensagem.recordId;
-
-  if (!recordId) {
-    enviar(cliente.ws, {
-      type: "error",
-      message: "Confirmação de recusa sem recordId."
+      record: recusa.record,
+      reason: recusa.reason,
+      refusedAt: recusa.refusedAt
     });
-
-    return;
   }
-
-  // Só remove do servidor depois que o GUICHÊ confirmar.
-  const existe = recusasPendentes.has(recordId);
-
-  if (existe) {
-    recusasPendentes.delete(recordId);
-  }
-
-  enviar(cliente.ws, {
-    type: "refusal_confirm_result",
-    recordId,
-    ok: true
-  });
-
-  console.log(
-    `[RECUSA ENTREGUE AO GUICHÊ] ${recordId}`
-  );
 }
 
-// ======================================================
-// WEBSOCKET
-// ======================================================
+/*
+============================================================
+ WEBSOCKET
+============================================================
+*/
 
 wss.on("connection", (ws) => {
 
-  const clientId = crypto.randomUUID();
+  console.log("[CONEXÃO] Novo cliente conectado.");
 
-  const cliente = {
-    id: clientId,
-    ws,
-    role: "unknown",
-    conectadoEm: new Date().toISOString()
-  };
-
-  clientes.set(clientId, cliente);
-
-  console.log(
-    `[CONEXÃO] ${clientId}`
-  );
-
-  // ----------------------------------------------------
-  // CONEXÃO INICIAL
-  // ----------------------------------------------------
+  ws.clientId = null;
+  ws.role = null;
 
   enviar(ws, {
     type: "connected",
-    id: clientId,
-    version: VERSION,
-    serverTime: new Date().toISOString()
+    serverTime: agora(),
+    version: "2.7.0"
   });
 
-  // ----------------------------------------------------
-  // RECEBIMENTO DE MENSAGENS
-  // ----------------------------------------------------
-
-  ws.on("message", (raw) => {
+  ws.on("message", (data) => {
 
     let mensagem;
 
     try {
       mensagem = JSON.parse(
-        raw.toString()
+        data.toString()
       );
     } catch (erro) {
 
@@ -459,295 +292,737 @@ wss.on("connection", (ws) => {
       return;
     }
 
-    const clienteAtual =
-      clientes.get(clientId);
-
-    if (!clienteAtual) {
-      return;
-    }
-
-    // --------------------------------------------------
-    // REGISTRO DO TIPO DE CLIENTE
-    // --------------------------------------------------
-
-    if (mensagem.type === "register") {
-
-      clienteAtual.role =
-        mensagem.role === "receiver"
-          ? "receiver"
-          : "sender";
-
-      enviar(ws, {
-        type: "registered",
-        role: clienteAtual.role,
-        serverTime: new Date().toISOString()
-      });
-
-      // ------------------------------------------------
-      // MESA:
-      // entrega imediatamente tudo que está pendente.
-      // ------------------------------------------------
-
-      if (
-        clienteAtual.role === "receiver"
-      ) {
-        enviarPendentesParaMesa(ws);
-      }
-
-      // ------------------------------------------------
-      // GUICHÊ:
-      // entrega imediatamente recusas que estavam
-      // aguardando porque o GUICHÊ estava offline.
-      // ------------------------------------------------
-
-      if (
-        clienteAtual.role === "sender"
-      ) {
-        enviarRecusasParaGuiche(ws);
-      }
-
-      console.log(
-        `[REGISTRO] ${clientId} => ${clienteAtual.role}`
-      );
-
-      return;
-    }
-
-    // --------------------------------------------------
-    // ENVIO DE NOVO ATENDIMENTO
-    // --------------------------------------------------
-
-    if (
-      mensagem.type === "send_record"
-    ) {
-
-      processarEnvioRegistro(
-        clienteAtual,
-        mensagem
-      );
-
-      return;
-    }
-
-    // --------------------------------------------------
-    // MESA RECEBEU
-    // --------------------------------------------------
-
-    if (
-      mensagem.type === "confirm_received"
-    ) {
-
-      processarConfirmacaoRecebimento(
-        clienteAtual,
-        mensagem
-      );
-
-      return;
-    }
-
-    // --------------------------------------------------
-    // MESA RECUSOU
-    // --------------------------------------------------
-
-    if (
-      mensagem.type === "refuse_record"
-    ) {
-
-      processarRecusaMesa(
-        clienteAtual,
-        mensagem
-      );
-
-      return;
-    }
-
-    // --------------------------------------------------
-    // GUICHÊ CONFIRMA QUE RECEBEU A RECUSA
-    // --------------------------------------------------
-
-    if (
-      mensagem.type === "confirm_refusal_received"
-    ) {
-
-      processarConfirmacaoRecusa(
-        clienteAtual,
-        mensagem
-      );
-
-      return;
-    }
-
-    // --------------------------------------------------
-    // PING MANUAL DO NAVEGADOR
-    // --------------------------------------------------
-
-    if (
-      mensagem.type === "ping"
-    ) {
-
-      enviar(ws, {
-        type: "pong",
-        serverTime: new Date().toISOString()
-      });
-
-      return;
-    }
+    tratarMensagem(ws, mensagem);
   });
-
-  // ----------------------------------------------------
-  // FECHAMENTO
-  // ----------------------------------------------------
 
   ws.on("close", () => {
 
     console.log(
-      `[DESCONECTADO] ${clientId}`
+      `[CONEXÃO] Cliente desconectado: ${ws.clientId || "não registrado"}`
     );
 
-    clientes.delete(clientId);
+    removerCliente(ws);
   });
 
   ws.on("error", (erro) => {
 
     console.error(
-      `[WEBSOCKET ERRO] ${clientId}:`,
+      "[WEBSOCKET] Erro:",
       erro.message
     );
+
   });
+
 });
 
-// ======================================================
-// PING AUTOMÁTICO DO SERVIDOR
-// ======================================================
-//
-// Ajuda a manter a conexão ativa e detectar aparelhos
-// que perderam a conexão sem fechar corretamente.
-// ======================================================
+/*
+============================================================
+TRATAMENTO DAS MENSAGENS
+============================================================
+*/
 
-const INTERVALO_PING = 15000;
+function tratarMensagem(ws, mensagem) {
 
-const intervaloPing = setInterval(() => {
+  const tipo = mensagem.type;
 
-  for (const cliente of clientes.values()) {
+  /*
+  ----------------------------------------------------------
+  REGISTER
+  ----------------------------------------------------------
+  */
 
-    if (
-      cliente.ws.readyState === WebSocket.OPEN
-    ) {
+  if (tipo === "register") {
 
-      enviar(
-        cliente.ws,
+    const role =
+      mensagem.role === "receiver"
+        ? "receiver"
+        : "sender";
+
+    /*
+     * Se já estava registrado, atualiza a função.
+     */
+    if (ws.clientId) {
+
+      const cliente =
+        clientes.get(ws.clientId);
+
+      if (cliente) {
+        cliente.role = role;
+      }
+
+      ws.role = role;
+
+    } else {
+
+      registrarCliente(ws, role);
+
+    }
+
+    console.log(
+      `[REGISTER] ${ws.clientId} => ${role}`
+    );
+
+    enviar(ws, {
+      type: "registered",
+      role,
+      clientId: ws.clientId
+    });
+
+    /*
+     * MESA recebe imediatamente tudo que está pendente.
+     */
+    if (role === "receiver") {
+
+      enviarPendentesParaMesa(ws);
+
+    }
+
+    /*
+     * GUICHÊ recebe imediatamente as recusas
+     * que ficaram aguardando entrega.
+     */
+    if (role === "sender") {
+
+      enviarRecusasParaGuiche(
+        ws.clientId
+      );
+
+    }
+
+    return;
+  }
+
+  /*
+  ----------------------------------------------------------
+  PING
+  ----------------------------------------------------------
+  */
+
+  if (tipo === "ping") {
+
+    enviar(ws, {
+      type: "pong",
+      at: agora()
+    });
+
+    return;
+  }
+
+  /*
+  ----------------------------------------------------------
+  PONG
+  ----------------------------------------------------------
+  */
+
+  if (tipo === "pong") {
+    return;
+  }
+
+  /*
+  ----------------------------------------------------------
+  SEND_RECORD
+  GUICHÊ -> SERVIDOR -> MESA
+  ----------------------------------------------------------
+  */
+
+  if (tipo === "send_record") {
+
+    if (!ws.clientId) {
+
+      enviar(ws, {
+        type: "error",
+        message: "Cliente ainda não registrado."
+      });
+
+      return;
+    }
+
+    if (ws.role !== "sender") {
+
+      enviar(ws, {
+        type: "error",
+        message: "Somente o GUICHÊ pode enviar atendimentos."
+      });
+
+      return;
+    }
+
+    const recordId =
+      mensagem.recordId ||
+      mensagem.record?.recordId;
+
+    if (!recordId) {
+
+      enviar(ws, {
+        type: "send_result",
+        ok: false,
+        message: "recordId não informado."
+      });
+
+      return;
+    }
+
+    const registro = {
+      ...(mensagem.record || {}),
+      recordId
+    };
+
+    /*
+     * IMPORTANTE:
+     * O dono passa a ser SEMPRE o GUICHÊ
+     * que está fazendo este envio.
+     *
+     * Isso resolve o problema da recusa
+     * voltar para o GUICHÊ errado ou não voltar.
+     */
+    const itemExistente =
+      pendentes.get(recordId);
+
+    const item = {
+
+      recordId,
+
+      record: registro,
+
+      ownerId:
+        ws.clientId,
+
+      criadoEm:
+        itemExistente?.criadoEm ||
+        agora(),
+
+      atualizadoEm:
+        agora()
+
+    };
+
+    pendentes.set(
+      recordId,
+      item
+    );
+
+    /*
+     * Se havia uma recusa antiga deste mesmo registro,
+     * ela deixa de ser uma recusa pendente porque
+     * o GUICHÊ acabou de reenviá-lo.
+     */
+    recusasPendentes.delete(
+      recordId
+    );
+
+    /*
+     * Envia para todas as MESA(s) conectadas.
+     */
+    const quantidadeMesa =
+      transmitirParaRole(
+        "receiver",
         {
-          type: "server_ping",
-          serverTime: new Date().toISOString()
+          type: "new_record",
+          recordId,
+          record: registro
         }
       );
+
+    console.log(
+      `[ENVIO] ${recordId} | GUICHÊ ${ws.clientId} | MESA(s): ${quantidadeMesa}`
+    );
+
+    enviar(ws, {
+      type: "send_result",
+      ok: true,
+      recordId,
+      mesasConectadas:
+        quantidadeMesa,
+      ownerId:
+        ws.clientId
+    });
+
+    return;
+  }
+
+  /*
+  ----------------------------------------------------------
+  CONFIRM_RECEIVED
+  MESA -> SERVIDOR -> GUICHÊ
+  ----------------------------------------------------------
+  */
+
+  if (tipo === "confirm_received") {
+
+    if (!ws.clientId) {
+      return;
     }
+
+    if (ws.role !== "receiver") {
+      return;
+    }
+
+    const recordId =
+      mensagem.recordId;
+
+    if (!recordId) {
+      return;
+    }
+
+    const pending =
+      pendentes.get(recordId);
+
+    /*
+     * Mesmo se o pendente já não estiver no Map,
+     * podemos simplesmente ignorar.
+     */
+    if (!pending) {
+
+      enviar(ws, {
+        type: "confirm_result",
+        ok: false,
+        recordId,
+        message:
+          "Atendimento não está mais pendente no servidor."
+      });
+
+      return;
+    }
+
+    const receivedAt =
+      mensagem.receivedAt ||
+      agora();
+
+    /*
+     * Atualiza o registro antes de mandar
+     * a confirmação ao GUICHÊ.
+     */
+    const registro = {
+      ...pending.record,
+
+      recordId,
+
+      status:
+        "recebido",
+
+      recebidoEm:
+        receivedAt
+
+    };
+
+    /*
+     * Remove da fila da MESA.
+     */
+    pendentes.delete(
+      recordId
+    );
+
+    /*
+     * Se existia recusa antiga,
+     * ela também deixa de ser pendente.
+     */
+    recusasPendentes.delete(
+      recordId
+    );
+
+    /*
+     * GUICHÊ dono.
+     */
+    if (pending.ownerId) {
+
+      enviarParaCliente(
+        pending.ownerId,
+        {
+          type: "record_received",
+          recordId,
+          record: registro,
+          receivedAt
+        }
+      );
+
+    }
+
+    /*
+     * Informa às outras MESA(s).
+     */
+    transmitirParaRole(
+      "receiver",
+      {
+        type: "record_received",
+        recordId,
+        receivedAt
+      },
+      ws.clientId
+    );
+
+    enviar(ws, {
+      type: "confirm_result",
+      ok: true,
+      recordId,
+      receivedAt
+    });
+
+    console.log(
+      `[RECEBIDO] ${recordId} | GUICHÊ: ${pending.ownerId}`
+    );
+
+    return;
   }
 
-}, INTERVALO_PING);
+  /*
+  ----------------------------------------------------------
+  REFUSE_RECORD
+  MESA -> SERVIDOR -> MESMO GUICHÊ
+  ----------------------------------------------------------
+  */
 
-// ======================================================
-// STATUS / HEALTH
-// ======================================================
+  if (tipo === "refuse_record") {
 
-app.get("/health", (_req, res) => {
+    if (!ws.clientId) {
+      return;
+    }
 
-  res.json({
-    ok: true,
-    version: VERSION,
+    if (ws.role !== "receiver") {
 
-    clients: clientes.size,
+      enviar(ws, {
+        type: "refuse_result",
+        ok: false,
+        recordId:
+          mensagem.recordId,
+        message:
+          "Somente a MESA pode recusar atendimentos."
+      });
 
-    senders: [...clientes.values()]
-      .filter(c => c.role === "sender")
-      .length,
+      return;
+    }
 
-    receivers: [...clientes.values()]
-      .filter(c => c.role === "receiver")
-      .length,
+    const recordId =
+      mensagem.recordId ||
+      mensagem.record?.recordId;
 
-    pendingRecords: pendentes.size,
+    if (!recordId) {
 
-    pendingRefusals: recusasPendentes.size,
+      enviar(ws, {
+        type: "refuse_result",
+        ok: false,
+        message:
+          "recordId não informado."
+      });
 
-    uptime: process.uptime(),
+      return;
+    }
 
-    serverTime: new Date().toISOString()
-  });
-});
+    const pending =
+      pendentes.get(recordId);
 
-app.get("/status", (_req, res) => {
+    if (!pending) {
 
-  res.json({
-    ok: true,
-    version: VERSION,
+      /*
+       * Caso raro:
+       * a MESA recusa depois que o servidor perdeu
+       * o pendente.
+       *
+       * Mesmo assim, se o GUICHÊ estiver identificado
+       * pela mensagem, tentamos entregar.
+       */
+      const registroMensagem = {
+        ...(mensagem.record || {}),
+        recordId
+      };
 
-    clientes: [...clientes.values()]
-      .map(cliente => ({
-        id: cliente.id,
-        role: cliente.role,
-        conectadoEm: cliente.conectadoEm
-      })),
+      const reason =
+        mensagem.reason ||
+        registroMensagem.motivoRecusa ||
+        "Motivo não informado.";
 
-    pendentes: [...pendentes.values()]
-      .map(item => ({
-        recordId: item.recordId,
-        sentAt: item.sentAt,
-        ownerId: item.ownerId
-      })),
+      const refusedAt =
+        mensagem.refusedAt ||
+        agora();
 
-    recusasPendentes: [...recusasPendentes.values()]
-      .map(item => ({
-        recordId: item.recordId,
-        refusedAt: item.refusedAt,
-        reason: item.reason,
-        ownerId: item.ownerId
-      })),
+      enviar(ws, {
+        type: "refuse_result",
+        ok: false,
+        recordId,
+        message:
+          "Atendimento não está mais pendente no servidor."
+      });
 
-    serverTime: new Date().toISOString()
-  });
-});
+      console.warn(
+        `[RECUSA] ${recordId} não encontrado em pendentes.`
+      );
 
-// ======================================================
-// ENCERRAMENTO LIMPO
-// ======================================================
+      return;
+    }
 
-process.on("SIGTERM", () => {
+    const reason =
+      String(
+        mensagem.reason ||
+        mensagem.record?.motivoRecusa ||
+        ""
+      ).trim() ||
+      "Motivo não informado.";
 
-  clearInterval(intervaloPing);
+    const refusedAt =
+      mensagem.refusedAt ||
+      agora();
 
-  for (const cliente of clientes.values()) {
-    try {
-      cliente.ws.close();
-    } catch (_) {}
+    /*
+     * Cria o registro recusado.
+     *
+     * IMPORTANTE:
+     * status vira RECUSADO.
+     */
+    const registroRecusado = {
+
+      ...pending.record,
+
+      ...(mensagem.record || {}),
+
+      recordId,
+
+      status:
+        "recusado",
+
+      motivoRecusa:
+        reason,
+
+      recusadoEm:
+        refusedAt,
+
+      recebidoEm:
+        null
+
+    };
+
+    /*
+     * Guarda a recusa para entrega ao GUICHÊ.
+     *
+     * Isso é persistente durante a execução do servidor.
+     * Se o GUICHÊ estiver offline neste momento,
+     * receberá quando reconectar.
+     */
+    recusasPendentes.set(
+      recordId,
+      {
+
+        recordId,
+
+        record:
+          registroRecusado,
+
+        ownerId:
+          pending.ownerId,
+
+        reason,
+
+        refusedAt
+
+      }
+    );
+
+    /*
+     * MUITO IMPORTANTE:
+     *
+     * A partir deste momento o atendimento
+     * NÃO É MAIS PENDENTE DA MESA.
+     */
+    pendentes.delete(
+      recordId
+    );
+
+    /*
+     * Entrega imediatamente ao GUICHÊ dono.
+     */
+    let entregueAoGuiche = false;
+
+    if (pending.ownerId) {
+
+      entregueAoGuiche =
+        enviarParaCliente(
+          pending.ownerId,
+          {
+            type: "record_refused",
+
+            recordId,
+
+            record:
+              registroRecusado,
+
+            reason,
+
+            refusedAt
+
+          }
+        );
+
+    }
+
+    /*
+     * A própria MESA recebe confirmação da recusa.
+     */
+    enviar(ws, {
+      type: "refuse_result",
+
+      ok: true,
+
+      recordId,
+
+      refusedAt,
+
+      deliveredToGuiche:
+        entregueAoGuiche
+
+    });
+
+    /*
+     * Outras MESAs são informadas para retirar
+     * o atendimento da lista, caso estejam exibindo.
+     */
+    transmitirParaRole(
+      "receiver",
+      {
+        type: "record_removed",
+        recordId,
+        reason: "recusado"
+      },
+      ws.clientId
+    );
+
+    console.log(
+      `[RECUSADO] ${recordId} | GUICHÊ: ${pending.ownerId} | entregue: ${entregueAoGuiche}`
+    );
+
+    return;
   }
 
-  server.close(() => {
-    process.exit(0);
-  });
-});
+  /*
+  ----------------------------------------------------------
+  CONFIRM_REFUSAL_RECEIVED
+  GUICHÊ -> SERVIDOR
+  ----------------------------------------------------------
+  */
 
-process.on("SIGINT", () => {
+  if (
+    tipo ===
+    "confirm_refusal_received"
+  ) {
 
-  clearInterval(intervaloPing);
+    if (!ws.clientId) {
+      return;
+    }
 
-  for (const cliente of clientes.values()) {
-    try {
-      cliente.ws.close();
-    } catch (_) {}
+    const recordId =
+      mensagem.recordId;
+
+    if (!recordId) {
+      return;
+    }
+
+    const recusa =
+      recusasPendentes.get(
+        recordId
+      );
+
+    if (!recusa) {
+
+      enviar(ws, {
+        type: "confirm_refusal_result",
+        ok: true,
+        recordId,
+        alreadyConfirmed: true
+      });
+
+      return;
+    }
+
+    /*
+     * Só o GUICHÊ dono pode confirmar.
+     */
+    if (
+      recusa.ownerId !==
+      ws.clientId
+    ) {
+
+      enviar(ws, {
+        type: "confirm_refusal_result",
+        ok: false,
+        recordId,
+        message:
+          "Este atendimento pertence a outro GUICHÊ."
+      });
+
+      return;
+    }
+
+    /*
+     * Agora a recusa pode sair da memória
+     * de pendências do servidor.
+     */
+    recusasPendentes.delete(
+      recordId
+    );
+
+    enviar(ws, {
+      type: "confirm_refusal_result",
+      ok: true,
+      recordId
+    });
+
+    console.log(
+      `[RECUSA CONFIRMADA] ${recordId} | GUICHÊ: ${ws.clientId}`
+    );
+
+    return;
   }
 
-  server.close(() => {
-    process.exit(0);
+  /*
+  ----------------------------------------------------------
+  UNKNOWN
+  ----------------------------------------------------------
+  */
+
+  enviar(ws, {
+    type: "error",
+    message:
+      "Tipo de mensagem não reconhecido: " +
+      String(tipo || "")
   });
-});
+}
 
-// ======================================================
-// INICIALIZAÇÃO
-// ======================================================
+/*
+============================================================
+PING DO SERVIDOR
+============================================================
+*/
 
-const PORT =
-  process.env.PORT || 3000;
+setInterval(() => {
+
+  for (const [id, cliente] of clientes.entries()) {
+
+    if (
+      cliente.ws.readyState !==
+      WebSocket.OPEN
+    ) {
+
+      removerCliente(
+        cliente.ws
+      );
+
+      continue;
+    }
+
+    enviar(
+      cliente.ws,
+      {
+        type: "server_ping",
+        at: agora()
+      }
+    );
+
+  }
+
+}, 15000);
+
+/*
+============================================================
+INICIALIZAÇÃO
+============================================================
+*/
 
 server.listen(
   PORT,
@@ -755,7 +1030,11 @@ server.listen(
   () => {
 
     console.log(
-      `Sistema de Atendimento V${VERSION} iniciado na porta ${PORT}`
+      `Servidor do Sistema de Atendimento iniciado na porta ${PORT}`
+    );
+
+    console.log(
+      "Versão: 2.7.0"
     );
 
   }
