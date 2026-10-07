@@ -3,498 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Guichê de Atendimento - Polícia Penal MS</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
-
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#f1f1f1;
-  color:#222;
-}
-
-header{
-  background:#111;
-  color:white;
-  padding:14px 22px;
-  display:flex;
-  align-items:center;
-  gap:18px;
-  border-bottom:4px solid #c7a84b;
-}
-
-header img{
-  width:70px;
-  height:70px;
-  object-fit:contain;
-  flex-shrink:0;
-}
-
-.logo h1{
-  margin:0;
-  font-size:25px;
-}
-
-.logo .sub{
-  margin-top:5px;
-  font-size:14px;
-  font-weight:bold;
-  color:#eee;
-}
-
-.logo .cpaig{
-  margin-top:3px;
-  font-size:17px;
-  font-weight:bold;
-  color:#ffd83d;
-}
-
-.container{
-  max-width:1150px;
-  margin:20px auto;
-  padding:0 15px;
-}
-
-.card{
-  background:#fff;
-  border-radius:10px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-
-.card h2{
-  margin-top:0;
-  border-bottom:2px solid #c7a84b;
-  padding-bottom:10px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:15px;
-}
-
-.campo{
-  display:flex;
-  flex-direction:column;
-}
-
-.campo label{
-  font-weight:bold;
-  margin-bottom:6px;
-}
-
-input,
-select,
-textarea{
-  width:100%;
-  padding:11px;
-  border:1px solid #bbb;
-  border-radius:6px;
-  font-size:16px;
-  background:white;
-  font-family:Arial,Helvetica,sans-serif;
-}
-
-textarea{
-  resize:vertical;
-}
-
-input:focus,
-select:focus,
-textarea:focus{
-  outline:none;
-  border-color:#c7a84b;
-  box-shadow:0 0 0 2px rgba(199,168,75,.15);
-}
-
-button{
-  border:0;
-  border-radius:7px;
-  padding:11px 16px;
-  font-size:15px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-}
-
-.btn-preparar{
-  background:#222;
-  color:#fff;
-  width:100%;
-  margin-top:18px;
-  font-size:17px;
-}
-
-.btn-preparar:hover{
-  background:#000;
-}
-
-.btn-enviar{
-  background:#c7a84b;
-  color:#111;
-  width:100%;
-  margin-top:15px;
-  font-size:18px;
-}
-
-.btn-enviar:hover{
-  background:#b59638;
-}
-
-.btn-secundario{
-  background:#555;
-  color:#fff;
-}
-
-.btn-receber{
-  background:#19733a;
-  color:#fff;
-}
-
-.btn-recusar{
-  background:#a51f1f;
-  color:#fff;
-}
-
-.btn-reenviar{
-  background:#1769aa;
-  color:#fff;
-}
-
-.btn-arquivar{
-  background:#555;
-  color:#fff;
-}
-
-.btn-excluir{
-  background:#8b0000;
-  color:#fff;
-}
-
-.btn-imprimir{
-  background:#222;
-  color:#fff;
-}
-
-.btn-salvar{
-  background:#19733a;
-  color:#fff;
-}
-
-.status{
-  padding:12px;
-  border-radius:6px;
-  background:#eee;
-  margin-bottom:15px;
-  font-weight:bold;
-}
-
-.status.online{
-  background:#dff4e3;
-  color:#17652b;
-}
-
-.status.offline{
-  background:#f8dddd;
-  color:#8a1f1f;
-}
-
-.status-base{
-  background:#eef3f7;
-  border:1px solid #d2dce5;
-  padding:12px;
-  border-radius:7px;
-  margin-top:15px;
-}
-
-.status-base.ok{
-  background:#e5f4e7;
-  border-color:#9ac9a1;
-  color:#185b24;
-}
-
-.item{
-  border:1px solid #ddd;
-  border-left:5px solid #c7a84b;
-  padding:14px;
-  margin-bottom:10px;
-  border-radius:7px;
-  background:#fafafa;
-}
-
-.item.recusado{
-  border-left-color:#a51f1f;
-  background:#fff7f7;
-}
-
-.item.guardado{
-  border-left-color:#555;
-}
-
-.item.item-preparacao{
-  border-left-color:#222;
-}
-
-.item strong{
-  display:block;
-  font-size:17px;
-  margin-bottom:6px;
-}
-
-.item-detalhes{
-  line-height:1.6;
-}
-
-.acoes{
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-  margin-top:12px;
-}
-
-.badge{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:bold;
-  margin-top:6px;
-}
-
-.badge-aguardando{
-  background:#fff1c7;
-  color:#745800;
-}
-
-.badge-recebido{
-  background:#d9f2dd;
-  color:#1c6828;
-}
-
-.badge-recusado{
-  background:#f7d3d3;
-  color:#8a1f1f;
-}
-
-.badge-guardado{
-  background:#ddd;
-  color:#333;
-}
-
-.confirmacao{
-  margin-top:10px;
-  padding:11px;
-  border-radius:7px;
-  background:#e5f4e7;
-  border:1px solid #9ac9a1;
-  color:#185b24;
-  font-weight:bold;
-}
-
-.recusa-box{
-  margin-top:10px;
-  padding:11px;
-  border-radius:7px;
-  background:#fff0f0;
-  border:1px solid #e1a3a3;
-}
-
-.recusa-box strong{
-  color:#8a1f1f;
-}
-
-.sem{
-  padding:18px;
-  border-radius:7px;
-  background:#f5f5f5;
-  border:1px solid #ddd;
-  color:#666;
-  text-align:center;
-}
-
-.lista-sugestoes{
-  position:relative;
-}
-
-.sugestoes{
-  position:absolute;
-  left:0;
-  right:0;
-  top:100%;
-  background:#fff;
-  border:1px solid #bbb;
-  border-top:0;
-  max-height:220px;
-  overflow-y:auto;
-  z-index:1000;
-  border-radius:0 0 6px 6px;
-}
-
-.sugestao{
-  padding:10px;
-  cursor:pointer;
-  border-bottom:1px solid #eee;
-}
-
-.sugestao:hover,
-.sugestao.selecionada{
-  background:#f2e6bc;
-}
-
-.contador{
-  font-size:13px;
-  color:#666;
-  margin-top:5px;
-}
-
-.toolbar{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-bottom:12px;
-}
-
-.toolbar input,
-.toolbar select{
-  flex:1;
-  min-width:180px;
-}
-
-.filtros{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-bottom:15px;
-}
-
-.preparacao-vazia{
-  padding:15px;
-  text-align:center;
-  color:#777;
-}
-
-.data-row{
-  display:flex;
-  gap:8px;
-  align-items:end;
-}
-
-.data-row > div{
-  flex:1;
-}
-
-.btn-hoje{
-  white-space:nowrap;
-}
-
-.modal{
-  display:none;
-  position:fixed;
-  z-index:5000;
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,.55);
-  padding:20px;
-  overflow:auto;
-}
-
-.modal-conteudo{
-  background:#fff;
-  max-width:850px;
-  margin:30px auto;
-  border-radius:10px;
-  padding:20px;
-}
-
-.modal-cabecalho{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:2px solid #c7a84b;
-  padding-bottom:10px;
-  margin-bottom:15px;
-}
-
-.fechar{
-  background:#8b0000;
-  color:#fff;
-}
-
-.print-opcoes{
-  display:grid;
-  gap:12px;
-}
-
-.print-opcoes label{
-  border:1px solid #ddd;
-  padding:13px;
-  border-radius:7px;
-  cursor:pointer;
-}
-
-.print-opcoes label:hover{
-  background:#f6f6f6;
-}
-
-.mini{
-  font-size:12px;
-  color:#666;
-}
-
-.editado-info{
-  background:#fff8df;
-  border:1px solid #e4cf7a;
-  color:#66520a;
-  padding:10px;
-  border-radius:7px;
-  margin-bottom:15px;
-  font-size:14px;
-}
-
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f1f1f1;color:#222}
+header{background:#111;color:white;padding:14px 22px;display:flex;align-items:center;gap:18px;border-bottom:4px solid #c7a84b}
+header img{width:70px;height:70px;object-fit:contain;flex-shrink:0}
+.logo h1{margin:0;font-size:25px}
+.logo .sub{margin-top:5px;font-size:14px;font-weight:bold;color:#eee}
+.logo .cpaig{margin-top:3px;font-size:17px;font-weight:bold;color:#ffd83d}
+.container{max-width:1150px;margin:20px auto;padding:0 15px}
+.card{background:#fff;border-radius:10px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.card h2{margin-top:0;border-bottom:2px solid #c7a84b;padding-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+.campo{display:flex;flex-direction:column}
+.campo label{font-weight:bold;margin-bottom:6px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #bbb;border-radius:6px;font-size:16px;background:white;font-family:Arial,Helvetica,sans-serif}
+textarea{resize:vertical}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#c7a84b;box-shadow:0 0 0 2px rgba(199,168,75,.15)}
+button{border:0;border-radius:7px;padding:11px 16px;font-size:15px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.btn-preparar{background:#222;color:#fff;width:100%;margin-top:18px;font-size:17px}
+.btn-preparar:hover{background:#000}
+.btn-enviar{background:#c7a84b;color:#111;width:100%;margin-top:15px;font-size:18px}
+.btn-enviar:hover{background:#b59638}
+.btn-secundario{background:#555;color:#fff}
+.btn-receber{background:#19733a;color:#fff}
+.btn-recusar{background:#a51f1f;color:#fff}
+.btn-reenviar{background:#1769aa;color:#fff}
+.btn-arquivar{background:#555;color:#fff}
+.btn-excluir{background:#8b0000;color:#fff}
+.btn-imprimir{background:#222;color:#fff}
+.btn-salvar{background:#19733a;color:#fff}
+.btn-guardar-todos{background:#555;color:#fff}
+.status{padding:12px;border-radius:6px;background:#eee;margin-bottom:15px;font-weight:bold}
+.status.online{background:#dff4e3;color:#17652b}
+.status.offline{background:#f8dddd;color:#8a1f1f}
+.status-base{background:#eef3f7;border:1px solid #d2dce5;padding:12px;border-radius:7px;margin-top:15px}
+.status-base.ok{background:#e5f4e7;border-color:#9ac9a1;color:#185b24}
+.item{border:1px solid #ddd;border-left:5px solid #c7a84b;padding:10px;margin-bottom:7px;border-radius:7px;background:#fafafa}
+.item.recusado{border-left-color:#a51f1f;background:#fff7f7}
+.item.guardado{border-left-color:#555}
+.item.item-preparacao{border-left-color:#222}
+.item strong{display:block;font-size:16px;margin-bottom:4px}
+.item-detalhes{line-height:1.45;font-size:14px}
+.acoes{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;margin-top:5px}
+.badge-aguardando{background:#fff1c7;color:#745800}
+.badge-recebido{background:#d9f2dd;color:#1c6828}
+.badge-recusado{background:#f7d3d3;color:#8a1f1f}
+.badge-guardado{background:#ddd;color:#333}
+.confirmacao{margin-top:8px;padding:8px;border-radius:7px;background:#e5f4e7;border:1px solid #9ac9a1;color:#185b24;font-weight:bold;font-size:13px}
+.recusa-box{margin-top:8px;padding:9px;border-radius:7px;background:#fff0f0;border:1px solid #e1a3a3;font-size:13px}
+.recusa-box strong{color:#8a1f1f}
+.sem{padding:15px;border-radius:7px;background:#f5f5f5;border:1px solid #ddd;color:#666;text-align:center}
+.lista-sugestoes{position:relative}
+.sugestoes{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #bbb;border-top:0;max-height:220px;overflow-y:auto;z-index:1000;border-radius:0 0 6px 6px}
+.sugestao{padding:10px;cursor:pointer;border-bottom:1px solid #eee}
+.sugestao:hover,.sugestao.selecionada{background:#f2e6bc}
+.contador{font-size:13px;color:#666;margin-top:5px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.toolbar input,.toolbar select{flex:1;min-width:180px}
+.filtros{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:15px}
+.preparacao-vazia{padding:12px;text-align:center;color:#777}
+.data-row{display:flex;gap:8px;align-items:end}
+.data-row>div{flex:1}
+.btn-hoje{white-space:nowrap}
+.modal{display:none;position:fixed;z-index:5000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.55);padding:20px;overflow:auto}
+.modal-conteudo{background:#fff;max-width:950px;margin:30px auto;border-radius:10px;padding:20px}
+.modal-cabecalho{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #c7a84b;padding-bottom:10px;margin-bottom:15px}
+.fechar{background:#8b0000;color:#fff}
+.print-opcoes{display:grid;gap:12px}
+.print-opcoes label{border:1px solid #ddd;padding:13px;border-radius:7px;cursor:pointer}
+.print-opcoes label:hover{background:#f6f6f6}
+.mini{font-size:12px;color:#666}
+.editado-info{background:#fff8df;border:1px solid #e4cf7a;color:#66520a;padding:10px;border-radius:7px;margin-bottom:15px;font-size:14px}
+.lista-compacta{width:100%;border-collapse:collapse;font-size:13px}
+.lista-compacta th,.lista-compacta td{border:1px solid #ddd;padding:7px;text-align:left;vertical-align:middle}
+.lista-compacta th{background:#eee;font-size:12px}
+.lista-compacta tr:nth-child(even){background:#fafafa}
+.lista-compacta .acoes-tabela{white-space:nowrap}
+.lista-compacta button{padding:6px 8px;font-size:11px;margin:2px}
+.modal-lista{max-height:65vh;overflow:auto}
+.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:8px}
+.check-item{border:1px solid #ddd;border-radius:6px;padding:8px;background:#fafafa}
+.check-item label{display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:normal}
+.check-item input{width:auto}
+.opcoes-pagina{margin-top:12px;padding:10px;background:#f5f5f5;border:1px solid #ddd;border-radius:7px}
+.acoes-opcoes{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 @media(max-width:750px){
-
-  .grid,
-  .filtros{
-    grid-template-columns:1fr;
-  }
-
-  header{
-    padding:12px;
-  }
-
-  header img{
-    width:55px;
-    height:55px;
-  }
-
-  .logo h1{
-    font-size:18px;
-  }
-
-  .logo .sub{
-    font-size:12px;
-  }
-
-  .logo .cpaig{
-    font-size:14px;
-  }
-
-  .acoes button{
-    width:100%;
-  }
+.grid,.filtros{grid-template-columns:1fr}
+.check-grid{grid-template-columns:1fr}
+header{padding:12px}
+header img{width:55px;height:55px}
+.logo h1{font-size:18px}
+.logo .sub{font-size:12px}
+.logo .cpaig{font-size:14px}
+.acoes button{width:100%}
+.lista-compacta{font-size:11px}
+.lista-compacta th,.lista-compacta td{padding:5px}
+.modal-conteudo{padding:12px;margin:10px auto}
 }
 </style>
 </head>
@@ -502,5748 +111,1325 @@ button:disabled{
 <body>
 
 <header>
-
-  <img
-    src="https://www.agepen.ms.gov.br/wp-content/uploads/2023/06/Brasao-PPMS-site.png"
-    alt="Logo Polícia Penal de Mato Grosso do Sul"
-    onerror="this.style.display='none'"
-  >
-
-  <div class="logo">
-    <h1>GUICHÊ DE ATENDIMENTO</h1>
-    <div class="sub">POLÍCIA PENAL DE MATO GROSSO DO SUL</div>
-    <div class="cpaig">CPAIG</div>
-  </div>
-
+<img src="https://www.agepen.ms.gov.br/wp-content/uploads/2023/06/Brasao-PPMS-site.png" alt="Logo Polícia Penal de Mato Grosso do Sul" onerror="this.style.display='none'">
+<div class="logo">
+<h1>GUICHÊ DE ATENDIMENTO</h1>
+<div class="sub">POLÍCIA PENAL DE MATO GROSSO DO SUL</div>
+<div class="cpaig">CPAIG</div>
+</div>
 </header>
 
 <div class="container">
 
-  <!-- CONEXÃO -->
-  <div
-    id="statusConexao"
-    class="status offline"
-  >
-    🔴 Conectando ao servidor...
-  </div>
-
-
-  <!-- NOVO ATENDIMENTO -->
-  <div class="card">
-
-    <h2>Novo Atendimento</h2>
-
-    <div class="grid">
-
-      <div class="campo lista-sugestoes">
-
-        <label for="nome">
-          Nome do Interno
-        </label>
-
-        <input
-          id="nome"
-          type="text"
-          autocomplete="off"
-          placeholder="Digite o nome do interno"
-        >
-
-        <div
-          id="sugestoesNome"
-          class="sugestoes"
-          style="display:none"
-        ></div>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="rgi">
-          RGI
-        </label>
-
-        <input
-          id="rgi"
-          type="text"
-          placeholder="Preenchido automaticamente"
-        >
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="pavilhao">
-          Pavilhão
-        </label>
-
-        <select id="pavilhao">
-
-          <option value="">
-            Selecione
-          </option>
-
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
-          <option>D</option>
-          <option>DISCIPLINAR</option>
-          <option>DISCIPLINAR RISCO</option>
-          <option>CP</option>
-          <option>VIRTUAL</option>
-
-        </select>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="cela">
-          Cela
-        </label>
-
-        <input
-          id="cela"
-          type="text"
-          list="listaCela"
-          placeholder="Digite ou selecione"
-        >
-
-        <datalist id="listaCela"></datalist>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="atendimento">
-          Atendimento
-        </label>
-
-        <input
-          id="atendimento"
-          type="text"
-          list="listaAtendimento"
-          placeholder="Digite ou selecione"
-          autocomplete="off"
-        >
-
-        <datalist id="listaAtendimento">
-
-          <option value="Jurídico">
-          <option value="Psicossocial">
-          <option value="Médico">
-          <option value="Odontologia">
-          <option value="Trabalho">
-          <option value="Chefia">
-          <option value="Chefe de equipe">
-          <option value="Portaria II">
-          <option value="Identificação">
-          <option value="Limpeza">
-          <option value="Advogado(a)">
-          <option value="Visita Assistida">
-          <option value="Autorização de Saída">
-          <option value="Licença Judicial">
-          <option value="7 dias">
-          <option value="7 dias monitorado">
-          <option value="Alvará">
-          <option value="Salvo conduto">
-          <option value="Domiciliar">
-          <option value="Evasão">
-          <option value="Desvio de Rota">
-          <option value="Falta">
-          <option value="Regressão">
-          <option value="Mudança de Cela">
-          <option value="Hospitalizado">
-          <option value="Outros">
-
-        </datalist>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="dataAtendimento">
-          Data do Atendimento
-        </label>
-
-        <div class="data-row">
-
-          <div>
-
-            <input
-              id="dataAtendimento"
-              type="date"
-            >
-
-          </div>
-
-          <button
-            type="button"
-            class="btn-secundario btn-hoje"
-            onclick="colocarHoje()"
-          >
-            HOJE
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <!-- ASSUNTO -->
-      <div
-        class="campo"
-        style="grid-column:1 / -1"
-      >
-
-        <label for="assunto">
-          Assunto
-        </label>
-
-        <textarea
-          id="assunto"
-          rows="3"
-          placeholder="Descreva o assunto do atendimento"
-        ></textarea>
-
-      </div>
-
-    </div>
-
-
-    <div
-      id="infoBase"
-      class="status-base"
-    >
-      📋 Base de internos não carregada.
-    </div>
-
-
-    <button
-      class="btn-preparar"
-      onclick="entrarNaLista()"
-    >
-      ➕ ENTRAR NA LISTA
-    </button>
-
-  </div>
-
-
-  <!-- BASE -->
-  <div class="card">
-
-    <h2>Base de Internos</h2>
-
-    <div id="statusBaseDetalhado">
-      Nenhuma base carregada.
-    </div>
-
-    <div class="acoes">
-
-      <button
-        class="btn-secundario"
-        onclick="abrirArquivoExcel()"
-      >
-        🔄 ATUALIZAR BASE DE INTERNOS
-      </button>
-
-      <button
-        class="btn-imprimir"
-        onclick="abrirModalImpressao()"
-      >
-        🖨️ IMPRIMIR
-      </button>
-
-    </div>
-
-    <input
-      id="arquivoExcel"
-      type="file"
-      accept=".xlsx,.xls"
-      style="display:none"
-      onchange="importarExcel(event)"
-    >
-
-  </div>
-
-
-  <!-- LISTA DE PREPARAÇÃO -->
-  <div class="card">
-
-    <h2>Lista de Preparação</h2>
-
-    <div class="mini">
-      Os atendimentos abaixo ainda não foram enviados para a Mesa.
-    </div>
-
-    <div
-      id="preparacao"
-      style="margin-top:12px"
-    ></div>
-
-    <button
-      id="btnEnviarMesa"
-      class="btn-enviar"
-      onclick="enviarParaMesa()"
-    >
-      📤 ENVIAR PARA MESA
-    </button>
-
-  </div>
-
-
-  <!-- HISTÓRICO -->
-  <div class="card">
-
-    <h2>Histórico de Atendimentos</h2>
-
-    <div class="toolbar">
-
-      <input
-        id="buscaHistorico"
-        type="text"
-        placeholder="🔎 Buscar por nome, RGI ou atendimento"
-        oninput="renderHistorico()"
-      >
-
-      <select
-        id="ordemHistorico"
-        onchange="renderHistorico()"
-      >
-
-        <option value="envio">
-          Ordem de envio
-        </option>
-
-        <option value="atendimento">
-          Por atendimento
-        </option>
-
-      </select>
-
-    </div>
-
-    <div id="historico"></div>
-
-  </div>
-
-
-  <!-- RECUSADOS -->
-  <div class="card">
-
-    <h2>❌ Atendimentos Recusados</h2>
-
-    <div class="mini">
-      Os atendimentos recusados pela Mesa ficam nesta área para edição,
-      reenvio ou arquivamento.
-    </div>
-
-    <div
-      class="toolbar"
-      style="margin-top:12px"
-    >
-
-      <input
-        id="buscaRecusados"
-        type="text"
-        placeholder="🔎 Buscar recusado"
-        oninput="renderRecusados()"
-      >
-
-    </div>
-
-    <div id="recusados"></div>
-
-  </div>
-
-
-  <!-- GUARDADOS -->
-  <div class="card">
-
-    <h2>🗄️ Atendimentos Guardados</h2>
-
-    <div class="filtros">
-
-      <input
-        id="buscaGuardados"
-        type="text"
-        placeholder="🔎 Nome, RGI ou atendimento"
-        oninput="renderGuardados()"
-      >
-
-      <input
-        id="dataGuardados"
-        type="date"
-        onchange="renderGuardados()"
-      >
-
-      <select
-        id="filtroGuardados"
-        onchange="renderGuardados()"
-      >
-
-        <option value="">
-          Todos os atendimentos
-        </option>
-
-      </select>
-
-    </div>
-
-    <div id="guardados"></div>
-
-  </div>
+<div id="statusConexao" class="status offline">🔴 Conectando ao servidor...</div>
+
+<div class="card">
+<h2>Novo Atendimento</h2>
+<div class="grid">
+
+<div class="campo lista-sugestoes">
+<label for="nome">Nome do Interno</label>
+<input id="nome" type="text" autocomplete="off" placeholder="Digite o nome do interno">
+<div id="sugestoesNome" class="sugestoes" style="display:none"></div>
+</div>
+
+<div class="campo">
+<label for="rgi">RGI</label>
+<input id="rgi" type="text" placeholder="Preenchido automaticamente">
+</div>
+
+<div class="campo">
+<label for="pavilhao">Pavilhão</label>
+<select id="pavilhao">
+<option value="">Selecione</option>
+<option>A</option><option>B</option><option>C</option><option>D</option>
+<option>DISCIPLINAR</option><option>DISCIPLINAR RISCO</option><option>CP</option><option>VIRTUAL</option>
+</select>
+</div>
+
+<div class="campo">
+<label for="cela">Cela</label>
+<input id="cela" type="text" list="listaCela" placeholder="Digite ou selecione">
+<datalist id="listaCela"></datalist>
+</div>
+
+<div class="campo">
+<label for="atendimento">Atendimento</label>
+<input id="atendimento" type="text" list="listaAtendimento" placeholder="Digite ou selecione" autocomplete="off">
+<datalist id="listaAtendimento">
+<option value="Jurídico"><option value="Psicossocial"><option value="Médico"><option value="Odontologia">
+<option value="Trabalho"><option value="Chefia"><option value="Chefe de equipe"><option value="Portaria II">
+<option value="Identificação"><option value="Limpeza"><option value="Advogado(a)"><option value="Visita Assistida">
+<option value="Autorização de Saída"><option value="Licença Judicial"><option value="7 dias"><option value="7 dias monitorado">
+<option value="Alvará"><option value="Salvo conduto"><option value="Domiciliar"><option value="Evasão">
+<option value="Desvio de Rota"><option value="Falta"><option value="Regressão"><option value="Mudança de Cela">
+<option value="Hospitalizado"><option value="Outros">
+</datalist>
+</div>
+
+<div class="campo">
+<label for="dataAtendimento">Data do Atendimento</label>
+<div class="data-row">
+<div><input id="dataAtendimento" type="date"></div>
+<button type="button" class="btn-secundario btn-hoje" onclick="colocarHoje()">HOJE</button>
+</div>
+</div>
+
+<div class="campo" style="grid-column:1 / -1">
+<label for="assunto">Assunto</label>
+<textarea id="assunto" rows="3" placeholder="Descreva o assunto do atendimento"></textarea>
+</div>
 
 </div>
 
-
-<!-- =====================================================
-     MODAL RECUSA / EDIÇÃO
-===================================================== -->
-
-<div
-  id="modalRecusa"
-  class="modal"
->
-
-  <div class="modal-conteudo">
-
-    <div class="modal-cabecalho">
-
-      <h2 id="tituloModalRecusa">
-        Editar Atendimento Recusado
-      </h2>
-
-      <button
-        class="fechar"
-        onclick="fecharModalRecusa()"
-      >
-        ✕
-      </button>
-
-    </div>
-
-
-    <div
-      id="infoEdicaoRecusa"
-      class="editado-info"
-    >
-      Edite os dados do atendimento recusado antes de reenviar para a Mesa.
-    </div>
-
-
-    <div class="grid">
-
-      <div class="campo lista-sugestoes">
-
-        <label for="editNome">
-          Nome do Interno
-        </label>
-
-        <input
-          id="editNome"
-          type="text"
-          autocomplete="off"
-          placeholder="Digite o nome do interno"
-        >
-
-        <div
-          id="sugestoesEditNome"
-          class="sugestoes"
-          style="display:none"
-        ></div>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="editRgi">
-          RGI
-        </label>
-
-        <input
-          id="editRgi"
-          type="text"
-        >
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="editPavilhao">
-          Pavilhão
-        </label>
-
-        <select id="editPavilhao">
-
-          <option value="">
-            Selecione
-          </option>
-
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
-          <option>D</option>
-          <option>DISCIPLINAR</option>
-          <option>DISCIPLINAR RISCO</option>
-          <option>CP</option>
-          <option>VIRTUAL</option>
-
-        </select>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="editCela">
-          Cela
-        </label>
-
-        <input
-          id="editCela"
-          type="text"
-          list="listaCelaEdit"
-          placeholder="Digite ou selecione"
-        >
-
-        <datalist id="listaCelaEdit"></datalist>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="editAtendimento">
-          Atendimento
-        </label>
-
-        <input
-          id="editAtendimento"
-          type="text"
-          list="listaAtendimentoEdit"
-          autocomplete="off"
-          placeholder="Digite ou selecione"
-        >
-
-        <datalist id="listaAtendimentoEdit">
-
-          <option value="Jurídico">
-          <option value="Psicossocial">
-          <option value="Médico">
-          <option value="Odontologia">
-          <option value="Trabalho">
-          <option value="Chefia">
-          <option value="Chefe de equipe">
-          <option value="Portaria II">
-          <option value="Identificação">
-          <option value="Limpeza">
-          <option value="Advogado(a)">
-          <option value="Visita Assistida">
-          <option value="Autorização de Saída">
-          <option value="Licença Judicial">
-          <option value="7 dias">
-          <option value="7 dias monitorado">
-          <option value="Alvará">
-          <option value="Salvo conduto">
-          <option value="Domiciliar">
-          <option value="Evasão">
-          <option value="Desvio de Rota">
-          <option value="Falta">
-          <option value="Regressão">
-          <option value="Mudança de Cela">
-          <option value="Hospitalizado">
-          <option value="Outros">
-
-        </datalist>
-
-      </div>
-
-
-      <div class="campo">
-
-        <label for="editDataAtendimento">
-          Data do Atendimento
-        </label>
-
-        <div class="data-row">
-
-          <div>
-
-            <input
-              id="editDataAtendimento"
-              type="date"
-            >
-
-          </div>
-
-          <button
-            type="button"
-            class="btn-secundario btn-hoje"
-            onclick="colocarHojeEdicao()"
-          >
-            HOJE
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <div
-        class="campo"
-        style="grid-column:1 / -1"
-      >
-
-        <label for="editAssunto">
-          Assunto
-        </label>
-
-        <textarea
-          id="editAssunto"
-          rows="3"
-          placeholder="Descreva o assunto"
-        ></textarea>
-
-      </div>
-
-
-      <div
-        class="campo"
-        style="grid-column:1 / -1"
-      >
-
-        <label for="motivoRecusa">
-          Motivo da recusa
-        </label>
-
-        <textarea
-          id="motivoRecusa"
-          rows="5"
-          placeholder="Informe o motivo da recusa"
-        ></textarea>
-
-      </div>
-
-    </div>
-
-
-    <div class="acoes">
-
-      <button
-        class="btn-secundario"
-        onclick="fecharModalRecusa()"
-      >
-        CANCELAR
-      </button>
-
-      <button
-        class="btn-salvar"
-        onclick="salvarEdicaoRecusa()"
-      >
-        💾 SALVAR ALTERAÇÕES
-      </button>
-
-    </div>
-
-  </div>
+<div id="infoBase" class="status-base">📋 Base de internos não carregada.</div>
+
+<button class="btn-preparar" onclick="entrarNaLista()">➕ ENTRAR NA LISTA</button>
+</div>
+
+<div class="card">
+<h2>Base de Internos</h2>
+<div id="statusBaseDetalhado">Nenhuma base carregada.</div>
+<div class="acoes">
+<button class="btn-secundario" onclick="abrirArquivoExcel()">🔄 ATUALIZAR BASE DE INTERNOS</button>
+<button class="btn-imprimir" onclick="abrirModalImpressao()">🖨️ IMPRIMIR</button>
+</div>
+<input id="arquivoExcel" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarExcel(event)">
+</div>
+
+<div class="card">
+<h2>Lista de Preparação</h2>
+<div class="mini">Os atendimentos abaixo ainda não foram enviados para a Mesa.</div>
+<div id="preparacao" style="margin-top:12px"></div>
+<button id="btnEnviarMesa" class="btn-enviar" onclick="enviarParaMesa()">📤 ENVIAR PARA MESA</button>
+</div>
+
+<div class="card">
+<h2>Histórico de Atendimentos</h2>
+<div class="toolbar">
+<input id="buscaHistorico" type="text" placeholder="🔎 Buscar por nome, RGI ou atendimento" oninput="renderHistorico()">
+<select id="ordemHistorico" onchange="renderHistorico()">
+<option value="envio">Ordem de envio</option>
+<option value="atendimento">Por atendimento</option>
+</select>
+<button class="btn-guardar-todos" onclick="guardarTodosRecebidos()">🗄️ GUARDAR TODOS</button>
+</div>
+<div id="historico"></div>
+</div>
+
+<div class="card">
+<h2>❌ Atendimentos Recusados</h2>
+<div class="mini">Os atendimentos recusados pela Mesa ficam nesta área para edição, reenvio ou arquivamento.</div>
+<div class="toolbar" style="margin-top:12px">
+<input id="buscaRecusados" type="text" placeholder="🔎 Buscar recusado" oninput="renderRecusados()">
+</div>
+<div id="recusados"></div>
+</div>
+
+<div class="card">
+<h2>🗄️ Atendimentos Guardados</h2>
+<div class="toolbar">
+<input id="resumoGuardados" type="text" readonly value="Nenhum atendimento guardado" style="background:#f5f5f5">
+<button class="btn-secundario" onclick="abrirGuardados()">📁 ACESSAR ATENDIMENTOS GUARDADOS</button>
+</div>
+<div class="mini">Os atendimentos guardados ficam disponíveis na lista acima para pesquisa, consulta e exclusão.</div>
+</div>
 
 </div>
 
+<!-- MODAL RECUSA / EDIÇÃO -->
+<div id="modalRecusa" class="modal">
+<div class="modal-conteudo">
+<div class="modal-cabecalho">
+<h2 id="tituloModalRecusa">Editar Atendimento Recusado</h2>
+<button class="fechar" onclick="fecharModalRecusa()">✕</button>
+</div>
+<div id="infoEdicaoRecusa" class="editado-info">Edite os dados do atendimento recusado antes de reenviar para a Mesa.</div>
 
-<!-- =====================================================
-     MODAL IMPRESSÃO
-===================================================== -->
+<div class="grid">
 
-<div
-  id="modalImpressao"
-  class="modal"
->
+<div class="campo lista-sugestoes">
+<label for="editNome">Nome do Interno</label>
+<input id="editNome" type="text" autocomplete="off" placeholder="Digite o nome do interno">
+<div id="sugestoesEditNome" class="sugestoes" style="display:none"></div>
+</div>
 
-  <div class="modal-conteudo">
+<div class="campo"><label for="editRgi">RGI</label><input id="editRgi" type="text"></div>
 
-    <div class="modal-cabecalho">
+<div class="campo">
+<label for="editPavilhao">Pavilhão</label>
+<select id="editPavilhao">
+<option value="">Selecione</option>
+<option>A</option><option>B</option><option>C</option><option>D</option>
+<option>DISCIPLINAR</option><option>DISCIPLINAR RISCO</option><option>CP</option><option>VIRTUAL</option>
+</select>
+</div>
 
-      <h2>
-        🖨️ Impressão
-      </h2>
+<div class="campo">
+<label for="editCela">Cela</label>
+<input id="editCela" type="text" list="listaCelaEdit" placeholder="Digite ou selecione">
+<datalist id="listaCelaEdit"></datalist>
+</div>
 
-      <button
-        class="fechar"
-        onclick="fecharModalImpressao()"
-      >
-        ✕
-      </button>
+<div class="campo">
+<label for="editAtendimento">Atendimento</label>
+<input id="editAtendimento" type="text" list="listaAtendimentoEdit" autocomplete="off" placeholder="Digite ou selecione">
+<datalist id="listaAtendimentoEdit">
+<option value="Jurídico"><option value="Psicossocial"><option value="Médico"><option value="Odontologia">
+<option value="Trabalho"><option value="Chefia"><option value="Chefe de equipe"><option value="Portaria II">
+<option value="Identificação"><option value="Limpeza"><option value="Advogado(a)"><option value="Visita Assistida">
+<option value="Autorização de Saída"><option value="Licença Judicial"><option value="7 dias"><option value="7 dias monitorado">
+<option value="Alvará"><option value="Salvo conduto"><option value="Domiciliar"><option value="Evasão">
+<option value="Desvio de Rota"><option value="Falta"><option value="Regressão"><option value="Mudança de Cela">
+<option value="Hospitalizado"><option value="Outros">
+</datalist>
+</div>
 
-    </div>
+<div class="campo">
+<label for="editDataAtendimento">Data do Atendimento</label>
+<div class="data-row">
+<div><input id="editDataAtendimento" type="date"></div>
+<button type="button" class="btn-secundario btn-hoje" onclick="colocarHojeEdicao()">HOJE</button>
+</div>
+</div>
 
+<div class="campo" style="grid-column:1 / -1">
+<label for="editAssunto">Assunto</label>
+<textarea id="editAssunto" rows="3" placeholder="Descreva o assunto"></textarea>
+</div>
 
-    <div class="print-opcoes">
+<div class="campo" style="grid-column:1 / -1">
+<label for="motivoRecusa">Motivo da recusa</label>
+<textarea id="motivoRecusa" rows="5" placeholder="Informe o motivo da recusa"></textarea>
+</div>
+</div>
 
-      <label>
+<div class="acoes">
+<button class="btn-secundario" onclick="fecharModalRecusa()">CANCELAR</button>
+<button class="btn-salvar" onclick="salvarEdicaoRecusa()">💾 SALVAR ALTERAÇÕES</button>
+</div>
+</div>
+</div>
 
-        <input
-          type="radio"
-          name="tipoImpressao"
-          value="atendimento"
-          checked
-        >
+<!-- MODAL GUARDADOS -->
+<div id="modalGuardados" class="modal">
+<div class="modal-conteudo">
+<div class="modal-cabecalho">
+<h2>📁 ATENDIMENTOS GUARDADOS</h2>
+<button class="fechar" onclick="fecharGuardados()">✕</button>
+</div>
 
-        <strong>
-          Por atendimento
-        </strong>
+<div class="toolbar">
+<input id="buscaGuardados" type="text" placeholder="🔎 Pesquisar por nome, atendimento, RGI, assunto ou data..." oninput="renderGuardados()">
+<input id="dataGuardados" type="date" onchange="renderGuardados()">
+<select id="filtroGuardados" onchange="renderGuardados()">
+<option value="">Todos os atendimentos</option>
+</select>
+</div>
 
-        <br>
+<div id="guardados" class="modal-lista"></div>
 
-        <span class="mini">
-          Escolher uma categoria de atendimento.
-        </span>
+<div class="acoes">
+<button class="btn-secundario" onclick="fecharGuardados()">FECHAR</button>
+</div>
+</div>
+</div>
 
-      </label>
+<!-- MODAL IMPRESSÃO -->
+<div id="modalImpressao" class="modal">
+<div class="modal-conteudo">
+<div class="modal-cabecalho">
+<h2>🖨️ Impressão</h2>
+<button class="fechar" onclick="fecharModalImpressao()">✕</button>
+</div>
 
+<div class="print-opcoes">
 
-      <label>
+<label>
+<input type="radio" name="tipoImpressao" value="atendimento" checked>
+<strong>Por atendimento</strong>
+<br><span class="mini">Escolher um ou vários tipos de atendimento.</span>
+</label>
 
-        <input
-          type="radio"
-          name="tipoImpressao"
-          value="geral"
-        >
+<label>
+<input type="radio" name="tipoImpressao" value="geral">
+<strong>Por atendimento geral</strong>
+<br><span class="mini">Imprimir todos os atendimentos.</span>
+</label>
 
-        <strong>
-          Por atendimento geral
-        </strong>
-
-        <br>
-
-        <span class="mini">
-          Imprimir todos os atendimentos.
-        </span>
-
-      </label>
-
-
-      <label>
-
-        <input
-          type="radio"
-          name="tipoImpressao"
-          value="data"
-        >
-
-        <strong>
-          Por data
-        </strong>
-
-        <br>
-
-        <span class="mini">
-          Escolher a data e imprimir os registros daquele dia.
-        </span>
-
-      </label>
-
-    </div>
-
-
-    <div
-      id="opcoesImpressaoDetalhes"
-      style="margin-top:15px"
-    ></div>
-
-
-    <div class="acoes">
-
-      <button
-        class="btn-secundario"
-        onclick="fecharModalImpressao()"
-      >
-        CANCELAR
-      </button>
-
-      <button
-        class="btn-imprimir"
-        onclick="executarImpressao()"
-      >
-        🖨️ IMPRIMIR
-      </button>
-
-    </div>
-
-  </div>
+<label>
+<input type="radio" name="tipoImpressao" value="data">
+<strong>Por data</strong>
+<br><span class="mini">Escolher a data e o atendimento daquele dia.</span>
+</label>
 
 </div>
 
+<div id="opcoesImpressaoDetalhes" style="margin-top:15px"></div>
+
+<div class="acoes">
+<button class="btn-secundario" onclick="fecharModalImpressao()">CANCELAR</button>
+<button class="btn-imprimir" onclick="executarImpressao()">🖨️ IMPRIMIR</button>
+</div>
+</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
+const STORAGE_PREPARACAO="guicheAtendimentosV23Preparacao";
+const STORAGE_HISTORICO="guicheAtendimentosV23Historico";
+const STORAGE_ARQUIVO="guicheAtendimentosV23Arquivo";
+const STORAGE_RECUSADOS="guicheAtendimentosV23Recusados";
+const STORAGE_BASE="atendimentoV23BaseInternos";
+const STORAGE_BASE_ATUALIZADA=STORAGE_BASE+"_atualizadaEm";
+const STORAGE_CLIENT_ID="guicheAtendimentoClientId";
+const STORAGE_ORDENACAO="guicheAtendimentoOrdenacao";
 
-/* =========================================================
-   CONFIGURAÇÕES
-========================================================= */
+let baseInternos=[];
+let preparacao=[];
+let historico=[];
+let arquivo=[];
+let recusados=[];
+let ws=null;
+let tentativaReconexao=null;
+let indiceSugestao=-1;
+let indiceSugestaoEdicao=-1;
+let registroRecusaAtual=null;
 
-const STORAGE_PREPARACAO =
-  "guicheAtendimentosV23Preparacao";
-
-const STORAGE_HISTORICO =
-  "guicheAtendimentosV23Historico";
-
-const STORAGE_ARQUIVO =
-  "guicheAtendimentosV23Arquivo";
-
-const STORAGE_RECUSADOS =
-  "guicheAtendimentosV23Recusados";
-
-const STORAGE_BASE =
-  "atendimentoV23BaseInternos";
-
-const STORAGE_BASE_ATUALIZADA =
-  STORAGE_BASE + "_atualizadaEm";
-
-const STORAGE_CLIENT_ID =
-  "guicheAtendimentoClientId";
-
-const STORAGE_ORDENACAO =
-  "guicheAtendimentoOrdenacao";
-
-
-/* =========================================================
-   VARIÁVEIS
-========================================================= */
-
-let baseInternos = [];
-
-let preparacao = [];
-
-let historico = [];
-
-let arquivo = [];
-
-let recusados = [];
-
-let ws = null;
-
-let tentativaReconexao = null;
-
-let indiceSugestao = -1;
-
-let indiceSugestaoEdicao = -1;
-
-let registroRecusaAtual = null;
-
-
-/* =========================================================
-   CLIENT ID
-========================================================= */
+const clientId=obterClientId();
 
 function obterClientId(){
-
-  let id =
-    localStorage.getItem(
-      STORAGE_CLIENT_ID
-    );
-
-  if(!id){
-
-    id =
-      (
-        window.crypto &&
-        crypto.randomUUID
-      )
-      ? crypto.randomUUID()
-      : "guiche-" +
-        Date.now() +
-        "-" +
-        Math.random()
-          .toString(16)
-          .slice(2);
-
-    localStorage.setItem(
-      STORAGE_CLIENT_ID,
-      id
-    );
-
-  }
-
-  return id;
-
+let id=localStorage.getItem(STORAGE_CLIENT_ID);
+if(!id){
+id=window.crypto&&crypto.randomUUID?crypto.randomUUID():"guiche-"+Date.now()+"-"+Math.random().toString(16).slice(2);
+localStorage.setItem(STORAGE_CLIENT_ID,id);
 }
-
-const clientId =
-  obterClientId();
-
-
-/* =========================================================
-   UTILITÁRIOS
-========================================================= */
+return id;
+}
 
 function normalizarTexto(valor){
-
-  return String(valor || "")
-    .normalize("NFD")
-    .replace(
-      /[\u0300-\u036f]/g,
-      ""
-    )
-    .toLowerCase()
-    .trim();
-
+return String(valor||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 }
-
 
 function escaparHTML(valor){
-
-  return String(valor ?? "")
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
+return String(valor??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 }
-
 
 function gerarId(){
-
-  return (
-    window.crypto &&
-    crypto.randomUUID
-  )
-  ? crypto.randomUUID()
-  : "rec-" +
-    Date.now() +
-    "-" +
-    Math.random()
-      .toString(16)
-      .slice(2);
-
+return window.crypto&&crypto.randomUUID?crypto.randomUUID():"rec-"+Date.now()+"-"+Math.random().toString(16).slice(2);
 }
-
 
 function formatarDataHora(valor){
-
-  if(!valor){
-    return "-";
-  }
-
-  const data =
-    new Date(valor);
-
-  if(
-    Number.isNaN(
-      data.getTime()
-    )
-  ){
-
-    return "-";
-
-  }
-
-  return data.toLocaleString(
-    "pt-BR",
-    {
-      dateStyle:"short",
-      timeStyle:"medium"
-    }
-  );
-
+if(!valor)return "-";
+const data=new Date(valor);
+if(Number.isNaN(data.getTime()))return "-";
+return data.toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"medium"});
 }
-
 
 function formatarData(valor){
-
-  if(!valor){
-    return "-";
-  }
-
-  const data =
-    new Date(valor);
-
-  if(
-    Number.isNaN(
-      data.getTime()
-    )
-  ){
-
-    return "-";
-
-  }
-
-  return data.toLocaleDateString(
-    "pt-BR"
-  );
-
+if(!valor)return "-";
+const data=new Date(valor);
+if(Number.isNaN(data.getTime()))return "-";
+return data.toLocaleDateString("pt-BR");
 }
-
 
 function dataHojeISO(){
-
-  const agora =
-    new Date();
-
-  const ano =
-    agora.getFullYear();
-
-  const mes =
-    String(
-      agora.getMonth()+1
-    ).padStart(2,"0");
-
-  const dia =
-    String(
-      agora.getDate()
-    ).padStart(2,"0");
-
-  return (
-    ano +
-    "-" +
-    mes +
-    "-" +
-    dia
-  );
-
+const agora=new Date();
+return agora.getFullYear()+"-"+String(agora.getMonth()+1).padStart(2,"0")+"-"+String(agora.getDate()).padStart(2,"0");
 }
 
-
-function dataRegistroParaFiltro(
-  item
-){
-
-  if(
-    item.registro &&
-    item.registro.dataAtendimento
-  ){
-
-    return item.registro.dataAtendimento;
-
-  }
-
-  if(item.dataAtendimento){
-
-    return item.dataAtendimento;
-
-  }
-
-  if(item.enviadoEm){
-
-    const data =
-      new Date(
-        item.enviadoEm
-      );
-
-    if(
-      !Number.isNaN(
-        data.getTime()
-      )
-    ){
-
-      const ano =
-        data.getFullYear();
-
-      const mes =
-        String(
-          data.getMonth()+1
-        ).padStart(2,"0");
-
-      const dia =
-        String(
-          data.getDate()
-        ).padStart(2,"0");
-
-      return (
-        ano +
-        "-" +
-        mes +
-        "-" +
-        dia
-      );
-
-    }
-
-  }
-
-  return "";
-
+function dataRegistroParaFiltro(item){
+if(item.registro&&item.registro.dataAtendimento)return item.registro.dataAtendimento;
+if(item.dataAtendimento)return item.dataAtendimento;
+if(item.enviadoEm){
+const data=new Date(item.enviadoEm);
+if(!Number.isNaN(data.getTime()))return data.getFullYear()+"-"+String(data.getMonth()+1).padStart(2,"0")+"-"+String(data.getDate()).padStart(2,"0");
 }
-
-
-/* =========================================================
-   STORAGE
-========================================================= */
+return "";
+}
 
 function salvarTudo(){
-
-  localStorage.setItem(
-    STORAGE_PREPARACAO,
-    JSON.stringify(
-      preparacao
-    )
-  );
-
-  localStorage.setItem(
-    STORAGE_HISTORICO,
-    JSON.stringify(
-      historico
-    )
-  );
-
-  localStorage.setItem(
-    STORAGE_ARQUIVO,
-    JSON.stringify(
-      arquivo
-    )
-  );
-
-  localStorage.setItem(
-    STORAGE_RECUSADOS,
-    JSON.stringify(
-      recusados
-    )
-  );
-
-  localStorage.setItem(
-    STORAGE_BASE,
-    JSON.stringify(
-      baseInternos
-    )
-  );
-
+localStorage.setItem(STORAGE_PREPARACAO,JSON.stringify(preparacao));
+localStorage.setItem(STORAGE_HISTORICO,JSON.stringify(historico));
+localStorage.setItem(STORAGE_ARQUIVO,JSON.stringify(arquivo));
+localStorage.setItem(STORAGE_RECUSADOS,JSON.stringify(recusados));
+localStorage.setItem(STORAGE_BASE,JSON.stringify(baseInternos));
 }
-
 
 function carregarTudo(){
+try{preparacao=JSON.parse(localStorage.getItem(STORAGE_PREPARACAO)||"[]")}catch{preparacao=[]}
+try{historico=JSON.parse(localStorage.getItem(STORAGE_HISTORICO)||"[]")}catch{historico=[]}
+try{arquivo=JSON.parse(localStorage.getItem(STORAGE_ARQUIVO)||"[]")}catch{arquivo=[]}
+try{recusados=JSON.parse(localStorage.getItem(STORAGE_RECUSADOS)||"[]")}catch{recusados=[]}
+try{baseInternos=JSON.parse(localStorage.getItem(STORAGE_BASE)||"[]")}catch{baseInternos=[]}
 
-  try{
-
-    preparacao =
-      JSON.parse(
-        localStorage.getItem(
-          STORAGE_PREPARACAO
-        ) || "[]"
-      );
-
-  }catch{
-
-    preparacao = [];
-
-  }
-
-
-  try{
-
-    historico =
-      JSON.parse(
-        localStorage.getItem(
-          STORAGE_HISTORICO
-        ) || "[]"
-      );
-
-  }catch{
-
-    historico = [];
-
-  }
-
-
-  try{
-
-    arquivo =
-      JSON.parse(
-        localStorage.getItem(
-          STORAGE_ARQUIVO
-        ) || "[]"
-      );
-
-  }catch{
-
-    arquivo = [];
-
-  }
-
-
-  try{
-
-    recusados =
-      JSON.parse(
-        localStorage.getItem(
-          STORAGE_RECUSADOS
-        ) || "[]"
-      );
-
-  }catch{
-
-    recusados = [];
-
-  }
-
-
-  try{
-
-    baseInternos =
-      JSON.parse(
-        localStorage.getItem(
-          STORAGE_BASE
-        ) || "[]"
-      );
-
-  }catch{
-
-    baseInternos = [];
-
-  }
-
-
-  migrarRecusadosAntigos();
-
-  prepararDadosAntigos();
-
-  renderPreparacao();
-
-  renderHistorico();
-
-  renderRecusados();
-
-  renderGuardados();
-
-  atualizarStatusBase();
-
-  atualizarFiltroGuardados();
-
+migrarRecusadosAntigos();
+prepararDadosAntigos();
+renderPreparacao();
+renderHistorico();
+renderRecusados();
+renderGuardados();
+atualizarStatusBase();
+atualizarFiltroGuardados();
+atualizarResumoGuardados();
 }
-
-
-/* =========================================================
-   MIGRAÇÃO DE RECUSAS ANTIGAS
-========================================================= */
 
 function migrarRecusadosAntigos(){
-
-  const antigos =
-    historico.filter(
-      item =>
-        item.status ===
-        "recusado"
-    );
-
-  if(
-    antigos.length === 0
-  ){
-
-    return;
-
-  }
-
-  antigos.forEach(
-    item => {
-
-      const existe =
-        recusados.some(
-          r =>
-            r.recordId ===
-            item.recordId
-        );
-
-      if(!existe){
-
-        recusados.push(
-          item
-        );
-
-      }
-
-    }
-  );
-
-  historico =
-    historico.filter(
-      item =>
-        item.status !==
-        "recusado"
-    );
-
-  salvarTudo();
-
+const antigos=historico.filter(item=>item.status==="recusado");
+if(!antigos.length)return;
+antigos.forEach(item=>{
+if(!recusados.some(r=>r.recordId===item.recordId))recusados.push(item);
+});
+historico=historico.filter(item=>item.status!=="recusado");
+salvarTudo();
 }
-
-
-/* =========================================================
-   COMPATIBILIDADE
-========================================================= */
 
 function prepararDadosAntigos(){
-
-  historico.forEach(
-    item => {
-
-      if(!item.status){
-
-        item.status =
-          item.recebidoEm
-          ? "recebido"
-          : "aguardando_mesa";
-
-      }
-
-      if(!item.registro){
-
-        item.registro = {};
-
-      }
-
-    }
-  );
-
-  recusados.forEach(
-    item => {
-
-      if(!item.registro){
-
-        item.registro = {};
-
-      }
-
-      item.status =
-        "recusado";
-
-    }
-  );
-
+historico.forEach(item=>{
+if(!item.status)item.status=item.recebidoEm?"recebido":"aguardando_mesa";
+if(!item.registro)item.registro={};
+});
+recusados.forEach(item=>{
+if(!item.registro)item.registro={};
+item.status="recusado";
+});
 }
-
-
-/* =========================================================
-   CELAS
-========================================================= */
 
 function preencherCelas(){
-
-  const listas = [
-    document.getElementById(
-      "listaCela"
-    ),
-    document.getElementById(
-      "listaCelaEdit"
-    )
-  ];
-
-  listas.forEach(
-    lista => {
-
-      if(!lista){
-        return;
-      }
-
-      lista.innerHTML = "";
-
-      for(
-        let i=1;
-        i<=120;
-        i++
-      ){
-
-        const numero =
-          String(i)
-            .padStart(2,"0");
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        option.value =
-          numero;
-
-        lista.appendChild(
-          option
-        );
-
-      }
-
-    }
-  );
-
+["listaCela","listaCelaEdit"].forEach(id=>{
+const lista=document.getElementById(id);
+if(!lista)return;
+lista.innerHTML="";
+for(let i=1;i<=120;i++){
+const option=document.createElement("option");
+option.value=String(i).padStart(2,"0");
+lista.appendChild(option);
+}
+});
 }
 
+function colocarHoje(){document.getElementById("dataAtendimento").value=dataHojeISO()}
+function colocarHojeEdicao(){document.getElementById("editDataAtendimento").value=dataHojeISO()}
 
-/* =========================================================
-   HOJE
-========================================================= */
-
-function colocarHoje(){
-
-  document.getElementById(
-    "dataAtendimento"
-  ).value =
-    dataHojeISO();
-
-}
-
-
-function colocarHojeEdicao(){
-
-  document.getElementById(
-    "editDataAtendimento"
-  ).value =
-    dataHojeISO();
-
-}
-
-
-/* =========================================================
-   BASE DE INTERNOS
-========================================================= */
-
-function abrirArquivoExcel(){
-
-  document.getElementById(
-    "arquivoExcel"
-  ).click();
-
-}
-
+function abrirArquivoExcel(){document.getElementById("arquivoExcel").click()}
 
 function atualizarStatusBase(){
-
-  const info =
-    document.getElementById(
-      "infoBase"
-    );
-
-  const detalhado =
-    document.getElementById(
-      "statusBaseDetalhado"
-    );
-
-  if(
-    !baseInternos.length
-  ){
-
-    info.className =
-      "status-base";
-
-    info.textContent =
-      "📋 Base de internos não carregada.";
-
-    detalhado.textContent =
-      "Nenhuma base de internos carregada.";
-
-    return;
-
-  }
-
-  const atualizadaEm =
-    localStorage.getItem(
-      STORAGE_BASE_ATUALIZADA
-    );
-
-  info.className =
-    "status-base ok";
-
-  info.textContent =
-    "📋 Base carregada: " +
-    baseInternos.length +
-    " internos.";
-
-  detalhado.innerHTML =
-    `
-      <strong>
-        ${baseInternos.length}
-        internos cadastrados.
-      </strong>
-      ${
-        atualizadaEm
-        ? `
-          <br>
-          Última atualização:
-          ${formatarDataHora(
-            atualizadaEm
-          )}
-        `
-        : ""
-      }
-    `;
-
+const info=document.getElementById("infoBase");
+const detalhado=document.getElementById("statusBaseDetalhado");
+if(!baseInternos.length){
+info.className="status-base";
+info.textContent="📋 Base de internos não carregada.";
+detalhado.textContent="Nenhuma base de internos carregada.";
+return;
 }
-
+const atualizadaEm=localStorage.getItem(STORAGE_BASE_ATUALIZADA);
+info.className="status-base ok";
+info.textContent="📋 Base carregada: "+baseInternos.length+" internos.";
+detalhado.innerHTML="<strong>"+baseInternos.length+" internos cadastrados.</strong>"+(atualizadaEm?"<br>Última atualização: "+formatarDataHora(atualizadaEm):"");
+}
 
 function importarExcel(event){
-
-  const arquivoExcel =
-    event.target.files[0];
-
-  if(!arquivoExcel){
-    return;
-  }
-
-  if(
-    typeof XLSX ===
-    "undefined"
-  ){
-
-    alert(
-      "Não foi possível carregar o sistema de Excel."
-    );
-
-    return;
-
-  }
-
-  const leitor =
-    new FileReader();
-
-  leitor.onload =
-    function(e){
-
-      try{
-
-        const dados =
-          new Uint8Array(
-            e.target.result
-          );
-
-        const workbook =
-          XLSX.read(
-            dados,
-            {
-              type:"array"
-            }
-          );
-
-        const primeiraAba =
-          workbook.Sheets[
-            workbook.SheetNames[0]
-          ];
-
-        const linhas =
-          XLSX.utils.sheet_to_json(
-            primeiraAba,
-            {
-              header:1,
-              defval:""
-            }
-          );
-
-        let indiceCabecalho =
-          -1;
-
-        for(
-          let i=0;
-          i<linhas.length;
-          i++
-        ){
-
-          const linha =
-            linhas[i].map(
-              x =>
-                normalizarTexto(x)
-            );
-
-          if(
-            linha.includes(
-              "nome do interno"
-            ) &&
-            linha.includes(
-              "rgi"
-            )
-          ){
-
-            indiceCabecalho =
-              i;
-
-            break;
-
-          }
-
-        }
-
-        if(
-          indiceCabecalho === -1
-        ){
-
-          alert(
-            "Não encontrei a linha de cabeçalho com NOME DO INTERNO e RGI."
-          );
-
-          return;
-
-        }
-
-        const cabecalho =
-          linhas[
-            indiceCabecalho
-          ];
-
-        function coluna(nome){
-
-          const alvo =
-            normalizarTexto(
-              nome
-            );
-
-          return cabecalho.findIndex(
-            c =>
-              normalizarTexto(c)
-              === alvo
-          );
-
-        }
-
-        const colNome =
-          coluna(
-            "NOME DO INTERNO"
-          );
-
-        const colRGI =
-          coluna("RGI");
-
-        const colPavilhao =
-          coluna("PAVILHÃO");
-
-        const colCela =
-          coluna("CELA");
-
-        if(
-          colNome < 0 ||
-          colRGI < 0
-        ){
-
-          alert(
-            "A planilha não possui as colunas necessárias."
-          );
-
-          return;
-
-        }
-
-        const novaBase = [];
-
-        for(
-          let i =
-            indiceCabecalho + 1;
-          i<linhas.length;
-          i++
-        ){
-
-          const linha =
-            linhas[i];
-
-          const nome =
-            String(
-              linha[colNome] || ""
-            ).trim();
-
-          if(!nome){
-            continue;
-          }
-
-          if(
-            normalizarTexto(
-              nome
-            ) === "totais"
-          ){
-
-            continue;
-
-          }
-
-          novaBase.push({
-
-            nome,
-
-            rgi:
-              String(
-                linha[colRGI] || ""
-              ).trim(),
-
-            pavilhao:
-              String(
-                colPavilhao >= 0
-                ? linha[colPavilhao] || ""
-                : ""
-              ).trim(),
-
-            cela:
-              String(
-                colCela >= 0
-                ? linha[colCela] || ""
-                : ""
-              ).trim()
-
-          });
-
-        }
-
-        baseInternos =
-          novaBase;
-
-        localStorage.setItem(
-          STORAGE_BASE_ATUALIZADA,
-          new Date().toISOString()
-        );
-
-        salvarTudo();
-
-        atualizarStatusBase();
-
-        alert(
-          "Base atualizada com sucesso!\n\n" +
-          novaBase.length +
-          " internos encontrados."
-        );
-
-        limparSugestoes();
-
-        limparSugestoesEdicao();
-
-      }catch(erro){
-
-        console.error(
-          erro
-        );
-
-        alert(
-          "Erro ao importar a planilha."
-        );
-
-      }
-
-    };
-
-  leitor.readAsArrayBuffer(
-    arquivoExcel
-  );
-
-  event.target.value = "";
-
+const arquivoExcel=event.target.files[0];
+if(!arquivoExcel)return;
+if(typeof XLSX==="undefined"){alert("Não foi possível carregar o sistema de Excel.");return}
+const leitor=new FileReader();
+leitor.onload=function(e){
+try{
+const dados=new Uint8Array(e.target.result);
+const workbook=XLSX.read(dados,{type:"array"});
+const primeiraAba=workbook.Sheets[workbook.SheetNames[0]];
+const linhas=XLSX.utils.sheet_to_json(primeiraAba,{header:1,defval:""});
+let indiceCabecalho=-1;
+for(let i=0;i<linhas.length;i++){
+const linha=linhas[i].map(x=>normalizarTexto(x));
+if(linha.includes("nome do interno")&&linha.includes("rgi")){indiceCabecalho=i;break}
+}
+if(indiceCabecalho===-1){alert("Não encontrei a linha de cabeçalho com NOME DO INTERNO e RGI.");return}
+const cabecalho=linhas[indiceCabecalho];
+function coluna(nome){
+const alvo=normalizarTexto(nome);
+return cabecalho.findIndex(c=>normalizarTexto(c)===alvo);
+}
+const colNome=coluna("NOME DO INTERNO");
+const colRGI=coluna("RGI");
+const colPavilhao=coluna("PAVILHÃO");
+const colCela=coluna("CELA");
+if(colNome<0||colRGI<0){alert("A planilha não possui as colunas necessárias.");return}
+const novaBase=[];
+for(let i=indiceCabecalho+1;i<linhas.length;i++){
+const linha=linhas[i];
+const nome=String(linha[colNome]||"").trim();
+if(!nome||normalizarTexto(nome)==="totais")continue;
+novaBase.push({
+nome,
+rgi:String(linha[colRGI]||"").trim(),
+pavilhao:String(colPavilhao>=0?linha[colPavilhao]||"":"").trim(),
+cela:String(colCela>=0?linha[colCela]||"":"").trim()
+});
+}
+baseInternos=novaBase;
+localStorage.setItem(STORAGE_BASE_ATUALIZADA,new Date().toISOString());
+salvarTudo();
+atualizarStatusBase();
+alert("Base atualizada com sucesso!\n\n"+novaBase.length+" internos encontrados.");
+limparSugestoes();
+limparSugestoesEdicao();
+}catch(erro){
+console.error(erro);
+alert("Erro ao importar a planilha.");
+}
+};
+leitor.readAsArrayBuffer(arquivoExcel);
+event.target.value="";
 }
 
-
-/* =========================================================
-   PESQUISA DE INTERNOS
-========================================================= */
-
-function buscarInternos(
-  termo
-){
-
-  const busca =
-    normalizarTexto(
-      termo
-    );
-
-  if(!busca){
-    return [];
-  }
-
-  return baseInternos
-    .filter(
-      item =>
-        normalizarTexto(
-          item.nome
-        ).includes(
-          busca
-        )
-    )
-    .slice(
-      0,
-      12
-    );
-
+function buscarInternos(termo){
+const busca=normalizarTexto(termo);
+if(!busca)return[];
+return baseInternos.filter(item=>normalizarTexto(item.nome).includes(busca)).slice(0,12);
 }
-
-
-/* =========================================================
-   SUGESTÕES - CADASTRO
-========================================================= */
 
 function mostrarSugestoes(){
-
-  const input =
-    document.getElementById(
-      "nome"
-    );
-
-  const caixa =
-    document.getElementById(
-      "sugestoesNome"
-    );
-
-  const resultados =
-    buscarInternos(
-      input.value
-    );
-
-  caixa.innerHTML = "";
-
-  indiceSugestao = -1;
-
-  if(
-    !input.value.trim() ||
-    resultados.length === 0
-  ){
-
-    caixa.style.display =
-      "none";
-
-    return;
-
-  }
-
-  resultados.forEach(
-    (
-      item,
-      index
-    ) => {
-
-      const div =
-        document.createElement(
-          "div"
-        );
-
-      div.className =
-        "sugestao";
-
-      div.innerHTML =
-        `
-          <strong>
-            ${escaparHTML(
-              item.nome
-            )}
-          </strong>
-
-          <br>
-
-          <span class="mini">
-            RGI:
-            ${escaparHTML(
-              item.rgi
-            )}
-
-            |
-
-            Pavilhão:
-            ${escaparHTML(
-              item.pavilhao
-            )}
-
-            |
-
-            Cela:
-            ${escaparHTML(
-              item.cela
-            )}
-          </span>
-        `;
-
-      div.addEventListener(
-        "click",
-        function(){
-
-          selecionarInterno(
-            item
-          );
-
-        }
-      );
-
-      caixa.appendChild(
-        div
-      );
-
-    }
-  );
-
-  caixa.style.display =
-    "block";
-
+const input=document.getElementById("nome");
+const caixa=document.getElementById("sugestoesNome");
+const resultados=buscarInternos(input.value);
+caixa.innerHTML="";
+indiceSugestao=-1;
+if(!input.value.trim()||!resultados.length){caixa.style.display="none";return}
+resultados.forEach(item=>{
+const div=document.createElement("div");
+div.className="sugestao";
+div.innerHTML="<strong>"+escaparHTML(item.nome)+"</strong><br><span class='mini'>RGI: "+escaparHTML(item.rgi)+" | Pavilhão: "+escaparHTML(item.pavilhao)+" | Cela: "+escaparHTML(item.cela)+"</span>";
+div.addEventListener("click",()=>selecionarInterno(item));
+caixa.appendChild(div);
+});
+caixa.style.display="block";
 }
 
-
-function selecionarInterno(
-  item
-){
-
-  document.getElementById(
-    "nome"
-  ).value =
-    item.nome || "";
-
-  document.getElementById(
-    "rgi"
-  ).value =
-    item.rgi || "";
-
-  document.getElementById(
-    "pavilhao"
-  ).value =
-    item.pavilhao || "";
-
-  document.getElementById(
-    "cela"
-  ).value =
-    normalizarCela(
-      item.cela
-    );
-
-  limparSugestoes();
-
+function selecionarInterno(item){
+document.getElementById("nome").value=item.nome||"";
+document.getElementById("rgi").value=item.rgi||"";
+document.getElementById("pavilhao").value=item.pavilhao||"";
+document.getElementById("cela").value=normalizarCela(item.cela);
+limparSugestoes();
 }
 
-
-function normalizarCela(
-  valor
-){
-
-  const texto =
-    String(
-      valor || ""
-    ).trim();
-
-  const numero =
-    parseInt(
-      texto,
-      10
-    );
-
-  if(
-    Number.isNaN(
-      numero
-    )
-  ){
-
-    return texto;
-
-  }
-
-  return String(
-    numero
-  ).padStart(
-    2,
-    "0"
-  );
-
+function normalizarCela(valor){
+const texto=String(valor||"").trim();
+const numero=parseInt(texto,10);
+if(Number.isNaN(numero))return texto;
+return String(numero).padStart(2,"0");
 }
-
 
 function limparSugestoes(){
-
-  const caixa =
-    document.getElementById(
-      "sugestoesNome"
-    );
-
-  caixa.innerHTML = "";
-
-  caixa.style.display =
-    "none";
-
-  indiceSugestao = -1;
-
+const caixa=document.getElementById("sugestoesNome");
+caixa.innerHTML="";
+caixa.style.display="none";
+indiceSugestao=-1;
 }
-
-
-/* =========================================================
-   SUGESTÕES - EDIÇÃO
-========================================================= */
 
 function mostrarSugestoesEdicao(){
-
-  const input =
-    document.getElementById(
-      "editNome"
-    );
-
-  const caixa =
-    document.getElementById(
-      "sugestoesEditNome"
-    );
-
-  const resultados =
-    buscarInternos(
-      input.value
-    );
-
-  caixa.innerHTML = "";
-
-  indiceSugestaoEdicao = -1;
-
-  if(
-    !input.value.trim() ||
-    resultados.length === 0
-  ){
-
-    caixa.style.display =
-      "none";
-
-    return;
-
-  }
-
-  resultados.forEach(
-    item => {
-
-      const div =
-        document.createElement(
-          "div"
-        );
-
-      div.className =
-        "sugestao";
-
-      div.innerHTML =
-        `
-          <strong>
-            ${escaparHTML(
-              item.nome
-            )}
-          </strong>
-
-          <br>
-
-          <span class="mini">
-            RGI:
-            ${escaparHTML(
-              item.rgi
-            )}
-
-            |
-
-            Pavilhão:
-            ${escaparHTML(
-              item.pavilhao
-            )}
-
-            |
-
-            Cela:
-            ${escaparHTML(
-              item.cela
-            )}
-          </span>
-        `;
-
-      div.addEventListener(
-        "click",
-        function(){
-
-          selecionarInternoEdicao(
-            item
-          );
-
-        }
-      );
-
-      caixa.appendChild(
-        div
-      );
-
-    }
-  );
-
-  caixa.style.display =
-    "block";
-
+const input=document.getElementById("editNome");
+const caixa=document.getElementById("sugestoesEditNome");
+const resultados=buscarInternos(input.value);
+caixa.innerHTML="";
+indiceSugestaoEdicao=-1;
+if(!input.value.trim()||!resultados.length){caixa.style.display="none";return}
+resultados.forEach(item=>{
+const div=document.createElement("div");
+div.className="sugestao";
+div.innerHTML="<strong>"+escaparHTML(item.nome)+"</strong><br><span class='mini'>RGI: "+escaparHTML(item.rgi)+" | Pavilhão: "+escaparHTML(item.pavilhao)+" | Cela: "+escaparHTML(item.cela)+"</span>";
+div.addEventListener("click",()=>selecionarInternoEdicao(item));
+caixa.appendChild(div);
+});
+caixa.style.display="block";
 }
 
-
-function selecionarInternoEdicao(
-  item
-){
-
-  document.getElementById(
-    "editNome"
-  ).value =
-    item.nome || "";
-
-  document.getElementById(
-    "editRgi"
-  ).value =
-    item.rgi || "";
-
-  document.getElementById(
-    "editPavilhao"
-  ).value =
-    item.pavilhao || "";
-
-  document.getElementById(
-    "editCela"
-  ).value =
-    normalizarCela(
-      item.cela
-    );
-
-  limparSugestoesEdicao();
-
+function selecionarInternoEdicao(item){
+document.getElementById("editNome").value=item.nome||"";
+document.getElementById("editRgi").value=item.rgi||"";
+document.getElementById("editPavilhao").value=item.pavilhao||"";
+document.getElementById("editCela").value=normalizarCela(item.cela);
+limparSugestoesEdicao();
 }
-
 
 function limparSugestoesEdicao(){
-
-  const caixa =
-    document.getElementById(
-      "sugestoesEditNome"
-    );
-
-  caixa.innerHTML = "";
-
-  caixa.style.display =
-    "none";
-
-  indiceSugestaoEdicao = -1;
-
+const caixa=document.getElementById("sugestoesEditNome");
+caixa.innerHTML="";
+caixa.style.display="none";
+indiceSugestaoEdicao=-1;
 }
-
-
-/* =========================================================
-   LIMPAR FORMULÁRIO
-========================================================= */
 
 function limparFormulario(){
-
-  document.getElementById(
-    "nome"
-  ).value = "";
-
-  document.getElementById(
-    "rgi"
-  ).value = "";
-
-  document.getElementById(
-    "pavilhao"
-  ).value = "";
-
-  document.getElementById(
-    "cela"
-  ).value = "";
-
-  document.getElementById(
-    "atendimento"
-  ).value = "";
-
-  document.getElementById(
-    "dataAtendimento"
-  ).value =
-    dataHojeISO();
-
-  document.getElementById(
-    "assunto"
-  ).value = "";
-
-  limparSugestoes();
-
+document.getElementById("nome").value="";
+document.getElementById("rgi").value="";
+document.getElementById("pavilhao").value="";
+document.getElementById("cela").value="";
+document.getElementById("atendimento").value="";
+document.getElementById("dataAtendimento").value=dataHojeISO();
+document.getElementById("assunto").value="";
+limparSugestoes();
 }
-
-
-/* =========================================================
-   ENTRAR NA LISTA
-========================================================= */
 
 function entrarNaLista(){
+const nome=document.getElementById("nome").value.trim();
+const rgi=document.getElementById("rgi").value.trim();
+const pavilhao=document.getElementById("pavilhao").value;
+const cela=document.getElementById("cela").value.trim();
+const atendimento=document.getElementById("atendimento").value.trim();
+const dataAtendimento=document.getElementById("dataAtendimento").value;
+const assunto=document.getElementById("assunto").value.trim();
 
-  const nome =
-    document.getElementById(
-      "nome"
-    ).value.trim();
+if(!nome||!rgi||!pavilhao||!cela||!atendimento){alert("Preencha Nome do Interno, RGI, Pavilhão, Cela e Atendimento.");return}
+if(!dataAtendimento){alert("Informe a data do atendimento.");return}
 
-  const rgi =
-    document.getElementById(
-      "rgi"
-    ).value.trim();
-
-  const pavilhao =
-    document.getElementById(
-      "pavilhao"
-    ).value;
-
-  const cela =
-    document.getElementById(
-      "cela"
-    ).value.trim();
-
-  const atendimento =
-    document.getElementById(
-      "atendimento"
-    ).value.trim();
-
-  const dataAtendimento =
-    document.getElementById(
-      "dataAtendimento"
-    ).value;
-
-  const assunto =
-    document.getElementById(
-      "assunto"
-    ).value.trim();
-
-  if(
-    !nome ||
-    !rgi ||
-    !pavilhao ||
-    !cela ||
-    !atendimento
-  ){
-
-    alert(
-      "Preencha Nome do Interno, RGI, Pavilhão, Cela e Atendimento."
-    );
-
-    return;
-
-  }
-
-  if(!dataAtendimento){
-
-    alert(
-      "Informe a data do atendimento."
-    );
-
-    return;
-
-  }
-
-  const registro = {
-
-    nome,
-
-    rgi,
-
-    identificacao:rgi,
-
-    pavilhao,
-
-    cela:
-
-      normalizarCela(
-        cela
-      ),
-
-    atendimento,
-
-    dataAtendimento,
-
-    assunto
-
-  };
-
-  preparacao.push({
-
-    registro,
-
-    criadoEm:
-      new Date().toISOString()
-
-  });
-
-  salvarTudo();
-
-  renderPreparacao();
-
-  limparFormulario();
-
+const registro={nome,rgi,identificacao:rgi,pavilhao,cela:normalizarCela(cela),atendimento,dataAtendimento,assunto};
+preparacao.push({registro,criadoEm:new Date().toISOString()});
+salvarTudo();
+renderPreparacao();
+limparFormulario();
 }
-
-
-/* =========================================================
-   RENDER PREPARAÇÃO
-========================================================= */
 
 function renderPreparacao(){
-
-  const elemento =
-    document.getElementById(
-      "preparacao"
-    );
-
-  const botao =
-    document.getElementById(
-      "btnEnviarMesa"
-    );
-
-  if(
-    preparacao.length === 0
-  ){
-
-    elemento.innerHTML =
-      `
-        <div class="preparacao-vazia">
-          Nenhum atendimento aguardando envio.
-        </div>
-      `;
-
-    botao.disabled =
-      true;
-
-    return;
-
-  }
-
-  botao.disabled =
-    false;
-
-  elemento.innerHTML =
-    preparacao
-      .map(
-        (
-          item,
-          index
-        ) => {
-
-          const r =
-            item.registro || {};
-
-          return `
-            <div class="item item-preparacao">
-
-              <strong>
-                ${index+1}.
-                ${escaparHTML(
-                  r.nome
-                )}
-              </strong>
-
-              <div class="item-detalhes">
-
-                RGI:
-                ${escaparHTML(
-                  r.rgi
-                )}
-
-                <br>
-
-                Pavilhão:
-                ${escaparHTML(
-                  r.pavilhao
-                )}
-
-                |
-                Cela:
-                ${escaparHTML(
-                  r.cela
-                )}
-
-                <br>
-
-                Atendimento:
-                <strong
-                  style="display:inline"
-                >
-                  ${escaparHTML(
-                    r.atendimento
-                  )}
-                </strong>
-
-                <br>
-
-                Data:
-                ${escaparHTML(
-                  r.dataAtendimento
-                )}
-
-                ${
-                  r.assunto
-                  ? `
-                    <br>
-                    Assunto:
-                    ${escaparHTML(
-                      r.assunto
-                    )}
-                  `
-                  : ""
-                }
-
-              </div>
-
-              <div class="acoes">
-
-                <button
-                  class="btn-excluir"
-                  onclick="removerPreparacao(${index})"
-                >
-                  🗑️ REMOVER
-                </button>
-
-              </div>
-
-            </div>
-          `;
-
-        }
-      )
-      .join("");
-
+const elemento=document.getElementById("preparacao");
+const botao=document.getElementById("btnEnviarMesa");
+if(!preparacao.length){
+elemento.innerHTML="<div class='preparacao-vazia'>Nenhum atendimento aguardando envio.</div>";
+botao.disabled=true;
+return;
+}
+botao.disabled=false;
+elemento.innerHTML="<table class='lista-compacta'><thead><tr><th>#</th><th>Interno</th><th>RGI</th><th>Pav/Cela</th><th>Atendimento</th><th>Data</th><th>Assunto</th><th>Ação</th></tr></thead><tbody>"+
+preparacao.map((item,index)=>{
+const r=item.registro||{};
+return "<tr><td>"+(index+1)+"</td><td><strong>"+escaparHTML(r.nome)+"</strong></td><td>"+escaparHTML(r.rgi)+"</td><td>"+escaparHTML(r.pavilhao)+"/"+escaparHTML(r.cela)+"</td><td>"+escaparHTML(r.atendimento)+"</td><td>"+escaparHTML(r.dataAtendimento||"-")+"</td><td>"+escaparHTML(r.assunto||"-")+"</td><td class='acoes-tabela'><button class='btn-excluir' onclick='removerPreparacao("+index+")'>🗑️</button></td></tr>";
+}).join("")+"</tbody></table>";
 }
 
-
-function removerPreparacao(
-  index
-){
-
-  if(
-    !confirm(
-      "Remover este atendimento da lista?"
-    )
-  ){
-
-    return;
-
-  }
-
-  preparacao.splice(
-    index,
-    1
-  );
-
-  salvarTudo();
-
-  renderPreparacao();
-
+function removerPreparacao(index){
+if(!confirm("Remover este atendimento da lista?"))return;
+preparacao.splice(index,1);
+salvarTudo();
+renderPreparacao();
 }
-
-
-/* =========================================================
-   ENVIO PARA MESA
-========================================================= */
 
 function enviarParaMesa(){
-
-  if(
-    preparacao.length === 0
-  ){
-
-    alert(
-      "Não há atendimentos na lista para enviar."
-    );
-
-    return;
-
-  }
-
-  if(
-    !ws ||
-    ws.readyState !==
-      WebSocket.OPEN
-  ){
-
-    alert(
-      "O Guichê não está conectado ao servidor."
-    );
-
-    return;
-
-  }
-
-  const agora =
-    new Date().toISOString();
-
-  preparacao.forEach(
-    item => {
-
-      const recordId =
-        gerarId();
-
-      const registro = {
-
-        ...(item.registro || {}),
-
-        reenvio:false,
-
-        status:
-          "aguardando_mesa"
-
-      };
-
-      const historicoItem = {
-
-        recordId,
-
-        registro,
-
-        enviadoEm:
-          agora,
-
-        recebidoEm:null,
-
-        recebidoPelaMesaEm:null,
-
-        status:
-          "aguardando_mesa"
-
-      };
-
-      historico.unshift(
-        historicoItem
-      );
-
-      enviarRegistroWS(
-        recordId,
-        registro
-      );
-
-    }
-  );
-
-  preparacao = [];
-
-  salvarTudo();
-
-  renderPreparacao();
-
-  renderHistorico();
-
-  alert(
-    "Atendimentos enviados para a Mesa."
-  );
-
+if(!preparacao.length){alert("Não há atendimentos na lista para enviar.");return}
+if(!ws||ws.readyState!==WebSocket.OPEN){alert("O Guichê não está conectado ao servidor.");return}
+const agora=new Date().toISOString();
+preparacao.forEach(item=>{
+const recordId=gerarId();
+const registro={...(item.registro||{}),reenvio:false,status:"aguardando_mesa"};
+const historicoItem={recordId,registro,enviadoEm:agora,recebidoEm:null,recebidoPelaMesaEm:null,status:"aguardando_mesa"};
+historico.unshift(historicoItem);
+enviarRegistroWS(recordId,registro);
+});
+preparacao=[];
+salvarTudo();
+renderPreparacao();
+renderHistorico();
+alert("Atendimentos enviados para a Mesa.");
 }
 
-
-/* =========================================================
-   ENVIO WEBSOCKET
-========================================================= */
-
-function enviarRegistroWS(
-  recordId,
-  registro
-){
-
-  if(
-    !ws ||
-    ws.readyState !==
-      WebSocket.OPEN
-  ){
-
-    return false;
-
-  }
-
-  try{
-
-    ws.send(
-      JSON.stringify({
-
-        type:
-          "send_record",
-
-        recordId,
-
-        record:{
-
-          ...(registro || {}),
-
-          reenvio:
-            registro?.reenvio === true,
-
-          status:
-            registro?.status ||
-            "aguardando_mesa"
-
-        },
-
-        ownerId:
-          clientId
-
-      })
-    );
-
-    return true;
-
-  }catch{
-
-    return false;
-
-  }
-
+function enviarRegistroWS(recordId,registro){
+if(!ws||ws.readyState!==WebSocket.OPEN)return false;
+try{
+ws.send(JSON.stringify({type:"send_record",recordId,record:{...(registro||{}),reenvio:registro?.reenvio===true,status:registro?.status||"aguardando_mesa"},ownerId:clientId}));
+return true;
+}catch{return false}
 }
-
-
-/* =========================================================
-   REENVIO AUTOMÁTICO
-========================================================= */
 
 function reenviarAguardandoMesa(){
-
-  if(
-    !ws ||
-    ws.readyState !==
-      WebSocket.OPEN
-  ){
-
-    return;
-
-  }
-
-  historico
-    .filter(
-      item =>
-        item.status ===
-        "aguardando_mesa"
-    )
-    .forEach(
-      item => {
-
-        if(!item.recordId){
-          return;
-        }
-
-        item.registro =
-          item.registro || {};
-
-        item.registro.status =
-          "aguardando_mesa";
-
-        enviarRegistroWS(
-          item.recordId,
-          item.registro
-        );
-
-      }
-    );
-
+if(!ws||ws.readyState!==WebSocket.OPEN)return;
+historico.filter(item=>item.status==="aguardando_mesa").forEach(item=>{
+if(!item.recordId)return;
+item.registro=item.registro||{};
+item.registro.status="aguardando_mesa";
+enviarRegistroWS(item.recordId,item.registro);
+});
 }
 
-
-/* =========================================================
-   CONFIRMAÇÃO DA MESA
-========================================================= */
-
-function receberConfirmacaoMesa(
-  recordId,
-  receivedAt
-){
-
-  const item =
-    historico.find(
-      x =>
-        x.recordId ===
-        recordId
-    );
-
-  if(!item){
-
-    /*
-      Se o Guichê já recebeu uma confirmação
-      anteriormente, não cria um novo registro.
-    */
-
-    return;
-
-  }
-
-  item.recebidoEm =
-    receivedAt ||
-    new Date().toISOString();
-
-  item.recebidoPelaMesaEm =
-    item.recebidoEm;
-
-  item.status =
-    "recebido";
-
-  if(item.registro){
-
-    item.registro.status =
-      "recebido";
-
-  }
-
-  salvarTudo();
-
-  renderHistorico();
-
+function receberConfirmacaoMesa(recordId,receivedAt){
+const item=historico.find(x=>x.recordId===recordId);
+if(!item)return;
+item.recebidoEm=receivedAt||new Date().toISOString();
+item.recebidoPelaMesaEm=item.recebidoEm;
+item.status="recebido";
+if(item.registro)item.registro.status="recebido";
+salvarTudo();
+renderHistorico();
 }
 
-
-/* =========================================================
-   RECEBER RECUSA DA MESA
-========================================================= */
-
-function receberRecusaDaMesa(
-  msg
-){
-
-  const recordId =
-    msg.recordId;
-
-  if(!recordId){
-
-    return;
-
-  }
-
-  let item =
-    historico.find(
-      x =>
-        x.recordId ===
-        recordId
-    );
-
-  /*
-    Se não estiver no histórico, procura em recusados.
-  */
-
-  if(!item){
-
-    item =
-      recusados.find(
-        x =>
-          x.recordId ===
-          recordId
-      );
-
-  }
-
-  if(!item){
-
-    item = {
-
-      recordId,
-
-      registro:
-        msg.record || {},
-
-      enviadoEm:
-        msg.record?.enviadoEm ||
-        new Date().toISOString(),
-
-      recebidoEm:null,
-
-      status:
-        "recusado"
-
-    };
-
-  }
-
-  item.registro =
-    {
-      ...(item.registro || {}),
-      ...(msg.record || {})
-    };
-
-  item.status =
-    "recusado";
-
-  item.motivoRecusa =
-    msg.reason ||
-    msg.motivoRecusa ||
-    "Motivo não informado.";
-
-  item.recusadoEm =
-    msg.refusedAt ||
-    msg.recusadoEm ||
-    new Date().toISOString();
-
-  item.recebidoEm =
-    null;
-
-  item.recebidoPelaMesaEm =
-    null;
-
-  item.registro.status =
-    "recusado";
-
-  item.registro.reenvio =
-    false;
-
-  item.historicoRecusas =
-    item.historicoRecusas ||
-    [];
-
-  item.historicoRecusas.unshift({
-
-    motivo:
-      item.motivoRecusa,
-
-    data:
-      item.recusadoEm
-
-  });
-
-  /*
-    O registro sai completamente do histórico
-    e fica somente na área de recusados.
-  */
-
-  historico =
-    historico.filter(
-      x =>
-        x.recordId !==
-        recordId
-    );
-
-  preparacao =
-    preparacao.filter(
-      x =>
-        x.recordId !==
-        recordId
-    );
-
-  recusados =
-    recusados.filter(
-      x =>
-        x.recordId !==
-        recordId
-    );
-
-  recusados.unshift(
-    item
-  );
-
-  salvarTudo();
-
-  renderHistorico();
-
-  renderRecusados();
-
-  renderPreparacao();
-
-  confirmarRecebimentoRecusa(
-    recordId
-  );
-
+function receberRecusaDaMesa(msg){
+const recordId=msg.recordId;
+if(!recordId)return;
+let item=historico.find(x=>x.recordId===recordId);
+if(!item)item=recusados.find(x=>x.recordId===recordId);
+if(!item){
+item={recordId,registro:msg.record||{},enviadoEm:msg.record?.enviadoEm||new Date().toISOString(),recebidoEm:null,status:"recusado"};
+}
+item.registro={...(item.registro||{}),...(msg.record||{})};
+item.status="recusado";
+item.motivoRecusa=msg.reason||msg.motivoRecusa||"Motivo não informado.";
+item.recusadoEm=msg.refusedAt||msg.recusadoEm||new Date().toISOString();
+item.recebidoEm=null;
+item.recebidoPelaMesaEm=null;
+item.registro.status="recusado";
+item.registro.reenvio=false;
+item.historicoRecusas=item.historicoRecusas||[];
+item.historicoRecusas.unshift({motivo:item.motivoRecusa,data:item.recusadoEm});
+historico=historico.filter(x=>x.recordId!==recordId);
+preparacao=preparacao.filter(x=>x.recordId!==recordId);
+recusados=recusados.filter(x=>x.recordId!==recordId);
+recusados.unshift(item);
+salvarTudo();
+renderHistorico();
+renderRecusados();
+renderPreparacao();
+confirmarRecebimentoRecusa(recordId);
 }
 
-
-/* =========================================================
-   CONFIRMAR RECEBIMENTO DA RECUSA
-========================================================= */
-
-function confirmarRecebimentoRecusa(
-  recordId
-){
-
-  if(
-    !ws ||
-    ws.readyState !==
-      WebSocket.OPEN
-  ){
-
-    return;
-
-  }
-
-  try{
-
-    ws.send(
-      JSON.stringify({
-
-        type:
-          "confirm_refusal_received",
-
-        recordId,
-
-        ownerId:
-          clientId
-
-      })
-    );
-
-  }catch{
-
-  }
-
+function confirmarRecebimentoRecusa(recordId){
+if(!ws||ws.readyState!==WebSocket.OPEN)return;
+try{ws.send(JSON.stringify({type:"confirm_refusal_received",recordId,ownerId:clientId}))}catch{}
 }
-
-
-/* =========================================================
-   HISTÓRICO
-========================================================= */
 
 function renderHistorico(){
+const elemento=document.getElementById("historico");
+const campoBusca=document.getElementById("buscaHistorico");
+const busca=normalizarTexto(campoBusca?campoBusca.value:"");
 
-  const elemento =
-    document.getElementById(
-      "historico"
-    );
+let dados=historico.filter(item=>{
+const r=item.registro||{};
+if(!busca)return true;
+return normalizarTexto(r.nome).includes(busca)||normalizarTexto(r.rgi).includes(busca)||normalizarTexto(r.atendimento).includes(busca)||normalizarTexto(r.assunto).includes(busca);
+});
 
-  const campoBusca =
-    document.getElementById(
-      "buscaHistorico"
-    );
-
-  const busca =
-    normalizarTexto(
-      campoBusca
-        ? campoBusca.value
-        : ""
-    );
-
-  let dados =
-    historico.filter(
-      item => {
-
-        const r =
-          item.registro || {};
-
-        if(!busca){
-          return true;
-        }
-
-        return (
-
-          normalizarTexto(
-            r.nome
-          ).includes(busca)
-
-          ||
-
-          normalizarTexto(
-            r.rgi
-          ).includes(busca)
-
-          ||
-
-          normalizarTexto(
-            r.atendimento
-          ).includes(busca)
-
-          ||
-
-          normalizarTexto(
-            r.assunto
-          ).includes(busca)
-
-        );
-
-      }
-    );
-
-  const ordem =
-    document.getElementById(
-      "ordemHistorico"
-    ).value;
-
-  if(
-    ordem ===
-    "atendimento"
-  ){
-
-    dados.sort(
-      (
-        a,
-        b
-      ) => {
-
-        const aa =
-          normalizarTexto(
-            a.registro?.atendimento
-          );
-
-        const bb =
-          normalizarTexto(
-            b.registro?.atendimento
-          );
-
-        return aa.localeCompare(
-          bb,
-          "pt-BR"
-        );
-
-      }
-    );
-
-  }
-
-  if(
-    dados.length === 0
-  ){
-
-    elemento.innerHTML =
-      `
-        <div class="sem">
-          Nenhum atendimento no histórico.
-        </div>
-      `;
-
-    return;
-
-  }
-
-  elemento.innerHTML =
-    dados
-      .map(
-        item =>
-          renderItemHistorico(
-            item
-          )
-      )
-      .join("");
-
+const ordem=document.getElementById("ordemHistorico").value;
+if(ordem==="atendimento"){
+dados.sort((a,b)=>normalizarTexto(a.registro?.atendimento).localeCompare(normalizarTexto(b.registro?.atendimento),"pt-BR"));
 }
 
-
-/* =========================================================
-   ITEM HISTÓRICO
-========================================================= */
-
-function renderItemHistorico(
-  item
-){
-
-  const r =
-    item.registro || {};
-
-  let statusHTML = "";
-
-  if(
-    item.status ===
-    "recebido"
-  ){
-
-    statusHTML =
-      `
-        <div class="confirmacao">
-
-          ✓ RECEBIDO PELA MESA
-
-          <br>
-
-          Horário da confirmação:
-          ${formatarDataHora(
-            item.recebidoEm
-          )}
-
-          <br>
-
-          <span
-            class="badge badge-recebido"
-          >
-            RECEBIDO
-          </span>
-
-        </div>
-
-        <div class="acoes">
-
-          <button
-            class="btn-arquivar"
-            onclick="arquivarRecebido('${item.recordId}')"
-          >
-            🗄️ GUARDAR
-          </button>
-
-        </div>
-      `;
-
-  }else{
-
-    statusHTML =
-      `
-        <div class="sem">
-
-          ⏳ Aguardando a Mesa receber.
-
-          <br>
-
-          <span
-            class="badge badge-aguardando"
-          >
-            AGUARDANDO MESA
-          </span>
-
-        </div>
-      `;
-
-  }
-
-  return `
-    <div class="item">
-
-      <strong>
-        ${escaparHTML(
-          r.nome
-        )}
-      </strong>
-
-      <div class="item-detalhes">
-
-        RGI:
-        ${escaparHTML(
-          r.rgi
-        )}
-
-        <br>
-
-        Pavilhão:
-        ${escaparHTML(
-          r.pavilhao
-        )}
-
-        |
-        Cela:
-        ${escaparHTML(
-          r.cela
-        )}
-
-        <br>
-
-        Atendimento:
-        ${escaparHTML(
-          r.atendimento
-        )}
-
-        <br>
-
-        Data do atendimento:
-        ${escaparHTML(
-          r.dataAtendimento ||
-          "-"
-        )}
-
-        ${
-          r.assunto
-          ? `
-            <br>
-            Assunto:
-            ${escaparHTML(
-              r.assunto
-            )}
-          `
-          : ""
-        }
-
-        <br>
-
-        Enviado:
-        ${formatarDataHora(
-          item.enviadoEm
-        )}
-
-      </div>
-
-      ${statusHTML}
-
-    </div>
-  `;
-
+if(!dados.length){
+elemento.innerHTML="<div class='sem'>Nenhum atendimento no histórico.</div>";
+return;
 }
 
-
-/* =========================================================
-   ARQUIVAR RECEBIDO
-========================================================= */
-
-function arquivarRecebido(
-  recordId
-){
-
-  const indice =
-    historico.findIndex(
-      item =>
-        item.recordId ===
-        recordId
-    );
-
-  if(
-    indice === -1
-  ){
-
-    return;
-
-  }
-
-  const item =
-    historico[indice];
-
-  if(
-    item.status !==
-    "recebido"
-  ){
-
-    alert(
-      "Somente atendimentos recebidos podem ser guardados."
-    );
-
-    return;
-
-  }
-
-  if(
-    !confirm(
-      "Guardar este atendimento?"
-    )
-  ){
-
-    return;
-
-  }
-
-  item.guardadoEm =
-    new Date().toISOString();
-
-  item.status =
-    "guardado";
-
-  if(item.registro){
-
-    item.registro.status =
-      "guardado";
-
-  }
-
-  arquivo.unshift(
-    item
-  );
-
-  historico.splice(
-    indice,
-    1
-  );
-
-  salvarTudo();
-
-  renderHistorico();
-
-  renderGuardados();
-
-  atualizarFiltroGuardados();
-
+elemento.innerHTML="<table class='lista-compacta'><thead><tr><th>Interno</th><th>RGI</th><th>Pav/Cela</th><th>Atendimento</th><th>Assunto</th><th>Data</th><th>Status</th><th>Ação</th></tr></thead><tbody>"+
+dados.map(item=>{
+const r=item.registro||{};
+const recebido=item.status==="recebido";
+return "<tr><td><strong>"+escaparHTML(r.nome)+"</strong></td><td>"+escaparHTML(r.rgi)+"</td><td>"+escaparHTML(r.pavilhao)+"/"+escaparHTML(r.cela)+"</td><td>"+escaparHTML(r.atendimento)+"</td><td>"+escaparHTML(r.assunto||"-")+"</td><td>"+escaparHTML(r.dataAtendimento||"-")+"</td><td>"+(recebido?"<span class='badge badge-recebido'>RECEBIDO</span>":"<span class='badge badge-aguardando'>AGUARDANDO</span>")+"</td><td>"+(recebido?"<button class='btn-arquivar' onclick=\"arquivarRecebido('"+item.recordId+"')\">🗄️ GUARDAR</button>":"⏳")+"</td></tr>";
+}).join("")+"</tbody></table>";
 }
 
+function arquivarRecebido(recordId){
+const indice=historico.findIndex(item=>item.recordId===recordId);
+if(indice===-1)return;
+const item=historico[indice];
+if(item.status!=="recebido"){alert("Somente atendimentos recebidos podem ser guardados.");return}
+if(!confirm("Guardar este atendimento?"))return;
+item.guardadoEm=new Date().toISOString();
+item.status="guardado";
+if(item.registro)item.registro.status="guardado";
+arquivo.unshift(item);
+historico.splice(indice,1);
+salvarTudo();
+renderHistorico();
+renderGuardados();
+atualizarFiltroGuardados();
+atualizarResumoGuardados();
+}
 
-/* =========================================================
-   RECUSADOS
-========================================================= */
+function guardarTodosRecebidos(){
+const recebidos=historico.filter(item=>item.status==="recebido");
+if(!recebidos.length){alert("Não há atendimentos recebidos pela Mesa para guardar.");return}
+if(!confirm("Guardar todos os "+recebidos.length+" atendimentos recebidos pela Mesa?"))return;
+
+const agora=new Date().toISOString();
+recebidos.forEach(item=>{
+item.guardadoEm=agora;
+item.status="guardado";
+if(item.registro)item.registro.status="guardado";
+});
+arquivo.unshift(...recebidos);
+historico=historico.filter(item=>item.status!=="guardado");
+salvarTudo();
+renderHistorico();
+renderGuardados();
+atualizarFiltroGuardados();
+atualizarResumoGuardados();
+alert(recebidos.length+" atendimentos foram guardados.");
+}
 
 function renderRecusados(){
+const elemento=document.getElementById("recusados");
+const campoBusca=document.getElementById("buscaRecusados");
+const busca=normalizarTexto(campoBusca?campoBusca.value:"");
 
-  const elemento =
-    document.getElementById(
-      "recusados"
-    );
+const dados=recusados.filter(item=>{
+if(!busca)return true;
+const r=item.registro||{};
+return normalizarTexto(r.nome).includes(busca)||normalizarTexto(r.rgi).includes(busca)||normalizarTexto(r.atendimento).includes(busca)||normalizarTexto(r.assunto).includes(busca)||normalizarTexto(item.motivoRecusa).includes(busca);
+});
 
-  const campoBusca =
-    document.getElementById(
-      "buscaRecusados"
-    );
-
-  const busca =
-    normalizarTexto(
-      campoBusca
-        ? campoBusca.value
-        : ""
-    );
-
-  const dados =
-    recusados.filter(
-      item => {
-
-        if(!busca){
-          return true;
-        }
-
-        const r =
-          item.registro || {};
-
-        return (
-
-          normalizarTexto(
-            r.nome
-          ).includes(busca)
-
-          ||
-
-          normalizarTexto(
-            r.rgi
-          ).includes(busca)
-
-          ||
-
-          normalizarTexto(
-            r.atendimento
-          ).includes(busca)
-
-          ||
-
-          normalizarTexto(
-            r.assunto
-          ).includes(busca)
-
-          ||
-
-          normalizarTexto(
-            item.motivoRecusa
-          ).includes(busca)
-
-        );
-
-      }
-    );
-
-  if(
-    dados.length === 0
-  ){
-
-    elemento.innerHTML =
-      `
-        <div class="sem">
-          Nenhum atendimento recusado.
-        </div>
-      `;
-
-    return;
-
-  }
-
-  elemento.innerHTML =
-    dados
-      .map(
-        item => {
-
-          const r =
-            item.registro || {};
-
-          return `
-            <div
-              class="item recusado"
-            >
-
-              <strong>
-                ${escaparHTML(
-                  r.nome
-                )}
-              </strong>
-
-              <div class="item-detalhes">
-
-                RGI:
-                ${escaparHTML(
-                  r.rgi
-                )}
-
-                <br>
-
-                Pavilhão:
-                ${escaparHTML(
-                  r.pavilhao
-                )}
-
-                |
-                Cela:
-                ${escaparHTML(
-                  r.cela
-                )}
-
-                <br>
-
-                Atendimento:
-                ${escaparHTML(
-                  r.atendimento
-                )}
-
-                <br>
-
-                Data do atendimento:
-                ${escaparHTML(
-                  r.dataAtendimento ||
-                  "-"
-                )}
-
-                ${
-                  r.assunto
-                  ? `
-                    <br>
-                    Assunto:
-                    ${escaparHTML(
-                      r.assunto
-                    )}
-                  `
-                  : ""
-                }
-
-              </div>
-
-              <div
-                class="recusa-box"
-              >
-
-                <strong>
-                  ❌ MOTIVO DA RECUSA
-                </strong>
-
-                <br><br>
-
-                ${escaparHTML(
-                  item.motivoRecusa ||
-                  "Motivo não informado."
-                )}
-
-                <br><br>
-
-                <span class="mini">
-                  Recusado em:
-                  ${formatarDataHora(
-                    item.recusadoEm
-                  )}
-                </span>
-
-              </div>
-
-              <div class="acoes">
-
-                <button
-                  class="btn-secundario"
-                  onclick="abrirEditarRecusa('${item.recordId}')"
-                >
-                  ✏️ EDITAR
-                </button>
-
-                <button
-                  class="btn-reenviar"
-                  onclick="reenviarRecusado('${item.recordId}')"
-                >
-                  📤 REENVIAR
-                </button>
-
-                <button
-                  class="btn-arquivar"
-                  onclick="arquivarRecusado('${item.recordId}')"
-                >
-                  🗄️ ARQUIVAR
-                </button>
-
-                <button
-                  class="btn-excluir"
-                  onclick="excluirRecusado('${item.recordId}')"
-                >
-                  🗑️ EXCLUIR
-                </button>
-
-              </div>
-
-            </div>
-          `;
-
-        }
-      )
-      .join("");
-
+if(!dados.length){
+elemento.innerHTML="<div class='sem'>Nenhum atendimento recusado.</div>";
+return;
 }
 
-
-/* =========================================================
-   EDITAR RECUSA - ABRIR
-========================================================= */
-
-function abrirEditarRecusa(
-  recordId
-){
-
-  const item =
-    recusados.find(
-      x =>
-        x.recordId ===
-        recordId
-    );
-
-  if(!item){
-
-    return;
-
-  }
-
-  registroRecusaAtual =
-    recordId;
-
-  const r =
-    item.registro || {};
-
-  document.getElementById(
-    "tituloModalRecusa"
-  ).textContent =
-    "Editar Atendimento Recusado";
-
-  document.getElementById(
-    "infoEdicaoRecusa"
-  ).textContent =
-    "Edite os dados completos do atendimento e, se necessário, altere também o motivo da recusa.";
-
-  document.getElementById(
-    "editNome"
-  ).value =
-    r.nome || "";
-
-  document.getElementById(
-    "editRgi"
-  ).value =
-    r.rgi || "";
-
-  document.getElementById(
-    "editPavilhao"
-  ).value =
-    r.pavilhao || "";
-
-  document.getElementById(
-    "editCela"
-  ).value =
-    normalizarCela(
-      r.cela
-    );
-
-  document.getElementById(
-    "editAtendimento"
-  ).value =
-    r.atendimento || "";
-
-  document.getElementById(
-    "editDataAtendimento"
-  ).value =
-    r.dataAtendimento ||
-    dataHojeISO();
-
-  document.getElementById(
-    "editAssunto"
-  ).value =
-    r.assunto || "";
-
-  document.getElementById(
-    "motivoRecusa"
-  ).value =
-    item.motivoRecusa || "";
-
-  document.getElementById(
-    "modalRecusa"
-  ).style.display =
-    "block";
-
+elemento.innerHTML="<table class='lista-compacta'><thead><tr><th>Interno</th><th>RGI</th><th>Pav/Cela</th><th>Atendimento</th><th>Data</th><th>Motivo da recusa</th><th>Ações</th></tr></thead><tbody>"+
+dados.map(item=>{
+const r=item.registro||{};
+return "<tr><td><strong>"+escaparHTML(r.nome)+"</strong></td><td>"+escaparHTML(r.rgi)+"</td><td>"+escaparHTML(r.pavilhao)+"/"+escaparHTML(r.cela)+"</td><td>"+escaparHTML(r.atendimento)+"</td><td>"+escaparHTML(r.dataAtendimento||"-")+"</td><td>"+escaparHTML(item.motivoRecusa||"Motivo não informado.")+"</td><td class='acoes-tabela'><button class='btn-secundario' onclick=\"abrirEditarRecusa('"+item.recordId+"')\">✏️</button><button class='btn-reenviar' onclick=\"reenviarRecusado('"+item.recordId+"')\">📤</button><button class='btn-arquivar' onclick=\"arquivarRecusado('"+item.recordId+"')\">🗄️</button><button class='btn-excluir' onclick=\"excluirRecusado('"+item.recordId+"')\">🗑️</button></td></tr>";
+}).join("")+"</tbody></table>";
 }
 
-
-/* =========================================================
-   FECHAR MODAL RECUSA
-========================================================= */
+function abrirEditarRecusa(recordId){
+const item=recusados.find(x=>x.recordId===recordId);
+if(!item)return;
+registroRecusaAtual=recordId;
+const r=item.registro||{};
+document.getElementById("tituloModalRecusa").textContent="Editar Atendimento Recusado";
+document.getElementById("infoEdicaoRecusa").textContent="Edite os dados completos do atendimento e, se necessário, altere também o motivo da recusa.";
+document.getElementById("editNome").value=r.nome||"";
+document.getElementById("editRgi").value=r.rgi||"";
+document.getElementById("editPavilhao").value=r.pavilhao||"";
+document.getElementById("editCela").value=normalizarCela(r.cela);
+document.getElementById("editAtendimento").value=r.atendimento||"";
+document.getElementById("editDataAtendimento").value=r.dataAtendimento||dataHojeISO();
+document.getElementById("editAssunto").value=r.assunto||"";
+document.getElementById("motivoRecusa").value=item.motivoRecusa||"";
+document.getElementById("modalRecusa").style.display="block";
+}
 
 function fecharModalRecusa(){
-
-  document.getElementById(
-    "modalRecusa"
-  ).style.display =
-    "none";
-
-  registroRecusaAtual =
-    null;
-
-  limparSugestoesEdicao();
-
+document.getElementById("modalRecusa").style.display="none";
+registroRecusaAtual=null;
+limparSugestoesEdicao();
 }
-
-
-/* =========================================================
-   SALVAR EDIÇÃO DA RECUSA
-========================================================= */
 
 function salvarEdicaoRecusa(){
+if(!registroRecusaAtual){fecharModalRecusa();return}
+const item=recusados.find(x=>x.recordId===registroRecusaAtual);
+if(!item){fecharModalRecusa();return}
 
-  if(!registroRecusaAtual){
+const nome=document.getElementById("editNome").value.trim();
+const rgi=document.getElementById("editRgi").value.trim();
+const pavilhao=document.getElementById("editPavilhao").value;
+const cela=document.getElementById("editCela").value.trim();
+const atendimento=document.getElementById("editAtendimento").value.trim();
+const dataAtendimento=document.getElementById("editDataAtendimento").value;
+const assunto=document.getElementById("editAssunto").value.trim();
+const motivo=document.getElementById("motivoRecusa").value.trim();
 
-    fecharModalRecusa();
+if(!nome||!rgi||!pavilhao||!cela||!atendimento){alert("Preencha Nome do Interno, RGI, Pavilhão, Cela e Atendimento.");return}
+if(!dataAtendimento){alert("Informe a data do atendimento.");return}
+if(!motivo){alert("Informe o motivo da recusa.");return}
 
-    return;
+const registroAnterior=item.registro||{};
+const motivoAnterior=item.motivoRecusa||"";
 
-  }
+item.registro={...registroAnterior,nome,rgi,identificacao:rgi,pavilhao,cela:normalizarCela(cela),atendimento,dataAtendimento,assunto,status:"recusado",reenvio:false};
+item.motivoRecusa=motivo;
 
-  const item =
-    recusados.find(
-      x =>
-        x.recordId ===
-        registroRecusaAtual
-    );
-
-  if(!item){
-
-    fecharModalRecusa();
-
-    return;
-
-  }
-
-  const nome =
-    document.getElementById(
-      "editNome"
-    ).value.trim();
-
-  const rgi =
-    document.getElementById(
-      "editRgi"
-    ).value.trim();
-
-  const pavilhao =
-    document.getElementById(
-      "editPavilhao"
-    ).value;
-
-  const cela =
-    document.getElementById(
-      "editCela"
-    ).value.trim();
-
-  const atendimento =
-    document.getElementById(
-      "editAtendimento"
-    ).value.trim();
-
-  const dataAtendimento =
-    document.getElementById(
-      "editDataAtendimento"
-    ).value;
-
-  const assunto =
-    document.getElementById(
-      "editAssunto"
-    ).value.trim();
-
-  const motivo =
-    document.getElementById(
-      "motivoRecusa"
-    ).value.trim();
-
-  if(
-    !nome ||
-    !rgi ||
-    !pavilhao ||
-    !cela ||
-    !atendimento
-  ){
-
-    alert(
-      "Preencha Nome do Interno, RGI, Pavilhão, Cela e Atendimento."
-    );
-
-    return;
-
-  }
-
-  if(!dataAtendimento){
-
-    alert(
-      "Informe a data do atendimento."
-    );
-
-    return;
-
-  }
-
-  if(!motivo){
-
-    alert(
-      "Informe o motivo da recusa."
-    );
-
-    return;
-
-  }
-
-  const registroAnterior =
-    item.registro || {};
-
-  const motivoAnterior =
-    item.motivoRecusa || "";
-
-  item.registro = {
-
-    ...registroAnterior,
-
-    nome,
-
-    rgi,
-
-    identificacao:
-      rgi,
-
-    pavilhao,
-
-    cela:
-      normalizarCela(
-        cela
-      ),
-
-    atendimento,
-
-    dataAtendimento,
-
-    assunto,
-
-    status:
-      "recusado",
-
-    reenvio:false
-
-  };
-
-  item.motivoRecusa =
-    motivo;
-
-  if(
-    motivoAnterior !==
-    motivo
-  ){
-
-    item.historicoRecusas =
-      item.historicoRecusas ||
-      [];
-
-    item.historicoRecusas.unshift({
-
-      motivo,
-
-      data:
-        new Date().toISOString()
-
-    });
-
-  }
-
-  item.editadoEm =
-    new Date().toISOString();
-
-  salvarTudo();
-
-  renderRecusados();
-
-  fecharModalRecusa();
-
-  alert(
-    "Atendimento recusado atualizado com sucesso."
-  );
-
+if(motivoAnterior!==motivo){
+item.historicoRecusas=item.historicoRecusas||[];
+item.historicoRecusas.unshift({motivo,data:new Date().toISOString()});
 }
 
-
-/* =========================================================
-   REENVIAR RECUSADO
-========================================================= */
-
-function reenviarRecusado(
-  recordId
-){
-
-  const indice =
-    recusados.findIndex(
-      x =>
-        x.recordId ===
-        recordId
-    );
-
-  if(
-    indice === -1
-  ){
-
-    return;
-
-  }
-
-  const item =
-    recusados[indice];
-
-  if(
-    !ws ||
-    ws.readyState !==
-      WebSocket.OPEN
-  ){
-
-    alert(
-      "O Guichê não está conectado ao servidor."
-    );
-
-    return;
-
-  }
-
-  if(
-    !confirm(
-      "Reenviar este atendimento para a Mesa?"
-    )
-  ){
-
-    return;
-
-  }
-
-  const agora =
-    new Date().toISOString();
-
-  /*
-    Mantém o MESMO recordId.
-    Isso é importante para o servidor identificar
-    que se trata do mesmo atendimento.
-  */
-
-  item.status =
-    "aguardando_mesa";
-
-  item.reenviadoEm =
-    agora;
-
-  item.recebidoEm =
-    null;
-
-  item.recebidoPelaMesaEm =
-    null;
-
-  item.registro =
-    {
-      ...(item.registro || {}),
-
-      status:
-        "aguardando_mesa",
-
-      reenvio:true,
-
-      reenviadoEm:
-        agora
-
-    };
-
-  /*
-    Atualiza o histórico do atendimento.
-  */
-
-  const historicoExistente =
-    historico.find(
-      x =>
-        x.recordId ===
-        recordId
-    );
-
-  if(historicoExistente){
-
-    Object.assign(
-      historicoExistente,
-      item
-    );
-
-  }else{
-
-    historico.unshift(
-      item
-    );
-
-  }
-
-  /*
-    Agora ele deixa de ser recusado.
-  */
-
-  recusados.splice(
-    indice,
-    1
-  );
-
-  salvarTudo();
-
-  renderHistorico();
-
-  renderRecusados();
-
-  /*
-    Envia imediatamente para a Mesa.
-  */
-
-  const enviado =
-    enviarRegistroWS(
-      item.recordId,
-      item.registro
-    );
-
-  if(!enviado){
-
-    alert(
-      "O atendimento foi preparado para reenvio, mas não foi possível enviá-lo agora. O sistema tentará novamente quando a conexão voltar."
-    );
-
-  }else{
-
-    alert(
-      "Atendimento reenviado para a Mesa."
-    );
-
-  }
-
+item.editadoEm=new Date().toISOString();
+salvarTudo();
+renderRecusados();
+fecharModalRecusa();
+alert("Atendimento recusado atualizado com sucesso.");
 }
 
+function reenviarRecusado(recordId){
+const indice=recusados.findIndex(x=>x.recordId===recordId);
+if(indice===-1)return;
+const item=recusados[indice];
+if(!ws||ws.readyState!==WebSocket.OPEN){alert("O Guichê não está conectado ao servidor.");return}
+if(!confirm("Reenviar este atendimento para a Mesa?"))return;
 
-/* =========================================================
-   ARQUIVAR RECUSADO
-========================================================= */
+const agora=new Date().toISOString();
+item.status="aguardando_mesa";
+item.reenviadoEm=agora;
+item.recebidoEm=null;
+item.recebidoPelaMesaEm=null;
+item.registro={...(item.registro||{}),status:"aguardando_mesa",reenvio:true,reenviadoEm:agora};
 
-function arquivarRecusado(
-  recordId
-){
+const historicoExistente=historico.find(x=>x.recordId===recordId);
+if(historicoExistente)Object.assign(historicoExistente,item);
+else historico.unshift(item);
 
-  const indice =
-    recusados.findIndex(
-      x =>
-        x.recordId ===
-        recordId
-    );
+recusados.splice(indice,1);
+salvarTudo();
+renderHistorico();
+renderRecusados();
 
-  if(
-    indice === -1
-  ){
-
-    return;
-
-  }
-
-  if(
-    !confirm(
-      "Arquivar este atendimento recusado?"
-    )
-  ){
-
-    return;
-
-  }
-
-  const item =
-    recusados[indice];
-
-  item.guardadoEm =
-    new Date().toISOString();
-
-  item.status =
-    "guardado";
-
-  if(item.registro){
-
-    item.registro.status =
-      "guardado";
-
-  }
-
-  arquivo.unshift(
-    item
-  );
-
-  recusados.splice(
-    indice,
-    1
-  );
-
-  salvarTudo();
-
-  renderRecusados();
-
-  renderGuardados();
-
-  atualizarFiltroGuardados();
-
+const enviado=enviarRegistroWS(item.recordId,item.registro);
+if(!enviado)alert("O atendimento foi preparado para reenvio, mas não foi possível enviá-lo agora. O sistema tentará novamente quando a conexão voltar.");
+else alert("Atendimento reenviado para a Mesa.");
 }
 
-
-/* =========================================================
-   EXCLUIR RECUSADO
-========================================================= */
-
-function excluirRecusado(
-  recordId
-){
-
-  if(
-    !confirm(
-      "Excluir definitivamente este atendimento recusado?"
-    )
-  ){
-
-    return;
-
-  }
-
-  recusados =
-    recusados.filter(
-      x =>
-        x.recordId !==
-        recordId
-    );
-
-  salvarTudo();
-
-  renderRecusados();
-
+function arquivarRecusado(recordId){
+const indice=recusados.findIndex(x=>x.recordId===recordId);
+if(indice===-1)return;
+if(!confirm("Arquivar este atendimento recusado?"))return;
+const item=recusados[indice];
+item.guardadoEm=new Date().toISOString();
+item.status="guardado";
+if(item.registro)item.registro.status="guardado";
+arquivo.unshift(item);
+recusados.splice(indice,1);
+salvarTudo();
+renderRecusados();
+renderGuardados();
+atualizarFiltroGuardados();
+atualizarResumoGuardados();
 }
 
-
-/* =========================================================
-   GUARDADOS
-========================================================= */
+function excluirRecusado(recordId){
+if(!confirm("Excluir definitivamente este atendimento recusado?"))return;
+recusados=recusados.filter(x=>x.recordId!==recordId);
+salvarTudo();
+renderRecusados();
+}
 
 function atualizarFiltroGuardados(){
-
-  const select =
-    document.getElementById(
-      "filtroGuardados"
-    );
-
-  if(!select){
-    return;
-  }
-
-  const atual =
-    select.value;
-
-  const categorias =
-    [
-      ...new Set(
-        arquivo
-          .map(
-            item =>
-              item.registro?.atendimento
-          )
-          .filter(Boolean)
-      )
-    ]
-    .sort(
-      (
-        a,
-        b
-      ) =>
-        a.localeCompare(
-          b,
-          "pt-BR"
-        )
-    );
-
-  select.innerHTML =
-    `
-      <option value="">
-        Todos os atendimentos
-      </option>
-    `;
-
-  categorias.forEach(
-    categoria => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-      option.value =
-        categoria;
-
-      option.textContent =
-        categoria;
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
-
-  if(
-    categorias.includes(
-      atual
-    )
-  ){
-
-    select.value =
-      atual;
-
-  }
-
+const select=document.getElementById("filtroGuardados");
+if(!select)return;
+const atual=select.value;
+const categorias=[...new Set(arquivo.map(item=>item.registro?.atendimento).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+select.innerHTML="<option value=''>Todos os atendimentos</option>";
+categorias.forEach(categoria=>{
+const option=document.createElement("option");
+option.value=categoria;
+option.textContent=categoria;
+select.appendChild(option);
+});
+if(categorias.includes(atual))select.value=atual;
 }
 
+function atualizarResumoGuardados(){
+const campo=document.getElementById("resumoGuardados");
+if(!campo)return;
+campo.value=arquivo.length===0?"Nenhum atendimento guardado":arquivo.length+" atendimento(s) guardado(s)";
+}
+
+function abrirGuardados(){
+document.getElementById("modalGuardados").style.display="block";
+atualizarFiltroGuardados();
+renderGuardados();
+}
+
+function fecharGuardados(){
+document.getElementById("modalGuardados").style.display="none";
+}
 
 function renderGuardados(){
-
-  const elemento =
-    document.getElementById(
-      "guardados"
-    );
-
-  if(!elemento){
-    return;
-  }
-
-  const campoBusca =
-    document.getElementById(
-      "buscaGuardados"
-    );
-
-  const busca =
-    normalizarTexto(
-      campoBusca
-        ? campoBusca.value
-        : ""
-    );
-
-  const data =
-    document.getElementById(
-      "dataGuardados"
-    ).value;
-
-  const categoria =
-    document.getElementById(
-      "filtroGuardados"
-    ).value;
-
-  const dados =
-    arquivo.filter(
-      item => {
-
-        const r =
-          item.registro || {};
-
-        if(busca){
-
-          const encontrou =
-
-            normalizarTexto(
-              r.nome
-            ).includes(busca)
-
-            ||
-
-            normalizarTexto(
-              r.rgi
-            ).includes(busca)
-
-            ||
-
-            normalizarTexto(
-              r.atendimento
-            ).includes(busca)
-
-            ||
-
-            normalizarTexto(
-              r.assunto
-            ).includes(busca);
-
-          if(!encontrou){
-
-            return false;
-
-          }
-
-        }
-
-        if(data){
-
-          if(
-            dataRegistroParaFiltro(
-              item
-            ) !== data
-          ){
-
-            return false;
-
-          }
-
-        }
-
-        if(
-          categoria &&
-          r.atendimento !==
-            categoria
-        ){
-
-          return false;
-
-        }
-
-        return true;
-
-      }
-    );
-
-  if(
-    dados.length === 0
-  ){
-
-    elemento.innerHTML =
-      `
-        <div class="sem">
-          Nenhum atendimento guardado encontrado.
-        </div>
-      `;
-
-    return;
-
-  }
-
-  elemento.innerHTML =
-    dados
-      .map(
-        item => {
-
-          const r =
-            item.registro || {};
-
-          const recusa =
-            item.motivoRecusa
-            ? `
-              <div
-                class="recusa-box"
-              >
-
-                <strong>
-                  ❌ Motivo da recusa:
-                </strong>
-
-                <br><br>
-
-                ${escaparHTML(
-                  item.motivoRecusa
-                )}
-
-              </div>
-            `
-            : "";
-
-          return `
-            <div class="item guardado">
-
-              <strong>
-                ${escaparHTML(
-                  r.nome
-                )}
-              </strong>
-
-              <div class="item-detalhes">
-
-                RGI:
-                ${escaparHTML(
-                  r.rgi
-                )}
-
-                <br>
-
-                Pavilhão:
-                ${escaparHTML(
-                  r.pavilhao
-                )}
-
-                |
-                Cela:
-                ${escaparHTML(
-                  r.cela
-                )}
-
-                <br>
-
-                Atendimento:
-                ${escaparHTML(
-                  r.atendimento
-                )}
-
-                <br>
-
-                Data do atendimento:
-                ${escaparHTML(
-                  r.dataAtendimento ||
-                  "-"
-                )}
-
-                ${
-                  r.assunto
-                  ? `
-                    <br>
-                    Assunto:
-                    ${escaparHTML(
-                      r.assunto
-                    )}
-                  `
-                  : ""
-                }
-
-                <br>
-
-                Guardado em:
-                ${formatarDataHora(
-                  item.guardadoEm
-                )}
-
-              </div>
-
-              ${recusa}
-
-              <div class="acoes">
-
-                <button
-                  class="btn-excluir"
-                  onclick="excluirGuardado('${item.recordId}')"
-                >
-                  🗑️ EXCLUIR
-                </button>
-
-              </div>
-
-            </div>
-          `;
-
-        }
-      )
-      .join("");
-
+const elemento=document.getElementById("guardados");
+if(!elemento)return;
+
+const campoBusca=document.getElementById("buscaGuardados");
+const campoData=document.getElementById("dataGuardados");
+const campoCategoria=document.getElementById("filtroGuardados");
+
+const busca=normalizarTexto(campoBusca?campoBusca.value:"");
+const data=campoData?campoData.value:"";
+const categoria=campoCategoria?campoCategoria.value:"";
+
+const dados=arquivo.filter(item=>{
+const r=item.registro||{};
+
+if(busca){
+const encontrou=normalizarTexto(r.nome).includes(busca)||normalizarTexto(r.rgi).includes(busca)||normalizarTexto(r.atendimento).includes(busca)||normalizarTexto(r.assunto).includes(busca)||normalizarTexto(r.dataAtendimento).includes(busca)||normalizarTexto(item.guardadoEm).includes(busca);
+if(!encontrou)return false;
 }
 
+if(data&&dataRegistroParaFiltro(item)!==data)return false;
+if(categoria&&r.atendimento!==categoria)return false;
 
-function excluirGuardado(
-  recordId
-){
+return true;
+});
 
-  if(
-    !confirm(
-      "Excluir definitivamente este atendimento guardado?"
-    )
-  ){
-
-    return;
-
-  }
-
-  arquivo =
-    arquivo.filter(
-      x =>
-        x.recordId !==
-        recordId
-    );
-
-  salvarTudo();
-
-  renderGuardados();
-
-  atualizarFiltroGuardados();
-
+if(!dados.length){
+elemento.innerHTML="<div class='sem'>Nenhum atendimento guardado encontrado.</div>";
+atualizarResumoGuardados();
+return;
 }
 
+elemento.innerHTML="<table class='lista-compacta'><thead><tr><th>Interno</th><th>RGI</th><th>Pav/Cela</th><th>Atendimento</th><th>Assunto</th><th>Data</th><th>Status</th><th>Guardado em</th><th>Ação</th></tr></thead><tbody>"+
+dados.map(item=>{
+const r=item.registro||{};
+return "<tr><td><strong>"+escaparHTML(r.nome)+"</strong></td><td>"+escaparHTML(r.rgi)+"</td><td>"+escaparHTML(r.pavilhao)+"/"+escaparHTML(r.cela)+"</td><td>"+escaparHTML(r.atendimento)+"</td><td>"+escaparHTML(r.assunto||"-")+"</td><td>"+escaparHTML(r.dataAtendimento||"-")+"</td><td><span class='badge badge-guardado'>GUARDADO</span></td><td>"+formatarDataHora(item.guardadoEm)+"</td><td><button class='btn-excluir' onclick=\"excluirGuardado('"+item.recordId+"')\">🗑️</button></td></tr>";
+}).join("")+"</tbody></table>";
 
-/* =========================================================
+atualizarResumoGuardados();
+}
+
+function excluirGuardado(recordId){
+if(!confirm("Excluir definitivamente este atendimento guardado?"))return;
+arquivo=arquivo.filter(x=>x.recordId!==recordId);
+salvarTudo();
+renderGuardados();
+atualizarFiltroGuardados();
+atualizarResumoGuardados();
+}
+
+/* ================================
    IMPRESSÃO
-========================================================= */
+================================ */
 
 function todosRegistrosImpressao(){
-
-  return [
-    ...historico,
-    ...arquivo
-  ];
-
+return [...historico,...arquivo];
 }
-
 
 function abrirModalImpressao(){
-
-  document.getElementById(
-    "modalImpressao"
-  ).style.display =
-    "block";
-
-  atualizarOpcoesImpressao();
-
+document.getElementById("modalImpressao").style.display="block";
+atualizarOpcoesImpressao();
 }
-
 
 function fecharModalImpressao(){
-
-  document.getElementById(
-    "modalImpressao"
-  ).style.display =
-    "none";
-
+document.getElementById("modalImpressao").style.display="none";
 }
 
+function obterCategoriasImpressao(dados){
+return [...new Set(dados.map(item=>item.registro?.atendimento).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+}
 
 function atualizarOpcoesImpressao(){
+const tipo=document.querySelector('input[name="tipoImpressao"]:checked')?.value;
+const area=document.getElementById("opcoesImpressaoDetalhes");
+const todos=todosRegistrosImpressao();
 
-  const tipo =
-    document.querySelector(
-      'input[name="tipoImpressao"]:checked'
-    )?.value;
-
-  const area =
-    document.getElementById(
-      "opcoesImpressaoDetalhes"
-    );
-
-  if(
-    tipo ===
-    "atendimento"
-  ){
-
-    const categorias =
-      [
-        ...new Set(
-          todosRegistrosImpressao()
-            .map(
-              item =>
-                item.registro?.atendimento
-            )
-            .filter(Boolean)
-        )
-      ]
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          a.localeCompare(
-            b,
-            "pt-BR"
-          )
-      );
-
-    area.innerHTML =
-      `
-        <div class="campo">
-
-          <label>
-            Atendimento
-          </label>
-
-          <select
-            id="tipoAtendimentoImpressao"
-          >
-
-            <option value="">
-              Selecione
-            </option>
-
-            ${categorias
-              .map(
-                c =>
-                  `
-                    <option
-                      value="${escaparHTML(c)}"
-                    >
-                      ${escaparHTML(c)}
-                    </option>
-                  `
-              )
-              .join("")}
-
-          </select>
-
-        </div>
-      `;
-
-    return;
-
-  }
-
-
-  if(
-    tipo ===
-    "geral"
-  ){
-
-    area.innerHTML =
-      `
-        <div class="sem">
-          Todos os atendimentos serão preparados para impressão.
-        </div>
-      `;
-
-    return;
-
-  }
-
-
-  if(
-    tipo ===
-    "data"
-  ){
-
-    area.innerHTML =
-      `
-        <div class="grid">
-
-          <div class="campo">
-
-            <label>
-              Data
-            </label>
-
-            <input
-              id="dataImpressao"
-              type="date"
-              value="${dataHojeISO()}"
-            >
-
-          </div>
-
-          <div class="campo">
-
-            <label>
-              Filtrar
-            </label>
-
-            <select
-              id="filtroDataImpressao"
-            >
-
-              <option value="todos">
-                Todos
-              </option>
-
-              <option value="atendimentos">
-                Atendimentos
-              </option>
-
-            </select>
-
-          </div>
-
-        </div>
-      `;
-
-  }
-
+if(tipo==="atendimento"){
+const categorias=obterCategoriasImpressao(todos);
+area.innerHTML=
+"<div class='campo'><label>Atendimentos</label>"+
+"<div class='acoes-opcoes'>"+
+"<button type='button' class='btn-secundario' onclick='marcarTodosAtendimentosImpressao(true)'>☑️ SELECIONAR TODOS</button>"+
+"<button type='button' class='btn-secundario' onclick='marcarTodosAtendimentosImpressao(false)'>⬜ LIMPAR</button>"+
+"</div>"+
+"<div class='check-grid' id='checkAtendimentosImpressao'>"+
+(categorias.length?categorias.map((c,i)=>"<div class='check-item'><label><input type='checkbox' class='check-atendimento' value='"+escaparHTML(c)+"' id='checkAt_"+i+"'>"+escaparHTML(c)+"</label></div>").join(""):"<div class='sem'>Nenhum atendimento encontrado.</div>")+
+"</div></div>"+
+"<div class='opcoes-pagina'><label><input type='checkbox' id='atendimentoPorPagina'> <strong>Atendimento por página</strong></label><div class='mini'>Cada tipo de atendimento selecionado começará em uma nova página.</div></div>";
+return;
 }
 
+if(tipo==="geral"){
+area.innerHTML="<div class='sem'>Todos os atendimentos serão preparados para impressão.</div><div class='opcoes-pagina'><label><input type='checkbox' id='geralPorPagina'> <strong>Atendimento por página</strong></label><div class='mini'>Cada tipo de atendimento começará em uma nova página.</div></div>";
+return;
+}
 
-document
-  .querySelectorAll(
-    'input[name="tipoImpressao"]'
-  )
-  .forEach(
-    radio => {
+if(tipo==="data"){
+area.innerHTML=
+"<div class='grid'>"+
+"<div class='campo'><label>Data</label><input id='dataImpressao' type='date' value='"+dataHojeISO()+"' onchange='atualizarFiltroAtendimentoPorData()'></div>"+
+"<div class='campo'><label>Filtrar por atendimento</label><select id='filtroDataImpressao' onchange='atualizarOpcaoPaginaData()'><option value='todos'>Todos</option></select></div>"+
+"</div>"+
+"<div id='opcaoPaginaData' class='opcoes-pagina'><label><input type='checkbox' id='dataPorPagina'> <strong>Atendimento por página</strong></label><div class='mini'>Cada tipo de atendimento começará em uma nova página.</div></div>";
+atualizarFiltroAtendimentoPorData();
+}
+}
 
-      radio.addEventListener(
-        "change",
-        atualizarOpcoesImpressao
-      );
+function marcarTodosAtendimentosImpressao(marcar){
+document.querySelectorAll(".check-atendimento").forEach(c=>c.checked=marcar);
+}
 
-    }
-  );
+function atualizarFiltroAtendimentoPorData(){
+const data=document.getElementById("dataImpressao")?.value;
+const select=document.getElementById("filtroDataImpressao");
+if(!select)return;
 
+const atual=select.value;
+let dados=todosRegistrosImpressao().filter(item=>!data||dataRegistroParaFiltro(item)===data);
+const categorias=obterCategoriasImpressao(dados);
 
-/* =========================================================
-   EXECUTAR IMPRESSÃO
-========================================================= */
+select.innerHTML="<option value='todos'>Todos</option>";
+categorias.forEach(c=>{
+const option=document.createElement("option");
+option.value=c;
+option.textContent=c;
+select.appendChild(option);
+});
+if(categorias.includes(atual))select.value=atual;
+else select.value="todos";
+}
+
+function atualizarOpcaoPaginaData(){}
+
+document.querySelectorAll('input[name="tipoImpressao"]').forEach(radio=>{
+radio.addEventListener("change",atualizarOpcoesImpressao);
+});
 
 function executarImpressao(){
+const tipo=document.querySelector('input[name="tipoImpressao"]:checked')?.value;
+let dados=[];
+let porPagina=false;
 
-  const tipo =
-    document.querySelector(
-      'input[name="tipoImpressao"]:checked'
-    )?.value;
-
-  let dados = [];
-
-
-  if(
-    tipo ===
-    "atendimento"
-  ){
-
-    const categoria =
-      document.getElementById(
-        "tipoAtendimentoImpressao"
-      )?.value;
-
-    if(!categoria){
-
-      alert(
-        "Selecione o atendimento."
-      );
-
-      return;
-
-    }
-
-    dados =
-      todosRegistrosImpressao()
-        .filter(
-          item =>
-            item.registro?.atendimento
-            ===
-            categoria
-        );
-
-  }
-
-
-  else if(
-    tipo ===
-    "geral"
-  ){
-
-    dados =
-      todosRegistrosImpressao();
-
-  }
-
-
-  else if(
-    tipo ===
-    "data"
-  ){
-
-    const data =
-      document.getElementById(
-        "dataImpressao"
-      )?.value;
-
-    const filtro =
-      document.getElementById(
-        "filtroDataImpressao"
-      )?.value;
-
-    if(!data){
-
-      alert(
-        "Selecione a data."
-      );
-
-      return;
-
-    }
-
-    dados =
-      todosRegistrosImpressao()
-        .filter(
-          item =>
-            dataRegistroParaFiltro(
-              item
-            ) ===
-            data
-        );
-
-    if(
-      filtro ===
-      "atendimentos"
-    ){
-
-      dados =
-        dados.filter(
-          item =>
-            item.registro?.atendimento
-        );
-
-    }
-
-  }
-
-
-  if(
-    dados.length === 0
-  ){
-
-    alert(
-      "Nenhum atendimento encontrado para a impressão."
-    );
-
-    return;
-
-  }
-
-  fecharModalImpressao();
-
-  gerarPaginaImpressao(
-    dados,
-    tipo
-  );
-
+if(tipo==="atendimento"){
+const selecionados=[...document.querySelectorAll(".check-atendimento:checked")].map(x=>x.value);
+if(!selecionados.length){alert("Selecione pelo menos um atendimento.");return}
+dados=todosRegistrosImpressao().filter(item=>selecionados.includes(item.registro?.atendimento));
+porPagina=document.getElementById("atendimentoPorPagina")?.checked||false;
 }
 
-
-/* =========================================================
-   PÁGINA DE IMPRESSÃO
-========================================================= */
-
-function gerarPaginaImpressao(
-  dados,
-  tipo
-){
-
-  const grupos = [];
-
-
-  if(
-    tipo ===
-    "atendimento"
-  ){
-
-    grupos.push({
-
-      titulo:
-        dados[0]
-          ?.registro
-          ?.atendimento ||
-        "ATENDIMENTO",
-
-      dados
-
-    });
-
-  }
-
-
-  else if(
-    tipo ===
-    "geral"
-  ){
-
-    const mapa = {};
-
-    dados.forEach(
-      item => {
-
-        const categoria =
-          item.registro?.atendimento ||
-          "OUTROS";
-
-        if(
-          !mapa[categoria]
-        ){
-
-          mapa[categoria] =
-            [];
-
-        }
-
-        mapa[categoria]
-          .push(item);
-
-      }
-    );
-
-    Object.keys(mapa)
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          a.localeCompare(
-            b,
-            "pt-BR"
-          )
-      )
-      .forEach(
-        categoria => {
-
-          grupos.push({
-
-            titulo:
-              categoria,
-
-            dados:
-              mapa[categoria]
-
-          });
-
-        }
-      );
-
-  }
-
-
-  else{
-
-    const mapa = {};
-
-    dados.forEach(
-      item => {
-
-        const categoria =
-          item.registro?.atendimento ||
-          "OUTROS";
-
-        if(
-          !mapa[categoria]
-        ){
-
-          mapa[categoria] =
-            [];
-
-        }
-
-        mapa[categoria]
-          .push(item);
-
-      }
-    );
-
-    Object.keys(mapa)
-      .sort(
-        (
-          a,
-          b
-        ) =>
-          a.localeCompare(
-            b,
-            "pt-BR"
-          )
-      )
-      .forEach(
-        categoria => {
-
-          grupos.push({
-
-            titulo:
-              categoria,
-
-            dados:
-              mapa[categoria]
-
-          });
-
-        }
-      );
-
-  }
-
-
-  const paginas =
-    grupos
-      .map(
-        grupo => {
-
-          const linhas =
-            grupo.dados
-              .map(
-                item => {
-
-                  const r =
-                    item.registro ||
-                    {};
-
-                  return `
-                    <tr>
-
-                      <td>
-                        ${escaparHTML(
-                          r.nome || ""
-                        )}
-                      </td>
-
-                      <td>
-                        ${escaparHTML(
-                          r.rgi || ""
-                        )}
-                      </td>
-
-                      <td class="pavcela">
-                        ${escaparHTML(
-                          r.pavilhao || ""
-                        )}
-                        /
-                        ${escaparHTML(
-                          r.cela || ""
-                        )}
-                      </td>
-
-                      <td>
-                        ${escaparHTML(
-                          r.atendimento || ""
-                        )}
-                      </td>
-
-                      <td>
-                        ${escaparHTML(
-                          r.dataAtendimento || ""
-                        )}
-                      </td>
-
-                      <td>
-                        ${escaparHTML(
-                          r.assunto || ""
-                        )}
-                      </td>
-
-                    </tr>
-                  `;
-
-                }
-              )
-              .join("");
-
-
-          return `
-            <section class="pagina">
-
-              <div
-                class="cabecalho-impressao"
-              >
-
-                <div class="titulo">
-                  CPAIG - LISTA DE ATENDIMENTOS
-                </div>
-
-                <div class="subtitulo">
-                  ${escaparHTML(
-                    grupo.titulo
-                  )}
-                </div>
-
-              </div>
-
-
-              <table>
-
-                <thead>
-
-                  <tr>
-
-                    <th>
-                      NOME DO INTERNO
-                    </th>
-
-                    <th>
-                      RGI
-                    </th>
-
-                    <th>
-                      PAV/CELA
-                    </th>
-
-                    <th>
-                      ATENDIMENTO
-                    </th>
-
-                    <th>
-                      DATA
-                    </th>
-
-                    <th>
-                      ASSUNTO
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody>
-                  ${linhas}
-                </tbody>
-
-              </table>
-
-            </section>
-          `;
-
-        }
-      )
-      .join("");
-
-
-  const janela =
-    window.open(
-      "",
-      "_blank"
-    );
-
-  if(!janela){
-
-    alert(
-      "O navegador bloqueou a janela de impressão. Permita pop-ups para este site."
-    );
-
-    return;
-
-  }
-
-
-  janela.document.write(
-    `
-      <!DOCTYPE html>
-
-      <html lang="pt-BR">
-
-      <head>
-
-        <meta charset="UTF-8">
-
-        <title>
-          CPAIG - Lista de Atendimentos
-        </title>
-
-        <style>
-
-          @page{
-            size:A4 portrait;
-            margin:5mm;
-          }
-
-          *{
-            box-sizing:border-box;
-          }
-
-          body{
-            margin:0;
-            font-family:
-              Arial,
-              Helvetica,
-              sans-serif;
-            color:#111;
-          }
-
-          .pagina{
-            width:100%;
-            min-height:287mm;
-            page-break-after:always;
-          }
-
-          .pagina:last-child{
-            page-break-after:auto;
-          }
-
-          .cabecalho-impressao{
-            text-align:center;
-            margin-bottom:8mm;
-          }
-
-          .titulo{
-            font-size:18px;
-            font-weight:bold;
-          }
-
-          .subtitulo{
-            font-size:15px;
-            font-weight:bold;
-            margin-top:4px;
-          }
-
-          table{
-            width:100%;
-            border-collapse:collapse;
-            font-size:10px;
-          }
-
-          th,
-          td{
-            border:1px solid #222;
-            padding:5px;
-            vertical-align:middle;
-          }
-
-          th{
-            background:#eee;
-            font-weight:bold;
-            text-align:center;
-          }
-
-          .pavcela{
-            text-align:center;
-            white-space:nowrap;
-          }
-
-          tr{
-            page-break-inside:avoid;
-          }
-
-        </style>
-
-      </head>
-
-      <body>
-
-        ${paginas}
-
-        <script>
-
-          window.onload =
-            function(){
-
-              setTimeout(
-                function(){
-
-                  window.print();
-
-                },
-                400
-              );
-
-            };
-
-        <\/script>
-
-      </body>
-
-      </html>
-    `
-  );
-
-  janela.document.close();
-
+else if(tipo==="geral"){
+dados=todosRegistrosImpressao();
+porPagina=document.getElementById("geralPorPagina")?.checked||false;
 }
 
+else if(tipo==="data"){
+const data=document.getElementById("dataImpressao")?.value;
+const filtro=document.getElementById("filtroDataImpressao")?.value;
+if(!data){alert("Selecione a data.");return}
+dados=todosRegistrosImpressao().filter(item=>dataRegistroParaFiltro(item)===data);
+if(filtro&&filtro!=="todos")dados=dados.filter(item=>item.registro?.atendimento===filtro);
+porPagina=document.getElementById("dataPorPagina")?.checked||false;
+}
 
-/* =========================================================
+if(!dados.length){
+alert("Nenhum atendimento encontrado para a impressão.");
+return;
+}
+
+fecharModalImpressao();
+gerarPaginaImpressao(dados,tipo,porPagina);
+}
+
+function agruparParaImpressao(dados,porPagina,tipo){
+if(!porPagina){
+if(tipo==="atendimento"){
+return [{titulo:"ATENDIMENTOS SELECIONADOS",dados}];
+}
+return [{titulo:tipo==="data"?"ATENDIMENTOS DO PERÍODO":"TODOS OS ATENDIMENTOS",dados}];
+}
+
+const mapa={};
+dados.forEach(item=>{
+const categoria=item.registro?.atendimento||"OUTROS";
+if(!mapa[categoria])mapa[categoria]=[];
+mapa[categoria].push(item);
+});
+
+return Object.keys(mapa).sort((a,b)=>a.localeCompare(b,"pt-BR")).map(categoria=>({titulo:categoria,dados:mapa[categoria]}));
+}
+
+function gerarPaginaImpressao(dados,tipo,porPagina){
+const grupos=agruparParaImpressao(dados,porPagina,tipo);
+
+const paginas=grupos.filter(grupo=>grupo.dados&&grupo.dados.length).map(grupo=>{
+const linhas=grupo.dados.map(item=>{
+const r=item.registro||{};
+return "<tr><td>"+escaparHTML(r.nome||"")+"</td><td>"+escaparHTML(r.rgi||"")+"</td><td class='pavcela'>"+escaparHTML(r.pavilhao||"")+"/"+escaparHTML(r.cela||"")+"</td><td>"+escaparHTML(r.atendimento||"")+"</td><td>"+escaparHTML(r.dataAtendimento||"")+"</td><td>"+escaparHTML(r.assunto||"")+"</td></tr>";
+}).join("");
+
+return "<section class='pagina'><div class='cabecalho-impressao'><div class='titulo'>CPAIG - LISTA DE ATENDIMENTOS</div><div class='subtitulo'>"+escaparHTML(grupo.titulo)+"</div></div><table><thead><tr><th>NOME DO INTERNO</th><th>RGI</th><th>PAV/CELA</th><th>ATENDIMENTO</th><th>DATA</th><th>ASSUNTO</th></tr></thead><tbody>"+linhas+"</tbody></table></section>";
+}).join("");
+
+if(!paginas){alert("Não há registros válidos para impressão.");return}
+
+const janela=window.open("","_blank");
+if(!janela){alert("O navegador bloqueou a janela de impressão. Permita pop-ups para este site.");return}
+
+janela.document.write("<!DOCTYPE html><html lang='pt-BR'><head><meta charset='UTF-8'><title>CPAIG - Lista de Atendimentos</title><style>@page{size:A4 portrait;margin:5mm}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#111}.pagina{width:100%;min-height:287mm}.pagina:not(:last-child){page-break-after:always}.cabecalho-impressao{text-align:center;margin-bottom:8mm}.titulo{font-size:18px;font-weight:bold}.subtitulo{font-size:15px;font-weight:bold;margin-top:4px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #222;padding:5px;vertical-align:middle}th{background:#eee;font-weight:bold;text-align:center}.pavcela{text-align:center;white-space:nowrap}tr{page-break-inside:avoid}</style></head><body>"+paginas+"<script>window.onload=function(){setTimeout(function(){window.print()},400)};<\/script></body></html>");
+janela.document.close();
+}
+
+/* ================================
    WEBSOCKET
-========================================================= */
+================================ */
 
 function conectar(){
-
-  if(
-    ws &&
-    (
-      ws.readyState ===
-      WebSocket.OPEN ||
-
-      ws.readyState ===
-      WebSocket.CONNECTING
-    )
-  ){
-
-    return;
-
-  }
-
-  const protocolo =
-    location.protocol ===
-    "https:"
-    ? "wss:"
-    : "ws:";
-
-
-  try{
-
-    ws =
-      new WebSocket(
-        protocolo +
-        "//" +
-        location.host
-      );
-
-  }catch{
-
-    atualizarStatus(
-      false
-    );
-
-    agendarReconexao();
-
-    return;
-
-  }
-
-
-  ws.onopen =
-    function(){
-
-      atualizarStatus(
-        true
-      );
-
-      try{
-
-        ws.send(
-          JSON.stringify({
-
-            type:
-              "register",
-
-            role:
-              "sender",
-
-            clientId,
-
-            ownerId:
-              clientId
-
-          })
-        );
-
-      }catch{
-
-      }
-
-      setTimeout(
-        reenviarAguardandoMesa,
-        500
-      );
-
-    };
-
-
-  ws.onclose =
-    function(){
-
-      atualizarStatus(
-        false
-      );
-
-      agendarReconexao();
-
-    };
-
-
-  ws.onerror =
-    function(){
-
-      atualizarStatus(
-        false
-      );
-
-    };
-
-
-  ws.onmessage =
-    function(event){
-
-      let msg;
-
-      try{
-
-        msg =
-          JSON.parse(
-            event.data
-          );
-
-      }catch{
-
-        return;
-
-      }
-
-      processarMensagemWS(
-        msg
-      );
-
-    };
-
+if(ws&&(ws.readyState===WebSocket.OPEN||ws.readyState===WebSocket.CONNECTING))return;
+const protocolo=location.protocol==="https:"?"wss:":"ws:";
+try{
+ws=new WebSocket(protocolo+"//"+location.host);
+}catch{
+atualizarStatus(false);
+agendarReconexao();
+return;
 }
 
+ws.onopen=function(){
+atualizarStatus(true);
+try{
+ws.send(JSON.stringify({type:"register",role:"sender",clientId,ownerId:clientId}));
+}catch{}
+setTimeout(reenviarAguardandoMesa,500);
+};
+
+ws.onclose=function(){
+atualizarStatus(false);
+agendarReconexao();
+};
+
+ws.onerror=function(){atualizarStatus(false)};
+
+ws.onmessage=function(event){
+let msg;
+try{msg=JSON.parse(event.data)}catch{return}
+processarMensagemWS(msg);
+};
+}
 
 function agendarReconexao(){
-
-  if(
-    tentativaReconexao
-  ){
-
-    return;
-
-  }
-
-  tentativaReconexao =
-    setTimeout(
-      function(){
-
-        tentativaReconexao =
-          null;
-
-        conectar();
-
-      },
-      3000
-    );
-
+if(tentativaReconexao)return;
+tentativaReconexao=setTimeout(function(){
+tentativaReconexao=null;
+conectar();
+},3000);
 }
 
-
-function processarMensagemWS(
-  msg
-){
-
-  if(
-    msg.type ===
-    "record_received"
-  ){
-
-    receberConfirmacaoMesa(
-      msg.recordId,
-      msg.receivedAt
-    );
-
-    return;
-
-  }
-
-
-  if(
-    msg.type ===
-    "record_refused"
-  ){
-
-    receberRecusaDaMesa(
-      msg
-    );
-
-    return;
-
-  }
-
+function processarMensagemWS(msg){
+if(msg.type==="record_received"){
+receberConfirmacaoMesa(msg.recordId,msg.receivedAt);
+return;
+}
+if(msg.type==="record_refused"){
+receberRecusaDaMesa(msg);
+return;
+}
 }
 
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-function atualizarStatus(
-  online
-){
-
-  const elemento =
-    document.getElementById(
-      "statusConexao"
-    );
-
-  if(online){
-
-    elemento.className =
-      "status online";
-
-    elemento.textContent =
-      "🟢 Conectado ao servidor";
-
-  }else{
-
-    elemento.className =
-      "status offline";
-
-    elemento.textContent =
-      "🔴 Desconectado — tentando reconectar...";
-
-  }
-
+function atualizarStatus(online){
+const elemento=document.getElementById("statusConexao");
+if(online){
+elemento.className="status online";
+elemento.textContent="🟢 Conectado ao servidor";
+}else{
+elemento.className="status offline";
+elemento.textContent="🔴 Desconectado — tentando reconectar...";
+}
 }
 
-
-/* =========================================================
+/* ================================
    TECLADO - NOME
-========================================================= */
-
-document
-  .getElementById(
-    "nome"
-  )
-  .addEventListener(
-    "input",
-    mostrarSugestoes
-  );
-
-
-document
-  .getElementById(
-    "nome"
-  )
-  .addEventListener(
-    "keydown",
-    function(event){
-
-      const caixa =
-        document.getElementById(
-          "sugestoesNome"
-        );
-
-      const itens =
-        caixa.querySelectorAll(
-          ".sugestao"
-        );
-
-      if(
-        caixa.style.display ===
-        "none" ||
-        itens.length === 0
-      ){
-
-        return;
-
-      }
-
-
-      if(
-        event.key ===
-        "ArrowDown"
-      ){
-
-        event.preventDefault();
-
-        indiceSugestao =
-          Math.min(
-            indiceSugestao + 1,
-            itens.length - 1
-          );
-
-      }
-
-
-      else if(
-        event.key ===
-        "ArrowUp"
-      ){
-
-        event.preventDefault();
-
-        indiceSugestao =
-          Math.max(
-            indiceSugestao - 1,
-            0
-          );
-
-      }
-
-
-      else if(
-        event.key ===
-        "Enter"
-      ){
-
-        event.preventDefault();
-
-        if(
-          indiceSugestao >= 0
-        ){
-
-          itens[
-            indiceSugestao
-          ].click();
-
-        }else{
-
-          itens[0].click();
-
-        }
-
-        return;
-
-      }
-
-
-      itens.forEach(
-        (
-          item,
-          index
-        ) => {
-
-          item.classList.toggle(
-            "selecionada",
-            index ===
-              indiceSugestao
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   TECLADO - NOME DA EDIÇÃO
-========================================================= */
-
-document
-  .getElementById(
-    "editNome"
-  )
-  .addEventListener(
-    "input",
-    mostrarSugestoesEdicao
-  );
-
-
-document
-  .getElementById(
-    "editNome"
-  )
-  .addEventListener(
-    "keydown",
-    function(event){
-
-      const caixa =
-        document.getElementById(
-          "sugestoesEditNome"
-        );
-
-      const itens =
-        caixa.querySelectorAll(
-          ".sugestao"
-        );
-
-      if(
-        caixa.style.display ===
-        "none" ||
-        itens.length === 0
-      ){
-
-        return;
-
-      }
-
-
-      if(
-        event.key ===
-        "ArrowDown"
-      ){
-
-        event.preventDefault();
-
-        indiceSugestaoEdicao =
-          Math.min(
-            indiceSugestaoEdicao + 1,
-            itens.length - 1
-          );
-
-      }
-
-
-      else if(
-        event.key ===
-        "ArrowUp"
-      ){
-
-        event.preventDefault();
-
-        indiceSugestaoEdicao =
-          Math.max(
-            indiceSugestaoEdicao - 1,
-            0
-          );
-
-      }
-
-
-      else if(
-        event.key ===
-        "Enter"
-      ){
-
-        event.preventDefault();
-
-        if(
-          indiceSugestaoEdicao >= 0
-        ){
-
-          itens[
-            indiceSugestaoEdicao
-          ].click();
-
-        }else{
-
-          itens[0].click();
-
-        }
-
-        return;
-
-      }
-
-
-      itens.forEach(
-        (
-          item,
-          index
-        ) => {
-
-          item.classList.toggle(
-            "selecionada",
-            index ===
-              indiceSugestaoEdicao
-          );
-
-        }
-      );
-
-    }
-  );
-
-
-/* =========================================================
-   CLIQUE FORA DAS SUGESTÕES
-========================================================= */
-
-document.addEventListener(
-  "click",
-  function(event){
-
-    const campo =
-      document.getElementById(
-        "nome"
-      );
-
-    const caixa =
-      document.getElementById(
-        "sugestoesNome"
-      );
-
-    if(
-      event.target !==
-        campo &&
-      !caixa.contains(
-        event.target
-      )
-    ){
-
-      limparSugestoes();
-
-    }
-
-
-    const campoEdit =
-      document.getElementById(
-        "editNome"
-      );
-
-    const caixaEdit =
-      document.getElementById(
-        "sugestoesEditNome"
-      );
-
-    if(
-      event.target !==
-        campoEdit &&
-      !caixaEdit.contains(
-        event.target
-      )
-    ){
-
-      limparSugestoesEdicao();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   ORDENÇÃO
-========================================================= */
-
-const ordemSalva =
-  localStorage.getItem(
-    STORAGE_ORDENACAO
-  );
-
-if(ordemSalva){
-
-  document.getElementById(
-    "ordemHistorico"
-  ).value =
-    ordemSalva;
-
+================================ */
+
+document.getElementById("nome").addEventListener("input",mostrarSugestoes);
+
+document.getElementById("nome").addEventListener("keydown",function(event){
+const caixa=document.getElementById("sugestoesNome");
+const itens=caixa.querySelectorAll(".sugestao");
+if(caixa.style.display==="none"||!itens.length)return;
+
+if(event.key==="ArrowDown"){
+event.preventDefault();
+indiceSugestao=Math.min(indiceSugestao+1,itens.length-1);
+}else if(event.key==="ArrowUp"){
+event.preventDefault();
+indiceSugestao=Math.max(indiceSugestao-1,0);
+}else if(event.key==="Enter"){
+event.preventDefault();
+if(indiceSugestao>=0)itens[indiceSugestao].click();
+else itens[0].click();
+return;
 }
 
+itens.forEach((item,index)=>item.classList.toggle("selecionada",index===indiceSugestao));
+});
 
-document
-  .getElementById(
-    "ordemHistorico"
-  )
-  .addEventListener(
-    "change",
-    function(){
+/* ================================
+   TECLADO - EDIÇÃO
+================================ */
 
-      localStorage.setItem(
-        STORAGE_ORDENACAO,
-        this.value
-      );
+document.getElementById("editNome").addEventListener("input",mostrarSugestoesEdicao);
 
-    }
-  );
+document.getElementById("editNome").addEventListener("keydown",function(event){
+const caixa=document.getElementById("sugestoesEditNome");
+const itens=caixa.querySelectorAll(".sugestao");
+if(caixa.style.display==="none"||!itens.length)return;
 
+if(event.key==="ArrowDown"){
+event.preventDefault();
+indiceSugestaoEdicao=Math.min(indiceSugestaoEdicao+1,itens.length-1);
+}else if(event.key==="ArrowUp"){
+event.preventDefault();
+indiceSugestaoEdicao=Math.max(indiceSugestaoEdicao-1,0);
+}else if(event.key==="Enter"){
+event.preventDefault();
+if(indiceSugestaoEdicao>=0)itens[indiceSugestaoEdicao].click();
+else itens[0].click();
+return;
+}
 
-/* =========================================================
+itens.forEach((item,index)=>item.classList.toggle("selecionada",index===indiceSugestaoEdicao));
+});
+
+/* ================================
+   CLIQUE FORA
+================================ */
+
+document.addEventListener("click",function(event){
+const campo=document.getElementById("nome");
+const caixa=document.getElementById("sugestoesNome");
+if(event.target!==campo&&!caixa.contains(event.target))limparSugestoes();
+
+const campoEdit=document.getElementById("editNome");
+const caixaEdit=document.getElementById("sugestoesEditNome");
+if(event.target!==campoEdit&&!caixaEdit.contains(event.target))limparSugestoesEdicao();
+});
+
+/* ================================
+   ORDENAÇÃO
+================================ */
+
+const ordemSalva=localStorage.getItem(STORAGE_ORDENACAO);
+if(ordemSalva)document.getElementById("ordemHistorico").value=ordemSalva;
+
+document.getElementById("ordemHistorico").addEventListener("change",function(){
+localStorage.setItem(STORAGE_ORDENACAO,this.value);
+});
+
+/* ================================
    MODAIS
-========================================================= */
+================================ */
 
-window.addEventListener(
-  "click",
-  function(event){
+window.addEventListener("click",function(event){
+const modalRecusa=document.getElementById("modalRecusa");
+const modalImpressao=document.getElementById("modalImpressao");
+const modalGuardados=document.getElementById("modalGuardados");
 
-    const modalRecusa =
-      document.getElementById(
-        "modalRecusa"
-      );
+if(event.target===modalRecusa)fecharModalRecusa();
+if(event.target===modalImpressao)fecharModalImpressao();
+if(event.target===modalGuardados)fecharGuardados();
+});
 
-    const modalImpressao =
-      document.getElementById(
-        "modalImpressao"
-      );
+/* ================================
+   ESC
+================================ */
 
-    if(
-      event.target ===
-      modalRecusa
-    ){
+document.addEventListener("keydown",function(event){
+if(event.key!=="Escape")return;
+fecharModalRecusa();
+fecharModalImpressao();
+fecharGuardados();
+});
 
-      fecharModalRecusa();
-
-    }
-
-    if(
-      event.target ===
-      modalImpressao
-    ){
-
-      fecharModalImpressao();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
+/* ================================
    INICIALIZAÇÃO
-========================================================= */
+================================ */
 
 preencherCelas();
 
-document.getElementById(
-  "dataAtendimento"
-).value =
-  dataHojeISO();
-
-document.getElementById(
-  "editDataAtendimento"
-).value =
-  dataHojeISO();
+document.getElementById("dataAtendimento").value=dataHojeISO();
+document.getElementById("editDataAtendimento").value=dataHojeISO();
 
 carregarTudo();
-
 conectar();
 
+setInterval(function(){
+if(!ws||ws.readyState!==WebSocket.OPEN)conectar();
+},5000);
 
-/* =========================================================
-   TENTAR NOVA CONEXÃO
-========================================================= */
-
-setInterval(
-  function(){
-
-    if(
-      !ws ||
-      ws.readyState !==
-        WebSocket.OPEN
-    ){
-
-      conectar();
-
-    }
-
-  },
-  5000
-);
-
-
-/* =========================================================
-   REENVIAR AGUARDANDO MESA
-========================================================= */
-
-setInterval(
-  function(){
-
-    reenviarAguardandoMesa();
-
-  },
-  15000
-);
+setInterval(function(){
+reenviarAguardandoMesa();
+},15000);
 
 </script>
 
