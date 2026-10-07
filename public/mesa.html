@@ -25,7 +25,12 @@ header{
 
 header h1{margin:0;font-size:28px}
 header h2{margin:5px 0 0;font-size:17px;font-weight:normal}
-.cpaig{color:#ffd900;font-size:18px;font-weight:bold;margin-top:7px}
+.cpaig{
+ color:#ffd900;
+ font-size:18px;
+ font-weight:bold;
+ margin-top:7px
+}
 
 .container{
  width:96%;
@@ -77,13 +82,22 @@ button{
  font-size:14px
 }
 
+button:hover{
+ opacity:.9
+}
+
 .btn-green{background:#176b3a;color:#fff}
 .btn-yellow{background:#e0b800;color:#111}
 .btn-blue{background:#1261a0;color:#fff}
 .btn-red{background:#b42318;color:#fff}
 .btn-gray{background:#65717c;color:#fff}
 .btn-purple{background:#6841a5;color:#fff}
-.btn-small{padding:7px 10px;font-size:12px}
+.btn-orange{background:#d46b08;color:#fff}
+
+.btn-small{
+ padding:7px 10px;
+ font-size:12px
+}
 
 .table-wrap{
  overflow-x:auto
@@ -131,16 +145,26 @@ tr:nth-child(even){
  min-width:180px
 }
 
-input,select{
- height:40px;
+input,select,textarea{
  border:1px solid #b9c1c8;
  border-radius:6px;
  padding:7px 9px;
  font-size:14px
 }
 
+input,select{
+ height:40px
+}
+
+textarea{
+ width:100%;
+ min-height:130px;
+ resize:vertical
+}
+
 input:focus,
-select:focus{
+select:focus,
+textarea:focus{
  outline:none;
  border-color:#123d25
 }
@@ -166,6 +190,11 @@ select:focus{
 .badge-guarded{
  background:#e7def8;
  color:#56338a
+}
+
+.badge-refused{
+ background:#fbe1df;
+ color:#a71910
 }
 
 .note{
@@ -216,6 +245,10 @@ select:focus{
  padding:20px
 }
 
+.modal-small{
+ max-width:600px
+}
+
 .modal-header{
  display:flex;
  justify-content:space-between;
@@ -226,6 +259,43 @@ select:focus{
 .modal-header h3{
  margin:0;
  color:#123d25
+}
+
+.refusal-box{
+ background:#fff7f6;
+ border:1px solid #efb0aa;
+ border-radius:8px;
+ padding:15px
+}
+
+.refusal-title{
+ color:#a71910;
+ font-size:18px;
+ font-weight:bold;
+ margin-bottom:10px
+}
+
+.pavilhao-list{
+ max-height:260px;
+ overflow:auto;
+ border:1px solid #ddd;
+ border-radius:6px;
+ padding:5px
+}
+
+.pavilhao-option{
+ display:block;
+ padding:7px 8px;
+ border-bottom:1px solid #eee;
+ cursor:pointer
+}
+
+.pavilhao-option:hover{
+ background:#f3f5f6
+}
+
+#printArea{
+ display:none
 }
 
 #toast{
@@ -241,13 +311,10 @@ select:focus{
  box-shadow:0 4px 12px rgba(0,0,0,.25)
 }
 
-/* =========================================
-   IMPRESSÃO
-========================================= */
 
-#printArea{
- display:none
-}
+/* =====================================================
+   IMPRESSÃO
+===================================================== */
 
 @media print{
 
@@ -271,14 +338,14 @@ select:focus{
 
  .print-page{
   width:100%;
-  page-break-after:always;
-  break-after:page;
-  overflow:hidden
- }
-
- .print-page:last-child{
+  break-inside:avoid;
   page-break-after:auto;
   break-after:auto
+ }
+
+ .print-page + .print-page{
+  break-before:page;
+  page-break-before:always
  }
 
  .print-header{
@@ -338,6 +405,7 @@ select:focus{
  }
 }
 
+
 @media(max-width:900px){
 
  header h1{
@@ -347,6 +415,7 @@ select:focus{
  .container{
   width:98%
  }
+
 }
 </style>
 </head>
@@ -563,6 +632,7 @@ select:focus{
      <th>Assunto</th>
      <th>Status</th>
      <th>Recebido em</th>
+     <th>Observação</th>
      <th>Ação</th>
 
     </tr>
@@ -577,6 +647,87 @@ select:focus{
 
 </div>
 
+
+</div>
+
+
+<!-- =====================================================
+     MODAL DE RECUSA
+===================================================== -->
+
+<div
+ id="modalRecusa"
+ class="modal hidden">
+
+ <div class="modal-content modal-small">
+
+  <div class="modal-header">
+
+   <h3>
+    ❌ RECUSAR ATENDIMENTO
+   </h3>
+
+   <button
+    type="button"
+    class="btn-gray"
+    onclick="fecharRecusa()">
+    FECHAR
+   </button>
+
+  </div>
+
+
+  <div class="refusal-box">
+
+   <div
+    id="recusaNome"
+    class="refusal-title">
+    Atendimento
+   </div>
+
+
+   <div class="note" style="margin-bottom:10px">
+
+    Informe o motivo da recusa.
+    Esta justificativa será enviada ao GUICHÊ
+    junto com o cadastro.
+
+   </div>
+
+
+   <textarea
+    id="recusaMotivo"
+    placeholder="Digite aqui a justificativa da recusa..."
+   ></textarea>
+
+
+   <div
+    style="
+     display:flex;
+     gap:8px;
+     justify-content:flex-end;
+     margin-top:12px">
+
+    <button
+     type="button"
+     class="btn-gray"
+     onclick="fecharRecusa()">
+     CANCELAR
+    </button>
+
+
+    <button
+     type="button"
+     class="btn-red"
+     onclick="confirmarRecusa()">
+     ❌ CONFIRMAR RECUSA
+    </button>
+
+   </div>
+
+  </div>
+
+ </div>
 
 </div>
 
@@ -613,7 +764,7 @@ select:focus{
     id="arquivoNome"
     type="text"
     placeholder="Nome..."
-    oninput="renderGuardados()">
+    oninput="renderGuardados">
 
 
    <input
@@ -712,7 +863,7 @@ select:focus{
     </h4>
 
 
-    <label>
+    <label style="display:block;margin:7px 0">
 
      <input
       type="radio"
@@ -726,7 +877,7 @@ select:focus{
     </label>
 
 
-    <label>
+    <label style="display:block;margin:7px 0">
 
      <input
       type="radio"
@@ -739,7 +890,7 @@ select:focus{
     </label>
 
 
-    <label>
+    <label style="display:block;margin:7px 0">
 
      <input
       type="radio"
@@ -748,6 +899,19 @@ select:focus{
       onchange="alterarModo()">
 
      Por data
+
+    </label>
+
+
+    <label style="display:block;margin:7px 0">
+
+     <input
+      type="radio"
+      name="modo"
+      value="pavilhao"
+      onchange="alterarModo()">
+
+     Por Pavilhão
 
     </label>
 
@@ -839,6 +1003,36 @@ select:focus{
    </div>
 
 
+   <!-- PAVILHÃO -->
+
+   <div
+    id="grupoPrintPavilhao"
+    class="hidden"
+    style="
+     grid-column:span 4;
+     border:1px solid #ddd;
+     padding:12px;
+     border-radius:7px">
+
+    <h4>
+     Pavilhão
+    </h4>
+
+
+    <div class="note">
+     Selecione um ou mais pavilhões.
+    </div>
+
+
+    <div
+     id="printPavilhoes"
+     class="pavilhao-list"
+     style="margin-top:8px">
+    </div>
+
+   </div>
+
+
    <!-- UM POR PÁGINA -->
 
    <div style="
@@ -913,7 +1107,6 @@ const STORAGE_ARQUIVO=
 const STORAGE_PENDENTES=
  "mesaAtendimentosV24Pendentes";
 
-
 const STORAGE_SOM=
  "mesaAtendimentosV24Som";
 
@@ -961,6 +1154,8 @@ let somAtivo=
  localStorage.getItem(STORAGE_SOM)==="true";
 
 let audioContext=null;
+
+let recordIdEmRecusa=null;
 
 
 /* =====================================================
@@ -1059,8 +1254,7 @@ function hoje(){
  return `${d.getFullYear()}-${
   String(d.getMonth()+1).padStart(2,"0")
  }-${
-  String(d.getDate()).padStart(2,"0")
- }`;
+  String(d.getDate()).padStart(2,"0")}`;
 
 }
 
@@ -1134,10 +1328,6 @@ function iniciar(){
   );
 
 
- /*
-   Garante recordId.
- */
-
  historico=
   historico.map(item=>{
 
@@ -1174,8 +1364,25 @@ function iniciar(){
   });
 
 
- salvarTudo();
+ pendentes=
+  pendentes.map(item=>{
 
+   const novo={...item};
+
+   if(!novo.recordId){
+
+    novo.recordId=
+     novo.id||
+     gerarId();
+
+   }
+
+   return novo;
+
+  });
+
+
+ salvarTudo();
 
  preencherFiltros();
 
@@ -1299,6 +1506,12 @@ function conectar(){
 
    }
 
+
+   /*
+     Futuramente o GUICHÊ poderá enviar
+     outras confirmações para a MESA.
+   */
+
   }
  );
 
@@ -1331,7 +1544,7 @@ function conectar(){
 
 
 /* =====================================================
-   RECEBER NOVO
+   RECEBER NOVO REGISTRO
 ===================================================== */
 
 function receberNovoRegistro(mensagem){
@@ -1353,7 +1566,7 @@ function receberNovoRegistro(mensagem){
 
 
  /*
-   Se já foi recebido ou guardado,
+   Se já foi recebido, recusado ou guardado,
    confirma novamente ao servidor.
  */
 
@@ -1379,7 +1592,7 @@ function receberNovoRegistro(mensagem){
 
 
  /*
-   Só entra nos pendentes.
+   Evita duplicidade nos pendentes.
  */
 
  const jaPendente=
@@ -1394,9 +1607,16 @@ function receberNovoRegistro(mensagem){
 
    ...registro,
 
-   recebidoEm:null
+   status:"aguardando_mesa",
+
+   recebidoEm:null,
+
+   recusadoEm:null,
+
+   motivoRecusa:""
 
   });
+
 
   salvarJSON(
    STORAGE_PENDENTES,
@@ -1451,7 +1671,11 @@ function receberUm(recordId){
 
   status:"recebido",
 
-  recebidoEm
+  recebidoEm,
+
+  recusadoEm:null,
+
+  motivoRecusa:""
 
  };
 
@@ -1531,7 +1755,248 @@ function receberTodos(){
 
 
 /* =====================================================
-   CONFIRMAÇÃO
+   RECUSAR
+===================================================== */
+
+function abrirRecusa(recordId){
+
+ const registro=
+  pendentes.find(
+   i=>i.recordId===recordId
+  );
+
+
+ if(!registro){
+
+  mostrarToast(
+   "Atendimento não encontrado."
+  );
+
+  return;
+
+ }
+
+
+ recordIdEmRecusa=recordId;
+
+
+ $("recusaNome").textContent=
+  `❌ ${registro.nome}`;
+
+
+ $("recusaMotivo").value="";
+
+
+ $("modalRecusa")
+  .classList
+  .remove("hidden");
+
+
+ setTimeout(
+  ()=>{
+   $("recusaMotivo").focus();
+  },
+  100
+ );
+
+}
+
+
+function fecharRecusa(){
+
+ recordIdEmRecusa=null;
+
+ $("recusaMotivo").value="";
+
+
+ $("modalRecusa")
+  .classList
+  .add("hidden");
+
+}
+
+
+function confirmarRecusa(){
+
+ if(!recordIdEmRecusa){
+
+  fecharRecusa();
+
+  return;
+
+ }
+
+
+ const motivo=
+  $("recusaMotivo").value.trim();
+
+
+ if(!motivo){
+
+  alert(
+   "Digite a justificativa da recusa."
+  );
+
+  $("recusaMotivo").focus();
+
+  return;
+
+ }
+
+
+ const indice=
+  pendentes.findIndex(
+   i=>i.recordId===recordIdEmRecusa
+  );
+
+
+ if(indice<0){
+
+  fecharRecusa();
+
+  mostrarToast(
+   "Atendimento não encontrado."
+  );
+
+  return;
+
+ }
+
+
+ const registro=
+  pendentes[indice];
+
+
+ const recusadoEm=
+  new Date().toISOString();
+
+
+ /*
+   Registro que volta ao GUICHÊ.
+ */
+
+ const recusado={
+
+  ...registro,
+
+  status:"recusado",
+
+  recusadoEm,
+
+  motivoRecusa:motivo,
+
+  recebidoEm:null
+
+ };
+
+
+ /*
+   Retira da lista de pendentes da MESA.
+ */
+
+ pendentes.splice(
+  indice,
+  1
+ );
+
+
+ /*
+   Guarda uma cópia no histórico da MESA.
+   Ele NÃO poderá ser guardado como recebido.
+ */
+
+ historico.push(
+  recusado
+ );
+
+
+ salvarTudo();
+
+
+ /*
+   Envia a recusa ao servidor.
+   A próxima etapa vai completar
+   o tratamento no servidor.
+ */
+
+ enviarRecusa(
+  recusado
+ );
+
+
+ renderPendentes();
+
+ renderHistorico();
+
+ fecharRecusa();
+
+
+ tocarRecusa();
+
+
+ mostrarToast(
+  `Atendimento recusado: ${registro.nome}`
+ );
+
+}
+
+
+/* =====================================================
+   ENVIAR RECUSA
+===================================================== */
+
+function enviarRecusa(registro){
+
+ if(
+  !socketAberto||
+  !socket||
+  socket.readyState!==WebSocket.OPEN
+ ){
+
+  mostrarToast(
+   "Recusa registrada localmente. A comunicação será enviada quando a conexão voltar."
+  );
+
+  return;
+
+ }
+
+
+ try{
+
+  socket.send(
+   JSON.stringify({
+
+    type:"refuse_record",
+
+    recordId:
+     registro.recordId,
+
+    record:
+     registro,
+
+    refusedAt:
+     registro.recusadoEm,
+
+    reason:
+     registro.motivoRecusa
+
+   })
+  );
+
+ }catch(e){
+
+  mostrarToast(
+   "Não foi possível enviar a recusa agora."
+  );
+
+ }
+
+}
+
+
+/* =====================================================
+   CONFIRMAÇÃO DE RECEBIMENTO
 ===================================================== */
 
 function enviarConfirmacao(
@@ -1643,13 +2108,22 @@ function renderPendentes(){
     ${escapeHtml(item.assunto)}
    </td>
 
-   <td>
+   <td style="white-space:nowrap">
 
     <button
      class="btn-green btn-small"
      onclick="receberUm('${item.recordId}')">
 
      ✅ RECEBIDO
+
+    </button>
+
+
+    <button
+     class="btn-red btn-small"
+     onclick="abrirRecusa('${item.recordId}')">
+
+     ❌ RECUSAR
 
     </button>
 
@@ -1663,7 +2137,7 @@ function renderPendentes(){
 
 
 /* =====================================================
-   HISTÓRICO
+   FILTROS
 ===================================================== */
 
 function preencherFiltros(){
@@ -1800,7 +2274,7 @@ function renderHistorico(){
   <tr>
 
    <td
-    colspan="10"
+    colspan="11"
     class="empty">
 
     Nenhum atendimento recebido.
@@ -1820,28 +2294,74 @@ function renderHistorico(){
   dados.map(item=>{
 
    let status=`
-
-    <span
-     class="badge badge-received">
-
+    <span class="badge badge-received">
      RECEBIDO
-
     </span>
-
    `;
+
+
+   let observacao="";
+
+
+   if(item.status==="recusado"){
+
+    status=`
+     <span class="badge badge-refused">
+      ❌ RECUSADO
+     </span>
+    `;
+
+
+    observacao=
+     `<span title="${escapeHtml(item.motivoRecusa)}">
+      ${escapeHtml(item.motivoRecusa)}
+     </span>`;
+
+   }
 
 
    if(item.status==="guardado"){
 
     status=`
-
-     <span
-      class="badge badge-guarded">
-
+     <span class="badge badge-guarded">
       GUARDADO
-
      </span>
+    `;
 
+   }
+
+
+   let acao="";
+
+
+   /*
+     Somente RECEBIDOS podem ser guardados.
+     Recusados não podem ser arquivados.
+   */
+
+   if(item.status==="recebido"){
+
+    acao=`
+
+     <button
+      class="btn-purple btn-small"
+      onclick="guardarAtendimento('${item.recordId}')">
+
+      🗄️ GUARDAR
+
+     </button>
+
+    `;
+
+   }
+
+
+   if(item.status==="recusado"){
+
+    acao=`
+     <span class="note">
+      Retornado ao GUICHÊ
+     </span>
     `;
 
    }
@@ -1887,20 +2407,17 @@ function renderHistorico(){
 
     <td>
      ${formatarDataHora(
-      item.recebidoEm
+      item.recebidoEm||
+      item.recusadoEm
      )}
     </td>
 
     <td>
+     ${observacao}
+    </td>
 
-     <button
-      class="btn-purple btn-small"
-      onclick="guardarAtendimento('${item.recordId}')">
-
-      🗄️ GUARDAR
-
-     </button>
-
+    <td>
+     ${acao}
     </td>
 
    </tr>
@@ -1934,7 +2451,7 @@ function guardarAtendimento(recordId){
  if(item.status!=="recebido"){
 
   mostrarToast(
-   "O atendimento precisa estar recebido."
+   "Somente atendimentos recebidos podem ser guardados."
   );
 
   return;
@@ -1964,7 +2481,7 @@ function guardarAtendimento(recordId){
 
 
  /*
-   RETIRA DO HISTÓRICO.
+   Retira do histórico.
  */
 
  historico.splice(
@@ -2047,10 +2564,6 @@ function guardarTodos(){
 
  });
 
-
- /*
-   Remove do histórico.
- */
 
  historico=
   historico.filter(
@@ -2228,7 +2741,7 @@ function renderGuardados(){
 
 
 /* =====================================================
-   SOM LIGA / DESLIGA
+   SOM
 ===================================================== */
 
 function alternarSom(){
@@ -2477,6 +2990,73 @@ function tocarConfirmacao(){
 }
 
 
+function tocarRecusa(){
+
+ if(!somAtivo)return;
+
+
+ try{
+
+  if(!audioContext)return;
+
+
+  const agora=
+   audioContext.currentTime;
+
+
+  const osc=
+   audioContext.createOscillator();
+
+
+  const gain=
+   audioContext.createGain();
+
+
+  osc.type="square";
+
+  osc.frequency.setValueAtTime(
+   350,
+   agora
+  );
+
+  osc.frequency.setValueAtTime(
+   220,
+   agora+0.15
+  );
+
+
+  gain.gain.setValueAtTime(
+   0.0001,
+   agora
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+   0.12,
+   agora+0.02
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+   0.0001,
+   agora+0.30
+  );
+
+
+  osc.connect(gain);
+
+  gain.connect(
+   audioContext.destination
+  );
+
+
+  osc.start(agora);
+
+  osc.stop(agora+0.35);
+
+ }catch(e){}
+
+}
+
+
 /* =====================================================
    IMPRESSÃO
 ===================================================== */
@@ -2535,6 +3115,126 @@ function preencherFiltrosImpressao(){
   `
   ).join("");
 
+
+ preencherPavilhoes();
+
+}
+
+
+function obterTodosRegistros(){
+
+ const mapa=new Map();
+
+
+ pendentes.forEach(item=>{
+  mapa.set(
+   item.recordId,
+   item
+  );
+ });
+
+
+ historico.forEach(item=>{
+  mapa.set(
+   item.recordId,
+   item
+  );
+ });
+
+
+ arquivo.forEach(item=>{
+  mapa.set(
+   item.recordId,
+   item
+  );
+ });
+
+
+ return [...mapa.values()];
+
+}
+
+
+function obterPavilhoes(){
+
+ const conjunto=new Set();
+
+
+ obterTodosRegistros().forEach(item=>{
+
+  const pav=
+   String(
+    item.pavilhao||
+    ""
+   ).trim();
+
+
+  if(pav){
+
+   conjunto.add(pav);
+
+  }
+
+ });
+
+
+ return [...conjunto].sort(
+  (a,b)=>
+   a.localeCompare(
+    b,
+    "pt-BR",
+    {
+     numeric:true
+    }
+   )
+ );
+
+}
+
+
+function preencherPavilhoes(){
+
+ const box=
+  $("printPavilhoes");
+
+
+ const pavilhoes=
+  obterPavilhoes();
+
+
+ if(!pavilhoes.length){
+
+  box.innerHTML=`
+   <div class="empty">
+    Nenhum pavilhão encontrado nos registros.
+   </div>
+  `;
+
+  return;
+
+ }
+
+
+ box.innerHTML=
+  pavilhoes.map(
+   (pav,index)=>`
+
+   <label class="pavilhao-option">
+
+    <input
+     type="checkbox"
+     value="${escapeHtml(pav)}"
+     id="printPav_${index}">
+
+    <strong>
+     ${escapeHtml(pav)}
+    </strong>
+
+   </label>
+
+  `
+  ).join("");
+
 }
 
 
@@ -2573,29 +3273,29 @@ function alterarModo(){
   ).value;
 
 
- if(modo==="data"){
-
-  $("grupoPrintData")
-   .classList
-   .remove("hidden");
-
-
-  $("grupoPrintAtendimento")
-   .classList
-   .add("hidden");
-
- }else{
-
-  $("grupoPrintData")
-   .classList
-   .add("hidden");
+ $("grupoPrintData")
+  .classList
+  .toggle(
+   "hidden",
+   modo!=="data"
+  );
 
 
-  $("grupoPrintAtendimento")
-   .classList
-   .remove("hidden");
+ $("grupoPrintPavilhao")
+  .classList
+  .toggle(
+   "hidden",
+   modo!=="pavilhao"
+  );
 
- }
+
+ $("grupoPrintAtendimento")
+  .classList
+  .toggle(
+   "hidden",
+   modo==="data"||
+   modo==="pavilhao"
+  );
 
 
  if(modo==="geral"){
@@ -2647,16 +3347,27 @@ function selecionados(id){
 }
 
 
-/*
-  HISTÓRICO + GUARDADOS.
-  Isso é importante para a impressão
-  por data continuar mostrando
-  registros arquivados.
- */
+/* =====================================================
+   DADOS PARA IMPRESSÃO
+===================================================== */
 
 function obterDadosImpressao(){
 
  const mapa=new Map();
+
+
+ /*
+   Histórico e guardados.
+   Pendentes também são incluídos para que
+   a impressão reflita os cadastros existentes.
+ */
+
+ pendentes.forEach(item=>{
+  mapa.set(
+   item.recordId,
+   item
+  );
+ });
 
 
  historico.forEach(item=>{
@@ -2800,8 +3511,54 @@ function obterDadosImpressao(){
  }
 
 
+ if(modo==="pavilhao"){
+
+  const escolhidos=
+   selecionados(
+    "printPavilhoes"
+   );
+
+
+  if(!escolhidos.length){
+
+   mostrarToast(
+    "Selecione pelo menos um pavilhão."
+   );
+
+   return null;
+
+  }
+
+
+  dados=
+   dados.filter(
+    item=>
+     escolhidos.includes(
+      String(item.pavilhao||"")
+     )
+   );
+
+ }
+
+
  dados.sort(
   (a,b)=>{
+
+   const pav=
+    String(a.pavilhao||"")
+     .localeCompare(
+      String(b.pavilhao||""),
+      "pt-BR",
+      {
+       numeric:true
+      }
+     );
+
+
+   if(pav!==0){
+    return pav;
+   }
+
 
    const atendimento=
     String(a.atendimento)
@@ -2830,6 +3587,10 @@ function obterDadosImpressao(){
 
 }
 
+
+/* =====================================================
+   EXECUTAR IMPRESSÃO
+===================================================== */
 
 function executarImpressao(){
 
@@ -2861,8 +3622,9 @@ function executarImpressao(){
  if(umPorPagina){
 
   /*
-    Uma página por categoria.
-    Nenhuma página vazia é criada.
+    Uma página por categoria de atendimento.
+    Somente categorias que possuem registros
+    serão criadas.
   */
 
   const mapa=
@@ -2919,29 +3681,85 @@ function executarImpressao(){
    ).value;
 
 
-  let titulo=
-   "LISTA DE ATENDIMENTOS";
+  if(modo==="pavilhao"){
+
+   const mapa=
+    new Map();
 
 
-  if(modo==="data"){
+   dados.forEach(item=>{
 
-   titulo=
-    `ATENDIMENTOS DE ${
-     formatarData(
-      $("printData").value
-     )
-    }`;
+    const pav=
+     String(
+      item.pavilhao||
+      "Sem pavilhão"
+     );
+
+
+    if(!mapa.has(pav)){
+
+     mapa.set(
+      pav,
+      []
+     );
+
+    }
+
+
+    mapa.get(pav).push(item);
+
+   });
+
+
+   for(
+    const [
+     pav,
+     itens
+    ] of mapa
+   ){
+
+    if(!itens.length)continue;
+
+
+    grupos.push({
+
+     titulo:
+      `PAVILHÃO ${pav}`,
+
+     itens
+
+    });
+
+   }
+
+
+  }else{
+
+   let titulo=
+    "LISTA DE ATENDIMENTOS";
+
+
+   if(modo==="data"){
+
+    titulo=
+     `ATENDIMENTOS DE ${
+      formatarData(
+       $("printData").value
+      )
+     }`;
+
+   }
+
+
+   grupos.push({
+
+    titulo,
+
+    itens:dados
+
+   });
 
   }
-
-
-  grupos.push({
-
-   titulo,
-
-   itens:dados
-
-  });
 
  }
 
@@ -2966,7 +3784,7 @@ function executarImpressao(){
 
 
  /*
-   Somente UMA chamada ao navegador.
+   UMA única chamada de impressão.
  */
 
  setTimeout(
@@ -2978,6 +3796,10 @@ function executarImpressao(){
 
 }
 
+
+/* =====================================================
+   GERAR IMPRESSÃO
+===================================================== */
 
 function gerarImpressao(grupos){
 
@@ -3127,6 +3949,19 @@ function gerarImpressao(grupos){
    FECHAR MODAIS
 ===================================================== */
 
+$("modalRecusa")
+ .addEventListener(
+  "click",
+  function(event){
+
+   if(event.target===this){
+    fecharRecusa();
+   }
+
+  }
+ );
+
+
 $("modalGuardados")
  .addEventListener(
   "click",
@@ -3151,6 +3986,27 @@ $("modalImpressao")
 
   }
  );
+
+
+/*
+  ESC fecha os modais.
+ */
+
+document.addEventListener(
+ "keydown",
+ event=>{
+
+  if(event.key!=="Escape")return;
+
+
+  fecharRecusa();
+
+  fecharGuardados();
+
+  fecharImpressao();
+
+ }
+);
 
 </script>
 
