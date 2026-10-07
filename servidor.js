@@ -5,7 +5,9 @@ const crypto = require("crypto");
 const path = require("path");
 
 
-const app = express();
+const app =
+  express();
+
 
 app.use(
   express.static(
@@ -30,18 +32,20 @@ const wss =
 
 
 /*
- * Clientes atualmente conectados.
+ * Clientes conectados
  */
 const clientes =
   new Map();
 
 
 /*
- * Atendimentos que ainda não foram
+ * Atendimentos ainda não
  * confirmados pela MESA.
  *
- * Eles permanecem aqui mesmo se
- * o GUICHÊ ou a MESA desconectarem.
+ * IMPORTANTE:
+ * Nunca apagar aqui simplesmente
+ * porque o GUICHÊ ou a MESA
+ * desconectou.
  */
 const pendentes =
   new Map();
@@ -68,9 +72,10 @@ function enviar(
 
 
 /*
- * Envia todos os atendimentos
- * ainda pendentes para uma MESA
- * que acabou de conectar.
+ * Entrega imediatamente
+ * todos os atendimentos
+ * pendentes para uma MESA
+ * recém-conectada.
  */
 function enviarPendentesParaMesa(
   ws
@@ -84,6 +89,7 @@ function enviarPendentesParaMesa(
     enviar(
       ws,
       {
+
         type:
           "new_record",
 
@@ -95,6 +101,7 @@ function enviarPendentesParaMesa(
 
         sentAt:
           item.sentAt
+
       }
     );
   }
@@ -112,9 +119,12 @@ wss.on(
     clientes.set(
       id,
       {
+
         ws,
+
         role:
           "unknown"
+
       }
     );
 
@@ -122,13 +132,15 @@ wss.on(
     enviar(
       ws,
       {
+
         type:
           "connected",
 
         id,
 
         version:
-          "2.1.0"
+          "2.2.0"
+
       }
     );
 
@@ -152,13 +164,16 @@ wss.on(
           enviar(
             ws,
             {
+
               type:
                 "error",
 
               message:
                 "Mensagem inválida."
+
             }
           );
+
 
           return;
         }
@@ -176,8 +191,9 @@ wss.on(
 
 
         /*
-         * REGISTRO DO CLIENTE
+         * REGISTRO
          */
+
         if (
           mensagem.type ===
           "register"
@@ -193,20 +209,21 @@ wss.on(
           enviar(
             ws,
             {
+
               type:
                 "registered",
 
               role:
                 cliente.role
+
             }
           );
 
 
           /*
-           * Se for MESA,
+           * MESA:
            * entrega imediatamente
-           * todos os atendimentos
-           * ainda pendentes.
+           * os pendentes.
            */
           if (
             cliente.role ===
@@ -226,6 +243,7 @@ wss.on(
         /*
          * NOVO ATENDIMENTO
          */
+
         if (
           mensagem.type ===
           "send_record"
@@ -237,11 +255,9 @@ wss.on(
 
 
           /*
-           * Se já existe, significa
-           * que o GUICHÊ está reenviando
-           * um atendimento pendente.
-           *
-           * Não cria duplicado.
+           * Se já existe,
+           * o GUICHÊ está reenviando
+           * o mesmo atendimento.
            */
           if (
             pendentes.has(
@@ -255,14 +271,21 @@ wss.on(
               );
 
 
+            /*
+             * Atualiza o proprietário
+             * para a nova conexão
+             * do GUICHÊ.
+             */
             existente.ownerId =
               id;
+
 
           } else {
 
             pendentes.set(
               recordId,
               {
+
                 recordId,
 
                 record:
@@ -275,6 +298,7 @@ wss.on(
 
                 ownerId:
                   id
+
               }
             );
           }
@@ -288,6 +312,7 @@ wss.on(
 
           const atendimento =
             {
+
               type:
                 "new_record",
 
@@ -299,11 +324,12 @@ wss.on(
 
               sentAt:
                 item.sentAt
+
             };
 
 
           /*
-           * Entrega o atendimento
+           * Entrega imediatamente
            * para todas as MESAS
            * conectadas.
            */
@@ -332,6 +358,7 @@ wss.on(
         /*
          * CONFIRMAÇÃO DA MESA
          */
+
         if (
           mensagem.type ===
           "confirm_received"
@@ -359,18 +386,19 @@ wss.on(
 
           const confirmacao =
             {
+
               type:
                 "record_received",
 
               recordId,
 
               receivedAt
+
             };
 
 
           /*
-           * Avisa o GUICHÊ
-           * que a MESA recebeu.
+           * Avisa o GUICHÊ.
            */
           const sender =
             clientes.get(
@@ -385,7 +413,7 @@ wss.on(
 
 
           /*
-           * Também avisa todas as MESAS.
+           * Avisa todas as MESAS.
            */
           for (
             const clienteAtual
@@ -406,8 +434,8 @@ wss.on(
 
 
           /*
-           * Agora que houve confirmação,
-           * pode retirar da fila pendente.
+           * Só agora remove
+           * da fila pendente.
            */
           pendentes.delete(
             recordId
@@ -426,15 +454,11 @@ wss.on(
       () => {
 
         /*
-         * IMPORTANTE:
+         * NÃO remover pendentes.
          *
-         * NÃO apagamos os atendimentos
-         * pendentes quando o GUICHÊ
-         * ou a MESA desconecta.
-         *
-         * Assim o atendimento não é perdido.
+         * Isso é fundamental para que
+         * a MESA possa receber depois.
          */
-
 
         clientes.delete(
           id
@@ -447,18 +471,20 @@ wss.on(
 
 
 /*
- * Rota de teste do servidor.
+ * TESTE DO SERVIDOR
  */
+
 app.get(
   "/health",
   (_req, res) => {
 
     res.json({
 
-      ok: true,
+      ok:
+        true,
 
       version:
-        "2.1.0",
+        "2.2.0",
 
       clients:
         clientes.size,
@@ -467,6 +493,7 @@ app.get(
         pendentes.size
 
     });
+
   }
 );
 
@@ -482,7 +509,7 @@ server.listen(
   () => {
 
     console.log(
-      "Sistema de Atendimento V2.1 iniciado na porta " +
+      "Sistema de Atendimento V2.2 iniciado na porta " +
       PORT
     );
 
