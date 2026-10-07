@@ -1,446 +1,440 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
-<meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
->
-
-<title>
-  Mesa — Sistema de Atendimento V2.3
-</title>
-
-<style>
-
-:root{
-  --blue:#123b6d;
-  --blue2:#0c2d52;
-  --yellow:#ffd400;
-  --bg:#eef2f7;
-  --green:#1d7a46;
-  --red:#b42318;
-}
-
-*{
-  box-sizing:border-box;
-}
-
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--bg);
-  color:#17202a;
-}
-
-header{
-  background:linear-gradient(
-    135deg,
-    var(--blue2),
-    var(--blue)
-  );
-  color:#fff;
-  padding:18px 20px;
-  text-align:center;
-  box-shadow:0 2px 8px #0002;
-}
-
-header h1{
-  font-size:22px;
-  margin:0 0 5px;
-}
-
-header .cpaig{
-  color:var(--yellow);
-  font-size:18px;
-  font-weight:800;
-}
-
-header h2{
-  font-size:16px;
-  margin:5px 0 0;
-  font-weight:500;
-}
-
-.container{
-  max-width:1200px;
-  margin:20px auto;
-  padding:0 14px;
-}
-
-.card{
-  background:#fff;
-  border-radius:12px;
-  padding:18px;
-  box-shadow:0 2px 10px #0001;
-  margin-bottom:16px;
-}
-
-.actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.btn{
-  border:0;
-  border-radius:8px;
-  padding:11px 15px;
-  font-weight:800;
-  cursor:pointer;
-}
-
-.primary{
-  background:var(--blue);
-  color:#fff;
-}
-
-.success{
-  background:var(--green);
-  color:#fff;
-}
-
-.warning{
-  background:#f59e0b;
-  color:#111;
-}
-
-.secondary{
-  background:#e5e7eb;
-  color:#111827;
-}
-
-.danger{
-  background:var(--red);
-  color:#fff;
-}
-
-.status{
-  padding:10px;
-  border-radius:8px;
-  background:#f4f6f8;
-  margin-top:12px;
-  font-size:13px;
-}
-
-.toolbar{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-}
-
-.toolbar select{
-  padding:8px;
-  border-radius:7px;
-  border:1px solid #b8c2cc;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
-}
-
-th,
-td{
-  border-bottom:1px solid #e5e7eb;
-  padding:8px;
-  text-align:left;
-  vertical-align:top;
-}
-
-th{
-  background:#f3f5f7;
-}
-
-.center{
-  text-align:center;
-}
-
-.muted{
-  color:#667085;
-}
-
-.badge{
-  display:inline-block;
-  padding:3px 7px;
-  border-radius:999px;
-  background:#e8f5ec;
-  color:#17663a;
-  font-size:11px;
-  font-weight:700;
-}
-
-.badge.pending{
-  background:#fff3cd;
-  color:#7a5800;
-}
-
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:#0008;
-  z-index:100;
-  padding:18px;
-  overflow:auto;
-}
-
-.modal.open{
-  display:block;
-}
-
-.modal-box{
-  background:#fff;
-  max-width:1000px;
-  margin:30px auto;
-  border-radius:12px;
-  padding:20px;
-}
-
-.modal-head{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:center;
-}
-
-.modal h3{
-  margin-top:0;
-}
-
-.modal-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-
-.modal-grid input,
-.modal-grid select{
-  width:100%;
-  padding:9px;
-  border:1px solid #b8c2cc;
-  border-radius:7px;
-}
-
-.checks{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:7px;
-  max-height:250px;
-  overflow:auto;
-  border:1px solid #ddd;
-  padding:10px;
-  border-radius:8px;
-}
-
-.checks label{
-  display:flex;
-  gap:7px;
-  align-items:center;
-  font-size:14px;
-}
-
-.archive-list{
-  max-height:340px;
-  overflow:auto;
-  border:1px solid #ddd;
-  border-radius:8px;
-  margin-top:10px;
-}
-
-.archive-list label{
-  display:flex;
-  gap:10px;
-  padding:9px;
-  border-bottom:1px solid #eee;
-}
-
-.archive-list label:last-child{
-  border-bottom:0;
-}
-
-.modal-actions{
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  margin-top:15px;
-  flex-wrap:wrap;
-}
-
-.hidden{
-  display:none!important;
-}
-
-.print-area{
-  display:none;
-}
-
-@media(max-width:800px){
-
-  table{
-    font-size:12px;
-  }
-
-  .modal-grid{
-    grid-template-columns:1fr;
-  }
-
-  .checks{
-    grid-template-columns:1fr;
-  }
-
-}
-
-@media print{
-
-  @page{
-    size:A4;
-    margin:5mm;
-  }
-
-  body>*:not(#printArea){
-    display:none!important;
-  }
-
-  #printArea{
-    display:block!important;
-    color:#000;
-    font-family:Arial,sans-serif;
-  }
-
-  .print-page{
-    break-after:page;
-    page-break-after:always;
-  }
-
-  .print-page:last-child{
-    break-after:auto;
-    page-break-after:auto;
-  }
-
-  .print-title{
-    text-align:center;
-    font-size:15px;
-    font-weight:800;
-    margin:0 0 3mm;
-  }
-
-  .group-title{
-    font-size:11pt;
-    font-weight:800;
-    margin:0 0 2mm;
-  }
-
-  .print-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:8.5pt;
-    table-layout:fixed;
-  }
-
-  .print-table th,
-  .print-table td{
-    border:1px solid #000;
-    padding:2.5px 3px;
-    line-height:1.15;
-    vertical-align:top;
-  }
-
-  .print-table th{
-    font-weight:800;
-  }
-
-  .col-nome{
-    width:32%;
-  }
-
-  .col-rgi{
-    width:14%;
-  }
-
-  .col-pav{
-    width:9%;
-    text-align:center!important;
-  }
-
-  .col-cela{
-    width:6%;
-    text-align:center!important;
-  }
-
-  .col-at{
-    width:24%;
-  }
-
-  .col-data{
-    width:15%;
-    text-align:center!important;
-  }
-
-  tr{
-    break-inside:avoid;
-    page-break-inside:avoid;
-  }
-
-}
-
-</style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MESA - Sistema de Atendimento</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eef2f7;
+      color: #17202a;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0c2d52, #123b6d);
+      color: white;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+
+    header h1 {
+      margin: 0 0 5px;
+      font-size: 22px;
+    }
+
+    header .cpaig {
+      color: #ffd400;
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    header h2 {
+      margin: 6px 0 0;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: 20px auto;
+      padding: 0 14px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+
+    .acoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #123b6d;
+      color: white;
+    }
+
+    .success {
+      background: #198754;
+      color: white;
+    }
+
+    .warning {
+      background: #f59e0b;
+      color: #111;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .status {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f4f6f8;
+      font-size: 14px;
+    }
+
+    .status.sucesso {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .status.erro {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .barra {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .barra h3 {
+      margin: 0;
+      color: #123b6d;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #fff3cd;
+      color: #664d03;
+    }
+
+    .badge.online {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .tabela {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #dee2e6;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #17365d;
+      color: white;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8f9fa;
+    }
+
+    .vazio {
+      text-align: center;
+      padding: 25px;
+      color: #6c757d;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,.55);
+      padding: 15px;
+      overflow-y: auto;
+    }
+
+    .modal.aberto {
+      display: block;
+    }
+
+    .modal-caixa {
+      max-width: 1050px;
+      margin: 25px auto;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .modal-cabecalho {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .modal-cabecalho h3 {
+      margin: 0;
+      color: #123b6d;
+    }
+
+    .filtros {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .filtros label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bcc6d0;
+      border-radius: 7px;
+      font-size: 14px;
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .check-item {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      background: #f8f9fa;
+    }
+
+    .check-item label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .check-item input {
+      width: auto;
+    }
+
+    .modal-acoes {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    #printArea {
+      display: none;
+    }
+
+    @media (max-width: 800px) {
+      .filtros {
+        grid-template-columns: 1fr;
+      }
+
+      .checks {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        font-size: 12px;
+      }
+    }
+
+    @media print {
+
+      @page {
+        size: A4 portrait;
+        margin: 5mm;
+      }
+
+      body > * {
+        display: none !important;
+      }
+
+      #printArea {
+        display: block !important;
+        width: 100%;
+      }
+
+      .print-page {
+        width: 100%;
+        min-height: 287mm;
+        page-break-after: always;
+        break-after: page;
+      }
+
+      .print-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      .print-header {
+        text-align: center;
+        margin-bottom: 5mm;
+      }
+
+      .print-header h1 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .print-header h2 {
+        margin: 2px 0;
+        font-size: 12px;
+      }
+
+      .print-header div {
+        font-size: 9px;
+      }
+
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 8.5pt;
+      }
+
+      .print-table th,
+      .print-table td {
+        border: 1px solid #000;
+        padding: 2.5px 3px;
+        line-height: 1.15;
+        vertical-align: top;
+      }
+
+      .print-table th {
+        background: #e5e7eb !important;
+        color: #111 !important;
+      }
+
+      .col-nome {
+        width: 31%;
+      }
+
+      .col-rgi {
+        width: 14%;
+      }
+
+      .col-pav {
+        width: 8%;
+        text-align: center !important;
+      }
+
+      .col-cela {
+        width: 7%;
+        text-align: center !important;
+      }
+
+      .col-atendimento {
+        width: 23%;
+      }
+
+      .col-data {
+        width: 17%;
+        text-align: center !important;
+      }
+
+      tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-
-  <h1>
-    POLÍCIA PENAL DE MATO GROSSO DO SUL
-  </h1>
-
-  <div class="cpaig">
-    CPAIG
-  </div>
-
-  <h2>
-    Mesa de Recebimento — Sistema de Atendimento V2.3
-  </h2>
-
+  <h1>POLÍCIA PENAL DE MATO GROSSO DO SUL</h1>
+  <div class="cpaig">CPAIG</div>
+  <h2>MESA DE ATENDIMENTO</h2>
 </header>
 
 <div class="container">
 
-  <div class="card">
+  <section class="card">
 
-    <div class="actions">
+    <div class="acoes">
 
       <button
-        class="btn success"
+        class="success"
         onclick="receberTodos()"
       >
         ✅ RECEBER TODOS
       </button>
 
       <button
-        class="btn secondary"
-        onclick="toggleSom()"
         id="somBtn"
+        class="secondary"
+        onclick="alternarSom()"
       >
         🔊 SOM: ON
       </button>
 
       <button
-        class="btn secondary"
-        onclick="abrirArquivo()"
+        class="secondary"
+        onclick="abrirGuardados()"
       >
         📁 ATENDIMENTOS GUARDADOS
       </button>
 
       <button
-        class="btn secondary"
+        class="primary"
         onclick="abrirImpressao()"
       >
         🖨️ IMPRIMIR LISTA
@@ -455,36 +449,35 @@ th{
       Conectando...
     </div>
 
-  </div>
+  </section>
 
 
-  <div class="card">
+  <!-- PENDENTES -->
 
-    <div class="toolbar">
+  <section class="card">
 
-      <h3 style="margin:0">
+    <div class="barra">
+
+      <h3>
         Atendimentos aguardando recebimento
       </h3>
 
       <span
-        id="pendentesCount"
-        class="badge pending"
+        id="contadorPendentes"
+        class="badge"
       >
         0 pendente(s)
       </span>
 
     </div>
 
-    <div
-      style="overflow:auto;margin-top:10px"
-    >
+    <div class="tabela">
 
       <table>
 
         <thead>
 
           <tr>
-
             <th>Nome</th>
             <th>RGI</th>
             <th>Pavilhão</th>
@@ -493,7 +486,6 @@ th{
             <th>Data</th>
             <th>Assunto</th>
             <th>Ação</th>
-
           </tr>
 
         </thead>
@@ -506,20 +498,23 @@ th{
 
     </div>
 
-  </div>
+  </section>
 
 
-  <div class="card">
+  <!-- HISTÓRICO -->
 
-    <div class="toolbar">
+  <section class="card">
 
-      <h3 style="margin:0">
-        Histórico de atendimentos recebidos
+    <div class="barra">
+
+      <h3>
+        Histórico de atendimentos
       </h3>
 
       <select
-        id="ordemMesa"
-        onchange="renderTudo()"
+        id="ordenacao"
+        onchange="renderHistorico()"
+        style="width:auto"
       >
 
         <option value="envio">
@@ -534,16 +529,13 @@ th{
 
     </div>
 
-    <div
-      style="overflow:auto;margin-top:10px"
-    >
+    <div class="tabela">
 
       <table>
 
         <thead>
 
           <tr>
-
             <th>Nome</th>
             <th>RGI</th>
             <th>Pavilhão</th>
@@ -552,7 +544,6 @@ th{
             <th>Data</th>
             <th>Status</th>
             <th>Ação</th>
-
           </tr>
 
         </thead>
@@ -565,38 +556,39 @@ th{
 
     </div>
 
-  </div>
+  </section>
 
 </div>
 
 
 <!-- =====================================================
-     MODAL DE ATENDIMENTOS GUARDADOS
+     GUARDADOS
 ===================================================== -->
 
 <div
-  id="arquivoModal"
+  id="guardadosModal"
   class="modal"
 >
 
-  <div class="modal-box">
+  <div class="modal-caixa">
 
-    <div class="modal-head">
+    <div class="modal-cabecalho">
 
       <h3>
-        📁 Atendimentos guardados
+        📁 ATENDIMENTOS GUARDADOS
       </h3>
 
       <button
-        class="btn secondary"
-        onclick="fecharArquivo()"
+        class="secondary"
+        onclick="fecharGuardados()"
       >
-        Fechar
+        FECHAR
       </button>
 
     </div>
 
-    <div class="modal-grid">
+
+    <div class="filtros">
 
       <div>
 
@@ -605,9 +597,9 @@ th{
         </label>
 
         <input
-          id="arquivoData"
+          id="filtroGuardadoData"
           type="date"
-          onchange="renderArquivo()"
+          onchange="renderGuardados()"
         >
 
       </div>
@@ -619,8 +611,8 @@ th{
         </label>
 
         <select
-          id="arquivoAtendimento"
-          onchange="renderArquivo()"
+          id="filtroGuardadoAtendimento"
+          onchange="renderGuardados()"
         >
 
           <option value="">
@@ -638,46 +630,44 @@ th{
         </label>
 
         <input
-          id="arquivoNome"
-          placeholder="Filtrar por nome"
-          oninput="renderArquivo()"
+          id="filtroGuardadoNome"
+          type="text"
+          placeholder="Pesquisar nome"
+          oninput="renderGuardados()"
         >
 
       </div>
 
     </div>
 
-    <div
-      id="arquivoCount"
-      class="status"
-    ></div>
 
     <div
-      id="arquivoList"
-      class="archive-list"
+      id="guardadosLista"
+      style="margin-top:15px"
     ></div>
 
-    <div class="modal-actions">
+
+    <div class="modal-acoes">
 
       <button
-        class="btn secondary"
-        onclick="selecionarTodosArquivo(true)"
+        class="secondary"
+        onclick="selecionarTodosGuardados(true)"
       >
-        Selecionar todos
+        ☑️ SELECIONAR TODOS
       </button>
 
       <button
-        class="btn secondary"
-        onclick="selecionarTodosArquivo(false)"
+        class="secondary"
+        onclick="selecionarTodosGuardados(false)"
       >
-        Desmarcar
+        DESMARCAR
       </button>
 
       <button
-        class="btn primary"
-        onclick="restaurarArquivados()"
+        class="primary"
+        onclick="restaurarGuardados()"
       >
-        ↩️ Restaurar selecionados
+        ↩️ RESTAURAR
       </button>
 
     </div>
@@ -686,18 +676,202 @@ th{
 
 </div>
 
-  <script>
+
+<!-- =====================================================
+     IMPRESSÃO
+===================================================== -->
+
+<div
+  id="impressaoModal"
+  class="modal"
+>
+
+  <div class="modal-caixa">
+
+    <div class="modal-cabecalho">
+
+      <h3>
+        🖨️ IMPRESSÃO
+      </h3>
+
+      <button
+        class="secondary"
+        onclick="fecharImpressao()"
+      >
+        FECHAR
+      </button>
+
+    </div>
+
+
+    <div class="filtros">
+
+      <div>
+
+        <label>
+          Tipo de impressão
+        </label>
+
+        <select
+          id="tipoImpressao"
+          onchange="alterarTipoImpressao()"
+        >
+
+          <option value="atendimento">
+            Por atendimento
+          </option>
+
+          <option value="geral">
+            Por atendimento geral
+          </option>
+
+          <option value="data">
+            Por data
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        id="campoData"
+        class="oculto"
+      >
+
+        <label>
+          Data
+        </label>
+
+        <input
+          id="dataImpressao"
+          type="date"
+          onchange="atualizarInfoImpressao()"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="filtroDataOpcoes"
+      class="oculto"
+      style="margin-top:12px"
+    >
+
+      <div class="check-item">
+
+        <label>
+          <input
+            type="radio"
+            name="filtroData"
+            value="todos"
+            checked
+            onchange="alternarFiltroData()"
+          >
+
+          Todos os atendimentos
+        </label>
+
+      </div>
+
+      <div
+        class="check-item"
+        style="margin-top:6px"
+      >
+
+        <label>
+          <input
+            type="radio"
+            name="filtroData"
+            value="atendimentos"
+            onchange="alternarFiltroData()"
+          >
+
+          Selecionar atendimentos
+        </label>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="listaTipos"
+      class="checks"
+    ></div>
+
+
+    <div
+      id="infoImpressao"
+      class="status"
+    ></div>
+
+
+    <div
+      class="check-item"
+      style="margin-top:12px"
+    >
+
+      <label>
+
+        <input
+          id="umPorPagina"
+          type="checkbox"
+          checked
+        >
+
+        <strong>
+          Um atendimento por página
+        </strong>
+
+      </label>
+
+    </div>
+
+
+    <div class="modal-acoes">
+
+      <button
+        class="secondary"
+        onclick="fecharImpressao()"
+      >
+        CANCELAR
+      </button>
+
+      <button
+        class="primary"
+        onclick="imprimir()"
+      >
+        🖨️ IMPRIMIR
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div id="printArea"></div>
+
+
+<script>
+
 "use strict";
 
+
 /* =========================================================
-   CONFIGURAÇÕES
+   CONFIGURAÇÃO
 ========================================================= */
 
-const STORAGE_MESA =
+const STORAGE_LISTA =
   "mesaAtendimentosV23";
 
-const STORAGE_ARQUIVO_MESA =
+const STORAGE_ARQUIVO =
   "mesaAtendimentosV23Arquivo";
+
 
 const ATENDIMENTOS = [
   "Jurídico",
@@ -728,35 +902,40 @@ const ATENDIMENTOS = [
   "Outros"
 ];
 
+
 let lista =
-  carregarJSON(
-    STORAGE_MESA,
-    []
+  carregar(
+    STORAGE_LISTA
   );
 
-let arquivo =
-  carregarJSON(
-    STORAGE_ARQUIVO_MESA,
-    []
+let guardados =
+  carregar(
+    STORAGE_ARQUIVO
   );
+
 
 let pendentes =
   new Map();
 
-let socket = null;
 
-let reconnectTimer = null;
+let socket =
+  null;
 
-let somAtivo = true;
+
+let reconectarTimer =
+  null;
+
+
+let somAtivo =
+  true;
 
 
 /* =========================================================
-   FUNÇÕES BÁSICAS
+   LOCAL STORAGE
 ========================================================= */
 
-function carregarJSON(
-  chave,
-  padrao
+function carregar(
+  chave
 ) {
 
   try {
@@ -767,39 +946,49 @@ function carregarJSON(
       );
 
     if (!valor) {
-      return padrao;
+      return [];
     }
 
-    return (
-      JSON.parse(valor) ??
-      padrao
-    );
+    const dados =
+      JSON.parse(
+        valor
+      );
+
+    return Array.isArray(
+      dados
+    )
+      ? dados
+      : [];
 
   } catch {
 
-    return padrao;
+    return [];
 
   }
 
 }
 
 
-function salvarJSON(
+function salvar(
   chave,
-  valor
+  dados
 ) {
 
   localStorage.setItem(
     chave,
     JSON.stringify(
-      valor
+      dados
     )
   );
 
 }
 
 
-function escapeHtml(
+/* =========================================================
+   UTILITÁRIOS
+========================================================= */
+
+function escapar(
   valor
 ) {
 
@@ -831,15 +1020,15 @@ function escapeHtml(
 
 
 function formatarData(
-  data
+  valor
 ) {
 
-  if (!data) {
+  if (!valor) {
     return "";
   }
 
   const partes =
-    String(data)
+    String(valor)
       .split("-");
 
   if (
@@ -857,7 +1046,7 @@ function formatarData(
 
   }
 
-  return data;
+  return valor;
 
 }
 
@@ -884,8 +1073,8 @@ function normalizarTexto(
    STATUS
 ========================================================= */
 
-function mostrarStatus(
-  texto,
+function status(
+  mensagem,
   tipo = ""
 ) {
 
@@ -895,37 +1084,30 @@ function mostrarStatus(
     );
 
   elemento.textContent =
-    texto;
+    mensagem;
+
+  elemento.className =
+    "status";
+
+  if (
+    tipo ===
+    "sucesso"
+  ) {
+
+    elemento.classList.add(
+      "sucesso"
+    );
+
+  }
 
   if (
     tipo ===
     "erro"
   ) {
 
-    elemento.style.background =
-      "#fde8e8";
-
-    elemento.style.color =
-      "#991b1b";
-
-  } else if (
-    tipo ===
-    "sucesso"
-  ) {
-
-    elemento.style.background =
-      "#e8f5ec";
-
-    elemento.style.color =
-      "#17663a";
-
-  } else {
-
-    elemento.style.background =
-      "#f4f6f8";
-
-    elemento.style.color =
-      "#17202a";
+    elemento.classList.add(
+      "erro"
+    );
 
   }
 
@@ -936,29 +1118,17 @@ function mostrarStatus(
    SOM
 ========================================================= */
 
-function toggleSom() {
+function alternarSom() {
 
   somAtivo =
     !somAtivo;
 
-  const botao =
-    document.getElementById(
-      "somBtn"
-    );
-
-  botao.textContent =
+  document.getElementById(
+    "somBtn"
+  ).textContent =
     somAtivo
       ? "🔊 SOM: ON"
       : "🔇 SOM: OFF";
-
-
-  if (
-    somAtivo
-  ) {
-
-    tocarSom();
-
-  }
 
 }
 
@@ -970,7 +1140,6 @@ function tocarSom() {
   ) {
     return;
   }
-
 
   try {
 
@@ -984,64 +1153,46 @@ function tocarSom() {
       return;
     }
 
-    const contexto =
+    const ctx =
       new AudioContext();
 
-    const oscilador =
-      contexto.createOscillator();
+    const oscillator =
+      ctx.createOscillator();
 
-    const ganho =
-      contexto.createGain();
+    const gain =
+      ctx.createGain();
 
-
-    oscilador.type =
-      "sine";
-
-    oscilador.frequency.value =
+    oscillator.frequency.value =
       880;
 
-    ganho.gain.value =
+    gain.gain.value =
       0.12;
 
-
-    oscilador.connect(
-      ganho
+    oscillator.connect(
+      gain
     );
 
-    ganho.connect(
-      contexto.destination
+    gain.connect(
+      ctx.destination
     );
 
+    oscillator.start();
 
-    oscilador.start();
-
-    oscilador.stop(
-      contexto.currentTime +
+    oscillator.stop(
+      ctx.currentTime +
       0.35
     );
 
-
     setTimeout(
       () => {
-
         try {
-          contexto.close();
+          ctx.close();
         } catch {}
-
       },
       500
     );
 
-  } catch (
-    erro
-  ) {
-
-    console.log(
-      "Som não disponível:",
-      erro
-    );
-
-  }
+  } catch {}
 
 }
 
@@ -1050,7 +1201,7 @@ function tocarSom() {
    NOTIFICAÇÃO
 ========================================================= */
 
-async function mostrarNotificacao(
+async function notificar(
   registro
 ) {
 
@@ -1059,7 +1210,6 @@ async function mostrarNotificacao(
   ) {
     return;
   }
-
 
   try {
 
@@ -1071,7 +1221,6 @@ async function mostrarNotificacao(
       await Notification.requestPermission();
 
     }
-
 
     if (
       Notification.permission ===
@@ -1094,33 +1243,254 @@ async function mostrarNotificacao(
 
 
 /* =========================================================
-   PENDENTES
+   WEBSOCKET
 ========================================================= */
 
-function adicionarPendente(
-  registro
+function websocketURL() {
+
+  return (
+    location.protocol ===
+    "https:"
+      ? "wss://"
+      : "ws://"
+  ) +
+  location.host;
+
+}
+
+
+function conectar() {
+
+  clearTimeout(
+    reconectarTimer
+  );
+
+
+  try {
+
+    socket =
+      new WebSocket(
+        websocketURL()
+      );
+
+  } catch {
+
+    agendarReconexao();
+
+    return;
+
+  }
+
+
+  socket.addEventListener(
+    "open",
+    () => {
+
+      status(
+        "MESA conectada ao servidor.",
+        "sucesso"
+      );
+
+      socket.send(
+        JSON.stringify({
+          type:
+            "register",
+          role:
+            "receiver"
+        })
+      );
+
+    }
+  );
+
+
+  socket.addEventListener(
+    "message",
+    evento => {
+
+      let mensagem;
+
+      try {
+
+        mensagem =
+          JSON.parse(
+            evento.data
+          );
+
+      } catch {
+
+        return;
+
+      }
+
+
+      tratarMensagem(
+        mensagem
+      );
+
+    }
+  );
+
+
+  socket.addEventListener(
+    "close",
+    () => {
+
+      status(
+        "MESA desconectada. Tentando reconectar..."
+      );
+
+      agendarReconexao();
+
+    }
+  );
+
+
+  socket.addEventListener(
+    "error",
+    () => {
+
+      status(
+        "Erro de conexão com o servidor.",
+        "erro"
+      );
+
+    }
+  );
+
+}
+
+
+function agendarReconexao() {
+
+  clearTimeout(
+    reconectarTimer
+  );
+
+  reconectarTimer =
+    setTimeout(
+      conectar,
+      3000
+    );
+
+}
+
+
+function enviar(
+  mensagem
 ) {
 
   if (
-    !registro ||
-    !registro.recordId
+    !socket ||
+    socket.readyState !==
+      WebSocket.OPEN
+  ) {
+
+    return false;
+
+  }
+
+  try {
+
+    socket.send(
+      JSON.stringify(
+        mensagem
+      )
+    );
+
+    return true;
+
+  } catch {
+
+    return false;
+
+  }
+
+}
+
+
+/* =========================================================
+   MENSAGENS
+========================================================= */
+
+function tratarMensagem(
+  mensagem
+) {
+
+  if (
+    mensagem.type ===
+    "new_record"
+  ) {
+
+    receberNovo(
+      mensagem
+    );
+
+    return;
+
+  }
+
+
+  if (
+    mensagem.type ===
+    "record_received"
+  ) {
+
+    /*
+      Outra MESA confirmou o registro.
+      Se o registro ainda estiver pendente
+      nesta MESA, retiramos da fila.
+    */
+
+    if (
+      mensagem.recordId
+    ) {
+
+      pendentes.delete(
+        mensagem.recordId
+      );
+
+      renderPendentes();
+
+    }
+
+    return;
+
+  }
+
+}
+
+
+/* =========================================================
+   NOVO REGISTRO
+========================================================= */
+
+function receberNovo(
+  mensagem
+) {
+
+  const recordId =
+    mensagem.recordId;
+
+
+  if (
+    !recordId
   ) {
     return;
   }
 
 
   /*
-    O mesmo registro pode ser enviado
-    novamente pelo GUICHÊ após uma
-    reconexão.
-
-    Por isso usamos recordId como
-    identificador único.
+    Deduplicação.
   */
-
   if (
+    lista.some(
+      item =>
+        item.recordId ===
+        recordId
+    ) ||
     pendentes.has(
-      registro.recordId
+      recordId
     )
   ) {
 
@@ -1129,95 +1499,51 @@ function adicionarPendente(
   }
 
 
+  const registro = {
+
+    ...(mensagem.record || {}),
+
+    recordId,
+
+    enviadoEm:
+      mensagem.sentAt ||
+      new Date()
+        .toISOString()
+
+  };
+
+
+  /*
+    IMPORTANTE:
+
+    Aqui ele NÃO vai para o histórico.
+
+    Ele fica somente como PENDENTE
+    até o usuário apertar RECEBIDO.
+  */
+
   pendentes.set(
-    registro.recordId,
-    {
-      ...registro
-    }
+    recordId,
+    registro
   );
 
 
   renderPendentes();
 
+  tocarSom();
+
+  notificar(
+    registro
+  );
+
 }
 
 
 /* =========================================================
-   RECEBIMENTO INDIVIDUAL
+   RECEBER UM
 ========================================================= */
 
-function receberAtendimento(
-  registro
-) {
-
-  if (
-    !registro ||
-    !registro.recordId
-  ) {
-    return;
-  }
-
-
-  /*
-    Adiciona aos pendentes somente
-    se ainda não tiver sido recebido.
-  */
-
-  adicionarPendente(
-    registro
-  );
-
-
-  /*
-    Verifica se já existe no histórico.
-  */
-
-  const existe =
-    lista.some(
-      item =>
-        item.recordId ===
-        registro.recordId
-    );
-
-
-  if (
-    !existe
-  ) {
-
-    lista.push({
-
-      ...registro,
-
-      status:
-        "recebido",
-
-      recebidoEm:
-        new Date()
-          .toISOString()
-
-    });
-
-
-    salvarJSON(
-      STORAGE_MESA,
-      lista
-    );
-
-  }
-
-
-  renderTudo();
-
-  tocarSom();
-
-  mostrarNotificacao(
-    registro
-  );
-
-}
-
-
-function marcarRecebido(
+function receberUm(
   recordId
 ) {
 
@@ -1227,73 +1553,63 @@ function marcarRecebido(
     );
 
 
-  if (!registro) {
-
+  if (
+    !registro
+  ) {
     return;
-
   }
 
 
-  const recebidoEm =
-    new Date()
-      .toISOString();
+  /*
+    Adiciona ao histórico somente
+    neste momento.
+  */
 
+  const recebido = {
 
-  const indice =
-    lista.findIndex(
-      item =>
-        item.recordId ===
-        recordId
-    );
+    ...registro,
+
+    status:
+      "recebido",
+
+    recebidoEm:
+      new Date()
+        .toISOString()
+
+  };
 
 
   if (
-    indice >= 0
+    !lista.some(
+      item =>
+        item.recordId ===
+        recordId
+    )
   ) {
 
-    lista[indice] = {
-
-      ...lista[indice],
-
-      status:
-        "recebido",
-
-      recebidoEm
-
-    };
-
-  } else {
-
-    lista.push({
-
-      ...registro,
-
-      status:
-        "recebido",
-
-      recebidoEm
-
-    });
+    lista.push(
+      recebido
+    );
 
   }
 
 
-  salvarJSON(
-    STORAGE_MESA,
+  salvar(
+    STORAGE_LISTA,
     lista
   );
 
 
-  /*
-    Primeiro enviamos a confirmação
-    ao servidor.
+  pendentes.delete(
+    recordId
+  );
 
-    O servidor então informa ao
-    GUICHÊ e retira o registro
-    da lista de pendentes.
+
+  /*
+    Confirma para o servidor.
   */
 
-  enviarMensagem({
+  enviar({
 
     type:
       "confirm_received",
@@ -1303,12 +1619,13 @@ function marcarRecebido(
   });
 
 
-  pendentes.delete(
-    recordId
-  );
-
-
   renderTudo();
+
+
+  status(
+    `Atendimento de ${registro.nome} recebido.`,
+    "sucesso"
+  );
 
 }
 
@@ -1329,9 +1646,8 @@ function receberTodos() {
     !ids.length
   ) {
 
-    mostrarStatus(
-      "Não há atendimentos aguardando recebimento.",
-      ""
+    status(
+      "Não há atendimentos pendentes."
     );
 
     return;
@@ -1339,27 +1655,19 @@ function receberTodos() {
   }
 
 
-  /*
-    Confirmamos um por um.
-
-    Isso é importante porque cada
-    registro possui seu próprio
-    recordId.
-  */
-
   ids.forEach(
-    recordId => {
+    id => {
 
-      marcarRecebido(
-        recordId
+      receberUm(
+        id
       );
 
     }
   );
 
 
-  mostrarStatus(
-    `${ids.length} atendimento(s) recebido(s) com sucesso.`,
+  status(
+    `${ids.length} atendimento(s) recebido(s).`,
     "sucesso"
   );
 
@@ -1367,7 +1675,7 @@ function receberTodos() {
 
 
 /* =========================================================
-   RENDER — PENDENTES
+   RENDER PENDENTES
 ========================================================= */
 
 function renderPendentes() {
@@ -1377,7 +1685,8 @@ function renderPendentes() {
       "pendentesBody"
     );
 
-  body.innerHTML = "";
+  body.innerHTML =
+    "";
 
 
   const registros =
@@ -1387,9 +1696,28 @@ function renderPendentes() {
 
 
   document.getElementById(
-    "pendentesCount"
+    "contadorPendentes"
   ).textContent =
     `${registros.length} pendente(s)`;
+
+
+  if (
+    !registros.length
+  ) {
+
+    body.innerHTML =
+      `<tr>
+        <td
+          colspan="8"
+          class="vazio"
+        >
+          Nenhum atendimento aguardando recebimento.
+        </td>
+      </tr>`;
+
+    return;
+
+  }
 
 
   registros.forEach(
@@ -1404,45 +1732,43 @@ function renderPendentes() {
       tr.innerHTML = `
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.nome
           )}
         </td>
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.rgi
           )}
         </td>
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.pavilhao
           )}
         </td>
 
-        <td class="center">
-          ${escapeHtml(
+        <td>
+          ${escapar(
             registro.cela
           )}
         </td>
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.atendimento
           )}
         </td>
 
         <td>
-          ${escapeHtml(
-            formatarData(
-              registro.dataAtendimento
-            )
+          ${formatarData(
+            registro.dataAtendimento
           )}
         </td>
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.assunto || ""
           )}
         </td>
@@ -1450,8 +1776,8 @@ function renderPendentes() {
         <td>
 
           <button
-            class="btn success"
-            onclick="marcarRecebido('${registro.recordId}')"
+            class="success"
+            onclick="receberUm('${registro.recordId}')"
           >
             RECEBIDO
           </button>
@@ -1475,16 +1801,25 @@ function renderPendentes() {
    HISTÓRICO
 ========================================================= */
 
-function obterHistoricoOrdenado() {
+function renderHistorico() {
+
+  const body =
+    document.getElementById(
+      "historicoBody"
+    );
+
+  body.innerHTML =
+    "";
+
 
   const ordem =
     document.getElementById(
-      "ordemMesa"
+      "ordenacao"
     ).value;
 
 
   const registros =
-    [...lista];
+    lista.slice();
 
 
   if (
@@ -1493,9 +1828,9 @@ function obterHistoricoOrdenado() {
   ) {
 
     registros.sort(
-      (a, b) => {
+      (a,b) => {
 
-        return (
+        const primeiro =
           String(
             a.atendimento ||
             ""
@@ -1505,18 +1840,21 @@ function obterHistoricoOrdenado() {
               ""
             ),
             "pt-BR"
-          ) ||
-          new Date(
-            a.recebidoEm ||
-            a.enviadoEm ||
-            a.criadoEm ||
-            0
-          ) -
-          new Date(
-            b.recebidoEm ||
+          );
+
+        if (
+          primeiro !== 0
+        ) {
+          return primeiro;
+        }
+
+        return String(
+          a.enviadoEm ||
+          ""
+        ).localeCompare(
+          String(
             b.enviadoEm ||
-            b.criadoEm ||
-            0
+            ""
           )
         );
 
@@ -1526,46 +1864,38 @@ function obterHistoricoOrdenado() {
   } else {
 
     registros.sort(
-      (a, b) => {
-
-        return (
-          new Date(
-            a.recebidoEm ||
-            a.enviadoEm ||
-            a.criadoEm ||
-            0
-          ) -
-          new Date(
-            b.recebidoEm ||
+      (a,b) =>
+        String(
+          a.enviadoEm ||
+          ""
+        ).localeCompare(
+          String(
             b.enviadoEm ||
-            b.criadoEm ||
-            0
+            ""
           )
-        );
-
-      }
+        )
     );
 
   }
 
 
-  return registros;
+  if (
+    !registros.length
+  ) {
 
-}
+    body.innerHTML =
+      `<tr>
+        <td
+          colspan="8"
+          class="vazio"
+        >
+          Nenhum atendimento recebido ainda.
+        </td>
+      </tr>`;
 
+    return;
 
-function renderHistorico() {
-
-  const body =
-    document.getElementById(
-      "historicoBody"
-    );
-
-  body.innerHTML = "";
-
-
-  const registros =
-    obterHistoricoOrdenado();
+  }
 
 
   registros.forEach(
@@ -1580,58 +1910,54 @@ function renderHistorico() {
       tr.innerHTML = `
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.nome
           )}
         </td>
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.rgi
           )}
         </td>
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.pavilhao
           )}
         </td>
 
-        <td class="center">
-          ${escapeHtml(
+        <td>
+          ${escapar(
             registro.cela
           )}
         </td>
 
         <td>
-          ${escapeHtml(
+          ${escapar(
             registro.atendimento
           )}
         </td>
 
         <td>
-          ${escapeHtml(
-            formatarData(
-              registro.dataAtendimento
-            )
+          ${formatarData(
+            registro.dataAtendimento
           )}
         </td>
 
         <td>
-
-          <span class="badge">
-            Recebido
+          <span class="badge online">
+            RECEBIDO
           </span>
-
         </td>
 
         <td>
 
           <button
-            class="btn warning"
+            class="secondary"
             onclick="guardarAtendimento('${registro.recordId}')"
           >
-            📁 Guardar
+            📁 GUARDAR
           </button>
 
         </td>
@@ -1650,20 +1976,7 @@ function renderHistorico() {
 
 
 /* =========================================================
-   RENDER GERAL
-========================================================= */
-
-function renderTudo() {
-
-  renderPendentes();
-
-  renderHistorico();
-
-}
-
-
-/* =========================================================
-   GUARDAR ATENDIMENTO
+   GUARDAR
 ========================================================= */
 
 function guardarAtendimento(
@@ -1685,37 +1998,38 @@ function guardarAtendimento(
   }
 
 
-  const registro =
-    lista[indice];
+  const registro = {
 
+    ...lista[indice],
 
-  const jaExiste =
-    arquivo.some(
-      item =>
-        item.recordId ===
-        recordId
-    );
+    status:
+      "guardado",
+
+    guardadoEm:
+      new Date()
+        .toISOString()
+
+  };
 
 
   if (
-    !jaExiste
+    !guardados.some(
+      item =>
+        item.recordId ===
+        recordId
+    )
   ) {
 
-    arquivo.push({
-
-      ...registro,
-
-      guardadoEm:
-        new Date()
-          .toISOString(),
-
-      origem:
-        "mesa"
-
-    });
+    guardados.push(
+      registro
+    );
 
   }
 
+
+  /*
+    Retira do histórico principal.
+  */
 
   lista.splice(
     indice,
@@ -1723,20 +2037,20 @@ function guardarAtendimento(
   );
 
 
-  salvarJSON(
-    STORAGE_MESA,
+  salvar(
+    STORAGE_LISTA,
     lista
   );
 
-  salvarJSON(
-    STORAGE_ARQUIVO_MESA,
-    arquivo
+  salvar(
+    STORAGE_ARQUIVO,
+    guardados
   );
 
 
-  renderTudo();
+  renderHistorico();
 
-  mostrarStatus(
+  status(
     "Atendimento guardado com sucesso.",
     "sucesso"
   );
@@ -1745,288 +2059,15 @@ function guardarAtendimento(
 
 
 /* =========================================================
-   CONEXÃO WEBSOCKET
+   MODAL GUARDADOS
 ========================================================= */
 
-function obterWsUrl() {
-
-  const protocolo =
-    location.protocol ===
-    "https:"
-      ? "wss:"
-      : "ws:";
-
-  return (
-    protocolo +
-    "//" +
-    location.host
-  );
-
-}
-
-
-function conectarWebSocket() {
-
-  if (
-    socket &&
-    (
-      socket.readyState ===
-        WebSocket.OPEN ||
-      socket.readyState ===
-        WebSocket.CONNECTING
-    )
-  ) {
-
-    return;
-
-  }
-
-
-  try {
-
-    socket =
-      new WebSocket(
-        obterWsUrl()
-      );
-
-  } catch {
-
-    agendarReconexao();
-
-    return;
-
-  }
-
-
-  socket.addEventListener(
-    "open",
-    () => {
-
-      mostrarStatus(
-        "MESA conectada ao servidor.",
-        "sucesso"
-      );
-
-
-      socket.send(
-        JSON.stringify({
-
-          type:
-            "register",
-
-          role:
-            "receiver"
-
-        })
-      );
-
-    }
-  );
-
-
-  socket.addEventListener(
-    "message",
-    evento => {
-
-      let mensagem;
-
-
-      try {
-
-        mensagem =
-          JSON.parse(
-            evento.data
-          );
-
-      } catch {
-
-        return;
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "connected"
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "registered"
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "new_record"
-      ) {
-
-        receberAtendimento({
-
-          ...(mensagem.record || {}),
-
-          recordId:
-            mensagem.recordId,
-
-          enviadoEm:
-            mensagem.sentAt ||
-            mensagem.record?.enviadoEm
-
-        });
-
-        return;
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "record_received"
-      ) {
-
-        /*
-          Outro dispositivo MESA pode
-          ter confirmado o atendimento.
-
-          Nesse caso também retiramos
-          dos pendentes locais.
-        */
-
-        if (
-          mensagem.recordId
-        ) {
-
-          pendentes.delete(
-            mensagem.recordId
-          );
-
-          renderPendentes();
-
-        }
-
-        return;
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "error"
-      ) {
-
-        mostrarStatus(
-          mensagem.message ||
-          "Erro no servidor.",
-          "erro"
-        );
-
-      }
-
-    }
-  );
-
-
-  socket.addEventListener(
-    "close",
-    () => {
-
-      mostrarStatus(
-        "Servidor desconectado. Tentando reconectar...",
-        ""
-      );
-
-      agendarReconexao();
-
-    }
-  );
-
-
-  socket.addEventListener(
-    "error",
-    () => {
-
-      try {
-        socket.close();
-      } catch {}
-
-    }
-  );
-
-}
-
-
-function agendarReconexao() {
-
-  if (
-    reconnectTimer
-  ) {
-    return;
-  }
-
-
-  reconnectTimer =
-    setTimeout(
-      () => {
-
-        reconnectTimer =
-          null;
-
-        conectarWebSocket();
-
-      },
-      1000
-    );
-
-}
-
-
-function enviarMensagem(
-  dados
-) {
-
-  if (
-    socket &&
-    socket.readyState ===
-      WebSocket.OPEN
-  ) {
-
-    socket.send(
-      JSON.stringify(
-        dados
-      )
-    );
-
-    return true;
-
-  }
-
-  return false;
-
-}
-
-
-/* =========================================================
-   ARQUIVO — FILTROS
-========================================================= */
-
-function preencherFiltroArquivo() {
+function preencherFiltroGuardado() {
 
   const select =
     document.getElementById(
-      "arquivoAtendimento"
+      "filtroGuardadoAtendimento"
     );
-
-  const valorAtual =
-    select.value;
 
 
   select.innerHTML =
@@ -2054,156 +2095,119 @@ function preencherFiltroArquivo() {
     }
   );
 
+}
 
-  select.value =
-    valorAtual;
+
+function abrirGuardados() {
+
+  preencherFiltroGuardado();
+
+  renderGuardados();
+
+  document.getElementById(
+    "guardadosModal"
+  ).classList.add(
+    "aberto"
+  );
 
 }
 
 
-function abrirArquivo() {
+function fecharGuardados() {
 
-  preencherFiltroArquivo();
-
-  document
-    .getElementById(
-      "arquivoModal"
-    )
-    .classList.add(
-      "open"
-    );
-
-  renderArquivo();
+  document.getElementById(
+    "guardadosModal"
+  ).classList.remove(
+    "aberto"
+  );
 
 }
 
 
-function fecharArquivo() {
+function renderGuardados() {
 
-  document
-    .getElementById(
-      "arquivoModal"
-    )
-    .classList.remove(
-      "open"
-    );
-
-}
-
-
-function renderArquivo() {
-
-  const listaElemento =
+  const container =
     document.getElementById(
-      "arquivoList"
-    );
-
-  const contador =
-    document.getElementById(
-      "arquivoCount"
+      "guardadosLista"
     );
 
 
   const data =
     document.getElementById(
-      "arquivoData"
+      "filtroGuardadoData"
     ).value;
 
 
   const atendimento =
     document.getElementById(
-      "arquivoAtendimento"
+      "filtroGuardadoAtendimento"
     ).value;
 
 
   const nome =
     normalizarTexto(
       document.getElementById(
-        "arquivoNome"
+        "filtroGuardadoNome"
       ).value
     );
 
 
-  const resultados =
-    arquivo
-      .filter(
-        registro => {
+  const encontrados =
+    guardados.filter(
+      registro => {
 
-          if (
-            data &&
-            registro.dataAtendimento !==
-              data
-          ) {
+        if (
+          data &&
+          registro.dataAtendimento !==
+            data
+        ) {
 
-            return false;
-
-          }
-
-
-          if (
-            atendimento &&
-            registro.atendimento !==
-              atendimento
-          ) {
-
-            return false;
-
-          }
-
-
-          if (
-            nome &&
-            !normalizarTexto(
-              registro.nome
-            ).includes(
-              nome
-            )
-          ) {
-
-            return false;
-
-          }
-
-
-          return true;
+          return false;
 
         }
-      )
-      .sort(
-        (a, b) => {
 
-          return (
-            new Date(
-              b.guardadoEm ||
-              b.recebidoEm ||
-              b.enviadoEm ||
-              0
-            ) -
-            new Date(
-              a.guardadoEm ||
-              a.recebidoEm ||
-              a.enviadoEm ||
-              0
-            )
-          );
+
+        if (
+          atendimento &&
+          registro.atendimento !==
+            atendimento
+        ) {
+
+          return false;
 
         }
-      );
 
 
-  contador.textContent =
-    `${resultados.length} atendimento(s) encontrado(s).`;
+        if (
+          nome &&
+          !normalizarTexto(
+            registro.nome
+          ).includes(
+            nome
+          )
+        ) {
+
+          return false;
+
+        }
 
 
-  listaElemento.innerHTML = "";
+        return true;
+
+      }
+    );
+
+
+  container.innerHTML =
+    "";
 
 
   if (
-    !resultados.length
+    !encontrados.length
   ) {
 
-    listaElemento.innerHTML =
-      `<div style="padding:15px;text-align:center;color:#667085">
+    container.innerHTML =
+      `<div class="status">
         Nenhum atendimento guardado encontrado.
       </div>`;
 
@@ -2212,77 +2216,69 @@ function renderArquivo() {
   }
 
 
-  resultados.forEach(
+  encontrados.forEach(
     registro => {
 
-      const label =
+      const div =
         document.createElement(
-          "label"
+          "div"
         );
 
+      div.className =
+        "check-item";
 
-      label.innerHTML = `
+      div.style.marginBottom =
+        "7px";
 
-        <input
-          type="checkbox"
-          class="arquivoCheck"
-          value="${escapeHtml(
-            registro.recordId
-          )}"
-        >
 
-        <span>
+      div.innerHTML = `
 
-          <strong>
-            ${escapeHtml(
-              registro.nome
-            )}
-          </strong>
+        <label>
 
-          <br>
+          <input
+            type="checkbox"
+            class="guardado-check"
+            value="${escapar(
+              registro.recordId
+            )}"
+          >
 
-          <small>
+          <span>
+
+            <strong>
+              ${escapar(
+                registro.nome
+              )}
+            </strong>
+
+            <br>
 
             RGI:
-            ${escapeHtml(
-              registro.rgi || "-"
+            ${escapar(
+              registro.rgi
             )}
 
-            |
-            Pavilhão:
-            ${escapeHtml(
-              registro.pavilhao || "-"
+            &nbsp; | &nbsp;
+
+            ${escapar(
+              registro.atendimento
             )}
 
-            |
-            Cela:
-            ${escapeHtml(
-              registro.cela || "-"
+            &nbsp; | &nbsp;
+
+            ${formatarData(
+              registro.dataAtendimento
             )}
 
-            |
-            Atendimento:
-            ${escapeHtml(
-              registro.atendimento || "-"
-            )}
+          </span>
 
-            |
-            Data:
-            ${escapeHtml(
-              formatarData(
-                registro.dataAtendimento
-              )
-            )}
-
-          </small>
-
-        </span>
+        </label>
 
       `;
 
 
-      listaElemento.appendChild(
-        label
+      container.appendChild(
+        div
       );
 
     }
@@ -2291,13 +2287,13 @@ function renderArquivo() {
 }
 
 
-function selecionarTodosArquivo(
+function selecionarTodosGuardados(
   marcar
 ) {
 
   document
     .querySelectorAll(
-      ".arquivoCheck"
+      ".guardado-check"
     )
     .forEach(
       checkbox => {
@@ -2311,25 +2307,26 @@ function selecionarTodosArquivo(
 }
 
 
-function restaurarArquivados() {
+function restaurarGuardados() {
 
-  const selecionados =
+  const ids =
     Array.from(
       document.querySelectorAll(
-        ".arquivoCheck:checked"
+        ".guardado-check:checked"
       )
-    ).map(
+    )
+    .map(
       checkbox =>
         checkbox.value
     );
 
 
   if (
-    !selecionados.length
+    !ids.length
   ) {
 
-    mostrarStatus(
-      "Selecione pelo menos um atendimento.",
+    status(
+      "Selecione pelo menos um atendimento guardado.",
       "erro"
     );
 
@@ -2338,161 +2335,180 @@ function restaurarArquivados() {
   }
 
 
-  const restaurados = [];
+  ids.forEach(
+    id => {
 
+      const indice =
+        guardados.findIndex(
+          registro =>
+            registro.recordId ===
+            id
+        );
 
-  arquivo =
-    arquivo.filter(
-      registro => {
-
-        if (
-          selecionados.includes(
-            registro.recordId
-          )
-        ) {
-
-          restaurados.push(
-            registro
-          );
-
-          return false;
-
-        }
-
-        return true;
-
-      }
-    );
-
-
-  restaurados.forEach(
-    registro => {
 
       if (
-        !lista.some(
-          item =>
-            item.recordId ===
-            registro.recordId
-        )
+        indice < 0
       ) {
-
-        lista.push({
-
-          ...registro,
-
-          status:
-            "recebido",
-
-          restauradoEm:
-            new Date()
-              .toISOString()
-
-        });
-
+        return;
       }
+
+
+      const registro =
+        guardados[indice];
+
+
+      guardados.splice(
+        indice,
+        1
+      );
+
+
+      /*
+        Ao restaurar, volta para o
+        histórico como recebido.
+      */
+
+      lista.push({
+
+        ...registro,
+
+        status:
+          "recebido"
+
+      });
 
     }
   );
 
 
-  salvarJSON(
-    STORAGE_ARQUIVO_MESA,
-    arquivo
+  salvar(
+    STORAGE_ARQUIVO,
+    guardados
   );
 
-  salvarJSON(
-    STORAGE_MESA,
+  salvar(
+    STORAGE_LISTA,
     lista
   );
 
 
   renderTudo();
 
-  renderArquivo();
+  renderGuardados();
 
 
-  mostrarStatus(
-    `${restaurados.length} atendimento(s) restaurado(s).`,
+  status(
+    "Atendimentos restaurados.",
     "sucesso"
   );
 
 }
 
-    <script>
+
 /* =========================================================
    IMPRESSÃO
 ========================================================= */
 
 function abrirImpressao() {
 
-  preencherListaAtendimentos();
+  document.getElementById(
+    "dataImpressao"
+  ).value =
+    dataHoje();
 
-  document
-    .getElementById(
-      "printModal"
-    )
-    .classList.add(
-      "open"
-    );
 
-  atualizarOpcoesImpressao();
+  montarTipos();
+
+  document.getElementById(
+    "impressaoModal"
+  ).classList.add(
+    "aberto"
+  );
+
+
+  alterarTipoImpressao();
 
 }
 
 
 function fecharImpressao() {
 
-  document
-    .getElementById(
-      "printModal"
-    )
-    .classList.remove(
-      "open"
-    );
+  document.getElementById(
+    "impressaoModal"
+  ).classList.remove(
+    "aberto"
+  );
 
 }
 
 
-function preencherListaAtendimentos() {
+function dataHoje() {
+
+  const d =
+    new Date();
+
+  return (
+    d.getFullYear() +
+    "-" +
+    String(
+      d.getMonth()+1
+    ).padStart(2,"0") +
+    "-" +
+    String(
+      d.getDate()
+    ).padStart(2,"0")
+  );
+
+}
+
+
+function montarTipos() {
 
   const container =
     document.getElementById(
-      "listaAtendimentos"
+      "listaTipos"
     );
 
-  container.innerHTML = "";
+
+  container.innerHTML =
+    "";
 
 
   ATENDIMENTOS.forEach(
     atendimento => {
 
-      const label =
+      const div =
         document.createElement(
-          "label"
+          "div"
         );
 
+      div.className =
+        "check-item";
 
-      label.innerHTML = `
 
-        <input
-          type="checkbox"
-          class="checkAtendimento"
-          value="${escapeHtml(
-            atendimento
-          )}"
-        >
+      div.innerHTML = `
 
-        <span>
-          ${escapeHtml(
+        <label>
+
+          <input
+            type="checkbox"
+            class="tipo-check"
+            value="${escapar(
+              atendimento
+            )}"
+          >
+
+          ${escapar(
             atendimento
           )}
-        </span>
+
+        </label>
 
       `;
 
 
       container.appendChild(
-        label
+        div
       );
 
     }
@@ -2501,111 +2517,12 @@ function preencherListaAtendimentos() {
 }
 
 
-function obterTipoImpressao() {
-
-  return document.getElementById(
-    "tipoImpressao"
-  ).value;
-
-}
-
-
-function obterModoData() {
-
-  const selecionado =
-    document.querySelector(
-      'input[name="modoData"]:checked'
-    );
-
-  return selecionado
-    ? selecionado.value
-    : "todos";
-
-}
-
-
-function atualizarOpcoesImpressao() {
-
-  const tipo =
-    obterTipoImpressao();
-
-
-  const dataWrap =
-    document.getElementById(
-      "dataPrintWrap"
-    );
-
-  const modoWrap =
-    document.getElementById(
-      "modoDataWrap"
-    );
-
-  const listaWrap =
-    document.getElementById(
-      "listaAtendimentosWrap"
-    );
-
-  const dataAtWrap =
-    document.getElementById(
-      "atendimentosDataWrap"
-    );
-
-
-  dataWrap.classList.toggle(
-    "hidden",
-    tipo !== "data"
-  );
-
-
-  modoWrap.classList.toggle(
-    "hidden",
-    tipo !== "data"
-  );
-
-
-  listaWrap.classList.toggle(
-    "hidden",
-    tipo === "data"
-  );
-
-
-  if (
-    tipo !== "data"
-  ) {
-
-    dataAtWrap.classList.add(
-      "hidden"
-    );
-
-  }
-
-
-  if (
-    tipo === "data"
-  ) {
-
-    atualizarAtendimentosDaData();
-
-  }
-
-
-  atualizarInformacaoImpressao();
-
-}
-
-
-function obterAtendimentosSelecionados(
-  seletor
-) {
+function obterTiposSelecionados() {
 
   return Array.from(
     document.querySelectorAll(
-      seletor
+      ".tipo-check:checked"
     )
-  )
-  .filter(
-    checkbox =>
-      checkbox.checked
   )
   .map(
     checkbox =>
@@ -2615,206 +2532,131 @@ function obterAtendimentosSelecionados(
 }
 
 
-function todosRegistrosParaImpressao() {
-
-  /*
-    O histórico da MESA e os atendimentos
-    guardados formam uma única base para
-    impressão.
-
-    O Map evita duplicação pelo recordId.
-  */
-
-  const mapa =
-    new Map();
-
-
-  [
-    ...lista,
-    ...arquivo
-  ].forEach(
-    registro => {
-
-      if (
-        registro &&
-        registro.recordId
-      ) {
-
-        mapa.set(
-          registro.recordId,
-          registro
-        );
-
-      }
-
-    }
-  );
-
-
-  return Array.from(
-    mapa.values()
-  );
-
-}
-
-
-function atualizarAtendimentosDaData() {
-
-  const data =
-    document.getElementById(
-      "dataPrint"
-    ).value;
-
-  const modo =
-    obterModoData();
-
-
-  const wrap =
-    document.getElementById(
-      "atendimentosDataWrap"
-    );
-
-  const container =
-    document.getElementById(
-      "atendimentosData"
-    );
-
-
-  container.innerHTML = "";
-
-
-  if (
-    modo !==
-    "atendimentos"
-  ) {
-
-    wrap.classList.add(
-      "hidden"
-    );
-
-    atualizarInformacaoImpressao();
-
-    return;
-
-  }
-
-
-  wrap.classList.remove(
-    "hidden"
-  );
-
-
-  const registros =
-    todosRegistrosParaImpressao()
-      .filter(
-        registro =>
-          !data ||
-          registro.dataAtendimento ===
-            data
-      );
-
-
-  const existentes =
-    new Set(
-      registros
-        .map(
-          registro =>
-            registro.atendimento
-        )
-        .filter(Boolean)
-    );
-
-
-  ATENDIMENTOS
-    .filter(
-      atendimento =>
-        existentes.has(
-          atendimento
-        )
-    )
-    .forEach(
-      atendimento => {
-
-        const label =
-          document.createElement(
-            "label"
-          );
-
-
-        label.innerHTML = `
-
-          <input
-            type="checkbox"
-            class="checkAtendimentoData"
-            value="${escapeHtml(
-              atendimento
-            )}"
-          >
-
-          <span>
-            ${escapeHtml(
-              atendimento
-            )}
-          </span>
-
-        `;
-
-
-        container.appendChild(
-          label
-        );
-
-      }
-    );
-
-
-  if (
-    !container.children.length
-  ) {
-
-    container.innerHTML =
-      `<div class="muted">
-        Nenhum atendimento encontrado para esta data.
-      </div>`;
-
-  }
-
-
-  atualizarInformacaoImpressao();
-
-}
-
-
-function atualizarInformacaoImpressao() {
-
-  const info =
-    document.getElementById(
-      "printInfo"
-    );
+function alterarTipoImpressao() {
 
   const tipo =
-    obterTipoImpressao();
+    document.getElementById(
+      "tipoImpressao"
+    ).value;
+
+
+  const campoData =
+    document.getElementById(
+      "campoData"
+    );
+
+
+  const filtro =
+    document.getElementById(
+      "filtroDataOpcoes"
+    );
+
+
+  const lista =
+    document.getElementById(
+      "listaTipos"
+    );
 
 
   if (
     tipo ===
-    "atendimento"
+    "data"
   ) {
 
-    const selecionados =
-      obterAtendimentosSelecionados(
-        ".checkAtendimento"
+    campoData.classList.remove(
+      "oculto"
+    );
+
+    filtro.classList.remove(
+      "oculto"
+    );
+
+    alternarFiltroData();
+
+  } else {
+
+    campoData.classList.add(
+      "oculto"
+    );
+
+    filtro.classList.add(
+      "oculto"
+    );
+
+    if (
+      tipo ===
+      "geral"
+    ) {
+
+      lista.classList.add(
+        "oculto"
       );
 
+    } else {
 
-    info.textContent =
-      selecionados.length
-        ? `${selecionados.length} tipo(s) de atendimento selecionado(s).`
-        : "Selecione um ou mais tipos de atendimento.";
+      lista.classList.remove(
+        "oculto"
+      );
 
-    return;
+    }
 
   }
+
+
+  atualizarInfoImpressao();
+
+}
+
+
+function alternarFiltroData() {
+
+  const modo =
+    document.querySelector(
+      'input[name="filtroData"]:checked'
+    )?.value;
+
+
+  const lista =
+    document.getElementById(
+      "listaTipos"
+    );
+
+
+  if (
+    modo ===
+    "atendimentos"
+  ) {
+
+    lista.classList.remove(
+      "oculto"
+    );
+
+  } else {
+
+    lista.classList.add(
+      "oculto"
+    );
+
+  }
+
+
+  atualizarInfoImpressao();
+
+}
+
+
+function atualizarInfoImpressao() {
+
+  const info =
+    document.getElementById(
+      "infoImpressao"
+    );
+
+
+  const tipo =
+    document.getElementById(
+      "tipoImpressao"
+    ).value;
 
 
   if (
@@ -2830,60 +2672,122 @@ function atualizarInformacaoImpressao() {
   }
 
 
-  const data =
-    document.getElementById(
-      "dataPrint"
-    ).value;
-
-
-  if (!data) {
-
-    info.textContent =
-      "Escolha uma data.";
-
-    return;
-
-  }
-
-
   if (
-    obterModoData() ===
-    "todos"
+    tipo ===
+    "data"
   ) {
 
-    const quantidade =
-      todosRegistrosParaImpressao()
-        .filter(
-          registro =>
-            registro.dataAtendimento ===
-            data
-        )
-        .length;
+    const data =
+      document.getElementById(
+        "dataImpressao"
+      ).value;
 
 
-    info.textContent =
-      `${quantidade} atendimento(s) encontrado(s) na data selecionada.`;
+    const modo =
+      document.querySelector(
+        'input[name="filtroData"]:checked'
+      )?.value;
+
+
+    if (
+      modo ===
+      "todos"
+    ) {
+
+      info.textContent =
+        `Todos os atendimentos de ${formatarData(data)} serão impressos.`;
+
+    } else {
+
+      const tipos =
+        obterTiposSelecionados();
+
+      info.textContent =
+        tipos.length
+          ? `${tipos.length} tipo(s) selecionado(s) para ${formatarData(data)}.`
+          : "Selecione os tipos de atendimento.";
+
+    }
 
     return;
 
   }
 
 
-  const selecionados =
-    obterAtendimentosSelecionados(
-      ".checkAtendimentoData"
-    );
+  const tipos =
+    obterTiposSelecionados();
 
 
   info.textContent =
-    selecionados.length
-      ? `${selecionados.length} tipo(s) selecionado(s) para a data.`
-      : "Selecione um ou mais tipos de atendimento.";
+    tipos.length
+      ? `${tipos.length} tipo(s) de atendimento selecionado(s).`
+      : "Selecione os tipos de atendimento.";
 
 }
 
 
-function agruparPorAtendimento(
+function combinarRegistros() {
+
+  const mapa =
+    new Map();
+
+
+  /*
+    Histórico recebido.
+  */
+
+  lista.forEach(
+    registro => {
+
+      if (
+        registro.recordId
+      ) {
+
+        mapa.set(
+          registro.recordId,
+          {
+            ...registro
+          }
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+    Guardados também entram na impressão.
+  */
+
+  guardados.forEach(
+    registro => {
+
+      if (
+        registro.recordId
+      ) {
+
+        mapa.set(
+          registro.recordId,
+          {
+            ...registro
+          }
+        );
+
+      }
+
+    }
+  );
+
+
+  return Array.from(
+    mapa.values()
+  );
+
+}
+
+
+function agrupar(
   registros
 ) {
 
@@ -2894,355 +2798,269 @@ function agruparPorAtendimento(
   registros.forEach(
     registro => {
 
-      const nome =
+      const atendimento =
         registro.atendimento ||
         "Outros";
 
 
       if (
-        !mapa.has(nome)
+        !mapa.has(
+          atendimento
+        )
       ) {
 
         mapa.set(
-          nome,
+          atendimento,
           []
         );
 
       }
 
 
-      mapa.get(nome).push(
-        registro
-      );
+      mapa
+        .get(
+          atendimento
+        )
+        .push(
+          registro
+        );
 
     }
   );
 
 
-  return Array.from(
-    mapa.entries()
-  )
-  .sort(
-    (a, b) =>
-      a[0].localeCompare(
-        b[0],
-        "pt-BR"
-      )
-  )
-  .map(
-    ([nome, registros]) => ({
-      nome,
-      registros
-    })
-  );
+  return mapa;
 
 }
 
 
-function ordenarRegistros(
+function ordenar(
   registros
 ) {
 
-  return [...registros].sort(
-    (a, b) => {
+  return registros
+    .slice()
+    .sort(
+      (a,b) => {
 
-      return (
-        String(
-          a.atendimento ||
-          ""
-        ).localeCompare(
+        const data =
           String(
-            b.atendimento ||
+            a.dataAtendimento ||
             ""
-          ),
-          "pt-BR"
-        ) ||
-        String(
-          a.nome ||
-          ""
-        ).localeCompare(
-          String(
-            b.nome ||
-            ""
-          ),
-          "pt-BR"
-        ) ||
-        new Date(
-          a.recebidoEm ||
+          ).localeCompare(
+            String(
+              b.dataAtendimento ||
+              ""
+            )
+          );
+
+
+        if (
+          data !==
+          0
+        ) {
+
+          return data;
+
+        }
+
+
+        return String(
           a.enviadoEm ||
-          a.criadoEm ||
-          0
-        ) -
-        new Date(
-          b.recebidoEm ||
-          b.enviadoEm ||
-          b.criadoEm ||
-          0
-        )
-      );
+          ""
+        ).localeCompare(
+          String(
+            b.enviadoEm ||
+            ""
+          )
+        );
 
-    }
-  );
+      }
+    );
 
 }
 
 
-function filtrarParaImpressao() {
-
-  const todos =
-    todosRegistrosParaImpressao();
-
-  const tipo =
-    obterTipoImpressao();
-
-
-  if (
-    tipo ===
-    "atendimento"
-  ) {
-
-    const selecionados =
-      obterAtendimentosSelecionados(
-        ".checkAtendimento"
-      );
-
-
-    if (
-      !selecionados.length
-    ) {
-
-      throw new Error(
-        "Selecione pelo menos um tipo de atendimento."
-      );
-
-    }
-
-
-    return todos.filter(
-      registro =>
-        selecionados.includes(
-          registro.atendimento
-        )
-    );
-
-  }
-
-
-  if (
-    tipo ===
-    "geral"
-  ) {
-
-    return todos;
-
-  }
-
-
-  const data =
-    document.getElementById(
-      "dataPrint"
-    ).value;
-
-
-  if (!data) {
-
-    throw new Error(
-      "Selecione a data da impressão."
-    );
-
-  }
-
-
-  const daData =
-    todos.filter(
-      registro =>
-        registro.dataAtendimento ===
-        data
-    );
-
-
-  if (
-    obterModoData() ===
-    "todos"
-  ) {
-
-    return daData;
-
-  }
-
-
-  const selecionados =
-    obterAtendimentosSelecionados(
-      ".checkAtendimentoData"
-    );
-
-
-  if (
-    !selecionados.length
-  ) {
-
-    throw new Error(
-      "Selecione pelo menos um tipo de atendimento."
-    );
-
-  }
-
-
-  return daData.filter(
-    registro =>
-      selecionados.includes(
-        registro.atendimento
-      )
-  );
-
-}
-
-
-function montarTabela(
+function criarPagina(
+  titulo,
   registros
 ) {
 
-  const linhas =
-    registros.map(
-      registro => `
+  const pagina =
+    document.createElement(
+      "section"
+    );
 
-        <tr>
-
-          <td class="col-nome">
-            ${escapeHtml(
-              registro.nome
-            )}
-          </td>
-
-          <td class="col-rgi">
-            ${escapeHtml(
-              registro.rgi
-            )}
-          </td>
-
-          <td class="col-pav">
-            ${escapeHtml(
-              registro.pavilhao
-            )}
-          </td>
-
-          <td class="col-cela">
-            ${escapeHtml(
-              registro.cela
-            )}
-          </td>
-
-          <td class="col-at">
-            ${escapeHtml(
-              registro.atendimento
-            )}
-          </td>
-
-          <td class="col-data">
-            ${escapeHtml(
-              formatarData(
-                registro.dataAtendimento
-              )
-            )}
-          </td>
-
-        </tr>
-
-      `
-    )
-    .join("");
+  pagina.className =
+    "print-page";
 
 
-  return `
-
-    <table class="print-table">
-
-      <thead>
-
-        <tr>
-
-          <th class="col-nome">
-            Nome
-          </th>
-
-          <th class="col-rgi">
-            RGI
-          </th>
-
-          <th class="col-pav">
-            Pavilhão
-          </th>
-
-          <th class="col-cela">
-            Cela
-          </th>
-
-          <th class="col-at">
-            Atendimento
-          </th>
-
-          <th class="col-data">
-            Data
-          </th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-        ${linhas}
-      </tbody>
-
-    </table>
-
-  `;
-
-}
+  const primeiro =
+    registros[0];
 
 
-function cabecalhoImpressao(
-  titulo = ""
-) {
+  pagina.innerHTML = `
 
-  return `
+    <div class="print-header">
 
-    <div class="print-title">
-      CPAIG - LISTA DE ATENDIMENTOS
+      <h1>
+        CPAIG - LISTA DE ATENDIMENTOS
+      </h1>
+
+      <h2>
+        ${escapar(
+          titulo
+        )}
+      </h2>
+
+      <div>
+        Data do atendimento:
+        ${formatarData(
+          primeiro?.dataAtendimento
+        )}
+
+        &nbsp; | &nbsp;
+
+        Total:
+        ${registros.length}
+
+      </div>
+
     </div>
 
-    ${
-      titulo
-        ? `
-          <div class="group-title">
-            ${escapeHtml(
-              titulo
-            )}
-          </div>
-        `
-        : ""
-    }
+  `;
+
+
+  const tabela =
+    document.createElement(
+      "table"
+    );
+
+  tabela.className =
+    "print-table";
+
+
+  tabela.innerHTML = `
+
+    <thead>
+
+      <tr>
+
+        <th class="col-nome">
+          Nome do interno
+        </th>
+
+        <th class="col-rgi">
+          RGI
+        </th>
+
+        <th class="col-pav">
+          Pav.
+        </th>
+
+        <th class="col-cela">
+          Cela
+        </th>
+
+        <th class="col-atendimento">
+          Atendimento
+        </th>
+
+        <th class="col-data">
+          Data
+        </th>
+
+      </tr>
+
+    </thead>
+
+    <tbody></tbody>
 
   `;
+
+
+  const tbody =
+    tabela.querySelector(
+      "tbody"
+    );
+
+
+  ordenar(
+    registros
+  ).forEach(
+    registro => {
+
+      const tr =
+        document.createElement(
+          "tr"
+        );
+
+
+      tr.innerHTML = `
+
+        <td>
+          ${escapar(
+            registro.nome
+          )}
+        </td>
+
+        <td>
+          ${escapar(
+            registro.rgi
+          )}
+        </td>
+
+        <td class="col-pav">
+          ${escapar(
+            registro.pavilhao
+          )}
+        </td>
+
+        <td class="col-cela">
+          ${escapar(
+            registro.cela
+          )}
+        </td>
+
+        <td>
+          ${escapar(
+            registro.atendimento
+          )}
+        </td>
+
+        <td class="col-data">
+          ${formatarData(
+            registro.dataAtendimento
+          )}
+        </td>
+
+      `;
+
+
+      tbody.appendChild(
+        tr
+      );
+
+    }
+  );
+
+
+  pagina.appendChild(
+    tabela
+  );
+
+
+  return pagina;
 
 }
 
 
-/* =========================================================
-   GERAÇÃO DA ÁREA DE IMPRESSÃO
-========================================================= */
-
-function gerarAreaImpressao(
-  registros
-) {
-
-  const area =
-    document.getElementById(
-      "printArea"
-    );
-
+function imprimir() {
 
   const tipo =
-    obterTipoImpressao();
+    document.getElementById(
+      "tipoImpressao"
+    ).value;
 
 
   const umPorPagina =
@@ -3251,221 +3069,214 @@ function gerarAreaImpressao(
     ).checked;
 
 
-  area.innerHTML = "";
+  const todos =
+    combinarRegistros();
 
 
-  const ordenados =
-    ordenarRegistros(
-      registros
-    );
+  let registros = [];
 
+  let titulo = "";
 
-  /*
-    POR ATENDIMENTO
-  */
 
   if (
     tipo ===
     "atendimento"
   ) {
 
-    const grupos =
-      agruparPorAtendimento(
-        ordenados
-      );
+    const tipos =
+      obterTiposSelecionados();
 
 
     if (
-      umPorPagina
+      !tipos.length
     ) {
 
-      grupos.forEach(
-        grupo => {
-
-          area.insertAdjacentHTML(
-            "beforeend",
-
-            `
-
-              <section class="print-page">
-
-                ${cabecalhoImpressao(
-                  grupo.nome
-                )}
-
-                ${montarTabela(
-                  grupo.registros
-                )}
-
-              </section>
-
-            `
-
-          );
-
-        }
+      status(
+        "Selecione pelo menos um atendimento.",
+        "erro"
       );
 
-    } else {
-
-      let html =
-        `<section class="print-page">
-
-          ${cabecalhoImpressao()}
-        `;
-
-
-      grupos.forEach(
-        grupo => {
-
-          html += `
-
-            <div
-              class="group-title"
-              style="margin-top:4mm"
-            >
-              ${escapeHtml(
-                grupo.nome
-              )}
-            </div>
-
-            ${montarTabela(
-              grupo.registros
-            )}
-
-          `;
-
-        }
-      );
-
-
-      html +=
-        "</section>";
-
-
-      area.innerHTML =
-        html;
+      return;
 
     }
 
 
-    return;
+    registros =
+      todos.filter(
+        registro =>
+          tipos.includes(
+            registro.atendimento
+          )
+      );
+
+
+    titulo =
+      "POR ATENDIMENTO";
 
   }
 
 
-  /*
-    POR ATENDIMENTO GERAL
-  */
-
-  if (
+  else if (
     tipo ===
     "geral"
   ) {
 
-    const grupos =
-      agruparPorAtendimento(
-        ordenados
-      );
+    registros =
+      todos;
+
+    titulo =
+      "POR ATENDIMENTO GERAL";
+
+  }
+
+
+  else if (
+    tipo ===
+    "data"
+  ) {
+
+    const data =
+      document.getElementById(
+        "dataImpressao"
+      ).value;
 
 
     if (
-      umPorPagina
+      !data
     ) {
 
-      grupos.forEach(
-        grupo => {
-
-          area.insertAdjacentHTML(
-            "beforeend",
-
-            `
-
-              <section class="print-page">
-
-                ${cabecalhoImpressao(
-                  grupo.nome
-                )}
-
-                ${montarTabela(
-                  grupo.registros
-                )}
-
-              </section>
-
-            `
-
-          );
-
-        }
+      status(
+        "Selecione a data.",
+        "erro"
       );
 
-    } else {
-
-      area.innerHTML = `
-
-        <section class="print-page">
-
-          ${cabecalhoImpressao()}
-
-          ${montarTabela(
-            ordenados
-          )}
-
-        </section>
-
-      `;
+      return;
 
     }
 
+
+    registros =
+      todos.filter(
+        registro =>
+          registro.dataAtendimento ===
+          data
+      );
+
+
+    const modo =
+      document.querySelector(
+        'input[name="filtroData"]:checked'
+      )?.value;
+
+
+    if (
+      modo ===
+      "atendimentos"
+    ) {
+
+      const tipos =
+        obterTiposSelecionados();
+
+
+      if (
+        !tipos.length
+      ) {
+
+        status(
+          "Selecione pelo menos um atendimento.",
+          "erro"
+        );
+
+        return;
+
+      }
+
+
+      registros =
+        registros.filter(
+          registro =>
+            tipos.includes(
+              registro.atendimento
+            )
+        );
+
+    }
+
+
+    titulo =
+      `POR DATA — ${formatarData(data)}`;
+
+  }
+
+
+  if (
+    !registros.length
+  ) {
+
+    status(
+      "Nenhum atendimento encontrado para a impressão.",
+      "erro"
+    );
 
     return;
 
   }
 
 
-  /*
-    POR DATA
-  */
-
-  const data =
+  const area =
     document.getElementById(
-      "dataPrint"
-    ).value;
-
-
-  const grupos =
-    agruparPorAtendimento(
-      ordenados
+      "printArea"
     );
 
+
+  area.innerHTML =
+    "";
+
+
+  /*
+    CORREÇÃO IMPORTANTE:
+
+    Com "Um atendimento por página",
+    não existe uma página geral inicial.
+
+    Cada grupo de atendimento vira
+    diretamente uma página.
+  */
 
   if (
     umPorPagina
   ) {
 
-    grupos.forEach(
-      grupo => {
+    const grupos =
+      agrupar(
+        registros
+      );
 
-        area.insertAdjacentHTML(
-          "beforeend",
 
-          `
+    const ordenados =
+      Array.from(
+        grupos.entries()
+      ).sort(
+        (a,b) =>
+          a[0].localeCompare(
+            b[0],
+            "pt-BR"
+          )
+      );
 
-            <section class="print-page">
 
-              ${cabecalhoImpressao(
-                `${grupo.nome} — ${formatarData(data)}`
-              )}
+    ordenados.forEach(
+      ([atendimento, itens]) => {
 
-              ${montarTabela(
-                grupo.registros
-              )}
+        const pagina =
+          criarPagina(
+            `${titulo} — ${atendimento}`,
+            itens
+          );
 
-            </section>
 
-          `
-
+        area.appendChild(
+          pagina
         );
 
       }
@@ -3473,135 +3284,77 @@ function gerarAreaImpressao(
 
   } else {
 
-    area.innerHTML = `
-
-      <section class="print-page">
-
-        ${cabecalhoImpressao(
-          `Data: ${formatarData(data)}`
-        )}
-
-        ${montarTabela(
-          ordenados
-        )}
-
-      </section>
-
-    `;
-
-  }
-
-}
-
-
-function executarImpressao() {
-
-  try {
-
-    const registros =
-      filtrarParaImpressao();
-
-
-    if (
-      !registros.length
-    ) {
-
-      throw new Error(
-        "Nenhum atendimento encontrado para os filtros escolhidos."
+    const pagina =
+      criarPagina(
+        titulo,
+        registros
       );
 
-    }
+
+    pagina.style.pageBreakAfter =
+      "auto";
+
+    pagina.style.breakAfter =
+      "auto";
 
 
-    gerarAreaImpressao(
-      registros
-    );
-
-
-    fecharImpressao();
-
-
-    setTimeout(
-      () => {
-
-        window.print();
-
-      },
-      150
-    );
-
-
-  } catch (
-    erro
-  ) {
-
-    alert(
-      erro.message
+    area.appendChild(
+      pagina
     );
 
   }
+
+
+  fecharImpressao();
+
+
+  setTimeout(
+    () => {
+
+      window.print();
+
+    },
+    300
+  );
 
 }
 
 
 /* =========================================================
-   EVENTOS
+   RENDER GERAL
 ========================================================= */
 
-document.addEventListener(
-  "change",
-  evento => {
+function renderTudo() {
 
-    if (
-      evento.target.matches(
-        ".checkAtendimento"
-      ) ||
-      evento.target.matches(
-        ".checkAtendimentoData"
-      )
-    ) {
+  renderPendentes();
 
-      atualizarInformacaoImpressao();
+  renderHistorico();
 
-    }
-
-  }
-);
+}
 
 
-document.addEventListener(
-  "click",
-  evento => {
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
 
-    const arquivoModal =
-      document.getElementById(
-        "arquivoModal"
-      );
+function inicializar() {
 
-    const printModal =
-      document.getElementById(
-        "printModal"
-      );
+  preencherFiltroGuardado();
 
+  renderTudo();
 
-    if (
-      evento.target ===
-      arquivoModal
-    ) {
+  conectar();
 
-      fecharArquivo();
-
-    }
+}
 
 
-    if (
-      evento.target ===
-      printModal
-    ) {
+window.addEventListener(
+  "beforeunload",
+  () => {
 
-      fecharImpressao();
-
-    }
+    clearTimeout(
+      reconectarTimer
+    );
 
   }
 );
@@ -3616,9 +3369,16 @@ document.addEventListener(
       "Escape"
     ) {
 
-      fecharArquivo();
-
-      fecharImpressao();
+      document
+        .querySelectorAll(
+          ".modal.aberto"
+        )
+        .forEach(
+          modal =>
+            modal.classList.remove(
+              "aberto"
+            )
+        );
 
     }
 
@@ -3626,244 +3386,9 @@ document.addEventListener(
 );
 
 
-/* =========================================================
-   INICIALIZAÇÃO
-========================================================= */
-
-function inicializar() {
-
-  preencherFiltroArquivo();
-
-  renderTudo();
-
-  conectarWebSocket();
-
-}
-
-
 inicializar();
 
 </script>
-
-
-<!-- =====================================================
-     MODAL DE IMPRESSÃO
-===================================================== -->
-
-<div
-  id="printModal"
-  class="modal"
->
-
-  <div class="modal-box">
-
-    <div class="modal-head">
-
-      <h3>
-        🖨️ Impressão
-      </h3>
-
-      <button
-        class="btn secondary"
-        onclick="fecharImpressao()"
-      >
-        Fechar
-      </button>
-
-    </div>
-
-
-    <div class="modal-grid">
-
-      <div>
-
-        <label>
-          Tipo de impressão
-        </label>
-
-        <select
-          id="tipoImpressao"
-          onchange="atualizarOpcoesImpressao()"
-        >
-
-          <option value="atendimento">
-            Por atendimento
-          </option>
-
-          <option value="geral">
-            Por atendimento geral
-          </option>
-
-          <option value="data">
-            Por data
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div
-        id="dataPrintWrap"
-        class="hidden"
-      >
-
-        <label>
-          Data
-        </label>
-
-        <input
-          id="dataPrint"
-          type="date"
-          onchange="atualizarAtendimentosDaData()"
-        >
-
-      </div>
-
-
-      <div
-        id="modoDataWrap"
-        class="hidden"
-      >
-
-        <label>
-          Por data
-        </label>
-
-        <div
-          style="
-            display:flex;
-            gap:10px;
-            margin-top:9px;
-          "
-        >
-
-          <label>
-
-            <input
-              type="radio"
-              name="modoData"
-              value="todos"
-              checked
-              onchange="atualizarAtendimentosDaData()"
-            >
-
-            Todos
-
-          </label>
-
-
-          <label>
-
-            <input
-              type="radio"
-              name="modoData"
-              value="atendimentos"
-              onchange="atualizarAtendimentosDaData()"
-            >
-
-            Atendimentos
-
-          </label>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <div
-      id="listaAtendimentosWrap"
-      style="margin-top:15px"
-    >
-
-      <label>
-        Selecione os atendimentos
-      </label>
-
-      <div
-        id="listaAtendimentos"
-        class="checks"
-      ></div>
-
-    </div>
-
-
-    <div
-      id="atendimentosDataWrap"
-      class="hidden"
-      style="margin-top:15px"
-    >
-
-      <label>
-        Atendimentos da data
-      </label>
-
-      <div
-        id="atendimentosData"
-        class="checks"
-      ></div>
-
-    </div>
-
-
-    <div
-      style="margin-top:15px"
-    >
-
-      <label>
-
-        <input
-          type="checkbox"
-          id="umPorPagina"
-        >
-
-        Um atendimento por página
-
-      </label>
-
-    </div>
-
-
-    <div
-      id="printInfo"
-      class="status"
-    ></div>
-
-
-    <div class="modal-actions">
-
-      <button
-        class="btn secondary"
-        onclick="fecharImpressao()"
-      >
-        Cancelar
-      </button>
-
-      <button
-        class="btn primary"
-        onclick="executarImpressao()"
-      >
-        🖨️ IMPRIMIR
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- =====================================================
-     ÁREA DE IMPRESSÃO
-===================================================== -->
-
-<div
-  id="printArea"
-  class="print-area"
-></div>
-
 
 </body>
 </html>
