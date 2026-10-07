@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   >
 
   <title>Mesa de Atendimento V2</title>
+
 
   <style>
 
@@ -185,9 +188,69 @@
       padding: 25px;
     }
 
+    .modal-fundo {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.55);
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .modal {
+      background: white;
+      max-width: 650px;
+      margin: 30px auto;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .modal h2 {
+      margin-top: 0;
+    }
+
+    .opcao-impressao {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .opcao-impressao label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    .opcao-impressao select,
+    .opcao-impressao input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .modal-botoes {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn-cancelar {
+      background: #777;
+      color: white;
+    }
+
     #listaImpressao {
       display: none;
     }
+
 
     @media print {
 
@@ -206,40 +269,104 @@
         left: 0;
         top: 0;
         width: 100%;
-        padding: 20px;
+        padding: 8mm;
       }
 
-      #listaImpressao h1 {
+      .print-cabecalho {
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
       }
 
-      #listaImpressao h2 {
-        margin-top: 20px;
+      .print-cabecalho h1 {
+        font-size: 16px;
+        margin: 0 0 4px 0;
+      }
+
+      .print-data {
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+
+      .print-grupo {
+        margin-bottom: 10px;
+      }
+
+      .print-grupo.pagina {
+        page-break-after: always;
+      }
+
+      .print-grupo h2 {
+        font-size: 13px;
+        margin: 5px 0;
+        padding-bottom: 3px;
         border-bottom: 1px solid #000;
-        padding-bottom: 5px;
       }
 
-      #listaImpressao table {
+      .print-tabela {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 15px;
+        table-layout: fixed;
       }
 
-      #listaImpressao th,
-      #listaImpressao td {
+      .print-tabela th,
+      .print-tabela td {
         border: 1px solid #000;
-        padding: 6px;
-        font-size: 12px;
+        padding: 2px 3px;
+        font-size: 9px;
+        line-height: 1.15;
       }
 
-      #listaImpressao th {
+      .print-tabela th {
         font-weight: bold;
       }
+
+      .col-nome {
+        width: 34%;
+      }
+
+      .col-rgi {
+        width: 16%;
+      }
+
+      .col-pavilhao {
+        width: 9%;
+        text-align: center;
+      }
+
+      .col-cela {
+        width: 7%;
+        text-align: center;
+      }
+
+      .col-atendimento {
+        width: 20%;
+      }
+
+      .col-data {
+        width: 14%;
+        text-align: center;
+      }
+
+      .print-tabela th.col-pavilhao,
+      .print-tabela td.col-pavilhao,
+      .print-tabela th.col-cela,
+      .print-tabela td.col-cela {
+        text-align: center;
+        padding-left: 1px;
+        padding-right: 1px;
+      }
+
+      @page {
+        size: A4;
+        margin: 8mm;
+      }
+
     }
 
   </style>
+
 </head>
+
 
 <body>
 
@@ -291,7 +418,7 @@
 
       <button
         class="btn-print"
-        onclick="imprimirLista()"
+        onclick="abrirImpressao()"
       >
         🖨️ IMPRIMIR LISTA
       </button>
@@ -341,11 +468,135 @@
 </main>
 
 
+<!-- PAINEL DE IMPRESSÃO -->
+
+<div
+  id="modalImpressao"
+  class="modal-fundo"
+>
+
+  <div class="modal">
+
+    <h2>
+      Opções de impressão
+    </h2>
+
+
+    <div class="opcao-impressao">
+
+      <label for="tipoImpressao">
+        Tipo de impressão
+      </label>
+
+      <select
+        id="tipoImpressao"
+        onchange="atualizarOpcoesImpressao()"
+      >
+
+        <option value="atendimento">
+          Por atendimento
+        </option>
+
+        <option value="geral">
+          Por atendimento geral
+        </option>
+
+        <option value="data">
+          Por data
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div
+      id="opcaoAtendimento"
+      class="opcao-impressao"
+    >
+
+      <label for="filtroAtendimento">
+        Escolha o atendimento
+      </label>
+
+      <select id="filtroAtendimento">
+
+        <option value="">
+          Selecione
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div
+      id="opcaoData"
+      class="opcao-impressao"
+      style="display:none;"
+    >
+
+      <label for="filtroData">
+        Escolha a data
+      </label>
+
+      <input
+        type="date"
+        id="filtroData"
+      >
+
+    </div>
+
+
+    <div
+      id="opcaoPagina"
+      class="opcao-impressao"
+    >
+
+      <label>
+
+        <input
+          type="checkbox"
+          id="umPorPagina"
+        >
+
+        Um atendimento por página
+
+      </label>
+
+    </div>
+
+
+    <div class="modal-botoes">
+
+      <button
+        class="btn-print"
+        onclick="executarImpressao()"
+      >
+        🖨️ IMPRIMIR
+      </button>
+
+
+      <button
+        class="btn-cancelar"
+        onclick="fecharImpressao()"
+      >
+        CANCELAR
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
 <script>
 
   const WS_URL =
     (location.protocol === "https:" ? "wss://" : "ws://") +
     location.host;
+
 
   let ws = null;
 
@@ -375,7 +626,65 @@
 
     localStorage.setItem(
       "mesaAtendimentosV2",
-      JSON.stringify(lista)
+      JSON.stringify(
+        lista
+      )
+    );
+  }
+
+
+  function dataHoje() {
+
+    const agora =
+      new Date();
+
+    const ano =
+      agora.getFullYear();
+
+    const mes =
+      String(
+        agora.getMonth() + 1
+      ).padStart(2, "0");
+
+    const dia =
+      String(
+        agora.getDate()
+      ).padStart(2, "0");
+
+    return `${ano}-${mes}-${dia}`;
+  }
+
+
+  function formatarData(
+    data
+  ) {
+
+    if (!data) {
+      return "-";
+    }
+
+    const partes =
+      String(data).split("-");
+
+
+    if (
+      partes.length === 3
+    ) {
+
+      return (
+        partes[2] +
+        "/" +
+        partes[1] +
+        "/" +
+        partes[0]
+      );
+    }
+
+
+    return new Date(
+      data
+    ).toLocaleString(
+      "pt-BR"
     );
   }
 
@@ -523,11 +832,6 @@
 
     if (existente) {
 
-      /*
-       * O atendimento já existe no histórico.
-       * Não cria duplicado.
-       */
-
       render();
 
       return;
@@ -557,6 +861,7 @@
     lista.unshift(
       item
     );
+
 
     salvar();
 
@@ -593,6 +898,7 @@
       JSON.stringify({
         type:
           "confirm_received",
+
         recordId
       })
     );
@@ -692,7 +998,7 @@
       lista
         .slice()
         .sort(
-          (a, b) => {
+          (a,b) => {
 
             if (
               ordem ===
@@ -710,6 +1016,7 @@
                   ),
                   "pt-BR"
                 );
+
 
               if (
                 cmp !== 0
@@ -781,9 +1088,7 @@
                 </div>
 
 
-                <div
-                  class="dados"
-                >
+                <div class="dados">
 
                   <div>
                     <strong>RGI:</strong>
@@ -817,6 +1122,13 @@
                     )}
                   </div>
 
+                  <div>
+                    <strong>Data do atendimento:</strong>
+                    ${formatarData(
+                      item.dataAtendimento
+                    )}
+                  </div>
+
                   ${
                     item.assunto
                       ? `
@@ -832,8 +1144,10 @@
 
                   <div>
                     <strong>Enviado em:</strong>
-                    ${formatarData(
+                    ${new Date(
                       item.enviadoEm
+                    ).toLocaleString(
+                      "pt-BR"
                     )}
                   </div>
 
@@ -842,8 +1156,10 @@
                       ? `
                         <div>
                           <strong>Recebido em:</strong>
-                          ${formatarData(
+                          ${new Date(
                             item.recebidoEm
+                          ).toLocaleString(
+                            "pt-BR"
                           )}
                         </div>
                       `
@@ -878,22 +1194,6 @@
           }
         )
         .join("");
-  }
-
-
-  function formatarData(
-    data
-  ) {
-
-    if (!data) {
-      return "-";
-    }
-
-    return new Date(
-      data
-    ).toLocaleString(
-      "pt-BR"
-    );
   }
 
 
@@ -978,7 +1278,8 @@
 
 
     if (
-      permissao === "granted"
+      permissao ===
+      "granted"
     ) {
 
       alert(
@@ -1029,7 +1330,259 @@
   }
 
 
-  function imprimirLista() {
+  /*
+   * IMPRESSÃO
+   */
+
+  function abrirImpressao() {
+
+    preencherFiltroAtendimento();
+
+    document.getElementById(
+      "filtroData"
+    ).value =
+      dataHoje();
+
+
+    document.getElementById(
+      "modalImpressao"
+    ).style.display =
+      "block";
+
+
+    atualizarOpcoesImpressao();
+  }
+
+
+  function fecharImpressao() {
+
+    document.getElementById(
+      "modalImpressao"
+    ).style.display =
+      "none";
+  }
+
+
+  function preencherFiltroAtendimento() {
+
+    const select =
+      document.getElementById(
+        "filtroAtendimento"
+      );
+
+
+    const atual =
+      select.value;
+
+
+    const atendimentos =
+      [
+        ...new Set(
+          lista
+            .map(
+              x =>
+                x.atendimento
+            )
+            .filter(Boolean)
+        )
+      ]
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "pt-BR"
+          )
+      );
+
+
+    select.innerHTML =
+      '<option value="">Selecione</option>';
+
+
+    atendimentos.forEach(
+      atendimento => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          atendimento;
+
+        option.textContent =
+          atendimento;
+
+        select.appendChild(
+          option
+        );
+      }
+    );
+
+
+    if (
+      atendimentos.includes(
+        atual
+      )
+    ) {
+
+      select.value =
+        atual;
+    }
+  }
+
+
+  function atualizarOpcoesImpressao() {
+
+    const tipo =
+      document.getElementById(
+        "tipoImpressao"
+      ).value;
+
+
+    document.getElementById(
+      "opcaoAtendimento"
+    ).style.display =
+      tipo === "atendimento"
+        ? "block"
+        : "none";
+
+
+    document.getElementById(
+      "opcaoData"
+    ).style.display =
+      tipo === "data"
+        ? "block"
+        : "none";
+
+
+    document.getElementById(
+      "opcaoPagina"
+    ).style.display =
+      tipo === "atendimento"
+        ? "block"
+        : "none";
+  }
+
+
+  function executarImpressao() {
+
+    const tipo =
+      document.getElementById(
+        "tipoImpressao"
+      ).value;
+
+
+    let registros = [];
+
+
+    if (
+      tipo === "atendimento"
+    ) {
+
+      const atendimento =
+        document.getElementById(
+          "filtroAtendimento"
+        ).value;
+
+
+      if (!atendimento) {
+
+        alert(
+          "Escolha o atendimento que deseja imprimir."
+        );
+
+        return;
+      }
+
+
+      registros =
+        lista.filter(
+          x =>
+            x.atendimento ===
+            atendimento
+        );
+    }
+
+
+    if (
+      tipo === "geral"
+    ) {
+
+      registros =
+        lista.slice();
+    }
+
+
+    if (
+      tipo === "data"
+    ) {
+
+      const data =
+        document.getElementById(
+          "filtroData"
+        ).value;
+
+
+      if (!data) {
+
+        alert(
+          "Escolha a data que deseja imprimir."
+        );
+
+        return;
+      }
+
+
+      registros =
+        lista.filter(
+          x =>
+            x.dataAtendimento ===
+            data
+        );
+    }
+
+
+    if (!registros.length) {
+
+      alert(
+        "Não existem atendimentos para os filtros escolhidos."
+      );
+
+      return;
+    }
+
+
+    const umPorPagina =
+      document.getElementById(
+        "umPorPagina"
+      ).checked;
+
+
+    gerarListaImpressao(
+      registros,
+      tipo,
+      umPorPagina
+    );
+
+
+    fecharImpressao();
+
+
+    setTimeout(
+      () => {
+        window.print();
+      },
+      150
+    );
+  }
+
+
+  function gerarListaImpressao(
+    registros,
+    tipo,
+    umPorPagina
+  ) {
 
     const area =
       document.getElementById(
@@ -1037,63 +1590,101 @@
       );
 
 
-    if (!lista.length) {
-
-      alert(
-        "Não há atendimentos para imprimir."
-      );
-
-      return;
-    }
+    let tituloData = "";
 
 
-    const grupos = {};
+    if (
+      tipo === "data"
+    ) {
+
+      const data =
+        document.getElementById(
+          "filtroData"
+        ).value;
 
 
-    lista.forEach(
-      item => {
-
-        const tipo =
-          item.atendimento ||
-          "Sem atendimento";
-
-        if (
-          !grupos[tipo]
-        ) {
-          grupos[tipo] = [];
-        }
-
-        grupos[tipo].push(
-          item
+      tituloData =
+        "Data: " +
+        formatarData(
+          data
         );
-      }
-    );
+
+    } else {
+
+      const datas =
+        [
+          ...new Set(
+            registros
+              .map(
+                x =>
+                  x.dataAtendimento
+              )
+              .filter(Boolean)
+          )
+        ];
+
+
+      tituloData =
+        datas.length === 1
+          ? "Data: " +
+            formatarData(
+              datas[0]
+            )
+          : "Data: múltiplos dias";
+    }
 
 
     let html = `
 
-      <h1>
-        POLÍCIA PENAL DE MATO GROSSO DO SUL
-      </h1>
+      <div class="print-cabecalho">
 
-      <div
-        style="
-          text-align:center;
-          font-weight:bold;
-          margin-bottom:20px;
-        "
-      >
-        CPAIG — LISTA DE ATENDIMENTOS
+        <h1>
+          CPAIG - LISTA DE ATENDIMENTOS
+        </h1>
+
+        <div class="print-data">
+          ${tituloData}
+        </div>
+
       </div>
 
     `;
 
 
-    Object.keys(
-      grupos
-    )
+    if (
+      tipo === "geral"
+    ) {
+
+      const grupos = {};
+
+
+      registros.forEach(
+        item => {
+
+          const chave =
+            item.atendimento ||
+            "Sem atendimento";
+
+
+          if (
+            !grupos[chave]
+          ) {
+            grupos[chave] = [];
+          }
+
+
+          grupos[chave].push(
+            item
+          );
+        }
+      );
+
+
+      Object.keys(
+        grupos
+      )
       .sort(
-        (a, b) =>
+        (a,b) =>
           a.localeCompare(
             b,
             "pt-BR"
@@ -1102,76 +1693,169 @@
       .forEach(
         atendimento => {
 
-          html += `
-
-            <h2>
-              ${escapeHtml(
+          html +=
+            montarTabela(
+              grupos[
                 atendimento
-              )}
-            </h2>
-
-            <table>
-
-              <thead>
-
-                <tr>
-                  <th>Nome</th>
-                  <th>Pavilhão</th>
-                  <th>Cela</th>
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                ${grupos[
-                  atendimento
-                ]
-                  .map(
-                    item => `
-
-                      <tr>
-
-                        <td>
-                          ${escapeHtml(
-                            item.nome
-                          )}
-                        </td>
-
-                        <td>
-                          ${escapeHtml(
-                            item.pavilhao ||
-                            ""
-                          )}
-                        </td>
-
-                        <td>
-                          ${escapeHtml(
-                            item.cela ||
-                            ""
-                          )}
-                        </td>
-
-                      </tr>
-
-                    `
-                  )
-                  .join("")}
-
-              </tbody>
-
-            </table>
-
-          `;
+              ],
+              atendimento,
+              false
+            );
         }
       );
+
+    } else {
+
+      html +=
+        montarTabela(
+          registros,
+          tipo === "atendimento"
+            ? registros[0]
+                .atendimento
+            : "Atendimentos",
+          umPorPagina
+        );
+    }
 
 
     area.innerHTML =
       html;
+  }
 
 
-    window.print();
+  function montarTabela(
+    registros,
+    titulo,
+    pagina
+  ) {
+
+    return `
+
+      <div
+        class="print-grupo ${
+          pagina
+            ? "pagina"
+            : ""
+        }"
+      >
+
+        <h2>
+          ${escapeHtml(
+            titulo
+          )}
+        </h2>
+
+        <table
+          class="print-tabela"
+        >
+
+          <thead>
+
+            <tr>
+
+              <th class="col-nome">
+                NOME
+              </th>
+
+              <th class="col-rgi">
+                RGI
+              </th>
+
+              <th class="col-pavilhao">
+                PAVILHÃO
+              </th>
+
+              <th class="col-cela">
+                CELA
+              </th>
+
+              <th class="col-atendimento">
+                ATENDIMENTO
+              </th>
+
+              <th class="col-data">
+                DATA
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${registros
+              .slice()
+              .sort(
+                (a,b) =>
+                  String(
+                    a.nome ||
+                    ""
+                  ).localeCompare(
+                    String(
+                      b.nome ||
+                      ""
+                    ),
+                    "pt-BR"
+                  )
+              )
+              .map(
+                item => `
+
+                  <tr>
+
+                    <td class="col-nome">
+                      ${escapeHtml(
+                        item.nome
+                      )}
+                    </td>
+
+                    <td class="col-rgi">
+                      ${escapeHtml(
+                        item.rgi ||
+                        ""
+                      )}
+                    </td>
+
+                    <td class="col-pavilhao">
+                      ${escapeHtml(
+                        item.pavilhao ||
+                        ""
+                      )}
+                    </td>
+
+                    <td class="col-cela">
+                      ${escapeHtml(
+                        item.cela ||
+                        ""
+                      )}
+                    </td>
+
+                    <td class="col-atendimento">
+                      ${escapeHtml(
+                        item.atendimento ||
+                        ""
+                      )}
+                    </td>
+
+                    <td class="col-data">
+                      ${formatarData(
+                        item.dataAtendimento
+                      )}
+                    </td>
+
+                  </tr>
+
+                `
+              )
+              .join("")}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    `;
   }
 
 
