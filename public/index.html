@@ -3,108 +3,479 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guichê de Atendimento - CPAIG</title>
+
+<title>Guichê de Atendimento - Polícia Penal MS</title>
 
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f1f5f9;color:#172033}
-header{background:#0b3d2e;color:#fff;padding:18px 22px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.header-top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
-.logo h1{margin:0;font-size:26px}
-.logo .sub{margin-top:5px;font-size:14px;font-weight:bold;color:#ffd83d}
-.logo .cpaig{margin-top:3px;font-size:16px;font-weight:bold;color:#ffd83d}
-.status{display:flex;align-items:center;gap:8px;font-size:14px}
-.status-dot{width:12px;height:12px;border-radius:50%;background:#ef4444}
-.status-dot.online{background:#22c55e}
-.container{max-width:1500px;margin:20px auto;padding:0 15px 50px}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-button{border:0;border-radius:7px;padding:10px 14px;cursor:pointer;font-weight:bold;font-size:14px}
-button:hover{filter:brightness(.96)}
-.btn-green{background:#15803d;color:#fff}
-.btn-blue{background:#2563eb;color:#fff}
-.btn-orange{background:#ea580c;color:#fff}
-.btn-red{background:#dc2626;color:#fff}
-.btn-yellow{background:#eab308;color:#111827}
-.btn-gray{background:#64748b;color:#fff}
-.btn-dark{background:#1e293b;color:#fff}
-.btn-purple{background:#7c3aed;color:#fff}
-.section{background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(15,23,42,.08);margin-bottom:20px;overflow:hidden}
-.section-header{padding:14px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.section-header h2{margin:0;font-size:19px}
-.section-body{padding:15px}
-.counter{background:#e2e8f0;padding:5px 10px;border-radius:20px;font-size:13px;font-weight:bold}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.form-group{margin-bottom:14px}
-.form-group label{display:block;margin-bottom:6px;font-size:13px;font-weight:bold}
-input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:10px;font:inherit;background:#fff}
-input:focus,select:focus,textarea:focus{outline:2px solid rgba(37,99,235,.2);border-color:#2563eb}
-textarea{min-height:100px;resize:vertical}
-.suggestions{position:relative}
-.suggestion-box{position:absolute;left:0;right:0;top:100%;z-index:50;background:#fff;border:1px solid #cbd5e1;border-top:0;max-height:260px;overflow:auto;box-shadow:0 5px 15px rgba(0,0,0,.12)}
-.suggestion{padding:10px;cursor:pointer;border-bottom:1px solid #e5e7eb}
-.suggestion:hover,.suggestion.active{background:#eff6ff}
-.suggestion strong{display:block}
-.suggestion small{color:#64748b}
-.info-base{display:flex;gap:10px;flex-wrap:wrap;margin-top:5px}
-.info-chip{background:#eff6ff;color:#1e40af;padding:5px 8px;border-radius:14px;font-size:12px;font-weight:bold}
-.table-wrap{width:100%;overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:1050px}
-th,td{padding:9px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:middle;font-size:13px}
-th{background:#f8fafc;color:#334155;position:sticky;top:0;z-index:2}
-tr:hover td{background:#f8fafc}
-.empty{text-align:center;padding:30px 15px;color:#64748b}
-.badge{display:inline-block;padding:5px 8px;border-radius:14px;font-size:12px;font-weight:bold;white-space:nowrap}
-.badge-waiting{background:#fef3c7;color:#92400e}
-.badge-received{background:#dcfce7;color:#166534}
-.badge-refused{background:#fee2e2;color:#991b1b}
-.badge-guarded{background:#dbeafe;color:#1e40af}
-.actions{display:flex;gap:6px;flex-wrap:wrap}
-.actions button{padding:7px 9px;font-size:12px}
-.refusal-box{margin-top:7px;padding:8px;background:#fff1f2;border:1px solid #fecdd3;border-radius:7px;color:#881337;white-space:pre-wrap}
-.small{font-size:12px;color:#64748b}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.62);z-index:1000;padding:20px;overflow:auto}
-.modal-overlay.show{display:flex;align-items:center;justify-content:center}
-.modal{width:min(900px,100%);max-height:94vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 15px 50px rgba(0,0,0,.3)}
-.modal-header{padding:16px 18px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
-.modal-header h3{margin:0}
-.modal-body{padding:18px}
-.modal-footer{padding:14px 18px;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
-.close{background:transparent;color:#475569;font-size:22px;padding:2px 7px}
-.print-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.radio-group{display:flex;gap:10px;flex-wrap:wrap}
-.radio-option{display:flex;align-items:center;gap:5px;border:1px solid #cbd5e1;border-radius:7px;padding:8px 10px;cursor:pointer}
-.radio-option input{width:auto}
-.checkbox-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:220px;overflow:auto;border:1px solid #e2e8f0;border-radius:7px;padding:10px}
-.checkbox-item{display:flex;align-items:center;gap:6px;font-size:13px}
-.checkbox-item input{width:auto}
-.toast{position:fixed;right:18px;bottom:18px;z-index:2000;background:#1e293b;color:#fff;padding:12px 16px;border-radius:8px;box-shadow:0 5px 20px rgba(0,0,0,.25);display:none;max-width:420px}
-.toast.show{display:block}
-.toast.success{background:#166534}
-.toast.error{background:#991b1b}
-.toast.warning{background:#92400e}
-.excel-info{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-top:10px}
-.print-page{width:100%;page-break-inside:avoid;break-inside:avoid}
-.print-page+.print-page{page-break-before:always;break-before:page}
-.print-header{text-align:center;margin-bottom:14px}
-.print-header h1{margin:0 0 4px;font-size:18px}
-.print-header h2{margin:0 0 4px;font-size:14px}
-.print-header p{margin:2px 0;font-size:11px}
-.print-table{width:100%;min-width:0;border-collapse:collapse}
-.print-table th,.print-table td{border:1px solid #111;padding:5px;font-size:10px}
-.print-table th{background:#eee;position:static}
-.print-pavcela{text-align:center;white-space:nowrap;font-weight:bold}
-
-@media(max-width:800px){
-.grid,.print-grid{grid-template-columns:1fr}
-.checkbox-list{grid-template-columns:1fr}
-.logo h1{font-size:21px}
+*{
+  box-sizing:border-box;
 }
 
-@media print{
-@page{size:A4 portrait;margin:5mm}
-body{background:#fff}
-body>*:not(#areaImpressao){display:none!important}
-#areaImpressao{display:block!important}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f1f1f1;
+  color:#222;
+}
+
+header{
+  background:#111;
+  color:white;
+  padding:14px 22px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+  border-bottom:4px solid #c7a84b;
+}
+
+header img{
+  width:70px;
+  height:70px;
+  object-fit:contain;
+  flex-shrink:0;
+}
+
+.logo h1{
+  margin:0;
+  font-size:25px;
+}
+
+.logo .sub{
+  margin-top:5px;
+  font-size:14px;
+  font-weight:bold;
+  color:#eee;
+}
+
+.logo .cpaig{
+  margin-top:3px;
+  font-size:17px;
+  font-weight:bold;
+  color:#ffd83d;
+}
+
+.container{
+  max-width:1150px;
+  margin:20px auto;
+  padding:0 15px;
+}
+
+.card{
+  background:#fff;
+  border-radius:10px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.card h2{
+  margin-top:0;
+  border-bottom:2px solid #c7a84b;
+  padding-bottom:10px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.campo{
+  display:flex;
+  flex-direction:column;
+}
+
+.campo label{
+  font-weight:bold;
+  margin-bottom:6px;
+}
+
+input,
+select{
+  width:100%;
+  padding:11px;
+  border:1px solid #bbb;
+  border-radius:6px;
+  font-size:16px;
+  background:white;
+}
+
+input:focus,
+select:focus{
+  outline:none;
+  border-color:#c7a84b;
+  box-shadow:0 0 0 2px rgba(199,168,75,.15);
+}
+
+button{
+  border:0;
+  border-radius:7px;
+  padding:11px 16px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.btn-preparar{
+  background:#222;
+  color:#fff;
+  width:100%;
+  margin-top:18px;
+  font-size:17px;
+}
+
+.btn-preparar:hover{
+  background:#000;
+}
+
+.btn-enviar{
+  background:#c7a84b;
+  color:#111;
+  width:100%;
+  margin-top:15px;
+  font-size:18px;
+}
+
+.btn-enviar:hover{
+  background:#b59638;
+}
+
+.btn-secundario{
+  background:#555;
+  color:#fff;
+}
+
+.btn-receber{
+  background:#19733a;
+  color:#fff;
+}
+
+.btn-recusar{
+  background:#a51f1f;
+  color:#fff;
+}
+
+.btn-reenviar{
+  background:#1769aa;
+  color:#fff;
+}
+
+.btn-arquivar{
+  background:#555;
+  color:#fff;
+}
+
+.btn-excluir{
+  background:#8b0000;
+  color:#fff;
+}
+
+.btn-imprimir{
+  background:#222;
+  color:#fff;
+}
+
+.status{
+  padding:12px;
+  border-radius:6px;
+  background:#eee;
+  margin-bottom:15px;
+  font-weight:bold;
+}
+
+.status.online{
+  background:#dff4e3;
+  color:#17652b;
+}
+
+.status.offline{
+  background:#f8dddd;
+  color:#8a1f1f;
+}
+
+.status-base{
+  background:#eef3f7;
+  border:1px solid #d2dce5;
+  padding:12px;
+  border-radius:7px;
+  margin-top:15px;
+}
+
+.status-base.ok{
+  background:#e5f4e7;
+  border-color:#9ac9a1;
+  color:#185b24;
+}
+
+.item{
+  border:1px solid #ddd;
+  border-left:5px solid #c7a84b;
+  padding:14px;
+  margin-bottom:10px;
+  border-radius:7px;
+  background:#fafafa;
+}
+
+.item.recusado{
+  border-left-color:#a51f1f;
+  background:#fff7f7;
+}
+
+.item.guardado{
+  border-left-color:#555;
+}
+
+.item strong{
+  display:block;
+  font-size:17px;
+  margin-bottom:6px;
+}
+
+.item-detalhes{
+  line-height:1.6;
+}
+
+.acoes{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:12px;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:bold;
+  margin-top:6px;
+}
+
+.badge-aguardando{
+  background:#fff1c7;
+  color:#745800;
+}
+
+.badge-recebido{
+  background:#d9f2dd;
+  color:#1c6828;
+}
+
+.badge-recusado{
+  background:#f7d3d3;
+  color:#8a1f1f;
+}
+
+.badge-guardado{
+  background:#ddd;
+  color:#333;
+}
+
+.confirmacao{
+  margin-top:10px;
+  padding:11px;
+  border-radius:7px;
+  background:#e5f4e7;
+  border:1px solid #9ac9a1;
+  color:#185b24;
+  font-weight:bold;
+}
+
+.recusa-box{
+  margin-top:10px;
+  padding:11px;
+  border-radius:7px;
+  background:#fff0f0;
+  border:1px solid #e1a3a3;
+}
+
+.recusa-box strong{
+  color:#8a1f1f;
+}
+
+.sem{
+  padding:18px;
+  border-radius:7px;
+  background:#f5f5f5;
+  border:1px solid #ddd;
+  color:#666;
+  text-align:center;
+}
+
+.lista-sugestoes{
+  position:relative;
+}
+
+.sugestoes{
+  position:absolute;
+  left:0;
+  right:0;
+  top:100%;
+  background:#fff;
+  border:1px solid #bbb;
+  border-top:0;
+  max-height:220px;
+  overflow-y:auto;
+  z-index:1000;
+  border-radius:0 0 6px 6px;
+}
+
+.sugestao{
+  padding:10px;
+  cursor:pointer;
+  border-bottom:1px solid #eee;
+}
+
+.sugestao:hover,
+.sugestao.selecionada{
+  background:#f2e6bc;
+}
+
+.contador{
+  font-size:13px;
+  color:#666;
+  margin-top:5px;
+}
+
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.toolbar input,
+.toolbar select{
+  flex:1;
+  min-width:180px;
+}
+
+.filtros{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.preparacao-vazia{
+  padding:15px;
+  text-align:center;
+  color:#777;
+}
+
+.item-preparacao{
+  border-left:5px solid #222;
+}
+
+.item-preparacao .acoes{
+  justify-content:flex-end;
+}
+
+.data-row{
+  display:flex;
+  gap:8px;
+  align-items:end;
+}
+
+.data-row > div{
+  flex:1;
+}
+
+.btn-hoje{
+  white-space:nowrap;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  z-index:5000;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,.55);
+  padding:20px;
+  overflow:auto;
+}
+
+.modal-conteudo{
+  background:#fff;
+  max-width:800px;
+  margin:30px auto;
+  border-radius:10px;
+  padding:20px;
+}
+
+.modal-cabecalho{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:2px solid #c7a84b;
+  padding-bottom:10px;
+  margin-bottom:15px;
+}
+
+.fechar{
+  background:#8b0000;
+  color:#fff;
+}
+
+.print-opcoes{
+  display:grid;
+  gap:12px;
+}
+
+.print-opcoes label{
+  border:1px solid #ddd;
+  padding:13px;
+  border-radius:7px;
+  cursor:pointer;
+}
+
+.print-opcoes label:hover{
+  background:#f6f6f6;
+}
+
+.mini{
+  font-size:12px;
+  color:#666;
+}
+
+@media(max-width:750px){
+  .grid,
+  .filtros{
+    grid-template-columns:1fr;
+  }
+
+  header{
+    padding:12px;
+  }
+
+  header img{
+    width:55px;
+    height:55px;
+  }
+
+  .logo h1{
+    font-size:18px;
+  }
+
+  .logo .sub{
+    font-size:12px;
+  }
+
+  .logo .cpaig{
+    font-size:14px;
+  }
+
+  .acoes button{
+    width:100%;
+  }
 }
 </style>
 </head>
@@ -112,4925 +483,4321 @@ body>*:not(#areaImpressao){display:none!important}
 <body>
 
 <header>
-<div class="header-top">
-<div class="logo">
-<h1>GUICHÊ DE ATENDIMENTO</h1>
-<div class="sub">POLÍCIA PENAL DE MATO GROSSO DO SUL</div>
-<div class="cpaig">CPAIG</div>
-</div>
 
-<div class="status">
-<span id="statusDot" class="status-dot"></span>
-<span id="statusTexto">Conectando...</span>
-</div>
-</div>
+  <img
+    src="https://www.agepen.ms.gov.br/wp-content/uploads/2023/06/Brasao-PPMS-site.png"
+    alt="Logo Polícia Penal de Mato Grosso do Sul"
+    onerror="this.style.display='none'"
+  >
+
+  <div class="logo">
+    <h1>GUICHÊ DE ATENDIMENTO</h1>
+    <div class="sub">POLÍCIA PENAL DE MATO GROSSO DO SUL</div>
+    <div class="cpaig">CPAIG</div>
+  </div>
+
 </header>
 
 <div class="container">
 
-<section class="section">
-<div class="section-header">
-<h2>📝 NOVO ATENDIMENTO</h2>
+  <!-- CONEXÃO -->
+  <div
+    id="statusConexao"
+    class="status offline"
+  >
+    🔴 Conectando ao servidor...
+  </div>
+
+  <!-- NOVO ATENDIMENTO -->
+  <div class="card">
+
+    <h2>Novo Atendimento</h2>
+
+    <div class="grid">
+
+      <div class="campo lista-sugestoes">
+
+        <label for="nome">
+          Nome do Interno
+        </label>
+
+        <input
+          id="nome"
+          type="text"
+          autocomplete="off"
+          placeholder="Digite o nome do interno"
+        >
+
+        <div
+          id="sugestoesNome"
+          class="sugestoes"
+          style="display:none"
+        ></div>
+
+      </div>
+
+      <div class="campo">
+
+        <label for="rgi">
+          RGI
+        </label>
+
+        <input
+          id="rgi"
+          type="text"
+          placeholder="Preenchido automaticamente"
+        >
+
+      </div>
+
+      <div class="campo">
+
+        <label for="pavilhao">
+          Pavilhão
+        </label>
+
+        <select id="pavilhao">
+          <option value="">Selecione</option>
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+          <option>D</option>
+          <option>DISCIPLINAR</option>
+          <option>DISCIPLINAR RISCO</option>
+          <option>CP</option>
+          <option>VIRTUAL</option>
+        </select>
+
+      </div>
+
+      <div class="campo">
+
+        <label for="cela">
+          Cela
+        </label>
+
+        <input
+          id="cela"
+          type="text"
+          list="listaCela"
+          placeholder="Digite ou selecione"
+        >
+
+        <datalist id="listaCela"></datalist>
+
+      </div>
+
+      <div class="campo">
+
+        <label for="atendimento">
+          Atendimento
+        </label>
+
+        <input
+          id="atendimento"
+          type="text"
+          list="listaAtendimento"
+          placeholder="Digite ou selecione"
+          autocomplete="off"
+        >
+
+        <datalist id="listaAtendimento">
+
+          <option value="Jurídico">
+          <option value="Psicossocial">
+          <option value="Médico">
+          <option value="Odontologia">
+          <option value="Trabalho">
+          <option value="Chefia">
+          <option value="Chefe de equipe">
+          <option value="Portaria II">
+          <option value="Identificação">
+          <option value="Limpeza">
+          <option value="Advogado(a)">
+          <option value="Visita Assistida">
+          <option value="Autorização de Saída">
+          <option value="Licença Judicial">
+          <option value="7 dias">
+          <option value="7 dias monitorado">
+          <option value="Alvará">
+          <option value="Salvo conduto">
+          <option value="Domiciliar">
+          <option value="Evasão">
+          <option value="Desvio de Rota">
+          <option value="Falta">
+          <option value="Regressão">
+          <option value="Mudança de Cela">
+          <option value="Hospitalizado">
+          <option value="Outros">
+
+        </datalist>
+
+      </div>
+
+      <div class="campo">
+
+        <label for="dataAtendimento">
+          Data do Atendimento
+        </label>
+
+        <div class="data-row">
+
+          <div>
+            <input
+              id="dataAtendimento"
+              type="date"
+            >
+          </div>
+
+          <button
+            type="button"
+            class="btn-secundario btn-hoje"
+            onclick="colocarHoje()"
+          >
+            HOJE
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      id="infoBase"
+      class="status-base"
+    >
+      📋 Base de internos não carregada.
+    </div>
+
+    <button
+      class="btn-preparar"
+      onclick="entrarNaLista()"
+    >
+      ➕ ENTRAR NA LISTA
+    </button>
+
+  </div>
+
+  <!-- BASE -->
+  <div class="card">
+
+    <h2>Base de Internos</h2>
+
+    <div id="statusBaseDetalhado">
+      Nenhuma base carregada.
+    </div>
+
+    <div class="acoes">
+
+      <button
+        class="btn-secundario"
+        onclick="abrirArquivoExcel()"
+      >
+        🔄 ATUALIZAR BASE DE INTERNOS
+      </button>
+
+      <button
+        class="btn-imprimir"
+        onclick="abrirModalImpressao()"
+      >
+        🖨️ IMPRIMIR
+      </button>
+
+    </div>
+
+    <input
+      id="arquivoExcel"
+      type="file"
+      accept=".xlsx,.xls"
+      style="display:none"
+      onchange="importarExcel(event)"
+    >
+
+  </div>
+
+  <!-- LISTA DE PREPARAÇÃO -->
+  <div class="card">
+
+    <h2>Lista de Preparação</h2>
+
+    <div class="mini">
+      Os atendimentos abaixo ainda não foram enviados para a Mesa.
+    </div>
+
+    <div
+      id="preparacao"
+      style="margin-top:12px"
+    ></div>
+
+    <button
+      id="btnEnviarMesa"
+      class="btn-enviar"
+      onclick="enviarParaMesa()"
+    >
+      📤 ENVIAR PARA MESA
+    </button>
+
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="card">
+
+    <h2>Histórico de Atendimentos</h2>
+
+    <div class="toolbar">
+
+      <input
+        id="buscaHistorico"
+        type="text"
+        placeholder="🔎 Buscar por nome, RGI ou atendimento"
+        oninput="renderHistorico()"
+      >
+
+      <select
+        id="ordemHistorico"
+        onchange="renderHistorico()"
+      >
+        <option value="envio">
+          Ordem de envio
+        </option>
+
+        <option value="atendimento">
+          Por atendimento
+        </option>
+      </select>
+
+    </div>
+
+    <div id="historico"></div>
+
+  </div>
+
+  <!-- RECUSADOS -->
+  <div class="card">
+
+    <h2>❌ Atendimentos Recusados</h2>
+
+    <div class="mini">
+      Os atendimentos recusados pela Mesa ficam nesta área para edição, reenvio ou arquivamento.
+    </div>
+
+    <div class="toolbar" style="margin-top:12px">
+
+      <input
+        id="buscaRecusados"
+        type="text"
+        placeholder="🔎 Buscar recusado"
+        oninput="renderRecusados()"
+      >
+
+    </div>
+
+    <div id="recusados"></div>
+
+  </div>
+
+  <!-- GUARDADOS -->
+  <div class="card">
+
+    <h2>🗄️ Atendimentos Guardados</h2>
+
+    <div class="filtros">
+
+      <input
+        id="buscaGuardados"
+        type="text"
+        placeholder="🔎 Nome, RGI ou atendimento"
+        oninput="renderGuardados()"
+      >
+
+      <input
+        id="dataGuardados"
+        type="date"
+        onchange="renderGuardados()"
+      >
+
+      <select
+        id="filtroGuardados"
+        onchange="renderGuardados()"
+      >
+        <option value="">
+          Todos os atendimentos
+        </option>
+      </select>
+
+    </div>
+
+    <div id="guardados"></div>
+
+  </div>
+
 </div>
 
-<div class="section-body">
+<!-- MODAL RECUSA -->
+<div
+  id="modalRecusa"
+  class="modal"
+>
 
-<div class="grid">
+  <div class="modal-conteudo">
 
-<div class="form-group suggestions">
-<label for="nomeInterno">Nome do interno</label>
-<input id="nomeInterno" autocomplete="off" placeholder="Digite o nome do interno...">
-<div id="sugestoesInternos" class="suggestion-box" style="display:none;"></div>
-<div id="infoInterno" class="info-base"></div>
-</div>
+    <div class="modal-cabecalho">
 
-<div class="form-group">
-<label for="rgi">RGI</label>
-<input id="rgi" placeholder="RGI">
-</div>
+      <h2 id="tituloModalRecusa">
+        Recusar Atendimento
+      </h2>
 
-<div class="form-group">
-<label for="pavilhao">Pavilhão</label>
-<input id="pavilhao" placeholder="Pavilhão">
-</div>
+      <button
+        class="fechar"
+        onclick="fecharModalRecusa()"
+      >
+        ✕
+      </button>
 
-<div class="form-group">
-<label for="cela">Cela</label>
-<select id="cela">
-<option value="">Selecione</option>
-</select>
-</div>
+    </div>
 
-<div class="form-group">
-<label for="atendimento">Atendimento</label>
-<select id="atendimento">
-<option value="">Selecione</option>
-</select>
-</div>
+    <div class="campo">
 
-<div class="form-group">
-<label for="dataAtendimento">Data do atendimento</label>
-<div style="display:flex;gap:7px;">
-<input type="date" id="dataAtendimento">
-<button type="button" class="btn-gray" onclick="usarHoje()">HOJE</button>
-</div>
-</div>
+      <label>
+        Motivo da recusa
+      </label>
 
-<div class="form-group" style="grid-column:1/-1;">
-<label for="assunto">Assunto / descrição</label>
-<textarea id="assunto" placeholder="Descreva o assunto do atendimento..."></textarea>
-</div>
+      <textarea
+        id="motivoRecusa"
+        rows="6"
+        style="width:100%;padding:12px;border:1px solid #bbb;border-radius:6px;font-size:16px"
+        placeholder="Informe o motivo da recusa"
+      ></textarea>
 
-</div>
+    </div>
 
-<div class="toolbar">
-<button class="btn-blue" onclick="entrarNaLista()">➕ ENTRAR NA LISTA</button>
-<button class="btn-green" onclick="enviarParaMesa()">📤 ENVIAR PARA MESA</button>
-<button class="btn-orange" onclick="abrirImpressao()">🖨️ IMPRIMIR</button>
-<button class="btn-dark" onclick="abrirGuardados()">📁 ATENDIMENTOS GUARDADOS</button>
-</div>
+    <div class="acoes">
 
-<div class="excel-info">
-<strong>Base de internos:</strong>
-<span id="baseStatus">Nenhuma base carregada.</span>
+      <button
+        class="btn-secundario"
+        onclick="fecharModalRecusa()"
+      >
+        CANCELAR
+      </button>
 
-<div style="margin-top:8px;">
-<input type="file" id="arquivoExcel" accept=".xlsx,.xls" style="display:none;" onchange="importarExcel(event)">
-<button class="btn-purple" onclick="selecionarExcel()">🔄 ATUALIZAR BASE DE INTERNOS</button>
-</div>
-</div>
+      <button
+        class="btn-recusar"
+        onclick="confirmarRecusaLocal()"
+      >
+        ❌ SALVAR RECUSA
+      </button>
 
-</div>
-</section>
+    </div>
 
-<section class="section">
-<div class="section-header">
-<h2>📋 LISTA DE ATENDIMENTOS PARA ENVIO</h2>
-<span id="contadorPreparacao" class="counter">0</span>
-</div>
-
-<div class="section-body">
-<div id="preparacaoContainer"></div>
-</div>
-</section>
-
-<section class="section">
-
-<div class="section-header">
-<h2>📚 HISTÓRICO DE ATENDIMENTOS</h2>
-<span id="contadorHistorico" class="counter">0</span>
-</div>
-
-<div class="section-body">
-
-<div class="toolbar">
-<button class="btn-gray" onclick="ordenarHistorico('envio')">↕ ORDEM DE ENVIO</button>
-<button class="btn-gray" onclick="ordenarHistorico('atendimento')">↕ POR ATENDIMENTO</button>
-</div>
-
-<div id="historicoContainer"></div>
-
-</div>
-</section>
+  </div>
 
 </div>
 
-<div id="toast" class="toast"></div>
+<!-- MODAL IMPRESSÃO -->
+<div
+  id="modalImpressao"
+  class="modal"
+>
 
-<!-- =========================
-     MODAL EDITAR RECUSA
-========================= -->
+  <div class="modal-conteudo">
 
-<div id="modalEditarRecusa" class="modal-overlay">
+    <div class="modal-cabecalho">
 
-<div class="modal">
+      <h2>
+        🖨️ Impressão
+      </h2>
 
-<div class="modal-header">
-<h3>✏️ EDITAR RECUSA</h3>
-<button class="close" onclick="fecharEditarRecusa()">×</button>
-</div>
+      <button
+        class="fechar"
+        onclick="fecharModalImpressao()"
+      >
+        ✕
+      </button>
 
-<div class="modal-body">
+    </div>
 
-<div id="dadosEditarRecusa" class="small" style="margin-bottom:14px;"></div>
+    <div class="print-opcoes">
 
-<div class="form-group">
-<label for="motivoRecusaEditado">Motivo da recusa</label>
-<textarea id="motivoRecusaEditado" placeholder="Edite o motivo da recusa..."></textarea>
-</div>
+      <label>
+        <input
+          type="radio"
+          name="tipoImpressao"
+          value="atendimento"
+          checked
+        >
+        <strong>Por atendimento</strong>
+        <br>
+        <span class="mini">
+          Escolher uma categoria de atendimento.
+        </span>
+      </label>
 
-<div class="small">
-O motivo alterado ficará registrado no atendimento.
-</div>
+      <label>
+        <input
+          type="radio"
+          name="tipoImpressao"
+          value="geral"
+        >
+        <strong>Por atendimento geral</strong>
+        <br>
+        <span class="mini">
+          Imprimir todos os atendimentos.
+        </span>
+      </label>
 
-</div>
+      <label>
+        <input
+          type="radio"
+          name="tipoImpressao"
+          value="data"
+        >
+        <strong>Por data</strong>
+        <br>
+        <span class="mini">
+          Escolher a data e imprimir os registros daquele dia.
+        </span>
+      </label>
 
-<div class="modal-footer">
-<button class="btn-gray" onclick="fecharEditarRecusa()">CANCELAR</button>
-<button class="btn-blue" onclick="salvarEdicaoRecusa()">💾 SALVAR MOTIVO</button>
-</div>
+    </div>
 
-</div>
-</div>
+    <div
+      id="opcoesImpressaoDetalhes"
+      style="margin-top:15px"
+    ></div>
 
-<!-- =========================
-     MODAL GUARDADOS
-========================= -->
+    <div class="acoes">
 
-<div id="modalGuardados" class="modal-overlay">
+      <button
+        class="btn-secundario"
+        onclick="fecharModalImpressao()"
+      >
+        CANCELAR
+      </button>
 
-<div class="modal">
+      <button
+        class="btn-imprimir"
+        onclick="executarImpressao()"
+      >
+        🖨️ IMPRIMIR
+      </button>
 
-<div class="modal-header">
-<h3>📁 ATENDIMENTOS GUARDADOS</h3>
-<button class="close" onclick="fecharGuardados()">×</button>
-</div>
+    </div>
 
-<div class="modal-body">
-
-<div class="form-group">
-<input id="filtroGuardados" placeholder="Pesquisar por nome, RGI, atendimento ou data..." oninput="renderGuardados()">
-</div>
-
-<div id="guardadosContainer"></div>
-
-</div>
-
-<div class="modal-footer">
-<button class="btn-gray" onclick="fecharGuardados()">FECHAR</button>
-</div>
-
-</div>
-</div>
-
-<!-- =========================
-     MODAL IMPRESSÃO
-========================= -->
-
-<div id="modalImpressao" class="modal-overlay">
-
-<div class="modal">
-
-<div class="modal-header">
-<h3>🖨️ IMPRESSÃO</h3>
-<button class="close" onclick="fecharImpressao()">×</button>
-</div>
-
-<div class="modal-body">
-
-<div class="form-group">
-
-<label>Tipo de impressão</label>
-
-<div class="radio-group">
-
-<label class="radio-option">
-<input type="radio" name="modoPrint" value="atendimento" checked onchange="alterarModoImpressao()">
-Por atendimento
-</label>
-
-<label class="radio-option">
-<input type="radio" name="modoPrint" value="geral" onchange="alterarModoImpressao()">
-Por atendimento geral
-</label>
-
-<label class="radio-option">
-<input type="radio" name="modoPrint" value="data" onchange="alterarModoImpressao()">
-Por data
-</label>
-
-</div>
-</div>
-
-<div id="grupoPrintAtendimento">
-
-<div class="print-grid">
-
-<div class="form-group">
-<label>Atendimentos</label>
-<div id="listaAtendimentosImpressao" class="checkbox-list"></div>
-</div>
-
-<div class="form-group">
-<label>Pavilhão — filtro opcional</label>
-<div id="listaPavilhoesAtendimento" class="checkbox-list"></div>
-</div>
-
-</div>
-</div>
-
-<div id="grupoPrintGeral" style="display:none;">
-
-<div class="form-group">
-<label>Pavilhão — filtro opcional</label>
-<div id="listaPavilhoesGeral" class="checkbox-list"></div>
-</div>
+  </div>
 
 </div>
 
-<div id="grupoPrintData" style="display:none;">
-
-<div class="print-grid">
-
-<div>
-
-<div class="form-group">
-<label for="printData">Data</label>
-<input type="date" id="printData">
-</div>
-
-<div class="form-group">
-
-<label>Tipo</label>
-
-<div class="radio-group">
-
-<label class="radio-option">
-<input type="radio" name="tipoData" value="todos" checked onchange="alterarTipoData()">
-Todos
-</label>
-
-<label class="radio-option">
-<input type="radio" name="tipoData" value="atendimentos" onchange="alterarTipoData()">
-Atendimentos
-</label>
-
-</div>
-
-</div>
-
-</div>
-
-<div>
-
-<div id="grupoAtendimentosData" class="form-group" style="display:none;">
-<label>Atendimentos</label>
-<div id="listaAtendimentosData" class="checkbox-list"></div>
-</div>
-
-<div class="form-group">
-<label>Pavilhão — filtro opcional</label>
-<div id="listaPavilhoesData" class="checkbox-list"></div>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-
-<div class="modal-footer">
-<button class="btn-gray" onclick="fecharImpressao()">CANCELAR</button>
-<button class="btn-blue" onclick="executarImpressao()">🖨️ IMPRIMIR</button>
-</div>
-
-</div>
-</div>
-
-<div id="areaImpressao" style="display:none;"></div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
-"use strict";
 
-/* ============================================================
-   CONFIGURAÇÃO
-============================================================ */
+/* =========================================================
+   CONFIGURAÇÕES
+========================================================= */
 
 const STORAGE_PREPARACAO =
-"guicheAtendimentosV23Preparacao";
+  "guicheAtendimentosV23Preparacao";
 
 const STORAGE_HISTORICO =
-"guicheAtendimentosV23Historico";
+  "guicheAtendimentosV23Historico";
 
 const STORAGE_ARQUIVO =
-"guicheAtendimentosV23Arquivo";
+  "guicheAtendimentosV23Arquivo";
+
+const STORAGE_RECUSADOS =
+  "guicheAtendimentosV23Recusados";
 
 const STORAGE_BASE =
-"atendimentoV23BaseInternos";
+  "atendimentoV23BaseInternos";
 
 const STORAGE_BASE_ATUALIZADA =
-STORAGE_BASE+"_atualizadaEm";
+  STORAGE_BASE + "_atualizadaEm";
 
-const ATENDIMENTOS=[
-"Jurídico",
-"Psicossocial",
-"Médico",
-"Odontologia",
-"Trabalho",
-"Chefia",
-"Chefe de equipe",
-"Portaria II",
-"Identificação",
-"Limpeza",
-"Advogado(a)",
-"Visita Assistida",
-"Autorização de Saída",
-"Licença Judicial",
-"7 dias",
-"7 dias monitorado",
-"Alvará",
-"Salvo conduto",
-"Domiciliar",
-"Evasão",
-"Desvio de Rota",
-"Falta",
-"Regressão",
-"Mudança de Cela",
-"Hospitalizado",
-"Outros"
-];
+const STORAGE_CLIENT_ID =
+  "guicheAtendimentoClientId";
 
-/* ============================================================
+const STORAGE_ORDENACAO =
+  "guicheAtendimentoOrdenacao";
+
+
+/* =========================================================
    VARIÁVEIS
-============================================================ */
+========================================================= */
 
-let baseInternos=[];
-let preparacao=[];
-let historico=[];
-let arquivo=[];
+let baseInternos = [];
+let preparacao = [];
+let historico = [];
+let arquivo = [];
+let recusados = [];
 
-let socket=null;
-let reconnectTimer=null;
-let heartbeatTimer=null;
+let ws = null;
 
-let reconnectDelay=2000;
+let tentativaReconexao = null;
 
-let indiceSugestao=-1;
-let resultadosSugestao=[];
+let indiceSugestao = -1;
 
-let recordIdEditandoRecusa=null;
+let registroRecusaAtual = null;
 
-let ordemHistorico="envio";
 
-/*
- * IDs que já foram recusados.
- *
- * Isso é uma proteção adicional:
- * mesmo que exista alguma mensagem antiga ou uma
- * reconexão acontecendo, um registro recusado não
- * poderá ser reenviado automaticamente.
- */
-let idsRecusados=new Set();
+/* =========================================================
+   CLIENT ID
+========================================================= */
 
-/* ============================================================
+function obterClientId(){
+
+  let id =
+    localStorage.getItem(
+      STORAGE_CLIENT_ID
+    );
+
+  if(!id){
+
+    id =
+      (crypto.randomUUID
+        ? crypto.randomUUID()
+        : "guiche-" +
+          Date.now() +
+          "-" +
+          Math.random()
+            .toString(16)
+            .slice(2));
+
+    localStorage.setItem(
+      STORAGE_CLIENT_ID,
+      id
+    );
+
+  }
+
+  return id;
+}
+
+const clientId = obterClientId();
+
+
+/* =========================================================
    UTILITÁRIOS
-============================================================ */
+========================================================= */
 
-function $(id){
-return document.getElementById(id);
-}
+function normalizarTexto(valor){
 
-function gerarId(){
-
-if(
-window.crypto &&
-crypto.randomUUID
-){
-return crypto.randomUUID();
-}
-
-return "guiche-"+
-Date.now()+"-"+
-Math.random().toString(36).slice(2);
-}
-
-function normalizar(valor){
-
-return String(valor??"")
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g,"")
-.toLowerCase()
-.trim();
+  return String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase()
+    .trim();
 
 }
 
-function escapeHtml(valor){
+function escaparHTML(valor){
 
-return String(valor??"")
-.replaceAll("&","&amp;")
-.replaceAll("<","&lt;")
-.replaceAll(">","&gt;")
-.replaceAll('"',"&quot;")
-.replaceAll("'","&#039;");
-
-}
-
-function salvarJSON(chave,valor){
-
-try{
-
-localStorage.setItem(
-chave,
-JSON.stringify(valor)
-);
-
-}catch(e){
-
-console.error(
-"Erro localStorage:",
-e
-);
-
-}
-
-}
-
-function lerJSON(chave,padrao){
-
-try{
-
-const valor=
-localStorage.getItem(chave);
-
-if(!valor){
-return padrao;
-}
-
-return JSON.parse(valor)??padrao;
-
-}catch(e){
-
-return padrao;
-
-}
+  return String(valor ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 
 }
 
 function formatarDataHora(valor){
 
-if(!valor){
-return "-";
-}
+  if(!valor) return "-";
 
-const d=
-new Date(valor);
+  const data =
+    new Date(valor);
 
-if(
-Number.isNaN(
-d.getTime()
-)
-){
+  if(
+    Number.isNaN(
+      data.getTime()
+    )
+  ){
+    return "-";
+  }
 
-return String(valor);
-
-}
-
-return d.toLocaleString(
-"pt-BR"
-);
+  return data.toLocaleString(
+    "pt-BR",
+    {
+      dateStyle:"short",
+      timeStyle:"medium"
+    }
+  );
 
 }
 
 function formatarData(valor){
 
-if(!valor){
-return "-";
-}
+  if(!valor) return "-";
 
-if(
-/^\d{4}-\d{2}-\d{2}$/
-.test(
-String(valor)
-)
-){
+  const data =
+    new Date(valor);
 
-const [
-ano,
-mes,
-dia
-]=String(valor).split("-");
+  if(
+    Number.isNaN(
+      data.getTime()
+    )
+  ){
+    return "-";
+  }
 
-return `${dia}/${mes}/${ano}`;
+  return data.toLocaleDateString(
+    "pt-BR"
+  );
 
 }
 
-const d=
-new Date(valor);
+function dataHojeISO(){
 
-if(
-Number.isNaN(
-d.getTime()
-)
-){
+  const agora =
+    new Date();
 
-return String(valor);
+  const ano =
+    agora.getFullYear();
 
-}
+  const mes =
+    String(
+      agora.getMonth()+1
+    ).padStart(2,"0");
 
-return d.toLocaleDateString(
-"pt-BR"
-);
+  const dia =
+    String(
+      agora.getDate()
+    ).padStart(2,"0");
 
-}
-
-function mostrarToast(
-mensagem,
-tipo=""
-){
-
-const toast=
-$("toast");
-
-toast.textContent=
-mensagem;
-
-toast.className=
-"toast show "+tipo;
-
-clearTimeout(
-mostrarToast.timer
-);
-
-mostrarToast.timer=
-setTimeout(
-()=>{
-toast.className="toast";
-},
-4000
-);
+  return `${ano}-${mes}-${dia}`;
 
 }
 
-/* ============================================================
+function dataRegistroParaFiltro(item){
+
+  if(item.dataAtendimento){
+
+    return item.dataAtendimento;
+  }
+
+  if(item.enviadoEm){
+
+    const data =
+      new Date(item.enviadoEm);
+
+    const ano =
+      data.getFullYear();
+
+    const mes =
+      String(
+        data.getMonth()+1
+      ).padStart(2,"0");
+
+    const dia =
+      String(
+        data.getDate()
+      ).padStart(2,"0");
+
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  return "";
+
+}
+
+
+/* =========================================================
    STORAGE
-============================================================ */
+========================================================= */
 
 function salvarTudo(){
 
-salvarJSON(
-STORAGE_PREPARACAO,
-preparacao
-);
+  localStorage.setItem(
+    STORAGE_PREPARACAO,
+    JSON.stringify(preparacao)
+  );
 
-salvarJSON(
-STORAGE_HISTORICO,
-historico
-);
+  localStorage.setItem(
+    STORAGE_HISTORICO,
+    JSON.stringify(historico)
+  );
 
-salvarJSON(
-STORAGE_ARQUIVO,
-arquivo
-);
+  localStorage.setItem(
+    STORAGE_ARQUIVO,
+    JSON.stringify(arquivo)
+  );
 
-salvarJSON(
-STORAGE_BASE,
-baseInternos
-);
+  localStorage.setItem(
+    STORAGE_RECUSADOS,
+    JSON.stringify(recusados)
+  );
 
-}
-
-/*
- * Reconstrói a proteção dos recusados toda vez que
- * o GUICHÊ é carregado.
- */
-function reconstruirIdsRecusados(){
-
-idsRecusados=
-new Set();
-
-historico.forEach(
-registro=>{
-
-if(
-registro &&
-registro.recordId &&
-registro.status==="recusado"
-){
-
-idsRecusados.add(
-String(
-registro.recordId
-)
-);
-
-}
-
-}
-);
-
-arquivo.forEach(
-registro=>{
-
-if(
-registro &&
-registro.recordId &&
-registro.status==="recusado"
-){
-
-idsRecusados.add(
-String(
-registro.recordId
-)
-);
-
-}
-
-}
-);
+  localStorage.setItem(
+    STORAGE_BASE,
+    JSON.stringify(baseInternos)
+  );
 
 }
 
 function carregarTudo(){
 
-preparacao=
-lerJSON(
-STORAGE_PREPARACAO,
-[]
-);
+  try{
 
-historico=
-lerJSON(
-STORAGE_HISTORICO,
-[]
-);
+    preparacao =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_PREPARACAO
+        ) || "[]"
+      );
 
-arquivo=
-lerJSON(
-STORAGE_ARQUIVO,
-[]
-);
+  }catch{
 
-baseInternos=
-lerJSON(
-STORAGE_BASE,
-[]
-);
+    preparacao = [];
 
-if(
-!Array.isArray(preparacao)
-){
+  }
 
-preparacao=[];
+  try{
 
-}
+    historico =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_HISTORICO
+        ) || "[]"
+      );
 
-if(
-!Array.isArray(historico)
-){
+  }catch{
 
-historico=[];
+    historico = [];
 
-}
+  }
 
-if(
-!Array.isArray(arquivo)
-){
+  try{
 
-arquivo=[];
+    arquivo =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_ARQUIVO
+        ) || "[]"
+      );
 
-}
+  }catch{
 
-if(
-!Array.isArray(baseInternos)
-){
+    arquivo = [];
 
-baseInternos=[];
+  }
 
-}
+  try{
 
-/*
- * Limpeza de segurança:
- * nenhum recusado pode permanecer na preparação.
- */
-preparacao=
-preparacao.filter(
-registro=>{
+    recusados =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_RECUSADOS
+        ) || "[]"
+      );
 
-if(
-registro.status==="recusado" ||
-idsRecusados.has(
-String(
-registro.recordId
-)
-)
-){
+  }catch{
 
-return false;
+    recusados = [];
 
-}
+  }
 
-return true;
+  try{
 
-}
-);
+    baseInternos =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_BASE
+        ) || "[]"
+      );
 
-reconstruirIdsRecusados();
+  }catch{
 
-renderPreparacao();
-renderHistorico();
-renderGuardados();
-atualizarStatusBase();
+    baseInternos = [];
+
+  }
+
+  migrarRecusadosAntigos();
+
+  prepararDadosAntigos();
+
+  renderPreparacao();
+  renderHistorico();
+  renderRecusados();
+  renderGuardados();
+  atualizarStatusBase();
+  atualizarFiltroGuardados();
 
 }
 
-/* ============================================================
-   FORMULÁRIO
-============================================================ */
 
-function usarHoje(){
+/* =========================================================
+   MIGRAÇÃO DE RECUSAS ANTIGAS
+========================================================= */
 
-const hoje=
-new Date();
+function migrarRecusadosAntigos(){
 
-const ano=
-hoje.getFullYear();
+  const antigos =
+    historico.filter(
+      item =>
+        item.status === "recusado"
+    );
 
-const mes=
-String(
-hoje.getMonth()+1
-).padStart(
-2,
-"0"
-);
+  if(
+    antigos.length === 0
+  ){
+    return;
+  }
 
-const dia=
-String(
-hoje.getDate()
-).padStart(
-2,
-"0"
-);
+  antigos.forEach(item => {
 
-$("dataAtendimento")
-.value=
-`${ano}-${mes}-${dia}`;
+    const existe =
+      recusados.some(
+        r =>
+          r.recordId ===
+          item.recordId
+      );
+
+    if(!existe){
+
+      recusados.push(
+        item
+      );
+
+    }
+
+  });
+
+  historico =
+    historico.filter(
+      item =>
+        item.status !== "recusado"
+    );
+
+  salvarTudo();
+
+}
+
+
+/* =========================================================
+   COMPATIBILIDADE COM REGISTROS ANTIGOS
+========================================================= */
+
+function prepararDadosAntigos(){
+
+  historico.forEach(item => {
+
+    if(!item.status){
+
+      item.status =
+        item.recebidoEm
+          ? "recebido"
+          : "aguardando_mesa";
+
+    }
+
+    if(!item.registro){
+
+      item.registro = {};
+
+    }
+
+  });
 
 }
 
-function preencherAtendimentos(){
 
-const select=
-$("atendimento");
-
-select.innerHTML=
-'<option value="">Selecione</option>';
-
-ATENDIMENTOS.forEach(
-atendimento=>{
-
-const option=
-document.createElement(
-"option"
-);
-
-option.value=
-atendimento;
-
-option.textContent=
-atendimento;
-
-select.appendChild(
-option
-);
-
-}
-);
-
-}
+/* =========================================================
+   CELAS
+========================================================= */
 
 function preencherCelas(){
 
-const select=
-$("cela");
+  const lista =
+    document.getElementById(
+      "listaCela"
+    );
 
-select.innerHTML=
-'<option value="">Selecione</option>';
+  lista.innerHTML = "";
 
-for(
-let i=1;
-i<=120;
-i++
-){
+  for(
+    let i=1;
+    i<=120;
+    i++
+  ){
 
-const valor=
-String(i)
-.padStart(
-2,
-"0"
-);
+    const numero =
+      String(i)
+        .padStart(2,"0");
 
-const option=
-document.createElement(
-"option"
-);
+    const option =
+      document.createElement(
+        "option"
+      );
 
-option.value=
-valor;
+    option.value =
+      numero;
 
-option.textContent=
-valor;
+    lista.appendChild(
+      option
+    );
 
-select.appendChild(
-option
-);
+  }
 
 }
 
+
+/* =========================================================
+   HOJE
+========================================================= */
+
+function colocarHoje(){
+
+  document.getElementById(
+    "dataAtendimento"
+  ).value =
+    dataHojeISO();
+
 }
 
-function selecionarExcel(){
 
-$("arquivoExcel").click();
+/* =========================================================
+   BASE DE INTERNOS
+========================================================= */
+
+function abrirArquivoExcel(){
+
+  document.getElementById(
+    "arquivoExcel"
+  ).click();
 
 }
 
 function atualizarStatusBase(){
 
-const quantidade=
-baseInternos.length;
+  const info =
+    document.getElementById(
+      "infoBase"
+    );
 
-if(!quantidade){
+  const detalhado =
+    document.getElementById(
+      "statusBaseDetalhado"
+    );
 
-$("baseStatus")
-.textContent=
-"Nenhuma base carregada.";
+  if(
+    !baseInternos.length
+  ){
 
-return;
+    info.className =
+      "status-base";
 
-}
+    info.textContent =
+      "📋 Base de internos não carregada.";
 
-const data=
-localStorage.getItem(
-STORAGE_BASE_ATUALIZADA
-);
+    detalhado.textContent =
+      "Nenhuma base de internos carregada.";
 
-$("baseStatus")
-.textContent=
-`${quantidade} internos carregados`+
-(
-data
-?` — última atualização: ${formatarDataHora(data)}`
-:""
-);
+    return;
 
-}
+  }
 
-async function importarExcel(event){
+  const atualizadaEm =
+    localStorage.getItem(
+      STORAGE_BASE_ATUALIZADA
+    );
 
-const arquivoSelecionado=
-event.target.files?.[0];
+  info.className =
+    "status-base ok";
 
-if(!arquivoSelecionado){
-return;
-}
+  info.textContent =
+    `📋 Base carregada: ${baseInternos.length} internos.`;
 
-try{
-
-if(!window.XLSX){
-
-throw new Error(
-"Biblioteca do Excel não carregada."
-);
-
-}
-
-const buffer=
-await arquivoSelecionado.arrayBuffer();
-
-const workbook=
-XLSX.read(
-buffer,
-{
-type:"array"
-}
-);
-
-const primeiraAba=
-workbook.Sheets[
-workbook.SheetNames[0]
-];
-
-const linhas=
-XLSX.utils.sheet_to_json(
-primeiraAba,
-{
-header:1,
-defval:""
-}
-);
-
-let indiceCabecalho=-1;
-
-for(
-let i=0;
-i<linhas.length;
-i++
-){
-
-const linha=
-linhas[i]
-.map(
-valor=>normalizar(valor)
-);
-
-if(
-linha.includes(
-"nome do interno"
-)&&
-linha.includes(
-"rgi"
-)
-){
-
-indiceCabecalho=
-i;
-
-break;
+  detalhado.innerHTML =
+    `
+      <strong>
+        ${baseInternos.length}
+        internos cadastrados.
+      </strong>
+      ${
+        atualizadaEm
+          ? `<br>Última atualização:
+             ${formatarDataHora(atualizadaEm)}`
+          : ""
+      }
+    `;
 
 }
 
+function importarExcel(event){
+
+  const arquivoExcel =
+    event.target.files[0];
+
+  if(!arquivoExcel){
+    return;
+  }
+
+  if(
+    typeof XLSX ===
+    "undefined"
+  ){
+
+    alert(
+      "Não foi possível carregar o sistema de Excel."
+    );
+
+    return;
+
+  }
+
+  const leitor =
+    new FileReader();
+
+  leitor.onload =
+    function(e){
+
+      try{
+
+        const dados =
+          new Uint8Array(
+            e.target.result
+          );
+
+        const workbook =
+          XLSX.read(
+            dados,
+            {
+              type:"array"
+            }
+          );
+
+        const primeiraAba =
+          workbook.Sheets[
+            workbook.SheetNames[0]
+          ];
+
+        const linhas =
+          XLSX.utils.sheet_to_json(
+            primeiraAba,
+            {
+              header:1,
+              defval:""
+            }
+          );
+
+        let indiceCabecalho =
+          -1;
+
+        for(
+          let i=0;
+          i<linhas.length;
+          i++
+        ){
+
+          const linha =
+            linhas[i]
+              .map(
+                x =>
+                  normalizarTexto(x)
+              );
+
+          if(
+            linha.includes(
+              "nome do interno"
+            ) &&
+            linha.includes("rgi")
+          ){
+
+            indiceCabecalho =
+              i;
+
+            break;
+
+          }
+
+        }
+
+        if(
+          indiceCabecalho === -1
+        ){
+
+          alert(
+            "Não encontrei a linha de cabeçalho com NOME DO INTERNO e RGI."
+          );
+
+          return;
+
+        }
+
+        const cabecalho =
+          linhas[
+            indiceCabecalho
+          ];
+
+        function coluna(nome){
+
+          const alvo =
+            normalizarTexto(nome);
+
+          return cabecalho.findIndex(
+            c =>
+              normalizarTexto(c)
+                === alvo
+          );
+
+        }
+
+        const colNome =
+          coluna(
+            "NOME DO INTERNO"
+          );
+
+        const colRGI =
+          coluna("RGI");
+
+        const colPavilhao =
+          coluna("PAVILHÃO");
+
+        const colCela =
+          coluna("CELA");
+
+        if(
+          colNome < 0 ||
+          colRGI < 0
+        ){
+
+          alert(
+            "A planilha não possui as colunas necessárias."
+          );
+
+          return;
+
+        }
+
+        const novaBase = [];
+
+        for(
+          let i =
+            indiceCabecalho + 1;
+          i<linhas.length;
+          i++
+        ){
+
+          const linha =
+            linhas[i];
+
+          const nome =
+            String(
+              linha[colNome] || ""
+            ).trim();
+
+          if(!nome){
+            continue;
+          }
+
+          if(
+            normalizarTexto(nome)
+              === "totais"
+          ){
+            continue;
+          }
+
+          novaBase.push({
+
+            nome,
+
+            rgi:
+              String(
+                linha[colRGI] || ""
+              ).trim(),
+
+            pavilhao:
+              String(
+                colPavilhao >= 0
+                  ? linha[colPavilhao] || ""
+                  : ""
+              ).trim(),
+
+            cela:
+              String(
+                colCela >= 0
+                  ? linha[colCela] || ""
+                  : ""
+              ).trim()
+
+          });
+
+        }
+
+        baseInternos =
+          novaBase;
+
+        localStorage.setItem(
+          STORAGE_BASE_ATUALIZADA,
+          new Date().toISOString()
+        );
+
+        salvarTudo();
+
+        atualizarStatusBase();
+
+        alert(
+          `Base atualizada com sucesso!\n\n${novaBase.length} internos encontrados.`
+        );
+
+        limparSugestoes();
+
+      }catch(erro){
+
+        console.error(
+          erro
+        );
+
+        alert(
+          "Erro ao importar a planilha."
+        );
+
+      }
+
+    };
+
+  leitor.readAsArrayBuffer(
+    arquivoExcel
+  );
+
+  event.target.value = "";
+
 }
 
-if(
-indiceCabecalho<0
-){
 
-throw new Error(
-"Não foi possível localizar o cabeçalho da planilha."
-);
+/* =========================================================
+   PESQUISA DE INTERNOS
+========================================================= */
 
-}
+function buscarInternos(termo){
 
-const cabecalho=
-linhas[
-indiceCabecalho
-].map(
-valor=>normalizar(valor)
-);
+  const busca =
+    normalizarTexto(termo);
 
-const idxNome=
-cabecalho.findIndex(
-x=>x==="nome do interno"
-);
+  if(!busca){
+    return [];
+  }
 
-const idxRgi=
-cabecalho.findIndex(
-x=>x==="rgi"
-);
-
-const idxPavilhao=
-cabecalho.findIndex(
-x=>
-x==="pavilhao" ||
-x==="pavilhão"
-);
-
-const idxCela=
-cabecalho.findIndex(
-x=>x==="cela"
-);
-
-const novaBase=[];
-
-for(
-let i=indiceCabecalho+1;
-i<linhas.length;
-i++
-){
-
-const linha=
-linhas[i];
-
-const nome=
-String(
-linha[idxNome]??""
-).trim();
-
-if(!nome){
-continue;
-}
-
-if(
-normalizar(nome)==="totais"
-){
-
-continue;
-
-}
-
-novaBase.push({
-
-nome,
-
-rgi:
-String(
-linha[idxRgi]??""
-).trim(),
-
-pavilhao:
-String(
-linha[idxPavilhao]??""
-).trim(),
-
-cela:
-normalizarCela(
-linha[idxCela]
-)
-
-});
-
-}
-
-if(
-!novaBase.length
-){
-
-throw new Error(
-"Nenhum interno foi encontrado na planilha."
-);
-
-}
-
-baseInternos=
-novaBase;
-
-localStorage.setItem(
-STORAGE_BASE_ATUALIZADA,
-new Date().toISOString()
-);
-
-salvarTudo();
-
-atualizarStatusBase();
-preencherPavilhoesImpressao();
-
-mostrarToast(
-`Base atualizada com ${baseInternos.length} internos.`,
-"success"
-);
-
-event.target.value="";
-
-}catch(e){
-
-console.error(e);
-
-mostrarToast(
-e.message ||
-"Erro ao importar a base.",
-"error"
-);
-
-event.target.value="";
-
-}
-
-}
-
-function normalizarCela(valor){
-
-if(
-valor===null ||
-valor===undefined ||
-String(valor).trim()===""
-){
-
-return "";
-
-}
-
-const texto=
-String(valor).trim();
-
-const numero=
-Number(texto);
-
-if(
-Number.isFinite(numero) &&
-numero>=1 &&
-numero<=120
-){
-
-return String(
-Math.trunc(numero)
-).padStart(
-2,
-"0"
-);
-
-}
-
-const somenteNumero=
-texto.match(
-/\d+/
-);
-
-if(somenteNumero){
-
-const n=
-Number(
-somenteNumero[0]
-);
-
-if(
-n>=1 &&
-n<=120
-){
-
-return String(n)
-.padStart(
-2,
-"0"
-);
-
-}
-
-}
-
-return texto;
-
-}
-
-/* ============================================================
-   BUSCA INTERNO
-============================================================ */
-
-function buscarInternos(texto){
-
-const termo=
-normalizar(texto);
-
-if(!termo){
-return [];
-}
-
-return baseInternos
-.filter(
-interno=>
-normalizar(
-interno.nome
-)
-.includes(
-termo
-)
-)
-.slice(
-0,
-20
-);
+  return baseInternos
+    .filter(item =>
+      normalizarTexto(
+        item.nome
+      ).includes(busca)
+    )
+    .slice(0,12);
 
 }
 
 function mostrarSugestoes(){
 
-const texto=
-$("nomeInterno").value;
+  const input =
+    document.getElementById(
+      "nome"
+    );
 
-const resultados=
-buscarInternos(texto);
+  const caixa =
+    document.getElementById(
+      "sugestoesNome"
+    );
 
-const box=
-$("sugestoesInternos");
+  const resultados =
+    buscarInternos(
+      input.value
+    );
 
-indiceSugestao=-1;
+  caixa.innerHTML = "";
 
-resultadosSugestao=
-resultados;
+  indiceSugestao = -1;
 
-if(
-!texto.trim() ||
-!resultados.length
-){
+  if(
+    !input.value.trim() ||
+    resultados.length === 0
+  ){
 
-box.style.display=
-"none";
+    caixa.style.display =
+      "none";
 
-box.innerHTML=
-"";
+    return;
 
-return;
+  }
 
-}
+  resultados.forEach(
+    (item,index) => {
 
-box.innerHTML=
-resultados
-.map(
-(interno,index)=>`
+      const div =
+        document.createElement(
+          "div"
+        );
 
-<div
-class="suggestion"
-data-index="${index}"
-onclick="selecionarInterno(${index})"
->
+      div.className =
+        "sugestao";
 
-<strong>
-${escapeHtml(interno.nome)}
-</strong>
+      div.dataset.index =
+        index;
 
-<small>
-RGI:
-${escapeHtml(interno.rgi||"-")}
-|
-Pavilhão:
-${escapeHtml(interno.pavilhao||"-")}
-|
-Cela:
-${escapeHtml(interno.cela||"-")}
-</small>
+      div.innerHTML =
+        `
+          <strong>
+            ${escaparHTML(item.nome)}
+          </strong>
+          <br>
+          <span class="mini">
+            RGI: ${escaparHTML(item.rgi)}
+            |
+            Pavilhão: ${escaparHTML(item.pavilhao)}
+            |
+            Cela: ${escaparHTML(item.cela)}
+          </span>
+        `;
 
-</div>
+      div.addEventListener(
+        "click",
+        function(){
 
-`
-)
-.join("");
+          selecionarInterno(
+            item
+          );
 
-box.style.display=
-"block";
+        }
+      );
 
-}
+      caixa.appendChild(
+        div
+      );
 
-function selecionarInterno(index){
+    }
+  );
 
-const interno=
-resultadosSugestao[index];
-
-if(!interno){
-return;
-}
-
-$("nomeInterno").value=
-interno.nome||"";
-
-$("rgi").value=
-interno.rgi||"";
-
-$("pavilhao").value=
-interno.pavilhao||"";
-
-$("cela").value=
-interno.cela||"";
-
-$("sugestoesInternos")
-.style.display=
-"none";
-
-mostrarInfoInterno(
-interno
-);
+  caixa.style.display =
+    "block";
 
 }
 
-function mostrarInfoInterno(
-interno
-){
+function selecionarInterno(item){
 
-$("infoInterno").innerHTML=`
+  document.getElementById(
+    "nome"
+  ).value =
+    item.nome || "";
 
-<span class="info-chip">
-RGI:
-${escapeHtml(interno.rgi||"-")}
-</span>
+  document.getElementById(
+    "rgi"
+  ).value =
+    item.rgi || "";
 
-<span class="info-chip">
-Pavilhão:
-${escapeHtml(interno.pavilhao||"-")}
-</span>
+  document.getElementById(
+    "pavilhao"
+  ).value =
+    item.pavilhao || "";
 
-<span class="info-chip">
-Cela:
-${escapeHtml(interno.cela||"-")}
-</span>
+  document.getElementById(
+    "cela"
+  ).value =
+    normalizarCela(
+      item.cela
+    );
 
-`;
-
-}
-
-$("nomeInterno")
-.addEventListener(
-"input",
-mostrarSugestoes
-);
-
-$("nomeInterno")
-.addEventListener(
-"keydown",
-event=>{
-
-const box=
-$("sugestoesInternos");
-
-if(
-box.style.display==="none"
-){
-
-return;
+  limparSugestoes();
 
 }
 
-const itens=
-box.querySelectorAll(
-".suggestion"
-);
+function normalizarCela(valor){
 
-if(
-event.key==="ArrowDown"
-){
+  const texto =
+    String(
+      valor || ""
+    ).trim();
 
-event.preventDefault();
+  const numero =
+    parseInt(
+      texto,
+      10
+    );
 
-indiceSugestao=
-Math.min(
-indiceSugestao+1,
-itens.length-1
-);
+  if(
+    Number.isNaN(
+      numero
+    )
+  ){
 
-}
+    return texto;
 
-if(
-event.key==="ArrowUp"
-){
+  }
 
-event.preventDefault();
-
-indiceSugestao=
-Math.max(
-indiceSugestao-1,
-0
-);
+  return String(
+    numero
+  ).padStart(2,"0");
 
 }
 
-if(
-event.key==="Enter"
-){
+function limparSugestoes(){
 
-event.preventDefault();
+  const caixa =
+    document.getElementById(
+      "sugestoesNome"
+    );
 
-if(
-indiceSugestao>=0
-){
+  caixa.innerHTML = "";
 
-selecionarInterno(
-indiceSugestao
-);
+  caixa.style.display =
+    "none";
 
-}else if(
-itens.length===1
-){
-
-selecionarInterno(0);
+  indiceSugestao = -1;
 
 }
 
-}
 
-itens.forEach(
-(item,index)=>{
-
-item.classList.toggle(
-"active",
-index===indiceSugestao
-);
-
-}
-);
-
-});
-
-document.addEventListener(
-"click",
-event=>{
-
-if(
-!event.target.closest(
-".suggestions"
-)
-){
-
-$("sugestoesInternos")
-.style.display=
-"none";
-
-}
-
-});
+/* =========================================================
+   ENTRAR NA LISTA
+========================================================= */
 
 function limparFormulario(){
 
-$("nomeInterno").value="";
-$("rgi").value="";
-$("pavilhao").value="";
-$("cela").value="";
-$("atendimento").value="";
-$("dataAtendimento").value="";
-$("assunto").value="";
-$("infoInterno").innerHTML="";
-$("sugestoesInternos").style.display="none";
+  document.getElementById(
+    "nome"
+  ).value = "";
 
-$("nomeInterno").focus();
+  document.getElementById(
+    "rgi"
+  ).value = "";
 
-}
+  document.getElementById(
+    "pavilhao"
+  ).value = "";
 
-function obterDadosFormulario(){
+  document.getElementById(
+    "cela"
+  ).value = "";
 
-const nome=
-$("nomeInterno").value.trim();
+  document.getElementById(
+    "atendimento"
+  ).value = "";
 
-const rgi=
-$("rgi").value.trim();
+  document.getElementById(
+    "dataAtendimento"
+  ).value =
+    dataHojeISO();
 
-const pavilhao=
-$("pavilhao").value.trim();
-
-const cela=
-$("cela").value.trim();
-
-const atendimento=
-$("atendimento").value.trim();
-
-const dataAtendimento=
-$("dataAtendimento").value;
-
-const assunto=
-$("assunto").value.trim();
-
-if(!nome){
-
-mostrarToast(
-"Informe o nome do interno.",
-"warning"
-);
-
-$("nomeInterno").focus();
-
-return null;
-
-}
-
-if(!atendimento){
-
-mostrarToast(
-"Selecione o atendimento.",
-"warning"
-);
-
-$("atendimento").focus();
-
-return null;
-
-}
-
-if(!dataAtendimento){
-
-mostrarToast(
-"Informe a data do atendimento.",
-"warning"
-);
-
-$("dataAtendimento").focus();
-
-return null;
-
-}
-
-return{
-
-recordId:
-gerarId(),
-
-nome,
-
-nomeInterno:
-nome,
-
-rgi,
-
-pavilhao,
-
-cela,
-
-atendimento,
-
-dataAtendimento,
-
-assunto,
-
-enviadoEm:null,
-
-recebidoEm:null,
-
-recusadoEm:null,
-
-motivoRecusa:"",
-
-status:
-"preparacao",
-
-historicoRecusas:[]
-
-};
+  limparSugestoes();
 
 }
 
 function entrarNaLista(){
 
-const registro=
-obterDadosFormulario();
+  const nome =
+    document.getElementById(
+      "nome"
+    ).value.trim();
 
-if(!registro){
-return;
+  const rgi =
+    document.getElementById(
+      "rgi"
+    ).value.trim();
+
+  const pavilhao =
+    document.getElementById(
+      "pavilhao"
+    ).value;
+
+  const cela =
+    document.getElementById(
+      "cela"
+    ).value.trim();
+
+  const atendimento =
+    document.getElementById(
+      "atendimento"
+    ).value.trim();
+
+  const dataAtendimento =
+    document.getElementById(
+      "dataAtendimento"
+    ).value;
+
+  if(
+    !nome ||
+    !rgi ||
+    !pavilhao ||
+    !cela ||
+    !atendimento
+  ){
+
+    alert(
+      "Preencha Nome do Interno, RGI, Pavilhão, Cela e Atendimento."
+    );
+
+    return;
+
+  }
+
+  if(!dataAtendimento){
+
+    alert(
+      "Informe a data do atendimento."
+    );
+
+    return;
+
+  }
+
+  const registro = {
+
+    nome,
+    rgi,
+    identificacao:rgi,
+    pavilhao,
+    cela,
+    atendimento,
+    dataAtendimento
+
+  };
+
+  preparacao.push({
+
+    registro,
+
+    criadoEm:
+      new Date().toISOString()
+
+  });
+
+  salvarTudo();
+
+  renderPreparacao();
+
+  limparFormulario();
+
 }
 
-preparacao.push(
-registro
-);
 
-salvarTudo();
-
-renderPreparacao();
-
-limparFormulario();
-
-mostrarToast(
-"Atendimento adicionado à lista.",
-"success"
-);
-
-}
-
-function removerDaPreparacao(
-recordId
-){
-
-const indice=
-preparacao.findIndex(
-item=>
-item.recordId===
-recordId
-);
-
-if(indice<0){
-return;
-}
-
-preparacao.splice(
-indice,
-1
-);
-
-salvarTudo();
-
-renderPreparacao();
-
-mostrarToast(
-"Atendimento removido da lista.",
-"success"
-);
-
-}
+/* =========================================================
+   RENDER PREPARAÇÃO
+========================================================= */
 
 function renderPreparacao(){
 
-const container=
-$("preparacaoContainer");
+  const elemento =
+    document.getElementById(
+      "preparacao"
+    );
 
-$("contadorPreparacao")
-.textContent=
-preparacao.length;
+  const botao =
+    document.getElementById(
+      "btnEnviarMesa"
+    );
 
-if(!preparacao.length){
+  if(
+    preparacao.length === 0
+  ){
 
-container.innerHTML=`
+    elemento.innerHTML =
+      `
+        <div class="preparacao-vazia">
+          Nenhum atendimento aguardando envio.
+        </div>
+      `;
 
-<div class="empty">
+    botao.disabled =
+      true;
 
-Nenhum atendimento aguardando envio.<br>
+    return;
 
-Use
-<strong>
-➕ ENTRAR NA LISTA
-</strong>
-para preparar os atendimentos.
+  }
 
-</div>
+  botao.disabled =
+    false;
 
-`;
+  elemento.innerHTML =
+    preparacao
+      .map(
+        (item,index) => {
 
-return;
+          const r =
+            item.registro || {};
 
-}
+          return `
+            <div class="item item-preparacao">
 
-let html=`
+              <strong>
+                ${index+1}. ${escaparHTML(r.nome)}
+              </strong>
 
-<div class="table-wrap">
+              <div class="item-detalhes">
 
-<table>
+                RGI:
+                ${escaparHTML(r.rgi)}
 
-<thead>
+                <br>
 
-<tr>
+                Pavilhão:
+                ${escaparHTML(r.pavilhao)}
 
-<th>#</th>
-<th>Nome</th>
-<th>RGI</th>
-<th>Pav/Cela</th>
-<th>Atendimento</th>
-<th>Data</th>
-<th>Assunto</th>
-<th>Ação</th>
+                |
+                Cela:
+                ${escaparHTML(r.cela)}
 
-</tr>
+                <br>
 
-</thead>
+                Atendimento:
+                <strong style="display:inline">
+                  ${escaparHTML(r.atendimento)}
+                </strong>
 
-<tbody>
+                <br>
 
-`;
+                Data:
+                ${escaparHTML(r.dataAtendimento)}
 
-preparacao.forEach(
-(registro,index)=>{
+              </div>
 
-html+=`
+              <div class="acoes">
 
-<tr>
+                <button
+                  class="btn-excluir"
+                  onclick="removerPreparacao(${index})"
+                >
+                  🗑️ REMOVER
+                </button>
 
-<td>
-${index+1}
-</td>
+              </div>
 
-<td>
-<strong>
-${escapeHtml(registro.nome)}
-</strong>
-</td>
+            </div>
+          `;
 
-<td>
-${escapeHtml(registro.rgi)}
-</td>
-
-<td class="print-pavcela">
-${escapeHtml(registro.pavilhao)}
-/
-${escapeHtml(registro.cela)}
-</td>
-
-<td>
-${escapeHtml(registro.atendimento)}
-</td>
-
-<td>
-${escapeHtml(
-formatarData(
-registro.dataAtendimento
-)
-)}
-</td>
-
-<td>
-${escapeHtml(
-registro.assunto||"-"
-)}
-</td>
-
-<td>
-
-<button
-class="btn-red"
-onclick="removerDaPreparacao('${escapeHtml(registro.recordId)}')"
->
-🗑️
-</button>
-
-</td>
-
-</tr>
-
-`;
-
-}
-);
-
-html+=`
-
-</tbody>
-
-</table>
-
-</div>
-
-`;
-
-container.innerHTML=
-html;
+        }
+      )
+      .join("");
 
 }
 
-/* ============================================================
-   ENVIO
-============================================================ */
+function removerPreparacao(index){
+
+  if(
+    !confirm(
+      "Remover este atendimento da lista?"
+    )
+  ){
+    return;
+  }
+
+  preparacao.splice(
+    index,
+    1
+  );
+
+  salvarTudo();
+
+  renderPreparacao();
+
+}
+
+
+/* =========================================================
+   ENVIO PARA MESA
+========================================================= */
 
 function enviarParaMesa(){
 
-if(!preparacao.length){
+  if(
+    preparacao.length === 0
+  ){
 
-mostrarToast(
-"A lista de envio está vazia.",
-"warning"
-);
+    alert(
+      "Não há atendimentos na lista para enviar."
+    );
 
-return;
+    return;
+
+  }
+
+  if(
+    !ws ||
+    ws.readyState !==
+      WebSocket.OPEN
+  ){
+
+    alert(
+      "O Guichê não está conectado ao servidor."
+    );
+
+    return;
+
+  }
+
+  const agora =
+    new Date().toISOString();
+
+  preparacao.forEach(
+    item => {
+
+      const recordId =
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : "rec-" +
+            Date.now() +
+            "-" +
+            Math.random()
+              .toString(16)
+              .slice(2);
+
+      const registro =
+        item.registro;
+
+      const historicoItem = {
+
+        recordId,
+
+        registro,
+
+        enviadoEm:agora,
+
+        recebidoEm:null,
+
+        recebidoPelaMesaEm:null,
+
+        status:
+          "aguardando_mesa"
+
+      };
+
+      historico.unshift(
+        historicoItem
+      );
+
+      enviarRegistroWS(
+        recordId,
+        registro
+      );
+
+    }
+  );
+
+  preparacao = [];
+
+  salvarTudo();
+
+  renderPreparacao();
+  renderHistorico();
+
+  alert(
+    "Atendimentos enviados para a Mesa."
+  );
 
 }
 
-if(
-!socket ||
-socket.readyState!==
-WebSocket.OPEN
+
+/* =========================================================
+   ENVIO WEBSOCKET
+========================================================= */
+
+function enviarRegistroWS(
+  recordId,
+  registro
 ){
 
-mostrarToast(
-"GUICHÊ está sem conexão com o servidor. Os atendimentos permanecem na lista.",
-"warning"
-);
+  if(
+    !ws ||
+    ws.readyState !==
+      WebSocket.OPEN
+  ){
+    return false;
+  }
 
-return;
+  try{
 
-}
+    ws.send(
+      JSON.stringify({
 
-const agora=
-new Date().toISOString();
+        type:"send_record",
 
-const enviados=[];
+        recordId,
 
-for(
-const registro of preparacao
-){
+        record:registro,
 
-/*
- * Um registro que tenha sido recusado nunca deve
- * estar na preparação.
- */
-if(
-registro.status==="recusado" ||
-idsRecusados.has(
-String(
-registro.recordId
-)
-)
-){
+        ownerId:clientId
 
-continue;
+      })
+    );
 
-}
+    return true;
 
-const envio={
+  }catch{
 
-...registro,
+    return false;
 
-enviadoEm:
-agora,
-
-status:
-"aguardando_mesa",
-
-recebidoEm:
-null,
-
-recusadoEm:
-null
-
-};
-
-try{
-
-socket.send(
-JSON.stringify({
-
-type:
-"send_record",
-
-recordId:
-envio.recordId,
-
-record:
-envio
-
-})
-);
-
-enviados.push(
-envio
-);
-
-}catch(e){
-
-console.error(e);
+  }
 
 }
 
-}
 
-if(!enviados.length){
-
-mostrarToast(
-"Nenhum atendimento novo pôde ser enviado.",
-"warning"
-);
-
-return;
-
-}
-
-enviados.forEach(
-registro=>{
-
-const existente=
-historico.find(
-item=>
-item.recordId===
-registro.recordId
-);
-
-if(existente){
-
-Object.assign(
-existente,
-registro
-);
-
-}else{
-
-historico.push(
-registro
-);
-
-}
-
-}
-);
-
-preparacao=
-preparacao.filter(
-item=>
-!enviados.some(
-x=>
-x.recordId===
-item.recordId
-)
-);
-
-salvarTudo();
-
-renderPreparacao();
-renderHistorico();
-
-mostrarToast(
-`${enviados.length} atendimento(s) enviado(s) para a MESA.`,
-"success"
-);
-
-}
-
-/* ============================================================
-   WEBSOCKET
-============================================================ */
-
-function definirStatus(
-online,
-texto
-){
-
-$("statusDot")
-.classList.toggle(
-"online",
-online
-);
-
-$("statusTexto")
-.textContent=
-texto;
-
-}
-
-function limparTimersSocket(){
-
-clearTimeout(
-reconnectTimer
-);
-
-clearInterval(
-heartbeatTimer
-);
-
-reconnectTimer=
-null;
-
-heartbeatTimer=
-null;
-
-}
-
-function conectarServidor(){
-
-limparTimersSocket();
-
-definirStatus(
-false,
-"Conectando..."
-);
-
-try{
-
-const protocolo=
-location.protocol===
-"https:"
-?"wss:"
-:"ws:";
-
-socket=
-new WebSocket(
-protocolo+
-"//"+
-location.host
-);
-
-}catch(e){
-
-agendarReconexao();
-
-return;
-
-}
-
-socket.addEventListener(
-"open",
-()=>{
-
-reconnectDelay=
-2000;
-
-definirStatus(
-true,
-"GUICHÊ conectado"
-);
-
-try{
-
-socket.send(
-JSON.stringify({
-
-type:
-"register",
-
-role:
-"sender"
-
-})
-);
-
-}catch(e){}
-
-iniciarHeartbeat();
-
-/*
- * IMPORTANTE:
- * somente aguardando_mesa é reenviado.
- * Recusados estão protegidos.
- */
-reenviarAguardandoMesa();
-
-mostrarToast(
-"GUICHÊ conectado ao servidor.",
-"success"
-);
-
-});
-
-socket.addEventListener(
-"message",
-event=>{
-
-let mensagem;
-
-try{
-
-mensagem=
-JSON.parse(
-event.data
-);
-
-}catch(e){
-
-return;
-
-}
-
-tratarMensagemServidor(
-mensagem
-);
-
-});
-
-socket.addEventListener(
-"close",
-()=>{
-
-limparTimersSocket();
-
-definirStatus(
-false,
-"Desconectado — tentando reconectar"
-);
-
-agendarReconexao();
-
-});
-
-socket.addEventListener(
-"error",
-()=>{
-
-definirStatus(
-false,
-"Erro de conexão"
-);
-
-try{
-
-socket.close();
-
-}catch(e){}
-
-});
-
-}
-
-function iniciarHeartbeat(){
-
-clearInterval(
-heartbeatTimer
-);
-
-heartbeatTimer=
-setInterval(
-()=>{
-
-if(
-!socket ||
-socket.readyState!==
-WebSocket.OPEN
-){
-
-return;
-
-}
-
-try{
-
-socket.send(
-JSON.stringify({
-
-type:
-"ping",
-
-from:
-"guiche"
-
-})
-);
-
-}catch(e){}
-
-},
-12000
-);
-
-}
-
-function agendarReconexao(){
-
-clearTimeout(
-reconnectTimer
-);
-
-reconnectTimer=
-setTimeout(
-()=>{
-
-conectarServidor();
-
-},
-reconnectDelay
-);
-
-reconnectDelay=
-Math.min(
-reconnectDelay*1.5,
-10000
-);
-
-}
-
-/* ============================================================
-   REENVIO AUTOMÁTICO
-============================================================ */
+/* =========================================================
+   REENVIO AUTOMÁTICO DOS AGUARDANDO MESA
+========================================================= */
 
 function reenviarAguardandoMesa(){
 
-if(
-!socket ||
-socket.readyState!==
-WebSocket.OPEN
-){
+  if(
+    !ws ||
+    ws.readyState !==
+      WebSocket.OPEN
+  ){
+    return;
+  }
 
-return;
+  historico
+    .filter(
+      item =>
+        item.status ===
+        "aguardando_mesa"
+    )
+    .forEach(
+      item => {
 
-}
+        enviarRegistroWS(
+          item.recordId,
+          item.registro
+        );
 
-/*
- * REGRA PRINCIPAL:
- *
- * Só pode ser reenviado quem está explicitamente
- * com status "aguardando_mesa".
- *
- * Recusado, recebido e guardado ficam fora.
- */
-const aguardando=
-historico.filter(
-registro=>{
-
-if(
-!registro ||
-!registro.recordId
-){
-
-return false;
+      }
+    );
 
 }
 
-if(
-registro.status!==
-"aguardando_mesa"
-){
 
-return false;
-
-}
-
-if(
-idsRecusados.has(
-String(
-registro.recordId
-)
-)
-){
-
-return false;
-
-}
-
-return true;
-
-}
-);
-
-if(!aguardando.length){
-return;
-}
-
-aguardando.forEach(
-registro=>{
-
-/*
- * Última proteção antes de enviar.
- */
-if(
-registro.status!==
-"aguardando_mesa"
-){
-
-return;
-
-}
-
-if(
-idsRecusados.has(
-String(
-registro.recordId
-)
-)
-){
-
-return;
-
-}
-
-try{
-
-socket.send(
-JSON.stringify({
-
-type:
-"send_record",
-
-recordId:
-registro.recordId,
-
-record:{
-...registro,
-status:
-"aguardando_mesa"
-}
-
-})
-);
-
-}catch(e){
-
-console.error(
-"Falha ao reenviar:",
-e
-);
-
-}
-
-}
-);
-
-}
-
-/* ============================================================
-   MENSAGENS DO SERVIDOR
-============================================================ */
-
-function tratarMensagemServidor(
-mensagem
-){
-
-if(
-mensagem.type===
-"connected"
-){
-
-return;
-
-}
-
-if(
-mensagem.type===
-"registered"
-){
-
-/*
- * Após o registro, fazemos uma segunda verificação.
- */
-reenviarAguardandoMesa();
-
-return;
-
-}
-
-if(
-mensagem.type===
-"server_ping"
-){
-
-if(
-socket &&
-socket.readyState===
-WebSocket.OPEN
-){
-
-try{
-
-socket.send(
-JSON.stringify({
-
-type:
-"pong",
-
-at:
-new Date().toISOString()
-
-})
-);
-
-}catch(e){}
-
-}
-
-return;
-
-}
-
-if(
-mensagem.type===
-"pong"
-){
-
-return;
-
-}
-
-if(
-mensagem.type===
-"record_received"
-){
-
-receberConfirmacaoMesa(
-mensagem
-);
-
-return;
-
-}
-
-if(
-mensagem.type===
-"record_refused"
-){
-
-receberRecusaDaMesa(
-mensagem
-);
-
-return;
-
-}
-
-if(
-mensagem.type===
-"send_result"
-){
-
-if(
-mensagem.ok===false
-){
-
-mostrarToast(
-mensagem.message||
-"O servidor não aceitou o envio.",
-"error"
-);
-
-}
-
-return;
-
-}
-
-if(
-mensagem.type===
-"confirm_result"
-){
-
-return;
-
-}
-
-if(
-mensagem.type===
-"refuse_result"
-){
-
-return;
-
-}
-
-if(
-mensagem.type===
-"error"
-){
-
-mostrarToast(
-mensagem.message||
-"Erro do servidor.",
-"error"
-);
-
-}
-
-}
-
-/* ============================================================
-   CONFIRMAÇÃO DE RECEBIMENTO
-============================================================ */
+/* =========================================================
+   CONFIRMAÇÃO DA MESA
+========================================================= */
 
 function receberConfirmacaoMesa(
-mensagem
+  recordId,
+  receivedAt
 ){
 
-const recordId=
-mensagem.recordId;
+  const item =
+    historico.find(
+      x =>
+        x.recordId ===
+        recordId
+    );
 
-if(!recordId){
-return;
-}
+  if(!item){
+    return;
+  }
 
-const registro=
-historico.find(
-item=>
-item.recordId===
-recordId
-);
+  item.recebidoEm =
+    receivedAt ||
+    new Date().toISOString();
 
-if(!registro){
-return;
-}
+  item.recebidoPelaMesaEm =
+    item.recebidoEm;
 
-/*
- * Só aceitamos confirmação se o registro ainda
- * estiver aguardando a MESA.
- *
- * Se já foi recusado, uma confirmação antiga
- * não pode ressuscitá-lo.
- */
-if(
-registro.status===
-"recusado"
-){
+  item.status =
+    "recebido";
 
-return;
+  salvarTudo();
+
+  renderHistorico();
 
 }
 
-registro.status=
-"recebido";
 
-registro.recebidoEm=
-mensagem.receivedAt||
-new Date().toISOString();
-
-salvarTudo();
-
-renderHistorico();
-
-mostrarToast(
-"A MESA recebeu o atendimento.",
-"success"
-);
-
-}
-
-/* ============================================================
-   RECUSA RECEBIDA DA MESA
-============================================================ */
+/* =========================================================
+   RECEBER RECUSA DA MESA
+========================================================= */
 
 function receberRecusaDaMesa(
-mensagem
+  msg
 ){
 
-const recordId=
-mensagem.recordId;
+  const recordId =
+    msg.recordId;
 
-if(!recordId){
-return;
-}
+  let item =
+    historico.find(
+      x =>
+        x.recordId ===
+        recordId
+    );
 
-/*
- * Procura primeiro no histórico.
- *
- * Não criamos uma segunda entrada se ela já existe.
- */
-let registro=
-historico.find(
-item=>
-item.recordId===
-recordId
-);
+  if(!item){
 
-/*
- * Se por alguma inconsistência não existir no histórico,
- * reconstruímos usando os dados enviados pela MESA.
- */
-if(!registro){
+    item = {
 
-registro={
-...(mensagem.record||{}),
-recordId
-};
+      recordId,
 
-historico.push(
-registro
-);
+      registro:
+        msg.record || {},
 
-}
+      enviadoEm:
+        msg.record?.enviadoEm ||
+        new Date().toISOString(),
 
-/*
- * IMPORTANTE:
- *
- * Assim que a recusa chega, o ID é colocado na lista
- * de bloqueio ANTES de qualquer outra operação.
- */
-idsRecusados.add(
-String(recordId)
-);
+      recebidoEm:null,
 
-/*
- * Atualiza os dados do registro existente.
- */
-if(
-mensagem.record &&
-typeof mensagem.record==="object"
-){
+      status:
+        "recusado"
 
-Object.assign(
-registro,
-mensagem.record
-);
+    };
 
-}
+  }
 
-const motivo=
-mensagem.reason||
-mensagem.record?.motivoRecusa||
-"Motivo não informado.";
+  item.status =
+    "recusado";
 
-const recusadoEm=
-mensagem.refusedAt||
-mensagem.record?.recusadoEm||
-new Date().toISOString();
+  item.motivoRecusa =
+    msg.reason ||
+    msg.motivoRecusa ||
+    "Motivo não informado.";
 
-/*
- * O estado definitivo é RECUSADO.
- */
-registro.status=
-"recusado";
+  item.recusadoEm =
+    msg.refusedAt ||
+    msg.recusadoEm ||
+    new Date().toISOString();
 
-registro.motivoRecusa=
-motivo;
+  item.recebidoEm =
+    null;
 
-registro.recusadoEm=
-recusadoEm;
+  item.recebidoPelaMesaEm =
+    null;
 
-registro.recebidoEm=
-null;
+  item.historicoRecusas =
+    item.historicoRecusas ||
+    [];
 
-/*
- * Guarda histórico das recusas.
- */
-if(
-!Array.isArray(
-registro.historicoRecusas
-)
-){
+  item.historicoRecusas.unshift({
 
-registro.historicoRecusas=[];
+    motivo:
+      item.motivoRecusa,
 
-}
+    data:
+      item.recusadoEm
 
-const ultima=
-registro.historicoRecusas[
-registro.historicoRecusas.length-1
-];
+  });
 
-if(
-!ultima ||
-normalizar(
-ultima.motivo
-)!==
-normalizar(
-motivo
-) ||
-ultima.em!==
-recusadoEm
-){
+  const existente =
+    recusados.find(
+      x =>
+        x.recordId ===
+        recordId
+    );
 
-registro.historicoRecusas.push({
+  if(existente){
 
-motivo,
+    Object.assign(
+      existente,
+      item
+    );
 
-em:
-recusadoEm,
+  }else{
 
-origem:
-"MESA"
+    recusados.unshift(
+      item
+    );
 
-});
+  }
+
+  historico =
+    historico.filter(
+      x =>
+        x.recordId !==
+        recordId
+    );
+
+  preparacao =
+    preparacao.filter(
+      x =>
+        x.recordId !==
+        recordId
+    );
+
+  salvarTudo();
+
+  renderHistorico();
+  renderRecusados();
+  renderPreparacao();
+
+  confirmarRecebimentoRecusa(
+    recordId
+  );
 
 }
 
-/*
- * Se por algum motivo esse ID estiver na preparação,
- * removemos.
- */
-preparacao=
-preparacao.filter(
-item=>
-String(
-item.recordId
-)!==
-String(
-recordId
-)
-);
 
-/*
- * SALVA PRIMEIRO.
- *
- * Isso é importante para que, se houver uma reconexão
- * imediatamente depois, o navegador já saiba que o
- * atendimento está recusado.
- */
-salvarTudo();
-
-renderPreparacao();
-renderHistorico();
-
-/*
- * Confirma para o servidor.
- */
-confirmarRecebimentoRecusa(
-recordId
-);
-
-mostrarToast(
-"❌ Atendimento recusado pela MESA. O registro ficou somente no GUICHÊ.",
-"warning"
-);
-
-}
-
-/* ============================================================
-   CONFIRMAÇÃO DA RECUSA
-============================================================ */
+/* =========================================================
+   CONFIRMAR RECEBIMENTO DA RECUSA
+========================================================= */
 
 function confirmarRecebimentoRecusa(
-recordId
+  recordId
 ){
 
-if(
-!socket ||
-socket.readyState!==
-WebSocket.OPEN
-){
+  if(
+    !ws ||
+    ws.readyState !==
+      WebSocket.OPEN
+  ){
+    return;
+  }
 
-return;
+  try{
 
-}
+    ws.send(
+      JSON.stringify({
 
-try{
+        type:
+          "confirm_refusal_received",
 
-socket.send(
-JSON.stringify({
+        recordId,
 
-type:
-"confirm_refusal_received",
+        ownerId:
+          clientId
 
-recordId:
-recordId
+      })
+    );
 
-})
-);
+  }catch{
 
-}catch(e){
-
-console.error(
-"Erro ao confirmar recusa:",
-e
-);
+  }
 
 }
 
-}
 
-/* ============================================================
+/* =========================================================
    HISTÓRICO
-============================================================ */
-
-function ordenarHistorico(
-tipo
-){
-
-ordemHistorico=
-tipo;
-
-renderHistorico();
-
-}
+========================================================= */
 
 function renderHistorico(){
 
-const container=
-$("historicoContainer");
+  const elemento =
+    document.getElementById(
+      "historico"
+    );
 
-$("contadorHistorico")
-.textContent=
-historico.length;
+  const busca =
+    normalizarTexto(
+      document.getElementById(
+        "buscaHistorico"
+      ).value
+    );
 
-if(!historico.length){
+  let dados =
+    historico.filter(
+      item => {
 
-container.innerHTML=
-'<div class="empty">Nenhum atendimento no histórico.</div>';
+        const r =
+          item.registro || {};
 
-return;
+        if(!busca){
+          return true;
+        }
 
-}
+        return (
 
-const lista=
-[...historico];
+          normalizarTexto(
+            r.nome
+          ).includes(busca)
 
-if(
-ordemHistorico===
-"atendimento"
-){
+          ||
 
-lista.sort(
-(a,b)=>
-normalizar(
-a.atendimento
-)
-.localeCompare(
-normalizar(
-b.atendimento
-),
-"pt-BR"
-)
-);
+          normalizarTexto(
+            r.rgi
+          ).includes(busca)
 
-}else{
+          ||
 
-lista.sort(
-(a,b)=>
-new Date(
-a.enviadoEm||0
-)-
-new Date(
-b.enviadoEm||0
-)
-);
+          normalizarTexto(
+            r.atendimento
+          ).includes(busca)
 
-}
+        );
 
-let html=`
+      }
+    );
 
-<div class="table-wrap">
+  const ordem =
+    document.getElementById(
+      "ordemHistorico"
+    ).value;
 
-<table>
+  if(
+    ordem ===
+    "atendimento"
+  ){
 
-<thead>
+    dados.sort(
+      (a,b) => {
 
-<tr>
+        const aa =
+          normalizarTexto(
+            a.registro?.atendimento
+          );
 
-<th>Nome</th>
-<th>RGI</th>
-<th>Pav/Cela</th>
-<th>Atendimento</th>
-<th>Data</th>
-<th>Status</th>
-<th>Informação</th>
-<th>Ação</th>
+        const bb =
+          normalizarTexto(
+            b.registro?.atendimento
+          );
 
-</tr>
+        return aa.localeCompare(
+          bb,
+          "pt-BR"
+        );
 
-</thead>
+      }
+    );
 
-<tbody>
+  }
 
-`;
+  if(
+    dados.length === 0
+  ){
 
-lista.forEach(
-registro=>{
+    elemento.innerHTML =
+      `
+        <div class="sem">
+          Nenhum atendimento no histórico.
+        </div>
+      `;
 
-let statusHtml="";
-let infoHtml="";
-let acaoHtml="";
+    return;
 
-if(
-registro.status===
-"aguardando_mesa"
-){
+  }
 
-statusHtml=
-'<span class="badge badge-waiting">⏳ AGUARDANDO MESA</span>';
-
-infoHtml=`
-Enviado em:
-${escapeHtml(
-formatarDataHora(
-registro.enviadoEm
-)
-)}
-`;
-
-acaoHtml=`
-
-<button
-class="btn-red"
-onclick="excluirHistorico('${escapeHtml(registro.recordId)}')"
->
-🗑️ EXCLUIR
-</button>
-
-`;
-
-}else if(
-registro.status===
-"recebido"
-){
-
-statusHtml=
-'<span class="badge badge-received">✅ RECEBIDO</span>';
-
-infoHtml=`
-Recebido em:
-${escapeHtml(
-formatarDataHora(
-registro.recebidoEm
-)
-)}
-`;
-
-acaoHtml=`
-
-<div class="actions">
-
-<button
-class="btn-yellow"
-onclick="guardarAtendimento('${escapeHtml(registro.recordId)}')"
->
-🗄️ GUARDAR
-</button>
-
-<button
-class="btn-red"
-onclick="excluirHistorico('${escapeHtml(registro.recordId)}')"
->
-🗑️ EXCLUIR
-</button>
-
-</div>
-
-`;
-
-}else if(
-registro.status===
-"recusado"
-){
-
-statusHtml=
-'<span class="badge badge-refused">❌ RECUSADO</span>';
-
-infoHtml=`
-
-<div class="refusal-box">
-
-<strong>
-Motivo da recusa:
-</strong>
-
-<br>
-
-${escapeHtml(
-registro.motivoRecusa||
-"Motivo não informado."
-)}
-
-<div
-class="small"
-style="margin-top:6px;"
->
-
-Recusado em:
-${escapeHtml(
-formatarDataHora(
-registro.recusadoEm
-)
-)}
-
-</div>
-
-</div>
-
-`;
-
-acaoHtml=`
-
-<div class="actions">
-
-<button
-class="btn-orange"
-onclick="abrirEditarRecusa('${escapeHtml(registro.recordId)}')"
->
-✏️ EDITAR RECUSA
-</button>
-
-<button
-class="btn-green"
-onclick="reenviarRecusado('${escapeHtml(registro.recordId)}')"
->
-📤 REENVIAR
-</button>
-
-<button
-class="btn-yellow"
-onclick="arquivarRecusado('${escapeHtml(registro.recordId)}')"
->
-🗄️ ARQUIVAR
-</button>
-
-<button
-class="btn-red"
-onclick="excluirHistorico('${escapeHtml(registro.recordId)}')"
->
-🗑️ EXCLUIR
-</button>
-
-</div>
-
-`;
-
-}else if(
-registro.status===
-"guardado"
-){
-
-statusHtml=
-'<span class="badge badge-guarded">🗄️ GUARDADO</span>';
-
-infoHtml=
-"Atendimento arquivado.";
-
-acaoHtml=
-'<span class="small">Arquivado</span>';
+  elemento.innerHTML =
+    dados
+      .map(
+        item =>
+          renderItemHistorico(
+            item
+          )
+      )
+      .join("");
 
 }
 
-html+=`
+function renderItemHistorico(
+  item
+){
 
-<tr>
+  const r =
+    item.registro || {};
 
-<td>
-<strong>
-${escapeHtml(
-registro.nome||
-registro.nomeInterno||
-""
-)}
-</strong>
-</td>
+  let statusHTML = "";
 
-<td>
-${escapeHtml(
-registro.rgi||""
-)}
-</td>
+  if(
+    item.status ===
+    "recebido"
+  ){
 
-<td class="print-pavcela">
-${escapeHtml(
-registro.pavilhao||""
-)}
-/
-${escapeHtml(
-registro.cela||""
-)}
-</td>
+    statusHTML =
+      `
+        <div class="confirmacao">
 
-<td>
-${escapeHtml(
-registro.atendimento||""
-)}
-</td>
+          ✓ RECEBIDO PELA MESA
 
-<td>
-${escapeHtml(
-formatarData(
-registro.dataAtendimento
-)
-)}
-</td>
+          <br>
 
-<td>
-${statusHtml}
-</td>
+          Horário da confirmação:
+          ${formatarDataHora(
+            item.recebidoEm
+          )}
 
-<td>
-${infoHtml}
-</td>
+          <br>
 
-<td>
-${acaoHtml}
-</td>
+          <span class="badge badge-recebido">
+            RECEBIDO
+          </span>
 
-</tr>
+        </div>
 
-`;
+        <div class="acoes">
 
-});
+          <button
+            class="btn-arquivar"
+            onclick="arquivarRecebido('${item.recordId}')"
+          >
+            🗄️ GUARDAR
+          </button>
 
-html+=`
+        </div>
+      `;
 
-</tbody>
+  }else{
 
-</table>
+    statusHTML =
+      `
+        <div class="sem">
 
-</div>
+          ⏳ Aguardando a Mesa receber.
 
-`;
+          <br>
 
-container.innerHTML=
-html;
+          <span class="badge badge-aguardando">
+            AGUARDANDO MESA
+          </span>
+
+        </div>
+      `;
+
+  }
+
+  return `
+    <div class="item">
+
+      <strong>
+        ${escaparHTML(r.nome)}
+      </strong>
+
+      <div class="item-detalhes">
+
+        RGI:
+        ${escaparHTML(r.rgi)}
+
+        <br>
+
+        Pavilhão:
+        ${escaparHTML(r.pavilhao)}
+
+        |
+        Cela:
+        ${escaparHTML(r.cela)}
+
+        <br>
+
+        Atendimento:
+        ${escaparHTML(r.atendimento)}
+
+        <br>
+
+        Data do atendimento:
+        ${escaparHTML(
+          r.dataAtendimento || "-"
+        )}
+
+        <br>
+
+        Enviado:
+        ${formatarDataHora(
+          item.enviadoEm
+        )}
+
+      </div>
+
+      ${statusHTML}
+
+    </div>
+  `;
 
 }
 
-/* ============================================================
+
+/* =========================================================
+   ARQUIVAR RECEBIDO
+========================================================= */
+
+function arquivarRecebido(
+  recordId
+){
+
+  const indice =
+    historico.findIndex(
+      item =>
+        item.recordId ===
+        recordId
+    );
+
+  if(
+    indice === -1
+  ){
+    return;
+  }
+
+  const item =
+    historico[indice];
+
+  if(
+    item.status !==
+    "recebido"
+  ){
+
+    alert(
+      "Somente atendimentos recebidos podem ser guardados."
+    );
+
+    return;
+
+  }
+
+  if(
+    !confirm(
+      "Guardar este atendimento?"
+    )
+  ){
+    return;
+  }
+
+  item.guardadoEm =
+    new Date().toISOString();
+
+  item.status =
+    "guardado";
+
+  arquivo.unshift(
+    item
+  );
+
+  historico.splice(
+    indice,
+    1
+  );
+
+  salvarTudo();
+
+  renderHistorico();
+  renderGuardados();
+  atualizarFiltroGuardados();
+
+}
+
+
+/* =========================================================
+   RECUSADOS
+========================================================= */
+
+function renderRecusados(){
+
+  const elemento =
+    document.getElementById(
+      "recusados"
+    );
+
+  const busca =
+    normalizarTexto(
+      document.getElementById(
+        "buscaRecusados"
+      ).value
+    );
+
+  const dados =
+    recusados.filter(
+      item => {
+
+        if(!busca){
+          return true;
+        }
+
+        const r =
+          item.registro || {};
+
+        return (
+
+          normalizarTexto(
+            r.nome
+          ).includes(busca)
+
+          ||
+
+          normalizarTexto(
+            r.rgi
+          ).includes(busca)
+
+          ||
+
+          normalizarTexto(
+            r.atendimento
+          ).includes(busca)
+
+          ||
+
+          normalizarTexto(
+            item.motivoRecusa
+          ).includes(busca)
+
+        );
+
+      }
+    );
+
+  if(
+    dados.length === 0
+  ){
+
+    elemento.innerHTML =
+      `
+        <div class="sem">
+          Nenhum atendimento recusado.
+        </div>
+      `;
+
+    return;
+
+  }
+
+  elemento.innerHTML =
+    dados
+      .map(
+        item => {
+
+          const r =
+            item.registro || {};
+
+          return `
+            <div class="item recusado">
+
+              <strong>
+                ${escaparHTML(r.nome)}
+              </strong>
+
+              <div class="item-detalhes">
+
+                RGI:
+                ${escaparHTML(r.rgi)}
+
+                <br>
+
+                Pavilhão:
+                ${escaparHTML(r.pavilhao)}
+
+                |
+                Cela:
+                ${escaparHTML(r.cela)}
+
+                <br>
+
+                Atendimento:
+                ${escaparHTML(r.atendimento)}
+
+                <br>
+
+                Data do atendimento:
+                ${escaparHTML(
+                  r.dataAtendimento || "-"
+                )}
+
+              </div>
+
+              <div class="recusa-box">
+
+                <strong>
+                  ❌ MOTIVO DA RECUSA
+                </strong>
+
+                <br><br>
+
+                ${escaparHTML(
+                  item.motivoRecusa ||
+                  "Motivo não informado."
+                )}
+
+                <br><br>
+
+                <span class="mini">
+                  Recusado em:
+                  ${formatarDataHora(
+                    item.recusadoEm
+                  )}
+                </span>
+
+              </div>
+
+              <div class="acoes">
+
+                <button
+                  class="btn-secundario"
+                  onclick="abrirEditarRecusa('${item.recordId}')"
+                >
+                  ✏️ EDITAR RECUSA
+                </button>
+
+                <button
+                  class="btn-reenviar"
+                  onclick="reenviarRecusado('${item.recordId}')"
+                >
+                  📤 REENVIAR
+                </button>
+
+                <button
+                  class="btn-arquivar"
+                  onclick="arquivarRecusado('${item.recordId}')"
+                >
+                  🗄️ ARQUIVAR
+                </button>
+
+                <button
+                  class="btn-excluir"
+                  onclick="excluirRecusado('${item.recordId}')"
+                >
+                  🗑️ EXCLUIR
+                </button>
+
+              </div>
+
+            </div>
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+/* =========================================================
    EDITAR RECUSA
-============================================================ */
+========================================================= */
 
 function abrirEditarRecusa(
-recordId
+  recordId
 ){
 
-const registro=
-historico.find(
-item=>
-item.recordId===
-recordId
-);
+  const item =
+    recusados.find(
+      x =>
+        x.recordId ===
+        recordId
+    );
 
-if(!registro){
-return;
-}
+  if(!item){
+    return;
+  }
 
-if(
-registro.status!==
-"recusado"
-){
+  registroRecusaAtual =
+    recordId;
 
-mostrarToast(
-"Este atendimento não está recusado.",
-"warning"
-);
+  document.getElementById(
+    "tituloModalRecusa"
+  ).textContent =
+    "Editar Recusa";
 
-return;
+  document.getElementById(
+    "motivoRecusa"
+  ).value =
+    item.motivoRecusa || "";
 
-}
-
-recordIdEditandoRecusa=
-recordId;
-
-$("dadosEditarRecusa")
-.innerHTML=`
-
-<strong>
-Interno:
-</strong>
-
-${escapeHtml(
-registro.nome||
-registro.nomeInterno||
-""
-)}
-
-&nbsp; | &nbsp;
-
-<strong>
-RGI:
-</strong>
-
-${escapeHtml(
-registro.rgi||""
-)}
-
-&nbsp; | &nbsp;
-
-<strong>
-Atendimento:
-</strong>
-
-${escapeHtml(
-registro.atendimento||""
-)}
-
-`;
-
-$("motivoRecusaEditado")
-.value=
-registro.motivoRecusa||"";
-
-$("modalEditarRecusa")
-.classList
-.add("show");
-
-setTimeout(
-()=>
-$("motivoRecusaEditado")
-.focus(),
-100
-);
+  document.getElementById(
+    "modalRecusa"
+  ).style.display =
+    "block";
 
 }
 
-function fecharEditarRecusa(){
+function fecharModalRecusa(){
 
-recordIdEditandoRecusa=
-null;
+  document.getElementById(
+    "modalRecusa"
+  ).style.display =
+    "none";
 
-$("motivoRecusaEditado")
-.value="";
-
-$("modalEditarRecusa")
-.classList
-.remove("show");
+  registroRecusaAtual =
+    null;
 
 }
 
-function salvarEdicaoRecusa(){
+function confirmarRecusaLocal(){
 
-if(
-!recordIdEditandoRecusa
-){
+  const motivo =
+    document.getElementById(
+      "motivoRecusa"
+    ).value.trim();
 
-return;
+  if(!motivo){
 
-}
+    alert(
+      "Informe o motivo da recusa."
+    );
 
-const motivo=
-$("motivoRecusaEditado")
-.value
-.trim();
+    return;
 
-if(!motivo){
+  }
 
-mostrarToast(
-"Informe o motivo da recusa.",
-"warning"
-);
+  if(!registroRecusaAtual){
 
-return;
+    fecharModalRecusa();
 
-}
+    return;
 
-const registro=
-historico.find(
-item=>
-item.recordId===
-recordIdEditandoRecusa
-);
+  }
 
-if(!registro){
-return;
-}
+  const item =
+    recusados.find(
+      x =>
+        x.recordId ===
+        registroRecusaAtual
+    );
 
-if(
-registro.status!==
-"recusado"
-){
+  if(!item){
+    fecharModalRecusa();
+    return;
+  }
 
-mostrarToast(
-"Este atendimento não está recusado.",
-"warning"
-);
+  item.motivoRecusa =
+    motivo;
 
-return;
+  item.historicoRecusas =
+    item.historicoRecusas ||
+    [];
 
-}
+  item.historicoRecusas.unshift({
 
-const motivoAnterior=
-registro.motivoRecusa||"";
+    motivo,
 
-registro.motivoRecusa=
-motivo;
+    data:
+      new Date().toISOString()
 
-if(
-!Array.isArray(
-registro.historicoRecusas
-)
-){
+  });
 
-registro.historicoRecusas=[];
+  salvarTudo();
+
+  renderRecusados();
+
+  fecharModalRecusa();
 
 }
 
-registro.historicoRecusas.push({
 
-motivo,
-
-em:
-new Date().toISOString(),
-
-origem:
-"GUICHÊ",
-
-motivoAnterior
-
-});
-
-idsRecusados.add(
-String(
-registro.recordId
-)
-);
-
-salvarTudo();
-
-renderHistorico();
-
-fecharEditarRecusa();
-
-mostrarToast(
-"Motivo da recusa atualizado.",
-"success"
-);
-
-}
-
-/* ============================================================
+/* =========================================================
    REENVIAR RECUSADO
-============================================================ */
+========================================================= */
 
 function reenviarRecusado(
-recordId
+  recordId
 ){
 
-const registro=
-historico.find(
-item=>
-item.recordId===
-recordId
-);
+  const indice =
+    recusados.findIndex(
+      x =>
+        x.recordId ===
+        recordId
+    );
 
-if(!registro){
-return;
-}
+  if(
+    indice === -1
+  ){
+    return;
+  }
 
-if(
-registro.status!==
-"recusado"
-){
+  const item =
+    recusados[indice];
 
-mostrarToast(
-"Este atendimento não está recusado.",
-"warning"
-);
+  if(
+    !ws ||
+    ws.readyState !==
+      WebSocket.OPEN
+  ){
 
-return;
+    alert(
+      "O Guichê não está conectado ao servidor."
+    );
 
-}
+    return;
 
-if(
-!registro.motivoRecusa ||
-!registro.motivoRecusa.trim()
-){
+  }
 
-mostrarToast(
-"O motivo da recusa precisa estar preenchido.",
-"warning"
-);
+  if(
+    !confirm(
+      "Reenviar este atendimento para a Mesa?"
+    )
+  ){
+    return;
+  }
 
-abrirEditarRecusa(
-recordId
-);
+  item.status =
+    "aguardando_mesa";
 
-return;
+  item.reenviadoEm =
+    new Date().toISOString();
 
-}
+  item.recebidoEm =
+    null;
 
-if(
-!socket ||
-socket.readyState!==
-WebSocket.OPEN
-){
+  item.recebidoPelaMesaEm =
+    null;
 
-mostrarToast(
-"GUICHÊ está sem conexão. Não foi possível reenviar.",
-"warning"
-);
+  historico.unshift(
+    item
+  );
 
-return;
+  recusados.splice(
+    indice,
+    1
+  );
 
-}
+  salvarTudo();
 
-/*
- * Aqui é uma ação MANUAL do usuário.
- * Portanto, agora podemos retirar o bloqueio.
- */
-idsRecusados.delete(
-String(
-recordId
-)
-);
+  renderHistorico();
+  renderRecusados();
 
-const agora=
-new Date().toISOString();
-
-registro.status=
-"aguardando_mesa";
-
-registro.enviadoEm=
-agora;
-
-registro.recebidoEm=
-null;
-
-registro.reenviadoEm=
-agora;
-
-try{
-
-socket.send(
-JSON.stringify({
-
-type:
-"send_record",
-
-recordId:
-registro.recordId,
-
-record:{
-...registro,
-
-status:
-"aguardando_mesa",
-
-motivoRecusa:
-registro.motivoRecusa,
-
-reenviadoEm:
-agora
+  enviarRegistroWS(
+    item.recordId,
+    item.registro
+  );
 
 }
 
-})
-);
 
-salvarTudo();
-
-renderHistorico();
-
-mostrarToast(
-"📤 Atendimento reenviado para a MESA.",
-"success"
-);
-
-}catch(e){
-
-console.error(e);
-
-/*
- * Se o envio manual falhar, volta a ser recusado.
- */
-registro.status=
-"recusado";
-
-idsRecusados.add(
-String(
-recordId
-)
-);
-
-salvarTudo();
-
-renderHistorico();
-
-mostrarToast(
-"Não foi possível enviar para a MESA.",
-"error"
-);
-
-}
-
-}
-
-/* ============================================================
+/* =========================================================
    ARQUIVAR RECUSADO
-============================================================ */
+========================================================= */
 
 function arquivarRecusado(
-recordId
+  recordId
 ){
 
-const indice=
-historico.findIndex(
-item=>
-item.recordId===
-recordId
-);
+  const indice =
+    recusados.findIndex(
+      x =>
+        x.recordId ===
+        recordId
+    );
 
-if(indice<0){
-return;
+  if(
+    indice === -1
+  ){
+    return;
+  }
+
+  if(
+    !confirm(
+      "Arquivar este atendimento recusado?"
+    )
+  ){
+    return;
+  }
+
+  const item =
+    recusados[indice];
+
+  item.guardadoEm =
+    new Date().toISOString();
+
+  item.status =
+    "guardado";
+
+  arquivo.unshift(
+    item
+  );
+
+  recusados.splice(
+    indice,
+    1
+  );
+
+  salvarTudo();
+
+  renderRecusados();
+  renderGuardados();
+  atualizarFiltroGuardados();
+
 }
 
-const registro=
-historico[indice];
 
-if(
-registro.status!==
-"recusado"
+/* =========================================================
+   EXCLUIR RECUSADO
+========================================================= */
+
+function excluirRecusado(
+  recordId
 ){
 
-mostrarToast(
-"Somente recusados podem ser arquivados desta forma.",
-"warning"
-);
+  if(
+    !confirm(
+      "Excluir definitivamente este atendimento recusado?"
+    )
+  ){
+    return;
+  }
 
-return;
+  recusados =
+    recusados.filter(
+      x =>
+        x.recordId !==
+        recordId
+    );
 
-}
+  salvarTudo();
 
-registro.status=
-"guardado";
-
-registro.guardadoEm=
-new Date().toISOString();
-
-idsRecusados.add(
-String(
-recordId
-)
-);
-
-historico.splice(
-indice,
-1
-);
-
-arquivo.push(
-registro
-);
-
-salvarTudo();
-
-renderHistorico();
-renderGuardados();
-
-mostrarToast(
-"Atendimento recusado arquivado.",
-"success"
-);
+  renderRecusados();
 
 }
 
-/* ============================================================
-   GUARDAR RECEBIDO
-============================================================ */
 
-function guardarAtendimento(
-recordId
-){
-
-const indice=
-historico.findIndex(
-item=>
-item.recordId===
-recordId
-);
-
-if(indice<0){
-return;
-}
-
-const registro=
-historico[indice];
-
-if(
-registro.status!==
-"recebido"
-){
-
-mostrarToast(
-"Este atendimento ainda não foi recebido.",
-"warning"
-);
-
-return;
-
-}
-
-registro.status=
-"guardado";
-
-registro.guardadoEm=
-new Date().toISOString();
-
-historico.splice(
-indice,
-1
-);
-
-arquivo.push(
-registro
-);
-
-salvarTudo();
-
-renderHistorico();
-renderGuardados();
-
-mostrarToast(
-"Atendimento guardado.",
-"success"
-);
-
-}
-
-/* ============================================================
-   EXCLUIR
-============================================================ */
-
-function excluirHistorico(
-recordId
-){
-
-const indice=
-historico.findIndex(
-item=>
-item.recordId===
-recordId
-);
-
-if(indice<0){
-return;
-}
-
-if(
-!confirm(
-"Deseja realmente excluir este atendimento do histórico?"
-)
-){
-
-return;
-
-}
-
-historico.splice(
-indice,
-1
-);
-
-idsRecusados.delete(
-String(
-recordId
-)
-);
-
-salvarTudo();
-
-renderHistorico();
-
-mostrarToast(
-"Atendimento excluído.",
-"success"
-);
-
-}
-
-/* ============================================================
+/* =========================================================
    GUARDADOS
-============================================================ */
+========================================================= */
 
-function abrirGuardados(){
+function atualizarFiltroGuardados(){
 
-renderGuardados();
+  const select =
+    document.getElementById(
+      "filtroGuardados"
+    );
 
-$("modalGuardados")
-.classList
-.add("show");
+  if(!select){
+    return;
+  }
 
-}
+  const atual =
+    select.value;
 
-function fecharGuardados(){
+  const categorias =
+    [
+      ...new Set(
+        arquivo
+          .map(
+            item =>
+              item.registro?.atendimento
+          )
+          .filter(Boolean)
+      )
+    ]
+    .sort(
+      (a,b) =>
+        a.localeCompare(
+          b,
+          "pt-BR"
+        )
+    );
 
-$("modalGuardados")
-.classList
-.remove("show");
+  select.innerHTML =
+    `<option value="">
+      Todos os atendimentos
+    </option>`;
+
+  categorias.forEach(
+    categoria => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        categoria;
+
+      option.textContent =
+        categoria;
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+  if(
+    categorias.includes(
+      atual
+    )
+  ){
+
+    select.value =
+      atual;
+
+  }
 
 }
 
 function renderGuardados(){
 
-const container=
-$("guardadosContainer");
+  const elemento =
+    document.getElementById(
+      "guardados"
+    );
 
-const termo=
-normalizar(
-$("filtroGuardados")
-?.value||""
-);
+  if(!elemento){
+    return;
+  }
 
-let lista=
-[...arquivo];
+  const busca =
+    normalizarTexto(
+      document.getElementById(
+        "buscaGuardados"
+      ).value
+    );
 
-if(termo){
+  const data =
+    document.getElementById(
+      "dataGuardados"
+    ).value;
 
-lista=
-lista.filter(
-registro=>{
+  const categoria =
+    document.getElementById(
+      "filtroGuardados"
+    ).value;
 
-const texto=[
+  const dados =
+    arquivo.filter(
+      item => {
 
-registro.nome,
+        const r =
+          item.registro || {};
 
-registro.nomeInterno,
+        if(busca){
 
-registro.rgi,
+          const encontrou =
+            normalizarTexto(
+              r.nome
+            ).includes(busca)
 
-registro.pavilhao,
+            ||
 
-registro.cela,
+            normalizarTexto(
+              r.rgi
+            ).includes(busca)
 
-registro.atendimento,
+            ||
 
-registro.dataAtendimento,
+            normalizarTexto(
+              r.atendimento
+            ).includes(busca);
 
-registro.motivoRecusa
+          if(!encontrou){
+            return false;
+          }
 
-].join(" ");
+        }
 
-return normalizar(
-texto
-)
-.includes(
-termo
-);
+        if(data){
 
-}
-);
+          if(
+            dataRegistroParaFiltro(
+              item
+            ) !== data
+          ){
 
-}
+            return false;
 
-lista.sort(
-(a,b)=>
-new Date(
-b.guardadoEm||0
-)-
-new Date(
-a.guardadoEm||0
-)
-);
+          }
 
-if(!lista.length){
+        }
 
-container.innerHTML=
-'<div class="empty">Nenhum atendimento guardado.</div>';
+        if(
+          categoria &&
+          r.atendimento !==
+            categoria
+        ){
 
-return;
+          return false;
 
-}
+        }
 
-let html=`
+        return true;
 
-<div class="table-wrap">
+      }
+    );
 
-<table>
+  if(
+    dados.length === 0
+  ){
 
-<thead>
+    elemento.innerHTML =
+      `
+        <div class="sem">
+          Nenhum atendimento guardado encontrado.
+        </div>
+      `;
 
-<tr>
+    return;
 
-<th>Nome</th>
-<th>RGI</th>
-<th>Pav/Cela</th>
-<th>Atendimento</th>
-<th>Data</th>
-<th>Status</th>
-<th>Guardado em</th>
+  }
 
-</tr>
+  elemento.innerHTML =
+    dados
+      .map(
+        item => {
 
-</thead>
+          const r =
+            item.registro || {};
 
-<tbody>
+          const recusa =
+            item.motivoRecusa
+              ? `
+                <div class="recusa-box">
+                  <strong>
+                    ❌ Motivo da recusa:
+                  </strong>
+                  <br><br>
+                  ${escaparHTML(
+                    item.motivoRecusa
+                  )}
+                </div>
+              `
+              : "";
 
-`;
+          return `
+            <div class="item guardado">
 
-lista.forEach(
-registro=>{
+              <strong>
+                ${escaparHTML(r.nome)}
+              </strong>
 
-const recusado=
-registro.status===
-"guardado" &&
-(
-Array.isArray(
-registro.historicoRecusas
-)&&
-registro.historicoRecusas.length>0
-);
+              <div class="item-detalhes">
 
-html+=`
+                RGI:
+                ${escaparHTML(r.rgi)}
 
-<tr>
+                <br>
 
-<td>
-<strong>
-${escapeHtml(
-registro.nome||
-registro.nomeInterno||
-""
-)}
-</strong>
-</td>
+                Pavilhão:
+                ${escaparHTML(r.pavilhao)}
 
-<td>
-${escapeHtml(
-registro.rgi||""
-)}
-</td>
+                |
+                Cela:
+                ${escaparHTML(r.cela)}
 
-<td class="print-pavcela">
-${escapeHtml(
-registro.pavilhao||""
-)}
-/
-${escapeHtml(
-registro.cela||""
-)}
-</td>
+                <br>
 
-<td>
-${escapeHtml(
-registro.atendimento||""
-)}
-</td>
+                Atendimento:
+                ${escaparHTML(r.atendimento)}
 
-<td>
-${escapeHtml(
-formatarData(
-registro.dataAtendimento
-)
-)}
-</td>
+                <br>
 
-<td>
+                Data do atendimento:
+                ${escaparHTML(
+                  r.dataAtendimento || "-"
+                )}
 
-${
-recusado
-?
+                <br>
 
-`
+                Guardado em:
+                ${formatarDataHora(
+                  item.guardadoEm
+                )}
 
-<span class="badge badge-refused">
-❌ RECUSADO / GUARDADO
-</span>
+              </div>
 
-<div class="refusal-box">
-${escapeHtml(
-registro.motivoRecusa||""
-)}
-</div>
+              ${recusa}
 
-`
+              <div class="acoes">
 
-:
+                <button
+                  class="btn-excluir"
+                  onclick="excluirGuardado('${item.recordId}')"
+                >
+                  🗑️ EXCLUIR
+                </button>
 
-`
+              </div>
 
-<span class="badge badge-guarded">
-🗄️ GUARDADO
-</span>
+            </div>
+          `;
 
-`
-
-}
-
-</td>
-
-<td>
-${escapeHtml(
-formatarDataHora(
-registro.guardadoEm
-)
-)}
-</td>
-
-</tr>
-
-`;
-
-});
-
-html+=`
-
-</tbody>
-
-</table>
-
-</div>
-
-`;
-
-container.innerHTML=
-html;
+        }
+      )
+      .join("");
 
 }
 
-/* ============================================================
+function excluirGuardado(
+  recordId
+){
+
+  if(
+    !confirm(
+      "Excluir definitivamente este atendimento guardado?"
+    )
+  ){
+    return;
+  }
+
+  arquivo =
+    arquivo.filter(
+      x =>
+        x.recordId !==
+        recordId
+    );
+
+  salvarTudo();
+
+  renderGuardados();
+  atualizarFiltroGuardados();
+
+}
+
+
+/* =========================================================
    IMPRESSÃO
-============================================================ */
-
-function abrirImpressao(){
-
-preencherAtendimentosImpressao();
-preencherAtendimentosData();
-preencherPavilhoesImpressao();
-
-$("printData")
-.value=
-new Date()
-.toISOString()
-.slice(
-0,
-10
-);
-
-alterarModoImpressao();
-
-$("modalImpressao")
-.classList
-.add("show");
-
-}
-
-function fecharImpressao(){
-
-$("modalImpressao")
-.classList
-.remove("show");
-
-}
-
-function obterModoImpressao(){
-
-return document.querySelector(
-'input[name="modoPrint"]:checked'
-)?.value||
-"atendimento";
-
-}
-
-function alterarModoImpressao(){
-
-const modo=
-obterModoImpressao();
-
-$("grupoPrintAtendimento")
-.style.display=
-modo==="atendimento"
-?"block"
-:"none";
-
-$("grupoPrintGeral")
-.style.display=
-modo==="geral"
-?"block"
-:"none";
-
-$("grupoPrintData")
-.style.display=
-modo==="data"
-?"block"
-:"none";
-
-if(
-modo==="data"
-){
-
-alterarTipoData();
-
-}
-
-}
-
-function alterarTipoData(){
-
-const tipo=
-document.querySelector(
-'input[name="tipoData"]:checked'
-)?.value||
-"todos";
-
-$("grupoAtendimentosData")
-.style.display=
-tipo==="atendimentos"
-?"block"
-:"none";
-
-}
-
-function preencherAtendimentosImpressao(){
-
-$("listaAtendimentosImpressao")
-.innerHTML=
-ATENDIMENTOS
-.map(
-atendimento=>`
-
-<label class="checkbox-item">
-
-<input
-type="checkbox"
-value="${escapeHtml(atendimento)}"
-checked
->
-
-${escapeHtml(atendimento)}
-
-</label>
-
-`
-)
-.join("");
-
-}
-
-function preencherAtendimentosData(){
-
-$("listaAtendimentosData")
-.innerHTML=
-ATENDIMENTOS
-.map(
-atendimento=>`
-
-<label class="checkbox-item">
-
-<input
-type="checkbox"
-value="${escapeHtml(atendimento)}"
->
-
-${escapeHtml(atendimento)}
-
-</label>
-
-`
-)
-.join("");
-
-}
-
-function obterPavilhoesDaBase(){
-
-const conjunto=
-new Set();
-
-baseInternos.forEach(
-interno=>{
-
-const pavilhao=
-String(
-interno.pavilhao||""
-).trim();
-
-if(pavilhao){
-
-conjunto.add(
-pavilhao
-);
-
-}
-
-}
-);
-
-return [
-...conjunto
-]
-.sort(
-(a,b)=>
-a.localeCompare(
-b,
-"pt-BR",
-{
-numeric:true,
-sensitivity:"base"
-}
-)
-);
-
-}
-
-function preencherPavilhoesImpressao(){
-
-const pavilhoes=
-obterPavilhoesDaBase();
-
-preencherListaPavilhoes(
-$("listaPavilhoesAtendimento"),
-"pavAt_",
-pavilhoes
-);
-
-preencherListaPavilhoes(
-$("listaPavilhoesGeral"),
-"pavGeral_",
-pavilhoes
-);
-
-preencherListaPavilhoes(
-$("listaPavilhoesData"),
-"pavData_",
-pavilhoes
-);
-
-}
-
-function preencherListaPavilhoes(
-container,
-prefixo,
-pavilhoes
-){
-
-if(!pavilhoes.length){
-
-container.innerHTML=
-'<div class="small">Base Excel não carregada ou sem pavilhões.</div>';
-
-return;
-
-}
-
-container.innerHTML=
-pavilhoes
-.map(
-(pavilhao,index)=>`
-
-<label class="checkbox-item">
-
-<input
-type="checkbox"
-id="${prefixo}${index}"
-value="${escapeHtml(pavilhao)}"
->
-
-${escapeHtml(pavilhao)}
-
-</label>
-
-`
-)
-.join("");
-
-}
-
-function obterMarcados(
-containerId
-){
-
-const container=
-$(containerId);
-
-if(!container){
-return [];
-}
-
-return [
-...container.querySelectorAll(
-'input[type="checkbox"]:checked'
-)
-]
-.map(
-input=>
-input.value
-);
-
-}
+========================================================= */
 
 function todosRegistrosImpressao(){
 
-const mapa=
-new Map();
-
-[
-...historico,
-...arquivo
-]
-.forEach(
-registro=>{
-
-if(
-registro.recordId
-){
-
-mapa.set(
-registro.recordId,
-{
-...registro
-}
-);
+  return [
+    ...historico,
+    ...arquivo
+  ];
 
 }
 
-}
-);
+function abrirModalImpressao(){
 
-return [
-...mapa.values()
-];
+  document.getElementById(
+    "modalImpressao"
+  ).style.display =
+    "block";
 
-}
-
-function registroData(
-registro
-){
-
-const valor=
-registro.dataAtendimento||
-"";
-
-if(
-/^\d{4}-\d{2}-\d{2}$/
-.test(
-String(valor)
-)
-){
-
-return String(valor);
+  atualizarOpcoesImpressao();
 
 }
 
-const d=
-new Date(valor);
+function fecharModalImpressao(){
 
-if(
-Number.isNaN(
-d.getTime()
-)
-){
-
-return "";
+  document.getElementById(
+    "modalImpressao"
+  ).style.display =
+    "none";
 
 }
 
-return [
+function atualizarOpcoesImpressao(){
 
-d.getFullYear(),
+  const tipo =
+    document.querySelector(
+      'input[name="tipoImpressao"]:checked'
+    )?.value;
 
-String(
-d.getMonth()+1
-).padStart(
-2,
-"0"
-),
+  const area =
+    document.getElementById(
+      "opcoesImpressaoDetalhes"
+    );
 
-String(
-d.getDate()
-).padStart(
-2,
-"0"
-)
+  if(
+    tipo ===
+    "atendimento"
+  ){
 
-].join("-");
+    const categorias =
+      [
+        ...new Set(
+          todosRegistrosImpressao()
+            .map(
+              item =>
+                item.registro?.atendimento
+            )
+            .filter(Boolean)
+        )
+      ]
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "pt-BR"
+          )
+      );
 
-}
+    area.innerHTML =
+      `
+        <div class="campo">
 
-function filtrarAtendimento(
-registros,
-atendimentos
-){
+          <label>
+            Atendimento
+          </label>
 
-if(!atendimentos.length){
-return [];
-}
+          <select id="tipoAtendimentoImpressao">
 
-const permitidos=
-new Set(
-atendimentos.map(
-normalizar
-)
-);
+            <option value="">
+              Selecione
+            </option>
 
-return registros.filter(
-registro=>
-permitidos.has(
-normalizar(
-registro.atendimento
-)
-)
-);
+            ${categorias
+              .map(
+                c =>
+                  `
+                  <option value="${escaparHTML(c)}">
+                    ${escaparHTML(c)}
+                  </option>
+                  `
+              )
+              .join("")}
 
-}
+          </select>
 
-function filtrarPavilhao(
-registros,
-pavilhoes
-){
+        </div>
+      `;
 
-if(!pavilhoes.length){
-return registros;
-}
+    return;
 
-const permitidos=
-new Set(
-pavilhoes.map(
-normalizar
-)
-);
+  }
 
-return registros.filter(
-registro=>
-permitidos.has(
-normalizar(
-registro.pavilhao
-)
-)
-);
+  if(
+    tipo ===
+    "geral"
+  ){
 
-}
+    area.innerHTML =
+      `
+        <div class="sem">
+          Todos os atendimentos serão preparados para impressão.
+        </div>
+      `;
 
-function obterDadosImpressao(){
+    return;
 
-let registros=
-todosRegistrosImpressao();
+  }
 
-const modo=
-obterModoImpressao();
+  if(
+    tipo ===
+    "data"
+  ){
 
-if(
-modo===
-"atendimento"
-){
+    area.innerHTML =
+      `
+        <div class="grid">
 
-const atendimentos=
-obterMarcados(
-"listaAtendimentosImpressao"
-);
+          <div class="campo">
 
-if(!atendimentos.length){
+            <label>
+              Data
+            </label>
 
-throw new Error(
-"Selecione pelo menos um atendimento."
-);
+            <input
+              id="dataImpressao"
+              type="date"
+              value="${dataHojeISO()}"
+            >
 
-}
+          </div>
 
-const pavilhoes=
-obterMarcados(
-"listaPavilhoesAtendimento"
-);
+          <div class="campo">
 
-registros=
-filtrarAtendimento(
-registros,
-atendimentos
-);
+            <label>
+              Filtrar
+            </label>
 
-registros=
-filtrarPavilhao(
-registros,
-pavilhoes
-);
+            <select id="filtroDataImpressao">
 
-return{
-modo,
-registros,
-grupos:
-atendimentos
-};
+              <option value="todos">
+                Todos
+              </option>
 
-}
+              <option value="atendimentos">
+                Atendimentos
+              </option>
 
-if(
-modo===
-"geral"
-){
+            </select>
 
-const pavilhoes=
-obterMarcados(
-"listaPavilhoesGeral"
-);
+          </div>
 
-registros=
-filtrarPavilhao(
-registros,
-pavilhoes
-);
+        </div>
+      `;
 
-return{
-modo,
-registros,
-grupos:
-ATENDIMENTOS
-};
+  }
 
 }
 
-if(
-modo===
-"data"
-){
-
-const data=
-$("printData").value;
-
-if(!data){
-
-throw new Error(
-"Selecione a data."
-);
-
-}
-
-const tipo=
-document.querySelector(
-'input[name="tipoData"]:checked'
-)?.value||
-"todos";
-
-registros=
-registros.filter(
-registro=>
-registroData(
-registro
-)===
-data
-);
-
-const pavilhoes=
-obterMarcados(
-"listaPavilhoesData"
-);
-
-registros=
-filtrarPavilhao(
-registros,
-pavilhoes
-);
-
-let grupos=[];
-
-if(
-tipo===
-"atendimentos"
-){
-
-grupos=
-obterMarcados(
-"listaAtendimentosData"
-);
-
-if(!grupos.length){
-
-throw new Error(
-"Selecione pelo menos um atendimento."
-);
-
-}
-
-registros=
-filtrarAtendimento(
-registros,
-grupos
-);
-
-}else{
-
-grupos=
-ATENDIMENTOS.filter(
-atendimento=>
-registros.some(
-registro=>
-normalizar(
-registro.atendimento
-)===
-normalizar(
-atendimento
-)
-)
-);
-
-}
-
-return{
-modo,
-registros,
-grupos,
-data
-};
-
-}
-
-return{
-modo,
-registros,
-grupos:
-ATENDIMENTOS
-};
-
-}
-
-function gerarPaginaPrint(
-registros,
-titulo,
-subtitulo=""
-){
-
-if(!registros.length){
-return "";
-}
-
-let linhas="";
-
-const ordenados=
-[...registros]
-.sort(
-(a,b)=>
-normalizar(
-a.nome||
-a.nomeInterno||
-""
-)
-.localeCompare(
-normalizar(
-b.nome||
-b.nomeInterno||
-""
-),
-"pt-BR"
-)
-);
-
-ordenados.forEach(
-registro=>{
-
-let status=
-"AGUARDANDO";
-
-if(
-registro.status===
-"recusado"
-){
-
-status=
-"RECUSADO";
-
-}else if(
-registro.status===
-"recebido"
-){
-
-status=
-"RECEBIDO";
-
-}else if(
-registro.status===
-"guardado"
-){
-
-status=
-"GUARDADO";
-
-}
-
-linhas+=`
-
-<tr>
-
-<td>
-${escapeHtml(
-registro.nome||
-registro.nomeInterno||
-""
-)}
-</td>
-
-<td>
-${escapeHtml(
-registro.rgi||""
-)}
-</td>
-
-<td class="print-pavcela">
-${escapeHtml(
-registro.pavilhao||""
-)}
-/
-${escapeHtml(
-registro.cela||""
-)}
-</td>
-
-<td>
-${escapeHtml(
-registro.atendimento||""
-)}
-</td>
-
-<td>
-${escapeHtml(
-formatarData(
-registro.dataAtendimento
-)
-)}
-</td>
-
-<td>
-${escapeHtml(status)}
-</td>
-
-</tr>
-
-`;
-
-});
-
-return`
-
-<div class="print-page">
-
-<div class="print-header">
-
-<h1>
-CPAIG - LISTA DE ATENDIMENTOS
-</h1>
-
-<h2>
-${escapeHtml(titulo)}
-</h2>
-
-${
-subtitulo
-?`<p>${escapeHtml(subtitulo)}</p>`
-:""
-}
-
-<p>
-Impressão:
-${escapeHtml(
-formatarDataHora(
-new Date().toISOString()
-)
-)}
-</p>
-
-</div>
-
-<table class="print-table">
-
-<thead>
-
-<tr>
-
-<th>Nome do interno</th>
-<th>RGI</th>
-<th>Pav/Cela</th>
-<th>Atendimento</th>
-<th>Data</th>
-<th>Status</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-${linhas}
-
-</tbody>
-
-</table>
-
-</div>
-
-`;
-
-}
+document
+  .querySelectorAll(
+    'input[name="tipoImpressao"]'
+  )
+  .forEach(
+    radio => {
+
+      radio.addEventListener(
+        "change",
+        atualizarOpcoesImpressao
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   EXECUTAR IMPRESSÃO
+========================================================= */
 
 function executarImpressao(){
 
-let dados;
+  const tipo =
+    document.querySelector(
+      'input[name="tipoImpressao"]:checked'
+    )?.value;
 
-try{
+  let dados =
+    [];
 
-dados=
-obterDadosImpressao();
+  if(
+    tipo ===
+    "atendimento"
+  ){
 
-}catch(e){
+    const categoria =
+      document.getElementById(
+        "tipoAtendimentoImpressao"
+      )?.value;
 
-mostrarToast(
-e.message,
-"warning"
-);
+    if(!categoria){
 
-return;
+      alert(
+        "Selecione o atendimento."
+      );
+
+      return;
+
+    }
+
+    dados =
+      todosRegistrosImpressao()
+        .filter(
+          item =>
+            item.registro?.atendimento
+              === categoria
+        );
+
+  }
+
+  else if(
+    tipo ===
+    "geral"
+  ){
+
+    dados =
+      todosRegistrosImpressao();
+
+  }
+
+  else if(
+    tipo ===
+    "data"
+  ){
+
+    const data =
+      document.getElementById(
+        "dataImpressao"
+      )?.value;
+
+    const filtro =
+      document.getElementById(
+        "filtroDataImpressao"
+      )?.value;
+
+    if(!data){
+
+      alert(
+        "Selecione a data."
+      );
+
+      return;
+
+    }
+
+    dados =
+      todosRegistrosImpressao()
+        .filter(
+          item =>
+            dataRegistroParaFiltro(
+              item
+            ) === data
+        );
+
+    if(
+      filtro ===
+      "atendimentos"
+    ){
+
+      dados =
+        dados.filter(
+          item =>
+            item.registro?.atendimento
+        );
+
+    }
+
+  }
+
+  if(
+    dados.length === 0
+  ){
+
+    alert(
+      "Nenhum atendimento encontrado para a impressão."
+    );
+
+    return;
+
+  }
+
+  fecharModalImpressao();
+
+  gerarPaginaImpressao(
+    dados,
+    tipo
+  );
 
 }
 
-if(
-!dados.registros.length
+
+/* =========================================================
+   PÁGINA DE IMPRESSÃO
+========================================================= */
+
+function gerarPaginaImpressao(
+  dados,
+  tipo
 ){
 
-mostrarToast(
-"Nenhum atendimento encontrado para os filtros.",
-"warning"
-);
+  const grupos = [];
 
-return;
+  if(
+    tipo ===
+    "atendimento"
+  ){
+
+    grupos.push({
+      titulo:
+        dados[0]
+          ?.registro
+          ?.atendimento ||
+        "ATENDIMENTO",
+      dados
+    });
+
+  }
+
+  else if(
+    tipo ===
+    "geral"
+  ){
+
+    const mapa =
+      {};
+
+    dados.forEach(
+      item => {
+
+        const categoria =
+          item.registro?.atendimento ||
+          "OUTROS";
+
+        if(
+          !mapa[categoria]
+        ){
+
+          mapa[categoria] =
+            [];
+
+        }
+
+        mapa[categoria]
+          .push(item);
+
+      }
+    );
+
+    Object.keys(mapa)
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "pt-BR"
+          )
+      )
+      .forEach(
+        categoria => {
+
+          grupos.push({
+
+            titulo:
+              categoria,
+
+            dados:
+              mapa[categoria]
+
+          });
+
+        }
+      );
+
+  }
+
+  else{
+
+    const mapa =
+      {};
+
+    dados.forEach(
+      item => {
+
+        const categoria =
+          item.registro?.atendimento ||
+          "OUTROS";
+
+        if(
+          !mapa[categoria]
+        ){
+
+          mapa[categoria] =
+            [];
+
+        }
+
+        mapa[categoria]
+          .push(item);
+
+      }
+    );
+
+    Object.keys(mapa)
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "pt-BR"
+          )
+      )
+      .forEach(
+        categoria => {
+
+          grupos.push({
+
+            titulo:
+              categoria,
+
+            dados:
+              mapa[categoria]
+
+          });
+
+        }
+      );
+
+  }
+
+  const paginas =
+    grupos
+      .map(
+        grupo => {
+
+          const linhas =
+            grupo.dados
+              .map(
+                item => {
+
+                  const r =
+                    item.registro ||
+                    {};
+
+                  return `
+                    <tr>
+
+                      <td>
+                        ${escaparHTML(
+                          r.nome || ""
+                        )}
+                      </td>
+
+                      <td>
+                        ${escaparHTML(
+                          r.rgi || ""
+                        )}
+                      </td>
+
+                      <td class="pavcela">
+                        ${escaparHTML(
+                          r.pavilhao || ""
+                        )}
+                        /
+                        ${escaparHTML(
+                          r.cela || ""
+                        )}
+                      </td>
+
+                      <td>
+                        ${escaparHTML(
+                          r.atendimento || ""
+                        )}
+                      </td>
+
+                      <td>
+                        ${escaparHTML(
+                          r.dataAtendimento || ""
+                        )}
+                      </td>
+
+                    </tr>
+                  `;
+
+                }
+              )
+              .join("");
+
+          return `
+            <section class="pagina">
+
+              <div class="cabecalho-impressao">
+
+                <div class="titulo">
+                  CPAIG - LISTA DE ATENDIMENTOS
+                </div>
+
+                <div class="subtitulo">
+                  ${escaparHTML(
+                    grupo.titulo
+                  )}
+                </div>
+
+              </div>
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      NOME DO INTERNO
+                    </th>
+
+                    <th>
+                      RGI
+                    </th>
+
+                    <th>
+                      PAV/CELA
+                    </th>
+
+                    <th>
+                      ATENDIMENTO
+                    </th>
+
+                    <th>
+                      DATA
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+                  ${linhas}
+                </tbody>
+
+              </table>
+
+            </section>
+          `;
+
+        }
+      )
+      .join("");
+
+  const janela =
+    window.open(
+      "",
+      "_blank"
+    );
+
+  if(!janela){
+
+    alert(
+      "O navegador bloqueou a janela de impressão. Permita pop-ups para este site."
+    );
+
+    return;
+
+  }
+
+  janela.document.write(
+    `
+      <!DOCTYPE html>
+
+      <html lang="pt-BR">
+
+      <head>
+
+        <meta charset="UTF-8">
+
+        <title>
+          CPAIG - Lista de Atendimentos
+        </title>
+
+        <style>
+
+          @page{
+            size:A4 portrait;
+            margin:5mm;
+          }
+
+          *{
+            box-sizing:border-box;
+          }
+
+          body{
+            margin:0;
+            font-family:Arial,Helvetica,sans-serif;
+            color:#111;
+          }
+
+          .pagina{
+            width:100%;
+            min-height:287mm;
+            page-break-after:always;
+          }
+
+          .pagina:last-child{
+            page-break-after:auto;
+          }
+
+          .cabecalho-impressao{
+            text-align:center;
+            margin-bottom:8mm;
+          }
+
+          .titulo{
+            font-size:18px;
+            font-weight:bold;
+          }
+
+          .subtitulo{
+            font-size:15px;
+            font-weight:bold;
+            margin-top:4px;
+          }
+
+          table{
+            width:100%;
+            border-collapse:collapse;
+            font-size:11px;
+          }
+
+          th,
+          td{
+            border:1px solid #222;
+            padding:5px;
+            vertical-align:middle;
+          }
+
+          th{
+            background:#eee;
+            font-weight:bold;
+            text-align:center;
+          }
+
+          .pavcela{
+            text-align:center;
+            white-space:nowrap;
+          }
+
+          tr{
+            page-break-inside:avoid;
+          }
+
+        </style>
+
+      </head>
+
+      <body>
+
+        ${paginas}
+
+        <script>
+
+          window.onload =
+            function(){
+
+              setTimeout(
+                function(){
+
+                  window.print();
+
+                },
+                400
+              );
+
+            };
+
+        <\/script>
+
+      </body>
+
+      </html>
+    `
+  );
+
+  janela.document.close();
 
 }
 
-const paginas=[];
 
-dados.grupos.forEach(
-atendimento=>{
+/* =========================================================
+   WEBSOCKET
+========================================================= */
 
-const grupo=
-dados.registros.filter(
-registro=>
-normalizar(
-registro.atendimento
-)===
-normalizar(
-atendimento
-)
-);
+function conectar(){
 
-if(!grupo.length){
-return;
+  if(
+    ws &&
+    (
+      ws.readyState ===
+      WebSocket.OPEN ||
+      ws.readyState ===
+      WebSocket.CONNECTING
+    )
+  ){
+
+    return;
+
+  }
+
+  const protocolo =
+    location.protocol ===
+    "https:"
+      ? "wss:"
+      : "ws:";
+
+  try{
+
+    ws =
+      new WebSocket(
+        protocolo +
+        "//" +
+        location.host
+      );
+
+  }catch{
+
+    atualizarStatus(
+      false
+    );
+
+    agendarReconexao();
+
+    return;
+
+  }
+
+  ws.onopen =
+    function(){
+
+      atualizarStatus(
+        true
+      );
+
+      try{
+
+        ws.send(
+          JSON.stringify({
+
+            type:"register",
+
+            role:"sender",
+
+            clientId,
+
+            ownerId:clientId
+
+          })
+        );
+
+      }catch{
+
+      }
+
+      setTimeout(
+        reenviarAguardandoMesa,
+        500
+      );
+
+    };
+
+  ws.onclose =
+    function(){
+
+      atualizarStatus(
+        false
+      );
+
+      agendarReconexao();
+
+    };
+
+  ws.onerror =
+    function(){
+
+      atualizarStatus(
+        false
+      );
+
+    };
+
+  ws.onmessage =
+    function(event){
+
+      let msg;
+
+      try{
+
+        msg =
+          JSON.parse(
+            event.data
+          );
+
+      }catch{
+
+        return;
+
+      }
+
+      processarMensagemWS(
+        msg
+      );
+
+    };
+
 }
 
-paginas.push(
-gerarPaginaPrint(
-grupo,
-atendimento,
-dados.modo===
-"data"
-?
-"Data: "+
-formatarData(
-dados.data
-)
-:
-""
-)
-);
+function agendarReconexao(){
 
-});
+  if(
+    tentativaReconexao
+  ){
+    return;
+  }
 
-if(!paginas.length){
+  tentativaReconexao =
+    setTimeout(
+      function(){
 
-mostrarToast(
-"Nenhum atendimento encontrado para os filtros.",
-"warning"
-);
+        tentativaReconexao =
+          null;
 
-return;
+        conectar();
+
+      },
+      3000
+    );
 
 }
 
-$("areaImpressao")
-.innerHTML=
-paginas.join("");
-
-fecharImpressao();
-
-setTimeout(
-()=>{
-window.print();
-},
-250
-);
-
-}
-
-/* ============================================================
-   REDE
-============================================================ */
-
-window.addEventListener(
-"online",
-()=>{
-
-mostrarToast(
-"Internet disponível. Reconectando ao servidor...",
-"success"
-);
-
-if(
-!socket ||
-socket.readyState!==
-WebSocket.OPEN
+function processarMensagemWS(
+  msg
 ){
 
-reconnectDelay=
-2000;
+  if(
+    msg.type ===
+    "record_received"
+  ){
 
-conectarServidor();
+    receberConfirmacaoMesa(
+      msg.recordId,
+      msg.receivedAt
+    );
+
+    return;
+
+  }
+
+  if(
+    msg.type ===
+    "record_refused"
+  ){
+
+    receberRecusaDaMesa(
+      msg
+    );
+
+    return;
+
+  }
 
 }
 
-});
 
-window.addEventListener(
-"offline",
-()=>{
+/* =========================================================
+   STATUS
+========================================================= */
 
-definirStatus(
-false,
-"Sem internet"
-);
-
-mostrarToast(
-"Conexão perdida. Os dados locais serão preservados.",
-"warning"
-);
-
-});
-
-document.addEventListener(
-"visibilitychange",
-()=>{
-
-if(
-document.visibilityState!==
-"visible"
+function atualizarStatus(
+  online
 ){
 
-return;
+  const elemento =
+    document.getElementById(
+      "statusConexao"
+    );
+
+  if(online){
+
+    elemento.className =
+      "status online";
+
+    elemento.textContent =
+      "🟢 Conectado ao servidor";
+
+  }else{
+
+    elemento.className =
+      "status offline";
+
+    elemento.textContent =
+      "🔴 Desconectado — tentando reconectar...";
+
+  }
 
 }
 
-if(
-!socket ||
-socket.readyState!==
-WebSocket.OPEN
-){
 
-conectarServidor();
+/* =========================================================
+   TECLADO / AUTOCOMPLETE
+========================================================= */
+
+document
+  .getElementById("nome")
+  .addEventListener(
+    "input",
+    mostrarSugestoes
+  );
+
+document
+  .getElementById("nome")
+  .addEventListener(
+    "keydown",
+    function(event){
+
+      const caixa =
+        document.getElementById(
+          "sugestoesNome"
+        );
+
+      const itens =
+        caixa.querySelectorAll(
+          ".sugestao"
+        );
+
+      if(
+        caixa.style.display ===
+        "none" ||
+        itens.length === 0
+      ){
+
+        return;
+
+      }
+
+      if(
+        event.key ===
+        "ArrowDown"
+      ){
+
+        event.preventDefault();
+
+        indiceSugestao =
+          Math.min(
+            indiceSugestao + 1,
+            itens.length - 1
+          );
+
+      }
+
+      else if(
+        event.key ===
+        "ArrowUp"
+      ){
+
+        event.preventDefault();
+
+        indiceSugestao =
+          Math.max(
+            indiceSugestao - 1,
+            0
+          );
+
+      }
+
+      else if(
+        event.key ===
+        "Enter"
+      ){
+
+        event.preventDefault();
+
+        if(
+          indiceSugestao >= 0
+        ){
+
+          itens[
+            indiceSugestao
+          ].click();
+
+        }else{
+
+          itens[0].click();
+
+        }
+
+        return;
+
+      }
+
+      itens.forEach(
+        (item,index) => {
+
+          item.classList.toggle(
+            "selecionada",
+            index ===
+              indiceSugestao
+          );
+
+        }
+      );
+
+    }
+  );
+
+document
+  .addEventListener(
+    "click",
+    function(event){
+
+      const campo =
+        document.getElementById(
+          "nome"
+        );
+
+      const caixa =
+        document.getElementById(
+          "sugestoesNome"
+        );
+
+      if(
+        event.target !== campo &&
+        !caixa.contains(
+          event.target
+        )
+      ){
+
+        limparSugestoes();
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   SALVAR ORDENÇÃO
+========================================================= */
+
+const ordemSalva =
+  localStorage.getItem(
+    STORAGE_ORDENACAO
+  );
+
+if(ordemSalva){
+
+  document.getElementById(
+    "ordemHistorico"
+  ).value =
+    ordemSalva;
 
 }
 
-});
+document
+  .getElementById(
+    "ordemHistorico"
+  )
+  .addEventListener(
+    "change",
+    function(){
 
-/* ============================================================
+      localStorage.setItem(
+        STORAGE_ORDENACAO,
+        this.value
+      );
+
+    }
+  );
+
+
+/* =========================================================
    MODAIS
-============================================================ */
+========================================================= */
 
-$("modalEditarRecusa")
-.addEventListener(
-"click",
-event=>{
+window.addEventListener(
+  "click",
+  function(event){
 
-if(
-event.target===
-$("modalEditarRecusa")
-){
+    const modalRecusa =
+      document.getElementById(
+        "modalRecusa"
+      );
 
-fecharEditarRecusa();
+    const modalImpressao =
+      document.getElementById(
+        "modalImpressao"
+      );
 
-}
+    if(
+      event.target ===
+      modalRecusa
+    ){
 
-});
+      fecharModalRecusa();
 
-$("modalGuardados")
-.addEventListener(
-"click",
-event=>{
+    }
 
-if(
-event.target===
-$("modalGuardados")
-){
+    if(
+      event.target ===
+      modalImpressao
+    ){
 
-fecharGuardados();
+      fecharModalImpressao();
 
-}
+    }
 
-});
+  }
+);
 
-$("modalImpressao")
-.addEventListener(
-"click",
-event=>{
 
-if(
-event.target===
-$("modalImpressao")
-){
-
-fecharImpressao();
-
-}
-
-});
-
-document.addEventListener(
-"keydown",
-event=>{
-
-if(
-event.key===
-"Escape"
-){
-
-fecharEditarRecusa();
-fecharGuardados();
-fecharImpressao();
-
-}
-
-});
-
-/* ============================================================
+/* =========================================================
    INICIALIZAÇÃO
-============================================================ */
-
-function inicializar(){
-
-preencherAtendimentos();
+========================================================= */
 
 preencherCelas();
 
+document.getElementById(
+  "dataAtendimento"
+).value =
+  dataHojeISO();
+
 carregarTudo();
 
-usarHoje();
+conectar();
 
-conectarServidor();
 
-window.addEventListener(
-"storage",
-event=>{
-
-if(
-event.key===
-STORAGE_BASE
-){
-
-baseInternos=
-lerJSON(
-STORAGE_BASE,
-[]
-);
-
-atualizarStatusBase();
-
-preencherPavilhoesImpressao();
-
-}
-
-});
+/* =========================================================
+   TENTAR NOVA CONEXÃO PERIODICAMENTE
+========================================================= */
 
 setInterval(
-()=>{
+  function(){
 
-/*
- * A rotina automática só olha
- * para "aguardando_mesa".
- *
- * Recusados ficam bloqueados.
- */
-reenviarAguardandoMesa();
+    if(
+      !ws ||
+      ws.readyState !==
+        WebSocket.OPEN
+    ){
 
-},
-10000
+      conectar();
+
+    }
+
+  },
+  5000
 );
+
+
+/* =========================================================
+   REENVIAR AGUARDANDO MESA PERIODICAMENTE
+========================================================= */
 
 setInterval(
-()=>{
+  function(){
 
-baseInternos=
-lerJSON(
-STORAGE_BASE,
-baseInternos
+    reenviarAguardandoMesa();
+
+  },
+  15000
 );
 
-atualizarStatusBase();
-
-},
-10000
-);
-
-}
-
-window.addEventListener(
-"load",
-inicializar
-);
-
-</script>
-
-<script
-src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
 </script>
 
 </body>
