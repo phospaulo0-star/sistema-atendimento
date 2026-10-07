@@ -141,7 +141,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:900px
+  min-width:1050px
 }
 
 th,td{
@@ -207,6 +207,12 @@ tr:hover td{background:#f8fafc}
   color:#881337;
   max-width:400px;
   white-space:pre-wrap
+}
+
+.subject-box{
+  max-width:300px;
+  white-space:pre-wrap;
+  word-break:break-word
 }
 
 .modal-overlay{
@@ -367,7 +373,8 @@ textarea{
   min-width:0
 }
 
-.print-table th,.print-table td{
+.print-table th,
+.print-table td{
   border:1px solid #111;
   padding:5px;
   font-size:10px
@@ -437,16 +444,24 @@ textarea{
 
 <header>
   <div class="header-top">
+
     <div class="logo-area">
       <h1>MESA DE ATENDIMENTO</h1>
-      <div class="sub">POLÍCIA PENAL DE MATO GROSSO DO SUL</div>
-      <div class="cpaig">CPAIG</div>
+
+      <div class="sub">
+        POLÍCIA PENAL DE MATO GROSSO DO SUL
+      </div>
+
+      <div class="cpaig">
+        CPAIG
+      </div>
     </div>
 
     <div class="status">
       <span id="statusDot" class="status-dot"></span>
       <span id="statusTexto">Conectando...</span>
     </div>
+
   </div>
 </header>
 
@@ -475,8 +490,13 @@ textarea{
   <section class="section">
 
     <div class="section-header">
+
       <h2>📥 ATENDIMENTOS PENDENTES</h2>
-      <span class="counter" id="contadorPendentes">0</span>
+
+      <span class="counter" id="contadorPendentes">
+        0
+      </span>
+
     </div>
 
     <div class="section-body">
@@ -488,19 +508,26 @@ textarea{
   <section class="section">
 
     <div class="section-header">
+
       <h2>📋 HISTÓRICO DE ATENDIMENTOS</h2>
-      <span class="counter" id="contadorHistorico">0</span>
+
+      <span class="counter" id="contadorHistorico">
+        0
+      </span>
+
     </div>
 
     <div class="section-body">
 
       <div class="toolbar">
 
-        <button class="btn-gray" onclick="ordenarHistorico('envio')">
+        <button class="btn-gray"
+          onclick="ordenarHistorico('envio')">
           ↕ ORDEM DE ENVIO
         </button>
 
-        <button class="btn-gray" onclick="ordenarHistorico('atendimento')">
+        <button class="btn-gray"
+          onclick="ordenarHistorico('atendimento')">
           ↕ POR ATENDIMENTO
         </button>
 
@@ -516,7 +543,7 @@ textarea{
 
 <div id="toast" class="toast"></div>
 
-<!-- RECUSA -->
+<!-- MODAL RECUSA -->
 
 <div id="modalRecusa" class="modal-overlay">
 
@@ -532,7 +559,9 @@ textarea{
 
     <div class="modal-body">
 
-      <div id="dadosRecusa" class="small" style="margin-bottom:12px;"></div>
+      <div id="dadosRecusa"
+        class="small"
+        style="margin-bottom:12px;"></div>
 
       <div class="form-group">
 
@@ -551,11 +580,13 @@ textarea{
 
     <div class="modal-footer">
 
-      <button class="btn-gray" onclick="fecharRecusa()">
+      <button class="btn-gray"
+        onclick="fecharRecusa()">
         CANCELAR
       </button>
 
-      <button class="btn-red" onclick="confirmarRecusa()">
+      <button class="btn-red"
+        onclick="confirmarRecusa()">
         ❌ CONFIRMAR RECUSA
       </button>
 
@@ -565,7 +596,7 @@ textarea{
 
 </div>
 
-<!-- GUARDADOS -->
+<!-- MODAL GUARDADOS -->
 
 <div id="modalGuardados" class="modal-overlay">
 
@@ -575,7 +606,8 @@ textarea{
 
       <h3>📁 ATENDIMENTOS GUARDADOS</h3>
 
-      <button class="close" onclick="fecharGuardados()">×</button>
+      <button class="close"
+        onclick="fecharGuardados()">×</button>
 
     </div>
 
@@ -585,7 +617,7 @@ textarea{
 
         <input
           id="filtroGuardados"
-          placeholder="Pesquisar por nome, atendimento, RGI ou data..."
+          placeholder="Pesquisar por nome, atendimento, RGI, assunto ou data..."
           oninput="renderGuardados()"
         >
 
@@ -597,7 +629,8 @@ textarea{
 
     <div class="modal-footer">
 
-      <button class="btn-gray" onclick="fecharGuardados()">
+      <button class="btn-gray"
+        onclick="fecharGuardados()">
         FECHAR
       </button>
 
@@ -607,7 +640,7 @@ textarea{
 
 </div>
 
-<!-- IMPRESSÃO -->
+<!-- MODAL IMPRESSÃO -->
 
 <div id="modalImpressao" class="modal-overlay">
 
@@ -617,7 +650,8 @@ textarea{
 
       <h3>🖨️ IMPRESSÃO</h3>
 
-      <button class="close" onclick="fecharImpressao()">×</button>
+      <button class="close"
+        onclick="fecharImpressao()">×</button>
 
     </div>
 
@@ -674,8 +708,8 @@ textarea{
 
             <div
               id="listaAtendimentosImpressao"
-              class="checkbox-list"
-            ></div>
+              class="checkbox-list">
+            </div>
 
           </div>
 
@@ -685,10 +719,11 @@ textarea{
 
             <div
               id="listaPavilhoesAtendimento"
-              class="checkbox-list"
-            ></div>
+              class="checkbox-list">
+            </div>
 
-            <div class="small" style="margin-top:6px;">
+            <div class="small"
+              style="margin-top:6px;">
               Os pavilhões são carregados da base Excel de internos.
             </div>
 
@@ -698,7 +733,8 @@ textarea{
 
       </div>
 
-      <div id="grupoPrintGeral" style="display:none;">
+      <div id="grupoPrintGeral"
+        style="display:none;">
 
         <div class="form-group">
 
@@ -706,14 +742,15 @@ textarea{
 
           <div
             id="listaPavilhoesGeral"
-            class="checkbox-list"
-          ></div>
+            class="checkbox-list">
+          </div>
 
         </div>
 
       </div>
 
-      <div id="grupoPrintData" style="display:none;">
+      <div id="grupoPrintData"
+        style="display:none;">
 
         <div class="print-grid">
 
@@ -725,7 +762,9 @@ textarea{
                 Data do atendimento
               </label>
 
-              <input type="date" id="printData">
+              <input
+                type="date"
+                id="printData">
 
             </div>
 
@@ -741,8 +780,7 @@ textarea{
                     name="tipoData"
                     value="todos"
                     checked
-                    onchange="alterarTipoData()"
-                  >
+                    onchange="alterarTipoData()">
                   Todos
                 </label>
 
@@ -751,8 +789,7 @@ textarea{
                     type="radio"
                     name="tipoData"
                     value="atendimentos"
-                    onchange="alterarTipoData()"
-                  >
+                    onchange="alterarTipoData()">
                   Atendimentos
                 </label>
 
@@ -767,15 +804,14 @@ textarea{
             <div
               id="grupoAtendimentosData"
               class="form-group"
-              style="display:none;"
-            >
+              style="display:none;">
 
               <label>Atendimentos</label>
 
               <div
                 id="listaAtendimentosData"
-                class="checkbox-list"
-              ></div>
+                class="checkbox-list">
+              </div>
 
             </div>
 
@@ -785,8 +821,8 @@ textarea{
 
               <div
                 id="listaPavilhoesData"
-                class="checkbox-list"
-              ></div>
+                class="checkbox-list">
+              </div>
 
             </div>
 
@@ -799,18 +835,20 @@ textarea{
       <div
         id="mensagemBasePavilhao"
         class="small"
-        style="display:none;margin-top:8px;"
-      ></div>
+        style="display:none;margin-top:8px;">
+      </div>
 
     </div>
 
     <div class="modal-footer">
 
-      <button class="btn-gray" onclick="fecharImpressao()">
+      <button class="btn-gray"
+        onclick="fecharImpressao()">
         CANCELAR
       </button>
 
-      <button class="btn-blue" onclick="executarImpressao()">
+      <button class="btn-blue"
+        onclick="executarImpressao()">
         🖨️ IMPRIMIR
       </button>
 
@@ -829,13 +867,26 @@ textarea{
    CONFIGURAÇÕES
 ============================================================ */
 
-const STORAGE_HISTORICO = "mesaAtendimentosV23";
-const STORAGE_ARQUIVO = "mesaAtendimentosV23Arquivo";
-const STORAGE_PENDENTES = "mesaAtendimentosV24Pendentes";
-const STORAGE_RECUSAS_ENVIO = "mesaAtendimentosV26RecusasEnvio";
-const STORAGE_RECUSAS_LOCAL = "mesaAtendimentosV27RecusasLocal";
-const STORAGE_SOM = "mesaAtendimentosV24Som";
-const STORAGE_BASE_EXCEL = "atendimentoV23BaseInternos";
+const STORAGE_HISTORICO =
+  "mesaAtendimentosV23";
+
+const STORAGE_ARQUIVO =
+  "mesaAtendimentosV23Arquivo";
+
+const STORAGE_PENDENTES =
+  "mesaAtendimentosV24Pendentes";
+
+const STORAGE_RECUSAS_ENVIO =
+  "mesaAtendimentosV26RecusasEnvio";
+
+const STORAGE_RECUSAS_LOCAL =
+  "mesaAtendimentosV27RecusasLocal";
+
+const STORAGE_SOM =
+  "mesaAtendimentosV24Som";
+
+const STORAGE_BASE_EXCEL =
+  "atendimentoV23BaseInternos";
 
 const ATENDIMENTOS = [
   "Jurídico",
@@ -884,20 +935,7 @@ let somAtivo = true;
 let recordIdRecusaAtual = null;
 let ordemHistorico = "envio";
 
-/*
- * IMPORTANTE:
- * Esta lista representa recusas feitas nesta MESA.
- *
- * Ela é persistente no localStorage.
- *
- * Mesmo que o servidor envie novamente o mesmo
- * atendimento, ele NÃO volta para pendentes.
- */
 let recusasLocais = new Set();
-
-/*
- * Recusas que o servidor já confirmou.
- */
 const recusasConfirmadas = new Set();
 
 /* ============================================================
@@ -921,6 +959,7 @@ function gerarId(){
 }
 
 function salvarJSON(chave,valor){
+
   localStorage.setItem(
     chave,
     JSON.stringify(valor)
@@ -1063,25 +1102,19 @@ function carregarRecusasLocais(){
   recusasLocais =
     new Set(
       Array.isArray(lista)
-        ? lista.map(
-            id => String(id)
-          )
+        ? lista.map(id=>String(id))
         : []
     );
 
-  /*
-   * Compatibilidade com recusas que já estavam
-   * salvas na fila antiga.
-   */
-  recusasEnvio.forEach(
-    registro=>{
-      if(registro.recordId){
-        recusasLocais.add(
-          String(registro.recordId)
-        );
-      }
+  recusasEnvio.forEach(registro=>{
+
+    if(registro.recordId){
+      recusasLocais.add(
+        String(registro.recordId)
+      );
     }
-  );
+
+  });
 }
 
 function salvarRecusasLocais(){
@@ -1113,21 +1146,34 @@ function estaRecusadoLocalmente(recordId){
 }
 
 /*
- * Remove somente quando o usuário fizer
- * REENVIAR manualmente.
+ * IMPORTANTE:
+ *
+ * Esta função é usada somente quando o GUICHÊ
+ * envia novamente um atendimento recusado.
+ *
+ * Ao reenviar, a MESA precisa liberar o recordId.
  */
+
 function liberarRecusaParaReenvio(recordId){
 
   if(!recordId){
     return;
   }
 
-  recusasLocais.delete(
-    String(recordId)
-  );
+  const id = String(recordId);
 
-  recusasConfirmadas.delete(
-    String(recordId)
+  recusasLocais.delete(id);
+  recusasConfirmadas.delete(id);
+
+  recusasEnvio =
+    recusasEnvio.filter(
+      item =>
+        String(item.recordId) !== id
+    );
+
+  salvarJSON(
+    STORAGE_RECUSAS_ENVIO,
+    recusasEnvio
   );
 
   salvarRecusasLocais();
@@ -1200,11 +1246,6 @@ function carregarTudo(){
 
   carregarRecusasLocais();
 
-  /*
-   * LIMPEZA DE SEGURANÇA:
-   * qualquer registro que já tenha sido recusado
-   * nunca pode continuar em pendentes.
-   */
   pendentes =
     pendentes.filter(
       registro =>
@@ -1269,8 +1310,11 @@ function tocarSom(){
 
     const ctx = new AudioContext();
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+    const osc =
+      ctx.createOscillator();
+
+    const gain =
+      ctx.createGain();
 
     osc.frequency.value = 880;
     osc.type = "sine";
@@ -1370,7 +1414,8 @@ function definirStatus(online,texto){
     .classList
     .toggle("online",online);
 
-  $("statusTexto").textContent = texto;
+  $("statusTexto").textContent =
+    texto;
 }
 
 /* ============================================================
@@ -1414,7 +1459,6 @@ function conectarServidor(){
 
     agendarReconexao();
     return;
-
   }
 
   socket.addEventListener(
@@ -1439,7 +1483,6 @@ function conectarServidor(){
       );
 
       reenviarConfirmacoesConhecidas();
-
       reenviarRecusasPendentes();
 
       iniciarHeartbeat();
@@ -1454,14 +1497,9 @@ function conectarServidor(){
       let mensagem;
 
       try{
-
-        mensagem =
-          JSON.parse(event.data);
-
+        mensagem = JSON.parse(event.data);
       }catch(e){
-
         return;
-
       }
 
       tratarMensagemServidor(
@@ -1577,16 +1615,14 @@ function enviarMensagem(dados){
     }catch(e){
 
       return false;
-
     }
-
   }
 
   return false;
 }
 
 /* ============================================================
-   MENSAGENS DO SERVIDOR
+   MENSAGENS
 ============================================================ */
 
 function tratarMensagemServidor(mensagem){
@@ -1652,12 +1688,11 @@ function tratarMensagemServidor(mensagem){
       "error"
     );
 
-    return;
   }
 }
 
 /* ============================================================
-   CONFIRMAÇÃO DA RECUSA
+   CONFIRMAÇÃO DE RECUSA
 ============================================================ */
 
 function tratarConfirmacaoRecusa(mensagem){
@@ -1668,11 +1703,6 @@ function tratarConfirmacaoRecusa(mensagem){
   if(!recordId){
     return;
   }
-
-  /*
-   * Mesmo antes desta confirmação o registro
-   * já está bloqueado localmente.
-   */
 
   if(mensagem.ok === true){
 
@@ -1688,20 +1718,11 @@ function tratarConfirmacaoRecusa(mensagem){
       "Recusa confirmada pelo servidor.",
       "success"
     );
-
-    return;
   }
-
-  /*
-   * NÃO colocamos o registro de volta
-   * nos pendentes em hipótese alguma.
-   *
-   * Ele continuará bloqueado localmente.
-   */
 }
 
 /* ============================================================
-   NOVO REGISTRO
+   REGISTRO
 ============================================================ */
 
 function obterRegistroDaMensagem(mensagem){
@@ -1715,14 +1736,27 @@ function obterRegistroDaMensagem(mensagem){
     registro.recordId ||
     gerarId();
 
-  registro.recordId = recordId;
+  registro.recordId =
+    recordId;
 
   if(!registro.enviadoEm){
 
     registro.enviadoEm =
       mensagem.sentAt ||
       new Date().toISOString();
+  }
 
+  /*
+   * Também aceitamos o marcador no nível
+   * da própria mensagem.
+   */
+  if(mensagem.reenvio === true){
+    registro.reenvio = true;
+  }
+
+  if(mensagem.reenviadoEm){
+    registro.reenviadoEm =
+      mensagem.reenviadoEm;
   }
 
   return registro;
@@ -1730,11 +1764,12 @@ function obterRegistroDaMensagem(mensagem){
 
 function localizarRegistroLocal(recordId){
 
+  const id = String(recordId);
+
   const p =
     pendentes.find(
       item =>
-        String(item.recordId) ===
-        String(recordId)
+        String(item.recordId) === id
     );
 
   if(p){
@@ -1747,8 +1782,7 @@ function localizarRegistroLocal(recordId){
   const h =
     historico.find(
       item =>
-        String(item.recordId) ===
-        String(recordId)
+        String(item.recordId) === id
     );
 
   if(h){
@@ -1761,8 +1795,7 @@ function localizarRegistroLocal(recordId){
   const a =
     arquivo.find(
       item =>
-        String(item.recordId) ===
-        String(recordId)
+        String(item.recordId) === id
     );
 
   if(a){
@@ -1774,6 +1807,11 @@ function localizarRegistroLocal(recordId){
 
   return null;
 }
+
+/* ============================================================
+   NOVO REGISTRO
+   INCLUI CORREÇÃO DO REENVIO
+============================================================ */
 
 function receberNovoRegistro(mensagem){
 
@@ -1787,43 +1825,87 @@ function receberNovoRegistro(mensagem){
 
   /*
    * ========================================================
-   * CORREÇÃO PRINCIPAL
+   * REENVIO DO GUICHÊ
    *
-   * Se este registro já foi recusado nesta MESA,
-   * o servidor pode até mandar o new_record novamente,
-   * mas a MESA simplesmente IGNORA.
+   * Quando o GUICHÊ clicar em REENVIAR,
+   * o registro virá com reenvio=true,
+   * status=aguardando_mesa ou reenviadoEm.
    *
-   * Portanto ele não volta para ATENDIMENTOS PENDENTES.
+   * Nesse caso devemos LIBERAR a recusa anterior.
    * ========================================================
    */
-  if(
-    estaRecusadoLocalmente(
-      recordId
-    )
-  ){
+
+  const ehReenvio =
+    mensagem.reenvio === true ||
+    registro.reenvio === true ||
+    registro.status === "aguardando_mesa" ||
+    !!registro.reenviadoEm;
+
+  if(ehReenvio){
 
     /*
-     * Se o servidor ainda tiver o atendimento
-     * como pendente, enviamos novamente a recusa.
+     * Libera o recordId que estava bloqueado
+     * pela recusa anterior.
      */
-    const recusa =
-      recusasEnvio.find(
-        item =>
-          String(item.recordId) ===
-          recordId
-      );
+    liberarRecusaParaReenvio(
+      recordId
+    );
 
-    if(recusa){
+    /*
+     * Remove qualquer recusa antiga
+     * da fila local.
+     */
+    removerRecusaDaFila(
+      recordId
+    );
 
-      enviarRecusaParaGuiche(
-        recusa
-      );
+    /*
+     * O atendimento volta a ser pendente.
+     */
+    registro.status =
+      "aguardando_recebimento";
 
+    registro.recebidoEm = null;
+
+    /*
+     * Não precisamos mais do marcador local.
+     */
+    registro.reenvio = false;
+
+  }else{
+
+    /*
+     * Atendimento recusado anteriormente:
+     * não deve voltar sozinho.
+     */
+    if(
+      estaRecusadoLocalmente(
+        recordId
+      )
+    ){
+
+      const recusa =
+        recusasEnvio.find(
+          item =>
+            String(item.recordId) ===
+            recordId
+        );
+
+      if(recusa){
+
+        enviarRecusaParaGuiche(
+          recusa
+        );
+      }
+
+      return;
     }
-
-    return;
   }
 
+  /*
+   * Se já existe localmente, tratamos
+   * separadamente.
+   */
   const conhecido =
     localizarRegistroLocal(
       recordId
@@ -1831,26 +1913,57 @@ function receberNovoRegistro(mensagem){
 
   if(conhecido){
 
-    const status =
-      conhecido.registro.status;
+    /*
+     * Se for reenvio, removemos a versão antiga
+     * do histórico/arquivo para que volte aos
+     * pendentes.
+     */
+    if(ehReenvio){
 
-    if(
-      status === "recebido" ||
-      status === "guardado"
-    ){
+      pendentes =
+        pendentes.filter(
+          item =>
+            String(item.recordId) !==
+            recordId
+        );
 
-      enviarMensagem({
-        type:"confirm_received",
-        recordId,
-        receivedAt:
-          conhecido.registro.recebidoEm ||
-          conhecido.registro.guardadoEm ||
-          new Date().toISOString()
-      });
+      historico =
+        historico.filter(
+          item =>
+            String(item.recordId) !==
+            recordId
+        );
 
+      arquivo =
+        arquivo.filter(
+          item =>
+            String(item.recordId) !==
+            recordId
+        );
+
+    }else{
+
+      const status =
+        conhecido.registro.status;
+
+      if(
+        status === "recebido" ||
+        status === "guardado"
+      ){
+
+        enviarMensagem({
+          type:"confirm_received",
+          recordId,
+          receivedAt:
+            conhecido.registro.recebidoEm ||
+            conhecido.registro.guardadoEm ||
+            new Date().toISOString()
+        });
+
+      }
+
+      return;
     }
-
-    return;
   }
 
   const pendente = {
@@ -1871,17 +1984,20 @@ function receberNovoRegistro(mensagem){
   salvarTudo();
 
   renderPendentes();
+  renderHistorico();
 
   tocarSom();
 
   mostrarToast(
-    "Novo atendimento recebido do GUICHÊ.",
+    ehReenvio
+      ? "🔄 Atendimento reenviado pelo GUICHÊ e voltou para os pendentes."
+      : "Novo atendimento recebido do GUICHÊ.",
     "success"
   );
 }
 
 /* ============================================================
-   RECEBER INDIVIDUAL
+   RECEBER UM
 ============================================================ */
 
 function receberUm(recordId){
@@ -1903,8 +2019,11 @@ function receberUm(recordId){
   const recebidoEm =
     new Date().toISOString();
 
-  registro.status = "recebido";
-  registro.recebidoEm = recebidoEm;
+  registro.status =
+    "recebido";
+
+  registro.recebidoEm =
+    recebidoEm;
 
   pendentes.splice(
     indice,
@@ -1930,7 +2049,6 @@ function receberUm(recordId){
     historico.push(
       registro
     );
-
   }
 
   salvarTudo();
@@ -1984,8 +2102,8 @@ function receberTodos(){
       const existente =
         historico.find(
           item =>
-            item.recordId ===
-            registro.recordId
+            String(item.recordId) ===
+            String(registro.recordId)
         );
 
       if(existente){
@@ -2000,7 +2118,6 @@ function receberTodos(){
         historico.push(
           registro
         );
-
       }
 
       enviarMensagem({
@@ -2045,6 +2162,7 @@ function reenviarConfirmacoesConhecidas(){
       ){
 
         enviarMensagem({
+
           type:"confirm_received",
 
           recordId:
@@ -2054,6 +2172,7 @@ function reenviarConfirmacoesConhecidas(){
             registro.recebidoEm ||
             registro.guardadoEm ||
             new Date().toISOString()
+
         });
 
       }
@@ -2063,19 +2182,14 @@ function reenviarConfirmacoesConhecidas(){
 }
 
 /* ============================================================
-   FILA LOCAL DE RECUSAS
+   FILA DE RECUSAS
 ============================================================ */
 
 function adicionarRecusaNaFila(registro){
 
   const recordId =
-    String(
-      registro.recordId
-    );
+    String(registro.recordId);
 
-  /*
-   * PRIMEIRO BLOQUEIA O REGISTRO.
-   */
   marcarComoRecusadoLocalmente(
     recordId
   );
@@ -2106,7 +2220,6 @@ function adicionarRecusaNaFila(registro){
     recusasEnvio.push({
       ...registro
     });
-
   }
 
   salvarTudo();
@@ -2117,17 +2230,17 @@ function removerRecusaDaFila(recordId){
   const id =
     String(recordId);
 
-  const novaFila =
+  recusasEnvio =
     recusasEnvio.filter(
       item =>
         String(item.recordId) !==
         id
     );
 
-  recusasEnvio =
-    novaFila;
-
-  salvarTudo();
+  salvarJSON(
+    STORAGE_RECUSAS_ENVIO,
+    recusasEnvio
+  );
 }
 
 function reenviarRecusasPendentes(){
@@ -2144,30 +2257,25 @@ function reenviarRecusasPendentes(){
     return;
   }
 
-  const copia =
-    recusasEnvio.map(
-      registro => ({
-        ...registro
-      })
-    );
+  recusasEnvio
+    .map(registro=>({...registro}))
+    .forEach(
+      registro=>{
 
-  copia.forEach(
-    registro=>{
+        if(
+          !recusasConfirmadas.has(
+            String(registro.recordId)
+          )
+        ){
 
-      if(
-        !recusasConfirmadas.has(
-          String(registro.recordId)
-        )
-      ){
+          enviarRecusaParaGuiche(
+            registro
+          );
 
-        enviarRecusaParaGuiche(
-          registro
-        );
+        }
 
       }
-
-    }
-  );
+    );
 }
 
 /* ============================================================
@@ -2181,15 +2289,14 @@ function enviarRecusaParaGuiche(registro){
   }
 
   const recordId =
-    String(registro.recordId || "");
+    String(
+      registro.recordId || ""
+    );
 
   if(!recordId){
     return false;
   }
 
-  /*
-   * A recusa já está bloqueada localmente.
-   */
   marcarComoRecusadoLocalmente(
     recordId
   );
@@ -2204,8 +2311,7 @@ function enviarRecusaParaGuiche(registro){
 
   const motivo =
     String(
-      registro.motivoRecusa ||
-      ""
+      registro.motivoRecusa || ""
     ).trim();
 
   if(!motivo){
@@ -2216,22 +2322,16 @@ function enviarRecusaParaGuiche(registro){
 
     type:"refuse_record",
 
-    recordId:
-
-      recordId,
+    recordId,
 
     record:{
       ...registro,
 
-      recordId:
+      recordId,
 
-        recordId,
+      status:"recusado",
 
-      status:
-        "recusado",
-
-      motivoRecusa:
-        motivo,
+      motivoRecusa:motivo,
 
       recusadoEm:
         registro.recusadoEm
@@ -2242,8 +2342,7 @@ function enviarRecusaParaGuiche(registro){
       registro.recusadoEm ||
       new Date().toISOString(),
 
-    reason:
-      motivo
+    reason:motivo
 
   });
 }
@@ -2254,10 +2353,6 @@ function enviarRecusaParaGuiche(registro){
 
 function renderPendentes(){
 
-  /*
-   * SEGURANÇA EXTRA:
-   * jamais mostrar recusados na tela.
-   */
   pendentes =
     pendentes.filter(
       registro =>
@@ -2294,6 +2389,7 @@ function renderPendentes(){
   let html = `
     <div class="table-wrap">
       <table>
+
         <thead>
           <tr>
             <th>Ordem</th>
@@ -2301,11 +2397,13 @@ function renderPendentes(){
             <th>RGI</th>
             <th>Pav/Cela</th>
             <th>Atendimento</th>
+            <th>Assunto</th>
             <th>Data do atendimento</th>
             <th>Enviado em</th>
             <th>Ação</th>
           </tr>
         </thead>
+
         <tbody>
   `;
 
@@ -2331,7 +2429,8 @@ function renderPendentes(){
         valorRegistro(
           registro,
           "pavilhao",
-          "PAVILHÃO"
+          "PAVILHÃO",
+          "PAVILHAO"
         );
 
       const cela =
@@ -2347,6 +2446,14 @@ function renderPendentes(){
           "atendimento",
           "nomeAtendimento",
           "Nome do Atendimento"
+        );
+
+      const assunto =
+        valorRegistro(
+          registro,
+          "assunto",
+          "ASSUNTO",
+          "subject"
         );
 
       const dataAtendimento =
@@ -2367,9 +2474,7 @@ function renderPendentes(){
           </td>
 
           <td>
-            <strong>
-              ${escapeHtml(nome)}
-            </strong>
+            <strong>${escapeHtml(nome)}</strong>
           </td>
 
           <td>
@@ -2385,10 +2490,14 @@ function renderPendentes(){
           </td>
 
           <td>
+            <div class="subject-box">
+              ${escapeHtml(assunto || "-")}
+            </div>
+          </td>
+
+          <td>
             ${escapeHtml(
-              formatarData(
-                dataAtendimento
-              )
+              formatarData(dataAtendimento)
             )}
           </td>
 
@@ -2406,15 +2515,13 @@ function renderPendentes(){
 
               <button
                 class="btn-green"
-                onclick="receberUm('${escapeHtml(recordIdSeguro(registro.recordId))}')"
-              >
+                onclick="receberUm('${escapeHtml(recordIdSeguro(registro.recordId))}')">
                 ✅ RECEBIDO
               </button>
 
               <button
                 class="btn-red"
-                onclick="abrirRecusa('${escapeHtml(recordIdSeguro(registro.recordId))}')"
-              >
+                onclick="abrirRecusa('${escapeHtml(recordIdSeguro(registro.recordId))}')">
                 ❌ RECUSAR
               </button>
 
@@ -2424,7 +2531,6 @@ function renderPendentes(){
 
         </tr>
       `;
-
     }
   );
 
@@ -2434,7 +2540,8 @@ function renderPendentes(){
     </div>
   `;
 
-  container.innerHTML = html;
+  container.innerHTML =
+    html;
 }
 
 /* ============================================================
@@ -2502,11 +2609,11 @@ function renderHistorico(){
         new Date(a.enviadoEm || 0) -
         new Date(b.enviadoEm || 0)
     );
-
   }
 
   let html = `
     <div class="table-wrap">
+
       <table>
 
         <thead>
@@ -2515,6 +2622,7 @@ function renderHistorico(){
             <th>RGI</th>
             <th>Pav/Cela</th>
             <th>Atendimento</th>
+            <th>Assunto</th>
             <th>Data</th>
             <th>Status</th>
             <th>Informação</th>
@@ -2547,7 +2655,8 @@ function renderHistorico(){
         valorRegistro(
           registro,
           "pavilhao",
-          "PAVILHÃO"
+          "PAVILHÃO",
+          "PAVILHAO"
         );
 
       const cela =
@@ -2562,6 +2671,14 @@ function renderHistorico(){
           registro,
           "atendimento",
           "nomeAtendimento"
+        );
+
+      const assunto =
+        valorRegistro(
+          registro,
+          "assunto",
+          "ASSUNTO",
+          "subject"
         );
 
       const dataAtendimento =
@@ -2624,21 +2741,18 @@ function renderHistorico(){
 
             <button
               class="btn-yellow"
-              onclick="guardarAtendimento('${escapeHtml(recordIdSeguro(registro.recordId))}')"
-            >
+              onclick="guardarAtendimento('${escapeHtml(recordIdSeguro(registro.recordId))}')">
               🗄️ GUARDAR
             </button>
 
             <button
               class="btn-red"
-              onclick="excluirHistorico('${escapeHtml(recordIdSeguro(registro.recordId))}')"
-            >
+              onclick="excluirHistorico('${escapeHtml(recordIdSeguro(registro.recordId))}')">
               🗑️ EXCLUIR
             </button>
 
           </div>
         `;
-
       }
 
       html += `
@@ -2663,6 +2777,12 @@ function renderHistorico(){
           </td>
 
           <td>
+            <div class="subject-box">
+              ${escapeHtml(assunto || "-")}
+            </div>
+          </td>
+
+          <td>
             ${escapeHtml(
               formatarData(
                 dataAtendimento
@@ -2678,17 +2798,18 @@ function renderHistorico(){
 
         </tr>
       `;
-
     }
   );
 
   html += `
         </tbody>
       </table>
+
     </div>
   `;
 
-  container.innerHTML = html;
+  container.innerHTML =
+    html;
 }
 
 /* ============================================================
@@ -2725,6 +2846,13 @@ function abrirRecusa(recordId){
       "nomeAtendimento"
     );
 
+  const assunto =
+    valorRegistro(
+      registro,
+      "assunto",
+      "ASSUNTO"
+    );
+
   const pavilhao =
     valorRegistro(
       registro,
@@ -2750,6 +2878,16 @@ function abrirRecusa(recordId){
 
     <strong>Pav/Cela:</strong>
     ${escapeHtml(pavilhao)}/${escapeHtml(cela)}
+
+    ${
+      assunto
+        ? `
+          <br><br>
+          <strong>Assunto:</strong>
+          ${escapeHtml(assunto)}
+        `
+        : ""
+    }
   `;
 
   $("recusaMotivo").value = "";
@@ -2813,7 +2951,6 @@ function confirmarRecusa(){
   if(indice < 0){
 
     fecharRecusa();
-
     return;
   }
 
@@ -2823,21 +2960,10 @@ function confirmarRecusa(){
   const recusadoEm =
     new Date().toISOString();
 
-  /*
-   * ========================================================
-   * PRIMEIRA COISA:
-   * bloqueamos definitivamente este recordId nesta MESA.
-   *
-   * Isso acontece ANTES de enviar qualquer mensagem.
-   * ========================================================
-   */
   marcarComoRecusadoLocalmente(
     recordId
   );
 
-  /*
-   * Remove imediatamente dos pendentes.
-   */
   pendentes.splice(
     indice,
     1
@@ -2849,16 +2975,14 @@ function confirmarRecusa(){
 
     recordId,
 
-    status:
-      "recusado",
+    status:"recusado",
 
     motivoRecusa:
       motivo,
 
     recusadoEm,
 
-    recebidoEm:
-      null,
+    recebidoEm:null,
 
     historicoRecusas:[
       ...(registro.historicoRecusas || []),
@@ -2871,16 +2995,10 @@ function confirmarRecusa(){
 
   };
 
-  /*
-   * Guarda a recusa para eventual reconexão.
-   */
   adicionarRecusaNaFila(
     recusado
   );
 
-  /*
-   * Salva e redesenha ANTES do envio.
-   */
   salvarTudo();
 
   renderPendentes();
@@ -2904,10 +3022,9 @@ function confirmarRecusa(){
   }else{
 
     mostrarToast(
-      "❌ Atendimento recusado. Removido da MESA. A recusa será enviada quando a conexão voltar.",
+      "❌ Atendimento recusado. Será enviado ao GUICHÊ quando a conexão voltar.",
       "warning"
     );
-
   }
 }
 
@@ -2920,8 +3037,8 @@ function guardarAtendimento(recordId){
   const indice =
     historico.findIndex(
       item =>
-        item.recordId ===
-        recordId
+        String(item.recordId) ===
+        String(recordId)
     );
 
   if(indice < 0){
@@ -2944,7 +3061,8 @@ function guardarAtendimento(recordId){
     return;
   }
 
-  registro.status = "guardado";
+  registro.status =
+    "guardado";
 
   registro.guardadoEm =
     new Date().toISOString();
@@ -2974,8 +3092,8 @@ function excluirHistorico(recordId){
   const indice =
     historico.findIndex(
       item =>
-        item.recordId ===
-        recordId
+        String(item.recordId) ===
+        String(recordId)
     );
 
   if(indice < 0){
@@ -2996,6 +3114,7 @@ function excluirHistorico(recordId){
   );
 
   salvarTudo();
+
   renderHistorico();
 
   mostrarToast(
@@ -3072,6 +3191,12 @@ function renderGuardados(){
               "nomeAtendimento"
             ),
 
+            valorRegistro(
+              registro,
+              "assunto",
+              "ASSUNTO"
+            ),
+
             formatarData(
               valorRegistro(
                 registro,
@@ -3084,10 +3209,8 @@ function renderGuardados(){
 
           return normalizar(texto)
             .includes(filtro);
-
         }
       );
-
   }
 
   lista.sort(
@@ -3113,18 +3236,22 @@ function renderGuardados(){
 
   let html = `
     <div class="table-wrap">
+
       <table>
 
         <thead>
+
           <tr>
             <th>Nome</th>
             <th>RGI</th>
             <th>Pav/Cela</th>
             <th>Atendimento</th>
+            <th>Assunto</th>
             <th>Data</th>
             <th>Status</th>
             <th>Guardado em</th>
           </tr>
+
         </thead>
 
         <tbody>
@@ -3144,7 +3271,9 @@ function renderGuardados(){
       ){
 
         statusHtml =
-          `<span class="badge badge-refused">❌ RECUSADO / GUARDADO</span>`;
+          `<span class="badge badge-refused">
+            ❌ RECUSADO / GUARDADO
+          </span>`;
 
         info = `
           <div class="refusal-box">
@@ -3153,7 +3282,6 @@ function renderGuardados(){
             )}
           </div>
         `;
-
       }
 
       html += `
@@ -3205,6 +3333,18 @@ function renderGuardados(){
           </td>
 
           <td>
+            <div class="subject-box">
+              ${escapeHtml(
+                valorRegistro(
+                  registro,
+                  "assunto",
+                  "ASSUNTO"
+                ) || "-"
+              )}
+            </div>
+          </td>
+
+          <td>
             ${escapeHtml(
               formatarData(
                 valorRegistro(
@@ -3231,17 +3371,18 @@ function renderGuardados(){
 
         </tr>
       `;
-
     }
   );
 
   html += `
         </tbody>
       </table>
+
     </div>
   `;
 
-  container.innerHTML = html;
+  container.innerHTML =
+    html;
 }
 
 /* ============================================================
@@ -3276,7 +3417,8 @@ function obterModoImpressao(){
 
   return document.querySelector(
     'input[name="modoPrint"]:checked'
-  )?.value || "atendimento";
+  )?.value ||
+  "atendimento";
 }
 
 function alterarModoImpressao(){
@@ -3321,7 +3463,8 @@ function alterarTipoData(){
   const tipo =
     document.querySelector(
       'input[name="tipoData"]:checked'
-    )?.value || "todos";
+    )?.value ||
+    "todos";
 
   $("grupoAtendimentosData")
     .style.display =
@@ -3341,24 +3484,22 @@ function preencherAtendimentosImpressao(){
 
   container.innerHTML =
     ATENDIMENTOS.map(
-      (atendimento,index)=>{
+      (atendimento,index)=>`
 
-        return `
-          <label class="checkbox-item">
+        <label class="checkbox-item">
 
-            <input
-              type="checkbox"
-              id="printAt_${index}"
-              value="${escapeHtml(atendimento)}"
-              checked
-            >
+          <input
+            type="checkbox"
+            id="printAt_${index}"
+            value="${escapeHtml(atendimento)}"
+            checked
+          >
 
-            ${escapeHtml(atendimento)}
+          ${escapeHtml(atendimento)}
 
-          </label>
-        `;
+        </label>
 
-      }
+      `
     ).join("");
 }
 
@@ -3373,23 +3514,21 @@ function preencherAtendimentosData(){
 
   container.innerHTML =
     ATENDIMENTOS.map(
-      (atendimento,index)=>{
+      (atendimento,index)=>`
 
-        return `
-          <label class="checkbox-item">
+        <label class="checkbox-item">
 
-            <input
-              type="checkbox"
-              id="printDataAt_${index}"
-              value="${escapeHtml(atendimento)}"
-            >
+          <input
+            type="checkbox"
+            id="printDataAt_${index}"
+            value="${escapeHtml(atendimento)}"
+          >
 
-            ${escapeHtml(atendimento)}
+          ${escapeHtml(atendimento)}
 
-          </label>
-        `;
+        </label>
 
-      }
+      `
     ).join("");
 }
 
@@ -3408,7 +3547,8 @@ function obterPavilhoesDaBaseExcel(){
       return [];
     }
 
-    const conjunto = new Set();
+    const conjunto =
+      new Set();
 
     base.forEach(
       item=>{
@@ -3429,7 +3569,6 @@ function obterPavilhoesDaBaseExcel(){
           conjunto.add(
             String(pavilhao).trim()
           );
-
         }
 
       }
@@ -3450,7 +3589,6 @@ function obterPavilhoesDaBaseExcel(){
   }catch(e){
 
     return [];
-
   }
 }
 
@@ -3482,20 +3620,24 @@ function preencherPavilhoesImpressao(){
 
   if(!pavilhoes.length){
 
-    mensagem.style.display = "block";
+    mensagem.style.display =
+      "block";
 
     mensagem.textContent =
       "Nenhum pavilhão foi encontrado na base Excel de internos.";
 
   }else{
 
-    mensagem.style.display = "none";
-    mensagem.textContent = "";
+    mensagem.style.display =
+      "none";
 
+    mensagem.textContent =
+      "";
   }
 }
 
 function preencherPavilhoesGerais(){
+
   preencherPavilhoesImpressao();
 }
 
@@ -3522,23 +3664,21 @@ function preencherListaPavilhoes(
 
   container.innerHTML =
     pavilhoes.map(
-      (pavilhao,index)=>{
+      (pavilhao,index)=>`
 
-        return `
-          <label class="checkbox-item">
+        <label class="checkbox-item">
 
-            <input
-              type="checkbox"
-              id="${prefixo}${index}"
-              value="${escapeHtml(pavilhao)}"
-            >
+          <input
+            type="checkbox"
+            id="${prefixo}${index}"
+            value="${escapeHtml(pavilhao)}"
+          >
 
-            ${escapeHtml(pavilhao)}
+          ${escapeHtml(pavilhao)}
 
-          </label>
-        `;
+        </label>
 
-      }
+      `
     ).join("");
 }
 
@@ -3563,13 +3703,17 @@ function obterIdsMarcados(containerId){
 function obterAtendimentosSelecionados(
   containerId
 ){
-  return obterIdsMarcados(containerId);
+  return obterIdsMarcados(
+    containerId
+  );
 }
 
 function obterPavilhoesSelecionados(
   containerId
 ){
-  return obterIdsMarcados(containerId);
+  return obterIdsMarcados(
+    containerId
+  );
 }
 
 /* ============================================================
@@ -3578,7 +3722,8 @@ function obterPavilhoesSelecionados(
 
 function todosOsRegistrosParaImpressao(){
 
-  const mapa = new Map();
+  const mapa =
+    new Map();
 
   [
     ...pendentes,
@@ -3588,11 +3733,12 @@ function todosOsRegistrosParaImpressao(){
     registro=>{
 
       if(!registro.recordId){
-        registro.recordId = gerarId();
+        registro.recordId =
+          gerarId();
       }
 
       mapa.set(
-        registro.recordId,
+        String(registro.recordId),
         {...registro}
       );
 
@@ -3680,7 +3826,8 @@ function dataRegistroParaImpressao(registro){
     return String(valor);
   }
 
-  const d = new Date(valor);
+  const d =
+    new Date(valor);
 
   if(Number.isNaN(d.getTime())){
     return "";
@@ -3688,8 +3835,10 @@ function dataRegistroParaImpressao(registro){
 
   return [
     d.getFullYear(),
-    String(d.getMonth()+1).padStart(2,"0"),
-    String(d.getDate()).padStart(2,"0")
+    String(d.getMonth()+1)
+      .padStart(2,"0"),
+    String(d.getDate())
+      .padStart(2,"0")
   ].join("-");
 }
 
@@ -3709,15 +3858,11 @@ function obterDadosParaImpressao(){
       );
 
     if(!atendimentos.length){
+
       throw new Error(
         "Selecione pelo menos um atendimento."
       );
     }
-
-    const pavilhoes =
-      obterPavilhoesSelecionados(
-        "listaPavilhoesAtendimento"
-      );
 
     registros =
       filtroPorAtendimento(
@@ -3728,7 +3873,9 @@ function obterDadosParaImpressao(){
     registros =
       filtroPorPavilhao(
         registros,
-        pavilhoes
+        obterPavilhoesSelecionados(
+          "listaPavilhoesAtendimento"
+        )
       );
 
     return {
@@ -3740,15 +3887,12 @@ function obterDadosParaImpressao(){
 
   if(modo === "geral"){
 
-    const pavilhoes =
-      obterPavilhoesSelecionados(
-        "listaPavilhoesGeral"
-      );
-
     registros =
       filtroPorPavilhao(
         registros,
-        pavilhoes
+        obterPavilhoesSelecionados(
+          "listaPavilhoesGeral"
+        )
       );
 
     return {
@@ -3764,6 +3908,7 @@ function obterDadosParaImpressao(){
       $("printData").value;
 
     if(!data){
+
       throw new Error(
         "Selecione a data da impressão."
       );
@@ -3772,7 +3917,8 @@ function obterDadosParaImpressao(){
     const tipo =
       document.querySelector(
         'input[name="tipoData"]:checked'
-      )?.value || "todos";
+      )?.value ||
+      "todos";
 
     registros =
       registros.filter(
@@ -3800,6 +3946,7 @@ function obterDadosParaImpressao(){
         );
 
       if(!grupos.length){
+
         throw new Error(
           "Selecione pelo menos um atendimento."
         );
@@ -3825,10 +3972,11 @@ function obterDadosParaImpressao(){
                     "nomeAtendimento"
                   )
                 ) ===
-                normalizar(atendimento)
+                normalizar(
+                  atendimento
+                )
             )
         );
-
     }
 
     return {
@@ -3943,6 +4091,14 @@ function gerarPaginaImpressao(
           "nomeAtendimento"
         );
 
+      const assunto =
+        valorRegistro(
+          registro,
+          "assunto",
+          "ASSUNTO",
+          "subject"
+        );
+
       const dataAtendimento =
         valorRegistro(
           registro,
@@ -3951,30 +4107,48 @@ function gerarPaginaImpressao(
           "data"
         );
 
-      let status = "AGUARDANDO";
+      let status =
+        "AGUARDANDO";
 
       if(
-        registro.status === "guardado"
+        registro.status ===
+        "guardado"
       ){
-        status = "GUARDADO";
+
+        status =
+          "GUARDADO";
+
       }else if(
-        registro.status === "recebido"
+        registro.status ===
+        "recebido"
       ){
-        status = "RECEBIDO";
+
+        status =
+          "RECEBIDO";
       }
 
       linhas += `
         <tr>
 
-          <td>${escapeHtml(nome)}</td>
+          <td>
+            ${escapeHtml(nome)}
+          </td>
 
-          <td>${escapeHtml(rgi)}</td>
+          <td>
+            ${escapeHtml(rgi)}
+          </td>
 
           <td class="print-pavcela">
             ${escapeHtml(pavilhao)}/${escapeHtml(cela)}
           </td>
 
-          <td>${escapeHtml(atendimento)}</td>
+          <td>
+            ${escapeHtml(atendimento)}
+          </td>
+
+          <td>
+            ${escapeHtml(assunto || "-")}
+          </td>
 
           <td>
             ${escapeHtml(
@@ -3984,11 +4158,12 @@ function gerarPaginaImpressao(
             )}
           </td>
 
-          <td>${escapeHtml(status)}</td>
+          <td>
+            ${escapeHtml(status)}
+          </td>
 
         </tr>
       `;
-
     }
   );
 
@@ -4031,6 +4206,7 @@ function gerarPaginaImpressao(
             <th>RGI</th>
             <th>Pav/Cela</th>
             <th>Atendimento</th>
+            <th>Assunto</th>
             <th>Data</th>
             <th>Status</th>
           </tr>
@@ -4100,7 +4276,6 @@ function executarImpressao(){
           formatarData(
             dados.data
           );
-
       }
 
       paginas.push(
@@ -4110,7 +4285,6 @@ function executarImpressao(){
           subtitulo
         )
       );
-
     }
   );
 
@@ -4138,7 +4312,7 @@ function executarImpressao(){
 }
 
 /* ============================================================
-   CONEXÃO DO APARELHO
+   CONEXÃO
 ============================================================ */
 
 window.addEventListener(
@@ -4185,16 +4359,16 @@ document.addEventListener(
       ){
 
         retryDelay = 1000;
+
         conectarServidor();
 
       }else{
 
         reenviarRecusasPendentes();
 
+        reenviarConfirmacoesConhecidas();
       }
-
     }
-
   }
 );
 
@@ -4207,7 +4381,9 @@ function inicializar(){
   carregarTudo();
 
   preencherAtendimentosImpressao();
+
   preencherAtendimentosData();
+
   preencherPavilhoesImpressao();
 
   conectarServidor();
@@ -4224,7 +4400,6 @@ function inicializar(){
         preencherPavilhoesImpressao();
 
       }
-
     }
   );
 
@@ -4233,9 +4408,6 @@ function inicializar(){
     10000
   );
 
-  /*
-   * Tenta reenviar recusas pendentes.
-   */
   setInterval(
     ()=>{
 
@@ -4246,6 +4418,8 @@ function inicializar(){
       ){
 
         reenviarRecusasPendentes();
+
+        reenviarConfirmacoesConhecidas();
 
       }
 
@@ -4272,7 +4446,9 @@ $("modalRecusa")
         event.target ===
         $("modalRecusa")
       ){
+
         fecharRecusa();
+
       }
 
     }
@@ -4287,7 +4463,9 @@ $("modalGuardados")
         event.target ===
         $("modalGuardados")
       ){
+
         fecharGuardados();
+
       }
 
     }
@@ -4302,7 +4480,9 @@ $("modalImpressao")
         event.target ===
         $("modalImpressao")
       ){
+
         fecharImpressao();
+
       }
 
     }
