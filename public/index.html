@@ -1,710 +1,702 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guichê — Sistema de Atendimento V2.3</title>
-
-<style>
-:root{
-  --blue:#123b6d;
-  --blue2:#0c2d52;
-  --yellow:#ffd400;
-  --bg:#eef2f7;
-  --green:#1d7a46;
-  --red:#b42318;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--bg);
-  color:#17202a;
-}
-
-header{
-  background:linear-gradient(135deg,var(--blue2),var(--blue));
-  color:#fff;
-  padding:18px 20px;
-  text-align:center;
-  box-shadow:0 2px 8px #0002;
-}
-
-header h1{
-  font-size:22px;
-  margin:0 0 5px;
-}
-
-header .cpaig{
-  color:var(--yellow);
-  font-size:18px;
-  font-weight:800;
-}
-
-header h2{
-  font-size:16px;
-  margin:5px 0 0;
-  font-weight:500;
-}
-
-.container{
-  max-width:1100px;
-  margin:20px auto;
-  padding:0 14px;
-}
-
-.card{
-  background:#fff;
-  border-radius:12px;
-  padding:18px;
-  box-shadow:0 2px 10px #0001;
-  margin-bottom:16px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr 1fr;
-  gap:12px;
-}
-
-.field label{
-  display:block;
-  font-weight:700;
-  font-size:13px;
-  margin-bottom:5px;
-}
-
-.field input,
-.field select{
-  width:100%;
-  padding:11px;
-  border:1px solid #b8c2cc;
-  border-radius:8px;
-  background:#fff;
-  font-size:15px;
-}
-
-.name-wrap{
-  position:relative;
-}
-
-.suggestions{
-  position:absolute;
-  z-index:20;
-  left:0;
-  right:0;
-  top:100%;
-  background:#fff;
-  border:1px solid #b8c2cc;
-  border-top:0;
-  border-radius:0 0 8px 8px;
-  max-height:250px;
-  overflow:auto;
-  box-shadow:0 5px 12px #0002;
-}
-
-.suggestion{
-  padding:10px 12px;
-  cursor:pointer;
-  border-bottom:1px solid #eee;
-}
-
-.suggestion:hover,
-.suggestion.active{
-  background:#eaf2ff;
-}
-
-.suggestion small{
-  display:block;
-  color:#667085;
-  margin-top:2px;
-}
-
-.actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:15px;
-}
-
-.btn{
-  border:0;
-  border-radius:8px;
-  padding:11px 15px;
-  font-weight:800;
-  cursor:pointer;
-}
-
-.primary{
-  background:var(--blue);
-  color:#fff;
-}
-
-.success{
-  background:var(--green);
-  color:#fff;
-}
-
-.secondary{
-  background:#e5e7eb;
-  color:#111827;
-}
-
-.warning{
-  background:#f59e0b;
-  color:#111;
-}
-
-.danger{
-  background:#b42318;
-  color:#fff;
-}
-
-.status{
-  padding:10px;
-  border-radius:8px;
-  background:#f4f6f8;
-  margin-top:12px;
-  font-size:13px;
-}
-
-.toolbar{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-}
-
-.toolbar select{
-  padding:8px;
-  border-radius:7px;
-  border:1px solid #b8c2cc;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
-}
-
-th,
-td{
-  border-bottom:1px solid #e5e7eb;
-  padding:8px;
-  text-align:left;
-  vertical-align:top;
-}
-
-th{
-  background:#f3f5f7;
-}
-
-.center{
-  text-align:center;
-}
-
-.muted{
-  color:#667085;
-}
-
-.badge{
-  display:inline-block;
-  padding:3px 7px;
-  border-radius:999px;
-  background:#e8f5ec;
-  color:#17663a;
-  font-size:11px;
-  font-weight:700;
-}
-
-.badge.pending{
-  background:#fff3cd;
-  color:#7a5800;
-}
-
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:#0008;
-  z-index:100;
-  padding:18px;
-  overflow:auto;
-}
-
-.modal.open{
-  display:block;
-}
-
-.modal-box{
-  background:#fff;
-  max-width:1000px;
-  margin:30px auto;
-  border-radius:12px;
-  padding:20px;
-}
-
-.modal-head{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:center;
-}
-
-.modal h3{
-  margin-top:0;
-}
-
-.modal-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-
-.modal-grid input,
-.modal-grid select{
-  width:100%;
-  padding:9px;
-  border:1px solid #b8c2cc;
-  border-radius:7px;
-}
-
-.checks{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:7px;
-  max-height:250px;
-  overflow:auto;
-  border:1px solid #ddd;
-  padding:10px;
-  border-radius:8px;
-}
-
-.checks label{
-  display:flex;
-  gap:7px;
-  align-items:center;
-  font-size:14px;
-}
-
-.modal-actions{
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  margin-top:15px;
-  flex-wrap:wrap;
-}
-
-.hidden{
-  display:none!important;
-}
-
-.archive-list{
-  max-height:340px;
-  overflow:auto;
-  border:1px solid #ddd;
-  border-radius:8px;
-  margin-top:10px;
-}
-
-.archive-list label{
-  display:flex;
-  gap:10px;
-  padding:9px;
-  border-bottom:1px solid #eee;
-}
-
-.archive-list label:last-child{
-  border-bottom:0;
-}
-
-.print-area{
-  display:none;
-}
-
-@media(max-width:800px){
-
-  .grid{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .modal-grid{
-    grid-template-columns:1fr;
-  }
-
-  .checks{
-    grid-template-columns:1fr;
-  }
-
-  table{
-    font-size:12px;
-  }
-}
-
-@media print{
-
-  @page{
-    size:A4;
-    margin:5mm;
-  }
-
-  body>*:not(#printArea){
-    display:none!important;
-  }
-
-  #printArea{
-    display:block!important;
-    color:#000;
-    font-family:Arial,sans-serif;
-  }
-
-  .print-page{
-    break-after:page;
-    page-break-after:always;
-  }
-
-  .print-page:last-child{
-    break-after:auto;
-    page-break-after:auto;
-  }
-
-  .print-title{
-    text-align:center;
-    font-size:15px;
-    font-weight:800;
-    margin:0 0 3mm;
-  }
-
-  .print-subtitle{
-    text-align:center;
-    font-size:10px;
-    margin:0 0 3mm;
-  }
-
-  .print-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:8.5pt;
-    table-layout:fixed;
-  }
-
-  .print-table th,
-  .print-table td{
-    border:1px solid #000;
-    padding:2.5px 3px;
-    line-height:1.15;
-    vertical-align:top;
-  }
-
-  .print-table th{
-    font-weight:800;
-  }
-
-  .print-table .col-nome{
-    width:32%;
-  }
-
-  .print-table .col-rgi{
-    width:14%;
-  }
-
-  .print-table .col-pav{
-    width:9%;
-    text-align:center;
-  }
-
-  .print-table .col-cela{
-    width:6%;
-    text-align:center;
-  }
-
-  .print-table .col-at{
-    width:24%;
-  }
-
-  .print-table .col-data{
-    width:15%;
-    text-align:center;
-  }
-
-  .group-title{
-    text-align:left;
-    font-size:11pt;
-    font-weight:800;
-    margin:0 0 2mm;
-  }
-
-  tr{
-    break-inside:avoid;
-    page-break-inside:avoid;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>GUICHÊ - Sistema de Atendimento</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f1f3f5;
+      color: #1f2937;
+    }
+
+    header {
+      background: #17365d;
+      color: white;
+      padding: 18px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    }
+
+    header .titulo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: .4px;
+    }
+
+    header .subtitulo {
+      margin-top: 5px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    header .cpaig {
+      margin-top: 7px;
+      color: #ffd400;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      width: min(1200px, calc(100% - 24px));
+      margin: 18px auto 40px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 19px;
+      color: #17365d;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+
+    .campo {
+      grid-column: span 12;
+      position: relative;
+    }
+
+    .campo.col-3 {
+      grid-column: span 3;
+    }
+
+    .campo.col-4 {
+      grid-column: span 4;
+    }
+
+    .campo.col-6 {
+      grid-column: span 6;
+    }
+
+    .campo.col-8 {
+      grid-column: span 8;
+    }
+
+    .campo label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 700;
+      font-size: 13px;
+      color: #374151;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 11px 12px;
+      font-size: 15px;
+      background: white;
+      color: #111827;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,.10);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 75px;
+    }
+
+    .data-wrapper {
+      display: flex;
+      gap: 6px;
+    }
+
+    .data-wrapper input {
+      flex: 1;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    button:hover {
+      filter: brightness(.95);
+    }
+
+    .btn-primary {
+      background: #1769aa;
+      color: white;
+    }
+
+    .btn-success {
+      background: #198754;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #f0ad00;
+      color: #111;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-dark {
+      background: #212529;
+      color: white;
+    }
+
+    .btn-light {
+      background: #e9ecef;
+      color: #212529;
+    }
+
+    .acoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .status {
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .status.sucesso {
+      display: block;
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .status.erro {
+      display: block;
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .status.info {
+      display: block;
+      background: #cff4fc;
+      color: #055160;
+    }
+
+    .base-status {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .suggestions {
+      position: absolute;
+      z-index: 50;
+      left: 0;
+      right: 0;
+      top: 100%;
+      background: white;
+      border: 1px solid #ced4da;
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      box-shadow: 0 6px 15px rgba(0,0,0,.12);
+    }
+
+    .suggestion {
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+
+    .suggestion:hover,
+    .suggestion.ativo {
+      background: #e9f2ff;
+    }
+
+    .suggestion strong {
+      display: block;
+      color: #17365d;
+    }
+
+    .suggestion small {
+      color: #555;
+    }
+
+    .tabela-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #dee2e6;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #17365d;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8f9fa;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-pendente {
+      background: #fff3cd;
+      color: #664d03;
+    }
+
+    .badge-recebido {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .badge-guardado {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
+    .vazio {
+      text-align: center;
+      padding: 25px;
+      color: #6c757d;
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .modal-backdrop.aberto {
+      display: flex;
+    }
+
+    .modal {
+      width: min(1000px, 100%);
+      max-height: 92vh;
+      overflow-y: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 15px 50px rgba(0,0,0,.3);
+    }
+
+    .modal h3 {
+      margin-top: 0;
+      color: #17365d;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .check-item {
+      border: 1px solid #dee2e6;
+      border-radius: 7px;
+      padding: 8px;
+      background: #f8f9fa;
+    }
+
+    .check-item label {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .check-item input {
+      width: auto;
+    }
+
+    .print-preview-info {
+      padding: 10px;
+      border-radius: 8px;
+      background: #f8f9fa;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    #printArea {
+      display: none;
+    }
+
+    @media (max-width: 800px) {
+      .campo.col-3,
+      .campo.col-4,
+      .campo.col-6,
+      .campo.col-8 {
+        grid-column: span 12;
+      }
+
+      .check-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header .titulo {
+        font-size: 20px;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 5mm;
+      }
+
+      body {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      body > * {
+        display: none !important;
+      }
+
+      #printArea {
+        display: block !important;
+        width: 100%;
+      }
+
+      .print-page {
+        width: 100%;
+        min-height: calc(297mm - 10mm);
+        page-break-after: always;
+        break-after: page;
+        padding: 0;
+      }
+
+      .print-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      .print-header {
+        text-align: center;
+        margin-bottom: 7px;
+      }
+
+      .print-header h1 {
+        font-size: 16px;
+        margin: 0 0 2px;
+      }
+
+      .print-header h2 {
+        font-size: 13px;
+        margin: 0 0 3px;
+      }
+
+      .print-header .print-info {
+        font-size: 10px;
+      }
+
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9px;
+      }
+
+      .print-table th,
+      .print-table td {
+        border: 1px solid #222;
+        padding: 3px 4px;
+        line-height: 1.15;
+      }
+
+      .print-table th {
+        background: #e5e7eb !important;
+        color: #111 !important;
+        position: static;
+      }
+
+      .print-table .col-pav {
+        width: 12mm;
+        text-align: center;
+      }
+
+      .print-table .col-cela {
+        width: 12mm;
+        text-align: center;
+      }
+
+      .print-table .col-data {
+        width: 22mm;
+        text-align: center;
+      }
+
+      .print-table .col-rgi {
+        width: 24mm;
+      }
+
+      .print-footer {
+        margin-top: 6px;
+        font-size: 9px;
+        text-align: right;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-  <h1>POLÍCIA PENAL DE MATO GROSSO DO SUL</h1>
+  <div class="titulo">POLÍCIA PENAL DE MATO GROSSO DO SUL</div>
+  <div class="subtitulo">SISTEMA DE ATENDIMENTO</div>
   <div class="cpaig">CPAIG</div>
-  <h2>Sistema de Atendimento — Guichê V2.3</h2>
 </header>
 
 <div class="container">
 
-  <div class="card">
+  <!-- CADASTRO -->
+  <section class="card">
+
+    <h2>GUICHÊ — NOVO ATENDIMENTO</h2>
 
     <div class="grid">
 
-      <div class="field" style="grid-column:span 2">
+      <div class="campo col-8">
+        <label for="nomeInterno">Nome de interno</label>
 
-        <label>NOME DO INTERNO</label>
+        <input
+          id="nomeInterno"
+          type="text"
+          autocomplete="off"
+          placeholder="Digite o nome do interno"
+        >
 
-        <div class="name-wrap">
-
-          <input
-            id="nome"
-            autocomplete="off"
-            placeholder="Digite o nome do interno"
-          >
-
-          <div
-            id="suggestions"
-            class="suggestions hidden"
-          ></div>
-
-        </div>
-
+        <div
+          id="sugestoesNome"
+          class="suggestions oculto"
+        ></div>
       </div>
 
-      <div class="field">
-
-        <label>RGI</label>
+      <div class="campo col-4">
+        <label for="rgi">RGI</label>
 
         <input
           id="rgi"
+          type="text"
           placeholder="RGI"
         >
-
       </div>
 
-      <div class="field">
+      <div class="campo col-4">
+        <label for="pavilhao">Pavilhão</label>
 
-        <label>PAVILHÃO</label>
+        <input
+          id="pavilhao"
+          type="text"
+          list="listaPavilhoes"
+          placeholder="Pavilhão"
+        >
 
-        <select id="pavilhao">
-
-          <option value="">Selecione</option>
-          <option>A</option>
-          <option>B</option>
-          <option>C</option>
-          <option>D</option>
-          <option>DISCIPLINAR</option>
-          <option>DISCIPLINAR RISCO</option>
-          <option>CP</option>
-          <option>VIRTUAL</option>
-
-        </select>
-
+        <datalist id="listaPavilhoes"></datalist>
       </div>
 
-      <div class="field">
-
-        <label>CELA</label>
+      <div class="campo col-4">
+        <label for="cela">Cela</label>
 
         <select id="cela">
           <option value="">Selecione</option>
         </select>
-
       </div>
 
-      <div class="field">
-
-        <label>ATENDIMENTO</label>
+      <div class="campo col-4">
+        <label for="atendimento">Atendimento</label>
 
         <select id="atendimento">
           <option value="">Selecione</option>
         </select>
-
       </div>
 
-      <div class="field">
+      <div class="campo col-6">
+        <label for="dataAtendimento">Data do atendimento</label>
 
-        <label>DATA DO ATENDIMENTO</label>
-
-        <div style="display:flex;gap:6px">
-
+        <div class="data-wrapper">
           <input
             id="dataAtendimento"
             type="date"
           >
 
           <button
-            class="btn secondary"
             type="button"
-            onclick="hoje()"
+            class="btn-warning"
+            onclick="definirHoje()"
           >
             HOJE
           </button>
-
         </div>
-
       </div>
 
-      <div
-        class="field"
-        style="grid-column:span 4"
-      >
-
-        <label>ASSUNTO</label>
+      <div class="campo col-6">
+        <label for="assunto">Assunto</label>
 
         <input
           id="assunto"
-          placeholder="Descreva o assunto"
+          type="text"
+          placeholder="Digite o assunto"
         >
-
       </div>
 
     </div>
 
-    <div class="actions">
+    <div class="acoes">
 
       <button
-        class="btn primary"
-        onclick="adicionarFila()"
+        type="button"
+        class="btn-success"
+        onclick="enviarAtendimento()"
       >
-        ➕ ADICIONAR À FILA
+        📤 ENVIAR PARA MESA
       </button>
 
       <button
-        class="btn success"
-        onclick="enviarFila()"
-      >
-        📤 ENVIAR PARA A MESA
-      </button>
-
-      <button
-        class="btn warning"
-        onclick="abrirArquivo()"
-      >
-        📁 ATENDIMENTOS GUARDADOS
-      </button>
-
-      <button
-        class="btn secondary"
-        onclick="abrirImpressao()"
-      >
-        🖨️ IMPRIMIR
-      </button>
-
-      <button
-        class="btn secondary"
+        type="button"
+        class="btn-primary"
         onclick="abrirAtualizarBase()"
       >
         🔄 ATUALIZAR BASE DE INTERNOS
       </button>
 
-      <input
-        id="excelInput"
-        type="file"
-        accept=".xlsx,.xls"
-        class="hidden"
+      <button
+        type="button"
+        class="btn-dark"
+        onclick="abrirModalImpressao()"
       >
+        🖨️ IMPRIMIR
+      </button>
 
     </div>
 
-    <div
-      id="baseStatus"
-      class="status"
-    ></div>
+    <input
+      id="excelInput"
+      type="file"
+      accept=".xlsx,.xls"
+      class="oculto"
+    >
 
     <div
       id="status"
       class="status"
     ></div>
 
-  </div>
+    <div
+      id="baseStatus"
+      class="base-status"
+    >
+      Base de internos não carregada.
+    </div>
+
+  </section>
 
 
-  <div class="card">
+  <!-- FILA -->
+  <section class="card">
 
-    <div class="toolbar">
+    <div class="top-actions">
 
-      <h3 style="margin:0">
-        Fila de atendimento
-      </h3>
+      <h2>📤 FILA DE ENVIO</h2>
 
-      <button
-        class="btn danger"
-        onclick="limparFila()"
-      >
-        Limpar fila
-      </button>
+      <span id="conexaoStatus" class="badge badge-pendente">
+        Conectando...
+      </span>
 
     </div>
 
-    <div style="overflow:auto;margin-top:10px">
+    <div class="tabela-wrapper">
 
       <table>
 
         <thead>
-
-          <tr>
-            <th>Nome</th>
-            <th>RGI</th>
-            <th>Pavilhão</th>
-            <th>Cela</th>
-            <th>Atendimento</th>
-            <th>Data</th>
-            <th>Assunto</th>
-            <th>Ação</th>
-          </tr>
-
-        </thead>
-
-        <tbody id="filaBody"></tbody>
-
-      </table>
-
-    </div>
-
-  </div>
-
-
-  <div class="card">
-
-    <div class="toolbar">
-
-      <h3 style="margin:0">
-        Histórico do GUICHÊ
-      </h3>
-
-      <select
-        id="ordemHistorico"
-        onchange="renderHistorico()"
-      >
-
-        <option value="envio">
-          Ordem de envio
-        </option>
-
-        <option value="atendimento">
-          Por atendimento
-        </option>
-
-      </select>
-
-    </div>
-
-    <div style="overflow:auto;margin-top:10px">
-
-      <table>
-
-        <thead>
-
           <tr>
             <th>Nome</th>
             <th>RGI</th>
@@ -713,84 +705,137 @@ th{
             <th>Atendimento</th>
             <th>Data</th>
             <th>Status</th>
-            <th>Ação</th>
           </tr>
-
         </thead>
 
-        <tbody id="historicoBody"></tbody>
+        <tbody id="filaTabela"></tbody>
 
       </table>
 
     </div>
 
-  </div>
+  </section>
+
+
+  <!-- HISTÓRICO -->
+  <section class="card">
+
+    <div class="top-actions">
+
+      <h2>📋 HISTÓRICO DE ATENDIMENTOS</h2>
+
+      <div class="acoes" style="margin-top:0">
+
+        <label style="font-size:13px;font-weight:700;">
+          Ordem:
+        </label>
+
+        <select
+          id="ordenacaoHistorico"
+          onchange="renderHistorico()"
+          style="width:auto"
+        >
+          <option value="envio">
+            Ordem de envio
+          </option>
+
+          <option value="atendimento">
+            Por atendimento
+          </option>
+        </select>
+
+        <button
+          class="btn-secondary"
+          onclick="abrirArquivoGuardado()"
+        >
+          📁 ATENDIMENTOS GUARDADOS
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="tabela-wrapper">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Envio</th>
+            <th>Nome</th>
+            <th>RGI</th>
+            <th>Pav.</th>
+            <th>Cela</th>
+            <th>Atendimento</th>
+            <th>Data</th>
+            <th>Assunto</th>
+            <th>Status</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+
+        <tbody id="historicoTabela"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
 
 </div>
 
 
-<!-- ÁREA DE ATENDIMENTOS GUARDADOS -->
-
+<!-- MODAL DE ARQUIVO -->
 <div
-  id="arquivoModal"
-  class="modal"
+  id="modalArquivo"
+  class="modal-backdrop"
 >
 
-  <div class="modal-box">
+  <div class="modal">
 
-    <div class="modal-head">
+    <h3>📁 ATENDIMENTOS GUARDADOS</h3>
 
-      <h3>
-        📁 Atendimentos guardados
-      </h3>
+    <div class="grid">
 
-      <button
-        class="btn secondary"
-        onclick="fecharArquivo()"
-      >
-        Fechar
-      </button>
+      <div class="campo col-4">
 
-    </div>
-
-    <div class="modal-grid">
-
-      <div>
-
-        <label>Data</label>
+        <label for="arquivoData">
+          Data
+        </label>
 
         <input
           id="arquivoData"
           type="date"
-          onchange="renderArquivo()"
+          oninput="renderArquivo()"
         >
 
       </div>
 
-      <div>
+      <div class="campo col-4">
 
-        <label>Atendimento</label>
+        <label for="arquivoAtendimento">
+          Atendimento
+        </label>
 
         <select
           id="arquivoAtendimento"
           onchange="renderArquivo()"
         >
-
-          <option value="">
-            Todos
-          </option>
-
+          <option value="">Todos</option>
         </select>
 
       </div>
 
-      <div>
+      <div class="campo col-4">
 
-        <label>Nome</label>
+        <label for="arquivoNome">
+          Nome
+        </label>
 
         <input
           id="arquivoNome"
-          placeholder="Filtrar por nome"
+          type="text"
+          placeholder="Pesquisar nome"
           oninput="renderArquivo()"
         >
 
@@ -798,37 +843,54 @@ th{
 
     </div>
 
-    <div
-      id="arquivoCount"
-      class="status"
-    ></div>
-
-    <div
-      class="archive-list"
-      id="arquivoList"
-    ></div>
-
-    <div class="modal-actions">
+    <div class="acoes">
 
       <button
-        class="btn secondary"
-        onclick="selecionarTodosArquivo(true)"
+        class="btn-light"
+        onclick="selecionarTodosArquivo()"
       >
-        Selecionar todos
+        ☑️ SELECIONAR TODOS
       </button>
 
       <button
-        class="btn secondary"
-        onclick="selecionarTodosArquivo(false)"
+        class="btn-danger"
+        onclick="excluirSelecionadosArquivo()"
       >
-        Desmarcar
+        🗑️ EXCLUIR SELECIONADOS
       </button>
 
+    </div>
+
+    <div
+      class="tabela-wrapper"
+      style="margin-top:12px"
+    >
+
+      <table>
+
+        <thead>
+          <tr>
+            <th></th>
+            <th>Nome</th>
+            <th>RGI</th>
+            <th>Atendimento</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+
+        <tbody id="arquivoTabela"></tbody>
+
+      </table>
+
+    </div>
+
+    <div class="modal-footer">
+
       <button
-        class="btn primary"
-        onclick="restaurarArquivados()"
+        class="btn-secondary"
+        onclick="fecharArquivoGuardado()"
       >
-        ↩️ Restaurar selecionados
+        FECHAR
       </button>
 
     </div>
@@ -838,41 +900,27 @@ th{
 </div>
 
 
-<!-- ÁREA DE IMPRESSÃO -->
-
+<!-- MODAL DE IMPRESSÃO -->
 <div
-  id="printModal"
-  class="modal"
+  id="modalImpressao"
+  class="modal-backdrop"
 >
 
-  <div class="modal-box">
+  <div class="modal">
 
-    <div class="modal-head">
+    <h3>🖨️ IMPRESSÃO</h3>
 
-      <h3>
-        🖨️ Impressão
-      </h3>
+    <div class="grid">
 
-      <button
-        class="btn secondary"
-        onclick="fecharImpressao()"
-      >
-        Fechar
-      </button>
+      <div class="campo col-4">
 
-    </div>
-
-    <div class="modal-grid">
-
-      <div>
-
-        <label>
+        <label for="tipoImpressao">
           Tipo de impressão
         </label>
 
         <select
           id="tipoImpressao"
-          onchange="atualizarOpcoesImpressao()"
+          onchange="alterarTipoImpressao()"
         >
 
           <option value="atendimento">
@@ -892,57 +940,60 @@ th{
       </div>
 
       <div
-        id="dataPrintWrap"
-        class="hidden"
+        id="campoDataImpressao"
+        class="campo col-4 oculto"
       >
 
-        <label>
+        <label for="dataImpressao">
           Data
         </label>
 
         <input
-          id="dataPrint"
+          id="dataImpressao"
           type="date"
-          onchange="atualizarAtendimentosDaData()"
         >
 
       </div>
 
+    </div>
+
+
+    <div
+      id="opcoesData"
+      class="oculto"
+    >
+
+      <div class="check-item">
+
+        <label>
+          <input
+            type="radio"
+            name="filtroData"
+            value="todos"
+            checked
+            onchange="alternarFiltroData()"
+          >
+
+          Todos os atendimentos
+        </label>
+
+      </div>
+
       <div
-        id="modoDataWrap"
-        class="hidden"
+        class="check-item"
+        style="margin-top:6px"
       >
 
         <label>
-          Por data
+          <input
+            type="radio"
+            name="filtroData"
+            value="atendimentos"
+            onchange="alternarFiltroData()"
+          >
+
+          Selecionar atendimentos
         </label>
-
-        <div
-          style="display:flex;gap:10px;margin-top:9px"
-        >
-
-          <label>
-            <input
-              type="radio"
-              name="modoData"
-              value="todos"
-              checked
-              onchange="atualizarAtendimentosDaData()"
-            >
-            Todos
-          </label>
-
-          <label>
-            <input
-              type="radio"
-              name="modoData"
-              value="atendimentos"
-              onchange="atualizarAtendimentosDaData()"
-            >
-            Atendimentos
-          </label>
-
-        </div>
 
       </div>
 
@@ -950,74 +1001,56 @@ th{
 
 
     <div
-      id="listaAtendimentosWrap"
-      style="margin-top:15px"
-    >
-
-      <label>
-        Selecione os atendimentos
-      </label>
-
-      <div
-        id="listaAtendimentos"
-        class="checks"
-      ></div>
-
-    </div>
-
-
-    <div
-      id="atendimentosDataWrap"
-      class="hidden"
-      style="margin-top:15px"
-    >
-
-      <label>
-        Atendimentos da data
-      </label>
-
-      <div
-        id="atendimentosData"
-        class="checks"
-      ></div>
-
-    </div>
-
-
-    <div
-      style="margin-top:15px"
-    >
-
-      <label>
-        <input
-          type="checkbox"
-          id="umPorPagina"
-        >
-
-        Um atendimento por página
-      </label>
-
-    </div>
-
-
-    <div
-      id="printInfo"
-      class="status"
+      id="listaAtendimentoImpressao"
+      class="check-grid"
     ></div>
 
 
-    <div class="modal-actions">
+    <div
+      id="opcoesGeral"
+      class="print-preview-info oculto"
+    >
+      A impressão geral utilizará todos os atendimentos existentes.
+    </div>
+
+
+    <div class="check-item" style="margin-top:15px">
+
+      <label>
+        <input
+          id="umAtendimentoPorPagina"
+          type="checkbox"
+          checked
+        >
+
+        <strong>
+          Um atendimento por página
+        </strong>
+      </label>
+
+    </div>
+
+
+    <div
+      id="infoImpressao"
+      class="print-preview-info"
+    >
+      Selecione os atendimentos que deseja imprimir.
+    </div>
+
+
+    <div class="modal-footer">
 
       <button
-        class="btn secondary"
-        onclick="fecharImpressao()"
+        class="btn-secondary"
+        onclick="fecharModalImpressao()"
       >
-        Cancelar
+        CANCELAR
       </button>
 
       <button
-        class="btn primary"
-        onclick="executarImpressao()"
+        class="btn-dark"
+        onclick="imprimirLista()"
       >
         🖨️ IMPRIMIR
       </button>
@@ -1029,3536 +1062,1305 @@ th{
 </div>
 
 
-<div
-  id="printArea"
-  class="print-area"
-></div>
+<!-- ÁREA EXCLUSIVA DE IMPRESSÃO -->
+<div id="printArea"></div>
 
-
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
-"use strict";
 
-/* =========================================================
-   CONFIGURAÇÕES
-========================================================= */
+  /* =========================================================
+     CONFIGURAÇÕES
+  ========================================================= */
 
-const STORAGE_HISTORICO = "atendimentoV2Historico";
-const STORAGE_OUTBOX = "atendimentoV2Outbox";
-const STORAGE_ARQUIVO = "atendimentoV23Arquivo";
-const STORAGE_BASE = "atendimentoV23BaseInternos";
-const STORAGE_BASE_DATA = "atendimentoV23BaseData";
+  const STORAGE_HISTORICO =
+    "atendimentoV2Historico";
 
-const ATENDIMENTOS = [
-  "Jurídico",
-  "Psicossocial",
-  "Médico",
-  "Odontologia",
-  "Trabalho",
-  "Chefia",
-  "Chefe de equipe",
-  "Portaria II",
-  "Identificação",
-  "Limpeza",
-  "Advogado(a)",
-  "Visita Assistida",
-  "Autorização de Saída",
-  "Licença Judicial",
-  "7 dias",
-  "7 dias monitorado",
-  "Alvará",
-  "Salvo conduto",
-  "Domiciliar",
-  "Evasão",
-  "Desvio de Rota",
-  "Falta",
-  "Regressão",
-  "Mudança de Cela",
-  "Hospitalizado",
-  "Outros"
-];
+  const STORAGE_OUTBOX =
+    "atendimentoV2Outbox";
 
-let fila = [];
-let historico = carregarJSON(STORAGE_HISTORICO, []);
-let outbox = carregarJSON(STORAGE_OUTBOX, []);
-let arquivo = carregarJSON(STORAGE_ARQUIVO, []);
-let baseInternos = carregarJSON(STORAGE_BASE, []);
+  const STORAGE_BASE =
+    "atendimentoV23BaseInternos";
 
-let socket = null;
-let reconnectTimer = null;
-let sugestaoIndex = -1;
+  const STORAGE_BASE_DATA =
+    "atendimentoV23BaseData";
+
+  const STORAGE_ARQUIVO =
+    "atendimentoV23Arquivo";
 
 
-/* =========================================================
-   FUNÇÕES BÁSICAS
-========================================================= */
+  const ATENDIMENTOS = [
+    "Jurídico",
+    "Psicossocial",
+    "Médico",
+    "Odontologia",
+    "Trabalho",
+    "Chefia",
+    "Chefe de equipe",
+    "Portaria II",
+    "Identificação",
+    "Limpeza",
+    "Advogado(a)",
+    "Visita Assistida",
+    "Autorização de Saída",
+    "Licença Judicial",
+    "7 dias",
+    "7 dias monitorado",
+    "Alvará",
+    "Salvo conduto",
+    "Domiciliar",
+    "Evasão",
+    "Desvio de Rota",
+    "Falta",
+    "Regressão",
+    "Mudança de Cela",
+    "Hospitalizado",
+    "Outros"
+  ];
 
-function carregarJSON(chave, padrao) {
-  try {
-    const valor = localStorage.getItem(chave);
 
-    if (!valor) {
-      return padrao;
+  let baseInternos = [];
+
+  let historico = [];
+
+  let outbox = [];
+
+  let arquivoGuardado = [];
+
+  let socket = null;
+
+  let reconectarTimer = null;
+
+  let sugestaoIndice = -1;
+
+
+  /* =========================================================
+     UTILITÁRIOS
+  ========================================================= */
+
+  function normalizarTexto(valor) {
+
+    return String(valor ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase()
+      .replace(/\s+/g, " ")
+      .trim();
+
+  }
+
+
+  function normalizarCela(valor) {
+
+    let texto =
+      String(valor ?? "")
+        .trim();
+
+    if (!texto) {
+      return "";
     }
 
-    const dados = JSON.parse(valor);
-
-    return dados ?? padrao;
-
-  } catch (erro) {
-    console.error("Erro ao carregar", chave, erro);
-    return padrao;
-  }
-}
-
-
-function salvarJSON(chave, valor) {
-  localStorage.setItem(
-    chave,
-    JSON.stringify(valor)
-  );
-}
-
-
-function novoId() {
-  if (
-    window.crypto &&
-    crypto.randomUUID
-  ) {
-    return crypto.randomUUID();
-  }
-
-  return (
-    Date.now().toString(36) +
-    Math.random().toString(36).slice(2)
-  );
-}
-
-
-function escapeHtml(valor) {
-
-  return String(valor ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-
-function normalizarTexto(valor) {
-
-  return String(valor ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase()
-    .trim();
-}
-
-
-function formatarData(data) {
-
-  if (!data) {
-    return "";
-  }
-
-  const partes = String(data).split("-");
-
-  if (partes.length === 3) {
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-  }
-
-  return data;
-}
-
-
-function hojeISO() {
-
-  const agora = new Date();
-
-  const ano = agora.getFullYear();
-
-  const mes = String(
-    agora.getMonth() + 1
-  ).padStart(2, "0");
-
-  const dia = String(
-    agora.getDate()
-  ).padStart(2, "0");
-
-  return `${ano}-${mes}-${dia}`;
-}
-
-
-function hoje() {
-
-  document.getElementById(
-    "dataAtendimento"
-  ).value = hojeISO();
-
-}
-
-
-function mostrarStatus(texto, tipo = "") {
-
-  const elemento =
-    document.getElementById("status");
-
-  elemento.textContent = texto;
-
-  if (tipo === "erro") {
-    elemento.style.background = "#fde8e8";
-    elemento.style.color = "#991b1b";
-  } else if (tipo === "sucesso") {
-    elemento.style.background = "#e8f5ec";
-    elemento.style.color = "#17663a";
-  } else {
-    elemento.style.background = "#f4f6f8";
-    elemento.style.color = "#17202a";
-  }
-
-}
-
-
-/* =========================================================
-   CELA
-========================================================= */
-
-function preencherCelas() {
-
-  const select =
-    document.getElementById("cela");
-
-  select.innerHTML =
-    '<option value="">Selecione</option>';
-
-  for (let i = 1; i <= 120; i++) {
-
-    const numero =
-      String(i).padStart(2, "0");
-
-    const option =
-      document.createElement("option");
-
-    option.value = numero;
-    option.textContent = numero;
-
-    select.appendChild(option);
-  }
-
-}
-
-
-/* =========================================================
-   ATENDIMENTOS
-========================================================= */
-
-function preencherAtendimentos() {
-
-  const select =
-    document.getElementById(
-      "atendimento"
-    );
-
-  select.innerHTML =
-    '<option value="">Selecione</option>';
-
-  ATENDIMENTOS.forEach(
-    atendimento => {
-
-      const option =
-        document.createElement("option");
-
-      option.value = atendimento;
-      option.textContent = atendimento;
-
-      select.appendChild(option);
-
+    /*
+      Corrige valores numéricos vindos do Excel,
+      como 1.0, 2.0 etc.
+    */
+    if (
+      /^-?\d+\.0+$/.test(texto)
+    ) {
+      texto =
+        texto.replace(
+          /\.0+$/,
+          ""
+        );
     }
-  );
 
-}
+    /*
+      Se for apenas número, mantém
+      pelo menos dois dígitos.
+    */
+    if (
+      /^\d+$/.test(texto)
+    ) {
 
+      const numero =
+        Number(texto);
 
-/* =========================================================
-   BASE DO EXCEL
-========================================================= */
-
-function atualizarStatusBase() {
-
-  const elemento =
-    document.getElementById(
-      "baseStatus"
-    );
-
-  const atualizado =
-    localStorage.getItem(
-      STORAGE_BASE_DATA
-    );
-
-  if (!baseInternos.length) {
-
-    elemento.innerHTML =
-      "<strong>Base de internos:</strong> nenhuma base carregada. " +
-      "Use o botão <strong>ATUALIZAR BASE DE INTERNOS</strong>.";
-
-    return;
-  }
-
-  elemento.innerHTML =
-    `<strong>Base de internos:</strong> ${baseInternos.length} registros` +
-    (
-      atualizado
-        ? ` — atualizada em ${escapeHtml(atualizado)}`
-        : ""
-    );
-
-}
-
-
-function abrirAtualizarBase() {
-
-  const input =
-    document.getElementById(
-      "excelInput"
-    );
-
-  input.value = "";
-
-  input.click();
-
-}
-
-
-async function importarExcel(evento) {
-
-  const arquivoSelecionado =
-    evento.target.files &&
-    evento.target.files[0];
-
-  if (!arquivoSelecionado) {
-    return;
-  }
-
-  try {
-
-    mostrarStatus(
-      "Lendo a base de internos...",
-      ""
-    );
-
-    const dados =
-      await arquivoSelecionado.arrayBuffer();
-
-    const workbook =
-      XLSX.read(
-        dados,
-        {
-          type: "array"
-        }
-      );
-
-    const primeiraAba =
-      workbook.SheetNames[0];
-
-    const planilha =
-      workbook.Sheets[
-        primeiraAba
-      ];
-
-    const linhas =
-      XLSX.utils.sheet_to_json(
-        planilha,
-        {
-          defval: ""
-        }
-      );
-
-    const novaBase = [];
-
-    linhas.forEach(linha => {
-
-      const chaves =
-        Object.keys(linha);
-
-      function obterCampo(...nomes) {
-
-        for (
-          const nome of nomes
-        ) {
-
-          const encontrado =
-            chaves.find(
-              chave =>
-                normalizarTexto(
-                  chave
-                ) ===
-                normalizarTexto(
-                  nome
-                )
-            );
-
-          if (
-            encontrado !==
-            undefined
-          ) {
-
-            return String(
-              linha[
-                encontrado
-              ] ?? ""
-            ).trim();
-
-          }
-
-        }
-
-        return "";
+      if (
+        numero >= 0 &&
+        numero <= 999
+      ) {
+        return String(numero)
+          .padStart(2, "0");
       }
 
-      const nome =
-        obterCampo(
-          "NOME DO INTERNO",
-          "NOME",
-          "NOME INTERNO"
+    }
+
+    return texto;
+
+  }
+
+
+  function hojeISO() {
+
+    const agora =
+      new Date();
+
+    const ano =
+      agora.getFullYear();
+
+    const mes =
+      String(
+        agora.getMonth() + 1
+      ).padStart(2, "0");
+
+    const dia =
+      String(
+        agora.getDate()
+      ).padStart(2, "0");
+
+    return `${ano}-${mes}-${dia}`;
+
+  }
+
+
+  function formatarData(valor) {
+
+    if (!valor) {
+      return "";
+    }
+
+    const partes =
+      String(valor).split("-");
+
+    if (
+      partes.length === 3
+    ) {
+      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+    return valor;
+
+  }
+
+
+  function formatarDataHora(valor) {
+
+    if (!valor) {
+      return "";
+    }
+
+    try {
+
+      const data =
+        new Date(valor);
+
+      if (
+        Number.isNaN(
+          data.getTime()
+        )
+      ) {
+        return valor;
+      }
+
+      return data.toLocaleString(
+        "pt-BR"
+      );
+
+    } catch {
+      return valor;
+    }
+
+  }
+
+
+  function gerarId() {
+
+    if (
+      window.crypto &&
+      typeof crypto.randomUUID ===
+        "function"
+    ) {
+      return crypto.randomUUID();
+    }
+
+    return (
+      Date.now().toString(36) +
+      Math.random()
+        .toString(36)
+        .slice(2)
+    );
+
+  }
+
+
+  function carregarJSON(
+    chave,
+    padrao
+  ) {
+
+    try {
+
+      const valor =
+        localStorage.getItem(
+          chave
         );
 
-      const rgi =
-        obterCampo(
-          "RGI",
-          "PRONTUARIO",
-          "PRONTUÁRIO"
+      if (!valor) {
+        return padrao;
+      }
+
+      const resultado =
+        JSON.parse(valor);
+
+      return resultado ?? padrao;
+
+    } catch {
+
+      return padrao;
+
+    }
+
+  }
+
+
+  function salvarJSON(
+    chave,
+    valor
+  ) {
+
+    try {
+
+      localStorage.setItem(
+        chave,
+        JSON.stringify(valor)
+      );
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao salvar:",
+        erro
+      );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     STATUS
+  ========================================================= */
+
+  function mostrarStatus(
+    mensagem,
+    tipo = "info"
+  ) {
+
+    const elemento =
+      document.getElementById(
+        "status"
+      );
+
+    if (!elemento) {
+      return;
+    }
+
+    elemento.textContent =
+      mensagem;
+
+    elemento.className =
+      "status " + tipo;
+
+    clearTimeout(
+      mostrarStatus.timer
+    );
+
+    mostrarStatus.timer =
+      setTimeout(
+        () => {
+          elemento.className =
+            "status";
+        },
+        6000
+      );
+
+  }
+
+
+  function atualizarConexao(
+    conectado
+  ) {
+
+    const elemento =
+      document.getElementById(
+        "conexaoStatus"
+      );
+
+    if (!elemento) {
+      return;
+    }
+
+    if (conectado) {
+
+      elemento.textContent =
+        "ONLINE";
+
+      elemento.className =
+        "badge badge-recebido";
+
+    } else {
+
+      elemento.textContent =
+        "OFFLINE";
+
+      elemento.className =
+        "badge badge-pendente";
+
+    }
+
+  }
+
+
+  /* =========================================================
+     INICIALIZAÇÃO DOS CAMPOS
+  ========================================================= */
+
+  function preencherAtendimentos() {
+
+    const select =
+      document.getElementById(
+        "atendimento"
+      );
+
+    if (!select) {
+      return;
+    }
+
+    select.innerHTML =
+      '<option value="">Selecione</option>';
+
+    ATENDIMENTOS.forEach(
+      atendimento => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          atendimento;
+
+        option.textContent =
+          atendimento;
+
+        select.appendChild(
+          option
         );
 
-      const pavilhao =
-        obterCampo(
-          "PAVILHAO",
-          "PAVILHÃO",
-          "PAV"
+      }
+    );
+
+  }
+
+
+  function preencherAtendimentosArquivo() {
+
+    const select =
+      document.getElementById(
+        "arquivoAtendimento"
+      );
+
+    if (!select) {
+      return;
+    }
+
+    select.innerHTML =
+      '<option value="">Todos</option>';
+
+    ATENDIMENTOS.forEach(
+      atendimento => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          atendimento;
+
+        option.textContent =
+          atendimento;
+
+        select.appendChild(
+          option
         );
 
-      const cela =
-        obterCampo(
+      }
+    );
+
+  }
+
+
+  function preencherCelas() {
+
+    const select =
+      document.getElementById(
+        "cela"
+      );
+
+    if (!select) {
+      return;
+    }
+
+    const atual =
+      select.value;
+
+    const valores =
+      new Set();
+
+    /*
+      Mantém opções básicas mesmo
+      antes da importação do Excel.
+    */
+    for (
+      let i = 1;
+      i <= 120;
+      i++
+    ) {
+
+      valores.add(
+        String(i)
+          .padStart(2, "0")
+      );
+
+    }
+
+    baseInternos.forEach(
+      interno => {
+
+        const cela =
+          normalizarCela(
+            interno.cela
+          );
+
+        if (cela) {
+          valores.add(cela);
+        }
+
+      }
+    );
+
+    select.innerHTML =
+      '<option value="">Selecione</option>';
+
+    Array.from(valores)
+      .sort(
+        (a, b) =>
+          a.localeCompare(
+            b,
+            "pt-BR",
+            {
+              numeric: true
+            }
+          )
+      )
+      .forEach(
+        valor => {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            valor;
+
+          option.textContent =
+            valor;
+
+          select.appendChild(
+            option
+          );
+
+        }
+      );
+
+    if (
+      atual &&
+      Array.from(valores)
+        .includes(atual)
+    ) {
+      select.value =
+        atual;
+    }
+
+  }
+
+
+  function atualizarOpcoesPavilhao() {
+
+    const datalist =
+      document.getElementById(
+        "listaPavilhoes"
+      );
+
+    if (!datalist) {
+      return;
+    }
+
+    const valores =
+      new Set();
+
+    baseInternos.forEach(
+      interno => {
+
+        const valor =
+          String(
+            interno.pavilhao || ""
+          ).trim();
+
+        if (valor) {
+          valores.add(valor);
+        }
+
+      }
+    );
+
+    datalist.innerHTML =
+      "";
+
+    Array.from(valores)
+      .sort(
+        (a, b) =>
+          a.localeCompare(
+            b,
+            "pt-BR",
+            {
+              numeric: true
+            }
+          )
+      )
+      .forEach(
+        valor => {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            valor;
+
+          datalist.appendChild(
+            option
+          );
+
+        }
+      );
+
+  }
+
+
+  /* =========================================================
+     BASE DE INTERNOS
+  ========================================================= */
+
+  function atualizarStatusBase() {
+
+    const elemento =
+      document.getElementById(
+        "baseStatus"
+      );
+
+    if (!elemento) {
+      return;
+    }
+
+    const data =
+      localStorage.getItem(
+        STORAGE_BASE_DATA
+      );
+
+    if (!baseInternos.length) {
+
+      elemento.innerHTML =
+        "<strong>Base de internos:</strong> não carregada.";
+
+      return;
+    }
+
+    elemento.innerHTML =
+      `<strong>Base de internos:</strong>
+       ${baseInternos.length.toLocaleString("pt-BR")} registros.
+       ${
+         data
+           ? `<br><strong>Última atualização:</strong> ${data}`
+           : ""
+       }`;
+
+  }
+
+
+  function abrirAtualizarBase() {
+
+    const input =
+      document.getElementById(
+        "excelInput"
+      );
+
+    if (!input) {
+
+      mostrarStatus(
+        "Campo de seleção do Excel não encontrado.",
+        "erro"
+      );
+
+      return;
+
+    }
+
+    input.value = "";
+
+    try {
+
+      if (
+        typeof input.showPicker ===
+        "function"
+      ) {
+
+        input.showPicker();
+
+        return;
+
+      }
+
+    } catch {}
+
+    input.click();
+
+  }
+
+
+  async function importarExcel(
+    evento
+  ) {
+
+    const input =
+      evento?.target;
+
+    const arquivoSelecionado =
+      input?.files &&
+      input.files[0];
+
+    if (!arquivoSelecionado) {
+      return;
+    }
+
+    try {
+
+      if (!window.XLSX) {
+
+        throw new Error(
+          "A biblioteca de leitura do Excel não foi carregada. Verifique a conexão com a internet e tente novamente."
+        );
+
+      }
+
+      mostrarStatus(
+        "Lendo a base de internos...",
+        "info"
+      );
+
+      const dados =
+        await arquivoSelecionado
+          .arrayBuffer();
+
+      const workbook =
+        XLSX.read(
+          dados,
+          {
+            type: "array",
+            cellDates: false,
+            raw: false
+          }
+        );
+
+      if (
+        !workbook.SheetNames.length
+      ) {
+
+        throw new Error(
+          "O arquivo Excel não possui planilhas."
+        );
+
+      }
+
+      const primeiraAba =
+        workbook.SheetNames[0];
+
+      const planilha =
+        workbook.Sheets[
+          primeiraAba
+        ];
+
+      /*
+        Lê a planilha como matriz.
+        Isso permite encontrar o cabeçalho
+        mesmo quando há uma linha vazia
+        antes dele.
+      */
+      const matriz =
+        XLSX.utils.sheet_to_json(
+          planilha,
+          {
+            header: 1,
+            defval: "",
+            raw: false
+          }
+        );
+
+      const normalizarCabecalho =
+        valor =>
+          normalizarTexto(
+            String(valor ?? "")
+          );
+
+      let indiceCabecalho =
+        -1;
+
+      for (
+        let i = 0;
+        i < matriz.length;
+        i++
+      ) {
+
+        const linha =
+          Array.isArray(matriz[i])
+            ? matriz[i]
+            : [];
+
+        const cabecalhos =
+          linha.map(
+            normalizarCabecalho
+          );
+
+        const temNome =
+          cabecalhos.includes(
+            "NOME DO INTERNO"
+          );
+
+        const temRGI =
+          cabecalhos.includes(
+            "RGI"
+          );
+
+        const temPavilhao =
+          cabecalhos.includes(
+            "PAVILHAO"
+          );
+
+        const temCela =
+          cabecalhos.includes(
+            "CELA"
+          );
+
+        if (
+          temNome &&
+          temRGI &&
+          temPavilhao &&
+          temCela
+        ) {
+
+          indiceCabecalho =
+            i;
+
+          break;
+
+        }
+
+      }
+
+      if (
+        indiceCabecalho < 0
+      ) {
+
+        throw new Error(
+          "Não encontrei o cabeçalho NOME DO INTERNO, RGI, PAVILHÃO e CELA."
+        );
+
+      }
+
+      const cabecalho =
+        matriz[
+          indiceCabecalho
+        ].map(
+          normalizarCabecalho
+        );
+
+      function posicao(
+        nome
+      ) {
+
+        return cabecalho.findIndex(
+          item =>
+            item ===
+            normalizarCabecalho(
+              nome
+            )
+        );
+
+      }
+
+      const colNome =
+        posicao(
+          "NOME DO INTERNO"
+        );
+
+      const colRGI =
+        posicao(
+          "RGI"
+        );
+
+      const colPavilhao =
+        posicao(
+          "PAVILHAO"
+        );
+
+      const colCela =
+        posicao(
           "CELA"
         );
 
-      if (nome) {
+      const novaBase = [];
+
+      for (
+        let i =
+          indiceCabecalho + 1;
+        i < matriz.length;
+        i++
+      ) {
+
+        const linha =
+          Array.isArray(matriz[i])
+            ? matriz[i]
+            : [];
+
+        const nome =
+          String(
+            linha[colNome] ?? ""
+          ).trim();
+
+        const rgi =
+          String(
+            linha[colRGI] ?? ""
+          ).trim();
+
+        const pavilhao =
+          String(
+            linha[colPavilhao] ?? ""
+          ).trim();
+
+        const celaBruta =
+          String(
+            linha[colCela] ?? ""
+          ).trim();
+
+        if (
+          !nome ||
+          normalizarTexto(nome) ===
+            "TOTAIS"
+        ) {
+          continue;
+        }
 
         novaBase.push({
           nome,
           rgi,
           pavilhao,
-          cela
+          cela:
+            normalizarCela(
+              celaBruta
+            )
         });
 
       }
 
-    });
-
-
-    if (!novaBase.length) {
-
-      throw new Error(
-        "Não encontrei registros válidos. " +
-        "Verifique se o Excel possui as colunas " +
-        "NOME DO INTERNO, RGI, PAVILHÃO e CELA."
-      );
-
-    }
-
-
-    baseInternos =
-      novaBase;
-
-    salvarJSON(
-      STORAGE_BASE,
-      baseInternos
-    );
-
-
-    const agora =
-      new Date();
-
-    const dataHora =
-      agora.toLocaleString(
-        "pt-BR"
-      );
-
-    localStorage.setItem(
-      STORAGE_BASE_DATA,
-      dataHora
-    );
-
-
-    atualizarStatusBase();
-
-    mostrarStatus(
-      `Base atualizada com sucesso: ${baseInternos.length} internos carregados.`,
-      "sucesso"
-    );
-
-  } catch (erro) {
-
-    console.error(
-      "Erro ao importar Excel:",
-      erro
-    );
-
-    mostrarStatus(
-      "Não foi possível importar o Excel: " +
-      erro.message,
-      "erro"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   BUSCA DE INTERNO
-========================================================= */
-
-function pesquisarInternos(texto) {
-
-  const termo =
-    normalizarTexto(texto);
-
-  if (!termo) {
-    return [];
-  }
-
-  return baseInternos
-    .filter(interno => {
-
-      return normalizarTexto(
-        interno.nome
-      ).includes(termo);
-
-    })
-    .sort((a, b) => {
-
-      const na =
-        normalizarTexto(a.nome);
-
-      const nb =
-        normalizarTexto(b.nome);
-
-      const aComeca =
-        na.startsWith(termo);
-
-      const bComeca =
-        nb.startsWith(termo);
-
       if (
-        aComeca &&
-        !bComeca
+        !novaBase.length
       ) {
-        return -1;
-      }
 
-      if (
-        !aComeca &&
-        bComeca
-      ) {
-        return 1;
-      }
-
-      return na.localeCompare(nb);
-
-    })
-    .slice(0, 20);
-
-}
-
-
-function mostrarSugestoes() {
-
-  const input =
-    document.getElementById(
-      "nome"
-    );
-
-  const caixa =
-    document.getElementById(
-      "suggestions"
-    );
-
-  const resultados =
-    pesquisarInternos(
-      input.value
-    );
-
-  caixa.innerHTML = "";
-
-  sugestaoIndex = -1;
-
-  if (!input.value.trim()) {
-
-    caixa.classList.add(
-      "hidden"
-    );
-
-    return;
-  }
-
-  if (!resultados.length) {
-
-    caixa.classList.add(
-      "hidden"
-    );
-
-    return;
-  }
-
-
-  resultados.forEach(
-    (interno, indice) => {
-
-      const div =
-        document.createElement(
-          "div"
+        throw new Error(
+          "Nenhum interno válido foi encontrado no Excel."
         );
 
-      div.className =
-        "suggestion";
+      }
 
-      div.dataset.index =
-        indice;
+      baseInternos =
+        novaBase;
 
-      div.innerHTML =
-        `<strong>${escapeHtml(interno.nome)}</strong>` +
-        `<small>RGI: ${escapeHtml(interno.rgi || "-")} ` +
-        `| Pavilhão: ${escapeHtml(interno.pavilhao || "-")} ` +
-        `| Cela: ${escapeHtml(interno.cela || "-")}</small>`;
-
-      div.addEventListener(
-        "mousedown",
-        evento => {
-
-          evento.preventDefault();
-
-          selecionarInterno(
-            interno
-          );
-
-        }
+      salvarJSON(
+        STORAGE_BASE,
+        baseInternos
       );
 
-      caixa.appendChild(
-        div
+      localStorage.setItem(
+        STORAGE_BASE_DATA,
+        new Date()
+          .toLocaleString(
+            "pt-BR"
+          )
       );
 
-    }
-  );
+      atualizarOpcoesPavilhao();
 
-  caixa.classList.remove(
-    "hidden"
-  );
+      preencherCelas();
 
-}
-
-
-function selecionarInterno(interno) {
-
-  document.getElementById(
-    "nome"
-  ).value = interno.nome || "";
-
-  document.getElementById(
-    "rgi"
-  ).value = interno.rgi || "";
-
-  document.getElementById(
-    "pavilhao"
-  ).value =
-    interno.pavilhao || "";
-
-  document.getElementById(
-    "cela"
-  ).value =
-    normalizarCela(
-      interno.cela
-    );
-
-  esconderSugestoes();
-
-}
-
-
-function normalizarCela(valor) {
-
-  if (
-    valor === null ||
-    valor === undefined ||
-    valor === ""
-  ) {
-    return "";
-  }
-
-  const numero =
-    String(valor)
-      .replace(/\D/g, "");
-
-  if (!numero) {
-    return "";
-  }
-
-  const n =
-    Number(numero);
-
-  if (
-    n < 1 ||
-    n > 120
-  ) {
-    return "";
-  }
-
-  return String(n).padStart(2, "0");
-
-}
-
-
-function esconderSugestoes() {
-
-  document
-    .getElementById(
-      "suggestions"
-    )
-    .classList.add(
-      "hidden"
-    );
-
-  sugestaoIndex = -1;
-
-}
-
-
-function navegarSugestoes(evento) {
-
-  const caixa =
-    document.getElementById(
-      "suggestions"
-    );
-
-  const itens =
-    caixa.querySelectorAll(
-      ".suggestion"
-    );
-
-  if (
-    caixa.classList.contains(
-      "hidden"
-    ) ||
-    !itens.length
-  ) {
-    return;
-  }
-
-  if (
-    evento.key ===
-    "ArrowDown"
-  ) {
-
-    evento.preventDefault();
-
-    sugestaoIndex =
-      (sugestaoIndex + 1) %
-      itens.length;
-
-  }
-
-  else if (
-    evento.key ===
-    "ArrowUp"
-  ) {
-
-    evento.preventDefault();
-
-    sugestaoIndex =
-      (sugestaoIndex - 1 +
-        itens.length) %
-      itens.length;
-
-  }
-
-  else if (
-    evento.key ===
-    "Enter"
-  ) {
-
-    if (
-      sugestaoIndex >= 0 &&
-      sugestaoIndex <
-        itens.length
-    ) {
-
-      evento.preventDefault();
-
-      itens[
-        sugestaoIndex
-      ].dispatchEvent(
-        new MouseEvent(
-          "mousedown"
-        )
-      );
-
-    }
-
-    return;
-
-  } else {
-
-    return;
-
-  }
-
-  itens.forEach(
-    (item, indice) => {
-
-      item.classList.toggle(
-        "active",
-        indice ===
-          sugestaoIndex
-      );
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   FORMULÁRIO
-========================================================= */
-
-function obterFormulario() {
-
-  return {
-
-    nome:
-      document.getElementById(
-        "nome"
-      ).value.trim(),
-
-    rgi:
-      document.getElementById(
-        "rgi"
-      ).value.trim(),
-
-    pavilhao:
-      document.getElementById(
-        "pavilhao"
-      ).value,
-
-    cela:
-      document.getElementById(
-        "cela"
-      ).value,
-
-    atendimento:
-      document.getElementById(
-        "atendimento"
-      ).value,
-
-    dataAtendimento:
-      document.getElementById(
-        "dataAtendimento"
-      ).value,
-
-    assunto:
-      document.getElementById(
-        "assunto"
-      ).value.trim()
-
-  };
-
-}
-
-
-function validarFormulario(dados) {
-
-  if (!dados.nome) {
-
-    mostrarStatus(
-      "Informe o nome do interno.",
-      "erro"
-    );
-
-    document
-      .getElementById("nome")
-      .focus();
-
-    return false;
-  }
-
-  if (!dados.rgi) {
-
-    mostrarStatus(
-      "Informe o RGI.",
-      "erro"
-    );
-
-    document
-      .getElementById("rgi")
-      .focus();
-
-    return false;
-  }
-
-  if (!dados.pavilhao) {
-
-    mostrarStatus(
-      "Selecione o pavilhão.",
-      "erro"
-    );
-
-    return false;
-  }
-
-  if (!dados.cela) {
-
-    mostrarStatus(
-      "Selecione a cela.",
-      "erro"
-    );
-
-    return false;
-  }
-
-  if (!dados.atendimento) {
-
-    mostrarStatus(
-      "Selecione o atendimento.",
-      "erro"
-    );
-
-    return false;
-  }
-
-  if (!dados.dataAtendimento) {
-
-    mostrarStatus(
-      "Informe a data do atendimento.",
-      "erro"
-    );
-
-    return false;
-  }
-
-  return true;
-
-}
-
-
-/* =========================================================
-   FILA
-========================================================= */
-
-function adicionarFila() {
-
-  const dados =
-    obterFormulario();
-
-  if (
-    !validarFormulario(
-      dados
-    )
-  ) {
-    return;
-  }
-
-
-  const registro = {
-
-    recordId:
-      novoId(),
-
-    ...dados,
-
-    criadoEm:
-      new Date()
-        .toISOString(),
-
-    status:
-      "aguardando_envio"
-
-  };
-
-
-  fila.push(
-    registro
-  );
-
-  renderFila();
-
-  limparFormulario();
-
-  mostrarStatus(
-    "Atendimento adicionado à fila.",
-    "sucesso"
-  );
-
-}
-
-
-function renderFila() {
-
-  const body =
-    document.getElementById(
-      "filaBody"
-    );
-
-  body.innerHTML = "";
-
-  fila.forEach(
-    (item, indice) => {
-
-      const tr =
-        document.createElement(
-          "tr"
-        );
-
-      tr.innerHTML = `
-
-        <td>${escapeHtml(item.nome)}</td>
-
-        <td>${escapeHtml(item.rgi)}</td>
-
-        <td>${escapeHtml(item.pavilhao)}</td>
-
-        <td class="center">
-          ${escapeHtml(item.cela)}
-        </td>
-
-        <td>${escapeHtml(item.atendimento)}</td>
-
-        <td>
-          ${escapeHtml(
-            formatarData(
-              item.dataAtendimento
-            )
-          )}
-        </td>
-
-        <td>${escapeHtml(item.assunto || "")}</td>
-
-        <td>
-          <button
-            class="btn danger"
-            onclick="removerFila(${indice})"
-          >
-            Excluir
-          </button>
-        </td>
-
-      `;
-
-      body.appendChild(
-        tr
-      );
-
-    }
-  );
-
-}
-
-
-function removerFila(indice) {
-
-  fila.splice(
-    indice,
-    1
-  );
-
-  renderFila();
-
-}
-
-
-function limparFila() {
-
-  if (!fila.length) {
-    return;
-  }
-
-  if (
-    !confirm(
-      "Deseja limpar toda a fila?"
-    )
-  ) {
-    return;
-  }
-
-  fila = [];
-
-  renderFila();
-
-}
-
-
-/* =========================================================
-   LIMPAR FORMULÁRIO
-========================================================= */
-
-function limparFormulario() {
-
-  document.getElementById(
-    "nome"
-  ).value = "";
-
-  document.getElementById(
-    "rgi"
-  ).value = "";
-
-  document.getElementById(
-    "pavilhao"
-  ).value = "";
-
-  document.getElementById(
-    "cela"
-  ).value = "";
-
-  document.getElementById(
-    "atendimento"
-  ).value = "";
-
-  document.getElementById(
-    "dataAtendimento"
-  ).value = hojeISO();
-
-  document.getElementById(
-    "assunto"
-  ).value = "";
-
-  esconderSugestoes();
-
-}
-
-
-/* =========================================================
-   WEBSOCKET
-========================================================= */
-
-function obterWsUrl() {
-
-  const protocolo =
-    location.protocol === "https:"
-      ? "wss:"
-      : "ws:";
-
-  return (
-    protocolo +
-    "//" +
-    location.host
-  );
-
-}
-
-
-function conectarWebSocket() {
-
-  if (
-    socket &&
-    (
-      socket.readyState ===
-        WebSocket.OPEN ||
-      socket.readyState ===
-        WebSocket.CONNECTING
-    )
-  ) {
-    return;
-  }
-
-  try {
-
-    socket =
-      new WebSocket(
-        obterWsUrl()
-      );
-
-  } catch (erro) {
-
-    agendarReconexao();
-
-    return;
-
-  }
-
-
-  socket.addEventListener(
-    "open",
-    () => {
-
-      socket.send(
-        JSON.stringify({
-          type:
-            "register",
-          role:
-            "sender"
-        })
-      );
+      atualizarStatusBase();
 
       mostrarStatus(
-        "Conectado à MESA.",
+        `Base atualizada com sucesso: ${baseInternos.length.toLocaleString("pt-BR")} internos carregados.`,
         "sucesso"
       );
 
-      enviarPendentes();
+      input.value = "";
 
-    }
-  );
+    } catch (erro) {
 
-
-  socket.addEventListener(
-    "message",
-    evento => {
-
-      let mensagem;
-
-      try {
-
-        mensagem =
-          JSON.parse(
-            evento.data
-          );
-
-      } catch {
-
-        return;
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "connected"
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "registered"
-      ) {
-
-        return;
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "record_received"
-      ) {
-
-        marcarComoRecebido(
-          mensagem.recordId,
-          mensagem.receivedAt
-        );
-
-      }
-
-
-      if (
-        mensagem.type ===
-        "error"
-      ) {
-
-        mostrarStatus(
-          mensagem.message ||
-          "Erro no servidor.",
-          "erro"
-        );
-
-      }
-
-    }
-  );
-
-
-  socket.addEventListener(
-    "close",
-    () => {
+      console.error(
+        "Erro ao importar Excel:",
+        erro
+      );
 
       mostrarStatus(
-        "MESA desconectada. Tentando reconectar...",
-        ""
+        "Não foi possível importar o Excel: " +
+        (
+          erro?.message ||
+          erro
+        ),
+        "erro"
       );
 
-      agendarReconexao();
-
-    }
-  );
-
-
-  socket.addEventListener(
-    "error",
-    () => {
-
-      try {
-        socket.close();
-      } catch {}
-
-    }
-  );
-
-}
-
-
-function agendarReconexao() {
-
-  if (
-    reconnectTimer
-  ) {
-    return;
-  }
-
-  reconnectTimer =
-    setTimeout(
-      () => {
-
-        reconnectTimer =
-          null;
-
-        conectarWebSocket();
-
-      },
-      1000
-    );
-
-}
-
-
-function enviarMensagem(dados) {
-
-  if (
-    socket &&
-    socket.readyState ===
-      WebSocket.OPEN
-  ) {
-
-    socket.send(
-      JSON.stringify(
-        dados
-      )
-    );
-
-    return true;
-
-  }
-
-  return false;
-
-}
-
-
-/* =========================================================
-   ENVIO PARA MESA
-========================================================= */
-
-function enviarFila() {
-
-  if (!fila.length) {
-
-    mostrarStatus(
-      "A fila está vazia.",
-      "erro"
-    );
-
-    return;
-
-  }
-
-
-  const registros =
-    [...fila];
-
-
-  registros.forEach(
-    registro => {
-
-      const item = {
-
-        ...registro,
-
-        status:
-          "enviado",
-
-        enviadoEm:
-          new Date()
-            .toISOString()
-
-      };
-
-
-      historico.push(
-        item
-      );
-
-
-      const jaExiste =
-        outbox.some(
-          x =>
-            x.recordId ===
-            item.recordId
-        );
-
-
-      if (!jaExiste) {
-
-        outbox.push(
-          item
-        );
-
+      if (input) {
+        input.value = "";
       }
 
-
-      enviarMensagem({
-        type:
-          "send_record",
-
-        recordId:
-          item.recordId,
-
-        record:
-          item,
-
-        sentAt:
-          item.enviadoEm
-
-      });
-
     }
-  );
-
-
-  salvarJSON(
-    STORAGE_HISTORICO,
-    historico
-  );
-
-  salvarJSON(
-    STORAGE_OUTBOX,
-    outbox
-  );
-
-
-  fila = [];
-
-  renderFila();
-
-  renderHistorico();
-
-
-  mostrarStatus(
-    socket &&
-    socket.readyState ===
-      WebSocket.OPEN
-      ? "Atendimentos enviados para a MESA."
-      : "Atendimentos guardados para envio. Serão enviados automaticamente quando a conexão voltar.",
-    "sucesso"
-  );
-
-
-  enviarPendentes();
-
-}
-
-
-function enviarPendentes() {
-
-  if (
-    !socket ||
-    socket.readyState !==
-      WebSocket.OPEN
-  ) {
-    return;
-  }
-
-
-  outbox.forEach(
-    item => {
-
-      enviarMensagem({
-
-        type:
-          "send_record",
-
-        recordId:
-          item.recordId,
-
-        record:
-          item,
-
-        sentAt:
-          item.enviadoEm ||
-          item.criadoEm
-
-      });
-
-    }
-  );
-
-}
-
-
-function marcarComoRecebido(
-  recordId,
-  receivedAt
-) {
-
-  let alterou = false;
-
-
-  historico =
-    historico.map(
-      item => {
-
-        if (
-          item.recordId ===
-          recordId
-        ) {
-
-          alterou = true;
-
-          return {
-
-            ...item,
-
-            status:
-              "recebido",
-
-            recebidoEm:
-              receivedAt ||
-              new Date()
-                .toISOString()
-
-          };
-
-        }
-
-        return item;
-
-      }
-    );
-
-
-  if (alterou) {
-
-    outbox =
-      outbox.filter(
-        item =>
-          item.recordId !==
-          recordId
-      );
-
-
-    salvarJSON(
-      STORAGE_HISTORICO,
-      historico
-    );
-
-    salvarJSON(
-      STORAGE_OUTBOX,
-      outbox
-    );
-
-    renderHistorico();
-
-  }
-
-}
-
-
-/* =========================================================
-   HISTÓRICO
-========================================================= */
-
-function obterHistoricoOrdenado() {
-
-  const lista =
-    [...historico];
-
-
-  const ordem =
-    document.getElementById(
-      "ordemHistorico"
-    ).value;
-
-
-  if (
-    ordem ===
-    "atendimento"
-  ) {
-
-    lista.sort(
-      (a, b) =>
-        String(
-          a.atendimento || ""
-        ).localeCompare(
-          String(
-            b.atendimento || ""
-          ),
-          "pt-BR"
-        ) ||
-        new Date(
-          a.enviadoEm ||
-          a.criadoEm ||
-          0
-        ) -
-        new Date(
-          b.enviadoEm ||
-          b.criadoEm ||
-          0
-        )
-    );
-
-  } else {
-
-    lista.sort(
-      (a, b) =>
-        new Date(
-          a.enviadoEm ||
-          a.criadoEm ||
-          0
-        ) -
-        new Date(
-          b.enviadoEm ||
-          b.criadoEm ||
-          0
-        )
-    );
 
   }
 
 
-  return lista;
+  /* =========================================================
+     BUSCA DE INTERNOS
+  ========================================================= */
 
-}
+  function mostrarSugestoesNome() {
 
-
-function renderHistorico() {
-
-  const body =
-    document.getElementById(
-      "historicoBody"
-    );
-
-  body.innerHTML = "";
-
-
-  const lista =
-    obterHistoricoOrdenado();
-
-
-  lista.forEach(
-    item => {
-
-      const tr =
-        document.createElement(
-          "tr"
-        );
-
-
-      const recebido =
-        item.status ===
-        "recebido";
-
-
-      tr.innerHTML = `
-
-        <td>
-          ${escapeHtml(item.nome)}
-        </td>
-
-        <td>
-          ${escapeHtml(item.rgi)}
-        </td>
-
-        <td>
-          ${escapeHtml(item.pavilhao)}
-        </td>
-
-        <td class="center">
-          ${escapeHtml(item.cela)}
-        </td>
-
-        <td>
-          ${escapeHtml(item.atendimento)}
-        </td>
-
-        <td>
-          ${escapeHtml(
-            formatarData(
-              item.dataAtendimento
-            )
-          )}
-        </td>
-
-        <td>
-
-          <span class="badge ${
-            recebido
-              ? ""
-              : "pending"
-          }">
-
-            ${
-              recebido
-                ? "Recebido"
-                : "Aguardando"
-            }
-
-          </span>
-
-        </td>
-
-        <td>
-
-          ${
-            recebido
-              ? `
-                <button
-                  class="btn warning"
-                  onclick="guardarHistorico('${item.recordId}')"
-                >
-                  📁 Guardar
-                </button>
-              `
-              : `
-                <span class="muted">
-                  Aguardando MESA
-                </span>
-              `
-          }
-
-        </td>
-
-      `;
-
-
-      body.appendChild(
-        tr
-      );
-
-    }
-  );
-
-}
-
-
-function guardarHistorico(
-  recordId
-) {
-
-  const indice =
-    historico.findIndex(
-      item =>
-        item.recordId ===
-        recordId
-    );
-
-
-  if (
-    indice < 0
-  ) {
-    return;
-  }
-
-
-  const item =
-    historico[indice];
-
-
-  if (
-    item.status !==
-    "recebido"
-  ) {
-
-    mostrarStatus(
-      "Somente atendimentos recebidos podem ser guardados.",
-      "erro"
-    );
-
-    return;
-
-  }
-
-
-  arquivo.push({
-
-    ...item,
-
-    guardadoEm:
-      new Date()
-        .toISOString(),
-
-    origem:
-      "guiche"
-
-  });
-
-
-  historico.splice(
-    indice,
-    1
-  );
-
-
-  salvarJSON(
-    STORAGE_ARQUIVO,
-    arquivo
-  );
-
-  salvarJSON(
-    STORAGE_HISTORICO,
-    historico
-  );
-
-
-  renderHistorico();
-
-  mostrarStatus(
-    "Atendimento guardado com sucesso.",
-    "sucesso"
-  );
-
-}
-
-  <script>
-/* =========================================================
-   ARQUIVO DE ATENDIMENTOS GUARDADOS
-========================================================= */
-
-function abrirArquivo() {
-
-  preencherFiltroArquivo();
-
-  document
-    .getElementById("arquivoModal")
-    .classList.add("open");
-
-  renderArquivo();
-
-}
-
-
-function fecharArquivo() {
-
-  document
-    .getElementById("arquivoModal")
-    .classList.remove("open");
-
-}
-
-
-function preencherFiltroArquivo() {
-
-  const select =
-    document.getElementById(
-      "arquivoAtendimento"
-    );
-
-  const atual =
-    select.value;
-
-  select.innerHTML =
-    '<option value="">Todos</option>';
-
-  ATENDIMENTOS.forEach(
-    atendimento => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-      option.value =
-        atendimento;
-
-      option.textContent =
-        atendimento;
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
-
-  select.value =
-    atual;
-
-}
-
-
-function renderArquivo() {
-
-  const lista =
-    document.getElementById(
-      "arquivoList"
-    );
-
-  const contador =
-    document.getElementById(
-      "arquivoCount"
-    );
-
-  const data =
-    document.getElementById(
-      "arquivoData"
-    ).value;
-
-  const atendimento =
-    document.getElementById(
-      "arquivoAtendimento"
-    ).value;
-
-  const nome =
-    normalizarTexto(
+    const campo =
       document.getElementById(
-        "arquivoNome"
-      ).value
-    );
-
-
-  let resultados =
-    arquivo.filter(
-      item => {
-
-        if (
-          data &&
-          item.dataAtendimento !==
-            data
-        ) {
-          return false;
-        }
-
-        if (
-          atendimento &&
-          item.atendimento !==
-            atendimento
-        ) {
-          return false;
-        }
-
-        if (
-          nome &&
-          !normalizarTexto(
-            item.nome
-          ).includes(nome)
-        ) {
-          return false;
-        }
-
-        return true;
-
-      }
-    );
-
-
-  resultados.sort(
-    (a, b) =>
-      new Date(
-        b.guardadoEm ||
-        b.recebidoEm ||
-        b.enviadoEm ||
-        0
-      ) -
-      new Date(
-        a.guardadoEm ||
-        a.recebidoEm ||
-        a.enviadoEm ||
-        0
-      )
-  );
-
-
-  contador.textContent =
-    `${resultados.length} atendimento(s) encontrado(s).`;
-
-
-  lista.innerHTML = "";
-
-
-  if (!resultados.length) {
-
-    lista.innerHTML =
-      `<div style="padding:15px;text-align:center;color:#667085">
-        Nenhum atendimento guardado encontrado.
-      </div>`;
-
-    return;
-
-  }
-
-
-  resultados.forEach(
-    item => {
-
-      const label =
-        document.createElement(
-          "label"
-        );
-
-
-      label.innerHTML = `
-
-        <input
-          type="checkbox"
-          class="arquivoCheck"
-          value="${escapeHtml(item.recordId)}"
-        >
-
-        <span>
-
-          <strong>
-            ${escapeHtml(item.nome)}
-          </strong>
-
-          <br>
-
-          <small>
-
-            RGI:
-            ${escapeHtml(item.rgi || "-")}
-
-            |
-            Pavilhão:
-            ${escapeHtml(item.pavilhao || "-")}
-
-            |
-            Cela:
-            ${escapeHtml(item.cela || "-")}
-
-            |
-            Atendimento:
-            ${escapeHtml(item.atendimento || "-")}
-
-            |
-            Data:
-            ${escapeHtml(
-              formatarData(
-                item.dataAtendimento
-              )
-            )}
-
-          </small>
-
-        </span>
-
-      `;
-
-
-      lista.appendChild(
-        label
+        "nomeInterno"
       );
 
-    }
-  );
-
-}
-
-
-function selecionarTodosArquivo(
-  marcar
-) {
-
-  document
-    .querySelectorAll(
-      ".arquivoCheck"
-    )
-    .forEach(
-      checkbox => {
-        checkbox.checked =
-          marcar;
-      }
-    );
-
-}
-
-
-function restaurarArquivados() {
-
-  const selecionados =
-    Array.from(
-      document.querySelectorAll(
-        ".arquivoCheck:checked"
-      )
-    ).map(
-      checkbox =>
-        checkbox.value
-    );
-
-
-  if (!selecionados.length) {
-
-    mostrarStatus(
-      "Selecione pelo menos um atendimento.",
-      "erro"
-    );
-
-    return;
-
-  }
-
-
-  const restaurados = [];
-
-
-  arquivo =
-    arquivo.filter(
-      item => {
-
-        if (
-          selecionados.includes(
-            item.recordId
-          )
-        ) {
-
-          restaurados.push(
-            item
-          );
-
-          return false;
-
-        }
-
-        return true;
-
-      }
-    );
-
-
-  restaurados.forEach(
-    item => {
-
-      historico.push({
-
-        ...item,
-
-        status:
-          "recebido",
-
-        restauradoEm:
-          new Date()
-            .toISOString()
-
-      });
-
-    }
-  );
-
-
-  salvarJSON(
-    STORAGE_ARQUIVO,
-    arquivo
-  );
-
-  salvarJSON(
-    STORAGE_HISTORICO,
-    historico
-  );
-
-
-  renderHistorico();
-
-  renderArquivo();
-
-
-  mostrarStatus(
-    `${restaurados.length} atendimento(s) restaurado(s).`,
-    "sucesso"
-  );
-
-}
-
-
-/* =========================================================
-   DADOS PARA IMPRESSÃO
-========================================================= */
-
-/*
-  A impressão considera:
-  1. Histórico atual
-  2. Atendimentos guardados
-
-  Dessa forma, quando for feita uma impressão por data,
-  os atendimentos arquivados também estarão disponíveis.
-*/
-
-function todosRegistrosParaImpressao() {
-
-  const mapa =
-    new Map();
-
-
-  [
-    ...historico,
-    ...arquivo
-  ].forEach(
-    item => {
-
-      if (
-        !item ||
-        !item.recordId
-      ) {
-        return;
-      }
-
-      mapa.set(
-        item.recordId,
-        item
-      );
-
-    }
-  );
-
-
-  return Array.from(
-    mapa.values()
-  );
-
-}
-
-
-function abrirImpressao() {
-
-  preencherListaAtendimentos();
-
-  document
-    .getElementById(
-      "printModal"
-    )
-    .classList.add("open");
-
-  atualizarOpcoesImpressao();
-
-}
-
-
-function fecharImpressao() {
-
-  document
-    .getElementById(
-      "printModal"
-    )
-    .classList.remove("open");
-
-}
-
-
-function preencherListaAtendimentos() {
-
-  const container =
-    document.getElementById(
-      "listaAtendimentos"
-    );
-
-  container.innerHTML = "";
-
-
-  ATENDIMENTOS.forEach(
-    atendimento => {
-
-      const label =
-        document.createElement(
-          "label"
-        );
-
-
-      label.innerHTML = `
-
-        <input
-          type="checkbox"
-          class="checkAtendimento"
-          value="${escapeHtml(atendimento)}"
-        >
-
-        <span>
-          ${escapeHtml(atendimento)}
-        </span>
-
-      `;
-
-
-      container.appendChild(
-        label
-      );
-
-    }
-  );
-
-}
-
-
-function obterTipoImpressao() {
-
-  return document.getElementById(
-    "tipoImpressao"
-  ).value;
-
-}
-
-
-function atualizarOpcoesImpressao() {
-
-  const tipo =
-    obterTipoImpressao();
-
-
-  const dataWrap =
-    document.getElementById(
-      "dataPrintWrap"
-    );
-
-  const modoWrap =
-    document.getElementById(
-      "modoDataWrap"
-    );
-
-  const listaWrap =
-    document.getElementById(
-      "listaAtendimentosWrap"
-    );
-
-  const dataAtWrap =
-    document.getElementById(
-      "atendimentosDataWrap"
-    );
-
-
-  dataWrap.classList.toggle(
-    "hidden",
-    tipo !== "data"
-  );
-
-
-  modoWrap.classList.toggle(
-    "hidden",
-    tipo !== "data"
-  );
-
-
-  /*
-    Para "Por atendimento" mostramos
-    a seleção múltipla.
-  */
-
-  listaWrap.classList.toggle(
-    "hidden",
-    tipo === "data"
-  );
-
-
-  if (
-    tipo !== "data"
-  ) {
-
-    dataAtWrap.classList.add(
-      "hidden"
-    );
-
-  }
-
-
-  if (
-    tipo === "data"
-  ) {
-
-    atualizarAtendimentosDaData();
-
-  }
-
-
-  atualizarInformacaoImpressao();
-
-}
-
-
-function obterModoData() {
-
-  const selecionado =
-    document.querySelector(
-      'input[name="modoData"]:checked'
-    );
-
-  return selecionado
-    ? selecionado.value
-    : "todos";
-
-}
-
-
-function atualizarAtendimentosDaData() {
-
-  const data =
-    document.getElementById(
-      "dataPrint"
-    ).value;
-
-  const modo =
-    obterModoData();
-
-
-  const wrap =
-    document.getElementById(
-      "atendimentosDataWrap"
-    );
-
-  const container =
-    document.getElementById(
-      "atendimentosData"
-    );
-
-
-  container.innerHTML = "";
-
-
-  if (
-    modo !==
-    "atendimentos"
-  ) {
-
-    wrap.classList.add(
-      "hidden"
-    );
-
-    atualizarInformacaoImpressao();
-
-    return;
-
-  }
-
-
-  wrap.classList.remove(
-    "hidden"
-  );
-
-
-  const registros =
-    todosRegistrosParaImpressao()
-      .filter(
-        item =>
-          !data ||
-          item.dataAtendimento ===
-            data
-      );
-
-
-  const existentes =
-    new Set(
-      registros
-        .map(
-          item =>
-            item.atendimento
-        )
-        .filter(Boolean)
-    );
-
-
-  ATENDIMENTOS
-    .filter(
-      atendimento =>
-        existentes.has(
-          atendimento
-        )
-    )
-    .forEach(
-      atendimento => {
-
-        const label =
-          document.createElement(
-            "label"
-          );
-
-
-        label.innerHTML = `
-
-          <input
-            type="checkbox"
-            class="checkAtendimentoData"
-            value="${escapeHtml(atendimento)}"
-          >
-
-          <span>
-            ${escapeHtml(atendimento)}
-          </span>
-
-        `;
-
-
-        container.appendChild(
-          label
-        );
-
-      }
-    );
-
-
-  if (
-    !container.children.length
-  ) {
-
-    container.innerHTML =
-      `<div class="muted">
-        Nenhum atendimento encontrado para esta data.
-      </div>`;
-
-  }
-
-
-  atualizarInformacaoImpressao();
-
-}
-
-
-function obterAtendimentosSelecionados(
-  classe
-) {
-
-  return Array.from(
-    document.querySelectorAll(
-      classe
-    )
-  )
-  .filter(
-    checkbox =>
-      checkbox.checked
-  )
-  .map(
-    checkbox =>
-      checkbox.value
-  );
-
-}
-
-
-function atualizarInformacaoImpressao() {
-
-  const info =
-    document.getElementById(
-      "printInfo"
-    );
-
-  const tipo =
-    obterTipoImpressao();
-
-
-  if (
-    tipo ===
-    "atendimento"
-  ) {
-
-    const selecionados =
-      obterAtendimentosSelecionados(
-        ".checkAtendimento"
-      );
-
-    info.textContent =
-      selecionados.length
-        ? `${selecionados.length} tipo(s) de atendimento selecionado(s).`
-        : "Selecione um ou mais tipos de atendimento.";
-
-    return;
-
-  }
-
-
-  if (
-    tipo ===
-    "geral"
-  ) {
-
-    info.textContent =
-      "Será impressa a lista geral de atendimentos.";
-
-    return;
-
-  }
-
-
-  const data =
-    document.getElementById(
-      "dataPrint"
-    ).value;
-
-  const modo =
-    obterModoData();
-
-
-  if (!data) {
-
-    info.textContent =
-      "Escolha uma data.";
-
-    return;
-
-  }
-
-
-  if (
-    modo ===
-    "todos"
-  ) {
-
-    const quantidade =
-      todosRegistrosParaImpressao()
-        .filter(
-          item =>
-            item.dataAtendimento ===
-            data
-        )
-        .length;
-
-    info.textContent =
-      `${quantidade} atendimento(s) encontrado(s) na data selecionada.`;
-
-  } else {
-
-    const selecionados =
-      obterAtendimentosSelecionados(
-        ".checkAtendimentoData"
-      );
-
-    info.textContent =
-      selecionados.length
-        ? `${selecionados.length} tipo(s) selecionado(s) para a data.`
-        : "Selecione um ou mais tipos de atendimento.";
-
-  }
-
-}
-
-
-/* =========================================================
-   PREPARAÇÃO DOS REGISTROS
-========================================================= */
-
-function ordenarRegistros(
-  registros
-) {
-
-  return [...registros].sort(
-    (a, b) => {
-
-      const dataA =
-        a.dataAtendimento ||
-        "";
-
-      const dataB =
-        b.dataAtendimento ||
-        "";
-
-      return (
-        dataA.localeCompare(
-          dataB
-        ) ||
-        String(
-          a.atendimento ||
-          ""
-        ).localeCompare(
-          String(
-            b.atendimento ||
-            ""
-          ),
-          "pt-BR"
-        ) ||
-        new Date(
-          a.enviadoEm ||
-          a.criadoEm ||
-          0
-        ) -
-        new Date(
-          b.enviadoEm ||
-          b.criadoEm ||
-          0
-        )
-      );
-
-    }
-  );
-
-}
-
-
-function filtrarParaImpressao() {
-
-  const registros =
-    todosRegistrosParaImpressao();
-
-
-  const tipo =
-    obterTipoImpressao();
-
-
-  if (
-    tipo ===
-    "atendimento"
-  ) {
-
-    const selecionados =
-      obterAtendimentosSelecionados(
-        ".checkAtendimento"
-      );
-
-
-    if (
-      !selecionados.length
-    ) {
-
-      throw new Error(
-        "Selecione pelo menos um tipo de atendimento."
-      );
-
-    }
-
-
-    return registros.filter(
-      item =>
-        selecionados.includes(
-          item.atendimento
-        )
-    );
-
-  }
-
-
-  if (
-    tipo ===
-    "geral"
-  ) {
-
-    return registros;
-
-  }
-
-
-  const data =
-    document.getElementById(
-      "dataPrint"
-    ).value;
-
-
-  if (!data) {
-
-    throw new Error(
-      "Selecione a data da impressão."
-    );
-
-  }
-
-
-  const registrosDaData =
-    registros.filter(
-      item =>
-        item.dataAtendimento ===
-        data
-    );
-
-
-  if (
-    obterModoData() ===
-    "todos"
-  ) {
-
-    return registrosDaData;
-
-  }
-
-
-  const selecionados =
-    obterAtendimentosSelecionados(
-      ".checkAtendimentoData"
-    );
-
-
-  if (
-    !selecionados.length
-  ) {
-
-    throw new Error(
-      "Selecione pelo menos um tipo de atendimento."
-    );
-
-  }
-
-
-  return registrosDaData.filter(
-    item =>
-      selecionados.includes(
-        item.atendimento
-      )
-  );
-
-}
-
-
-/* =========================================================
-   IMPRESSÃO
-========================================================= */
-
-function executarImpressao() {
-
-  try {
-
-    const registros =
-      filtrarParaImpressao();
-
-
-    if (!registros.length) {
-
-      throw new Error(
-        "Nenhum atendimento encontrado para os filtros escolhidos."
-      );
-
-    }
-
-
-    gerarAreaImpressao(
-      registros
-    );
-
-
-    fecharImpressao();
-
-
-    /*
-      Pequeno atraso para garantir que
-      o navegador terminou de montar
-      a área de impressão antes de
-      abrir a janela.
-    */
-
-    setTimeout(
-      () => {
-
-        window.print();
-
-      },
-      150
-    );
-
-
-  } catch (erro) {
-
-    alert(
-      erro.message
-    );
-
-  }
-
-}
-
-
-function criarCabecalhoPagina(
-  tituloExtra = ""
-) {
-
-  return `
-
-    <div class="print-title">
-      CPAIG - LISTA DE ATENDIMENTOS
-    </div>
-
-    ${
-      tituloExtra
-        ? `
-          <div class="group-title">
-            ${escapeHtml(
-              tituloExtra
-            )}
-          </div>
-        `
-        : ""
-    }
-
-  `;
-
-}
-
-
-function montarTabela(
-  registros
-) {
-
-  const linhas =
-    registros.map(
-      item => `
-
-        <tr>
-
-          <td class="col-nome">
-            ${escapeHtml(
-              item.nome
-            )}
-          </td>
-
-          <td class="col-rgi">
-            ${escapeHtml(
-              item.rgi
-            )}
-          </td>
-
-          <td class="col-pav">
-            ${escapeHtml(
-              item.pavilhao
-            )}
-          </td>
-
-          <td class="col-cela">
-            ${escapeHtml(
-              item.cela
-            )}
-          </td>
-
-          <td class="col-at">
-            ${escapeHtml(
-              item.atendimento
-            )}
-          </td>
-
-          <td class="col-data">
-            ${escapeHtml(
-              formatarData(
-                item.dataAtendimento
-              )
-            )}
-          </td>
-
-        </tr>
-
-      `
-    ).join("");
-
-
-  return `
-
-    <table class="print-table">
-
-      <thead>
-
-        <tr>
-
-          <th class="col-nome">
-            Nome
-          </th>
-
-          <th class="col-rgi">
-            RGI
-          </th>
-
-          <th class="col-pav">
-            Pavilhão
-          </th>
-
-          <th class="col-cela">
-            Cela
-          </th>
-
-          <th class="col-at">
-            Atendimento
-          </th>
-
-          <th class="col-data">
-            Data
-          </th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-        ${linhas}
-      </tbody>
-
-    </table>
-
-  `;
-
-}
-
-
-/*
-  IMPORTANTE:
-
-  Quando "Um atendimento por página" estiver marcado,
-  cada grupo de atendimento é colocado dentro de uma
-  .print-page separada.
-
-  Não criamos uma página geral antes dos grupos.
-
-  Isso evita:
-  - primeira página com tudo junto;
-  - páginas seguintes vazias;
-  - grupos duplicados.
-*/
-
-function gerarAreaImpressao(
-  registros
-) {
-
-  const area =
-    document.getElementById(
-      "printArea"
-    );
-
-  const tipo =
-    obterTipoImpressao();
-
-  const umPorPagina =
-    document.getElementById(
-      "umPorPagina"
-    ).checked;
-
-
-  area.innerHTML = "";
-
-
-  const ordenados =
-    ordenarRegistros(
-      registros
-    );
-
-
-  /*
-    POR ATENDIMENTO
-  */
-
-  if (
-    tipo ===
-    "atendimento"
-  ) {
-
-    const grupos =
-      agruparPorAtendimento(
-        ordenados
-      );
-
-
-    if (
-      umPorPagina
-    ) {
-
-      grupos.forEach(
-        grupo => {
-
-          area.insertAdjacentHTML(
-            "beforeend",
-
-            `
-
-              <section class="print-page">
-
-                ${criarCabecalhoPagina(
-                  grupo.nome
-                )}
-
-                ${montarTabela(
-                  grupo.registros
-                )}
-
-              </section>
-
-            `
-          );
-
-        }
-      );
-
-    } else {
-
-      let html =
-        `<section class="print-page">
-          ${criarCabecalhoPagina()}
-        `;
-
-
-      grupos.forEach(
-        grupo => {
-
-          html += `
-
-            <div
-              class="group-title"
-              style="margin-top:4mm"
-            >
-              ${escapeHtml(
-                grupo.nome
-              )}
-            </div>
-
-            ${montarTabela(
-              grupo.registros
-            )}
-
-          `;
-
-        }
-      );
-
-
-      html +=
-        "</section>";
-
-
-      area.innerHTML =
-        html;
-
-    }
-
-    return;
-
-  }
-
-
-  /*
-    POR ATENDIMENTO GERAL
-  */
-
-  if (
-    tipo ===
-    "geral"
-  ) {
-
-    const grupos =
-      agruparPorAtendimento(
-        ordenados
-      );
-
-
-    if (
-      umPorPagina
-    ) {
-
-      grupos.forEach(
-        grupo => {
-
-          area.insertAdjacentHTML(
-            "beforeend",
-
-            `
-
-              <section class="print-page">
-
-                ${criarCabecalhoPagina(
-                  grupo.nome
-                )}
-
-                ${montarTabela(
-                  grupo.registros
-                )}
-
-              </section>
-
-            `
-
-          );
-
-        }
-      );
-
-    } else {
-
-      area.innerHTML = `
-
-        <section class="print-page">
-
-          ${criarCabecalhoPagina()}
-
-          ${montarTabela(
-            ordenados
-          )}
-
-        </section>
-
-      `;
-
-    }
-
-    return;
-
-  }
-
-
-  /*
-    POR DATA
-  */
-
-  const data =
-    document.getElementById(
-      "dataPrint"
-    ).value;
-
-
-  const grupos =
-    agruparPorAtendimento(
-      ordenados
-    );
-
-
-  if (
-    umPorPagina
-  ) {
-
-    grupos.forEach(
-      grupo => {
-
-        area.insertAdjacentHTML(
-          "beforeend",
-
-          `
-
-            <section class="print-page">
-
-              ${criarCabecalhoPagina(
-                `${grupo.nome} — ${formatarData(data)}`
-              )}
-
-              ${montarTabela(
-                grupo.registros
-              )}
-
-            </section>
-
-          `
-
-        );
-
-      }
-    );
-
-  } else {
-
-    area.innerHTML = `
-
-      <section class="print-page">
-
-        ${criarCabecalhoPagina(
-          `Data: ${formatarData(data)}`
-        )}
-
-        ${montarTabela(
-          ordenados
-        )}
-
-      </section>
-
-    `;
-
-  }
-
-}
-
-
-function agruparPorAtendimento(
-  registros
-) {
-
-  const mapa =
-    new Map();
-
-
-  registros.forEach(
-    item => {
-
-      const nome =
-        item.atendimento ||
-        "Outros";
-
-
-      if (
-        !mapa.has(nome)
-      ) {
-
-        mapa.set(
-          nome,
-          []
-        );
-
-      }
-
-
-      mapa.get(nome).push(
-        item
-      );
-
-    }
-  );
-
-
-  return Array.from(
-    mapa.entries()
-  )
-  .sort(
-    (a, b) =>
-      a[0].localeCompare(
-        b[0],
-        "pt-BR"
-      )
-  )
-  .map(
-    ([nome, registros]) => ({
-      nome,
-      registros
-    })
-  );
-
-}
-
-
-/* =========================================================
-   ATUALIZAÇÃO DOS FILTROS DE IMPRESSÃO
-========================================================= */
-
-document.addEventListener(
-  "change",
-  evento => {
-
-    if (
-      evento.target.matches(
-        ".checkAtendimento"
-      )
-    ) {
-
-      atualizarInformacaoImpressao();
-
-    }
-
-    if (
-      evento.target.matches(
-        ".checkAtendimentoData"
-      )
-    ) {
-
-      atualizarInformacaoImpressao();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   FECHAMENTO DO MODAL AO CLICAR FORA
-========================================================= */
-
-document.addEventListener(
-  "click",
-  evento => {
-
-    const arquivoModal =
+    const caixa =
       document.getElementById(
-        "arquivoModal"
+        "sugestoesNome"
       );
 
-    const printModal =
-      document.getElementById(
-        "printModal"
-      );
-
-
     if (
-      evento.target ===
-      arquivoModal
-    ) {
-
-      fecharArquivo();
-
-    }
-
-
-    if (
-      evento.target ===
-      printModal
-    ) {
-
-      fecharImpressao();
-
-    }
-
-  }
-);
-</script>
-
-  <script>
-/* =========================================================
-   INICIALIZAÇÃO
-========================================================= */
-
-function inicializar() {
-
-  preencherCelas();
-
-  preencherAtendimentos();
-
-  document.getElementById(
-    "dataAtendimento"
-  ).value = hojeISO();
-
-  atualizarStatusBase();
-
-  renderFila();
-
-  renderHistorico();
-
-  conectarWebSocket();
-
-}
-
-
-/* =========================================================
-   EVENTOS DO CAMPO NOME
-========================================================= */
-
-document.getElementById(
-  "nome"
-).addEventListener(
-  "input",
-  () => {
-
-    mostrarSugestoes();
-
-  }
-);
-
-
-document.getElementById(
-  "nome"
-).addEventListener(
-  "keydown",
-  evento => {
-
-    navegarSugestoes(
-      evento
-    );
-
-  }
-);
-
-
-document.getElementById(
-  "nome"
-).addEventListener(
-  "focus",
-  () => {
-
-    if (
-      document.getElementById(
-        "nome"
-      ).value.trim()
-    ) {
-
-      mostrarSugestoes();
-
-    }
-
-  }
-);
-
-
-document.getElementById(
-  "nome"
-).addEventListener(
-  "blur",
-  () => {
-
-    /*
-      Pequeno atraso para permitir
-      que o clique em uma sugestão
-      seja processado.
-    */
-
-    setTimeout(
-      esconderSugestoes,
-      180
-    );
-
-  }
-);
-
-
-/* =========================================================
-   EVENTO DO EXCEL
-========================================================= */
-
-document.getElementById(
-  "excelInput"
-).addEventListener(
-  "change",
-  importarExcel
-);
-
-
-/* =========================================================
-   TECLA ESC
-========================================================= */
-
-document.addEventListener(
-  "keydown",
-  evento => {
-
-    if (
-      evento.key !==
-      "Escape"
+      !campo ||
+      !caixa
     ) {
       return;
     }
 
-
-    fecharArquivo();
-
-    fecharImpressao();
-
-    esconderSugestoes();
-
-  }
-);
-
-
-/* =========================================================
-   IMPRESSÃO — LIMPEZA APÓS WINDOW.PRINT
-========================================================= */
-
-window.addEventListener(
-  "afterprint",
-  () => {
-
-    const area =
-      document.getElementById(
-        "printArea"
+    const termo =
+      normalizarTexto(
+        campo.value
       );
 
-    /*
-      Mantemos a área montada,
-      pois alguns navegadores podem
-      precisar dela durante o diálogo
-      de impressão.
-    */
+    sugestaoIndice =
+      -1;
 
     if (
-      area &&
-      !area.innerHTML.trim()
+      termo.length < 2 ||
+      !baseInternos.length
     ) {
-      area.innerHTML = "";
+
+      caixa.innerHTML =
+        "";
+
+      caixa.classList.add(
+        "oculto"
+      );
+
+      return;
+
     }
 
+    const encontrados =
+      baseInternos
+        .filter(
+          interno =>
+            normalizarTexto(
+              interno.nome
+            ).includes(termo)
+        )
+        .slice(
+          0,
+          12
+        );
+
+    if (
+      !encontrados.length
+    ) {
+
+      caixa.innerHTML =
+        "";
+
+      caixa.classList.add(
+        "oculto"
+      );
+
+      return;
+
+    }
+
+    caixa.innerHTML =
+      "";
+
+    encontrados.forEach(
+      (interno, indice) => {
+
+        const item =
+          document.createElement(
+            "div"
+          );
+
+        item.className =
+          "suggestion";
+
+        item.dataset.index =
+          indice;
+
+        item.innerHTML =
+          `<strong>${escaparHTML(interno.nome)}</strong>
+           <small>
+             RGI: ${escaparHTML(interno.rgi || "-")}
+             &nbsp;|&nbsp;
+             Pavilhão: ${escaparHTML(interno.pavilhao || "-")}
+             &nbsp;|&nbsp;
+             Cela: ${escaparHTML(interno.cela || "-")}
+           </small>`;
+
+        item.addEventListener(
+          "mousedown",
+          evento => {
+
+            evento.preventDefault();
+
+            selecionarInterno(
+              interno
+            );
+
+          }
+        );
+
+        caixa.appendChild(
+          item
+        );
+
+      }
+    );
+
+    caixa.classList.remove(
+      "oculto"
+    );
+
   }
-);
 
 
-/* =========================================================
-   INÍCIO DO SISTEMA
-========================================================= */
+  function selecionarInterno(
+    interno
+  ) {
 
-inicializar();
+    document.getElementById(
+      "nomeInterno"
+    ).value =
+      interno.nome || "";
 
-</script>
+    document.getElementById(
+      "rgi"
+    ).value =
+      interno.rgi || "";
 
-</body>
-</html>
+    document.getElementById(
+      "pavilhao"
+    ).value =
+      interno.pavilhao || "";
+
+    const selectCela =
+      document.getElementById(
+        "cela"
+      );
+
+    const cela =
+      normalizarCela(
+        interno.cela
+      );
+
+    if (cela) {
+
+      let option =
+        Array.from(
+          selectCela.options
+        ).find(
+          item =>
+            item.value ===
+            cela
+        );
+
+      if (!option) {
+
+        option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          cela;
+
+        option.textContent =
+          cela;
+
+        selectCela.appendChild(
+          option
+        );
+
+      }
+
+      selectCela.value =
+        cela;
+
+    }
+
+    document.getElementById(
+      "sugestoesNome"
+    ).classList.add(
+      "oculto"
+    );
+
+    sugestaoIndice =
+      -1;
+
+  }
+
+
+  function navegarSugestoes(
+    direcao
+  ) {
+
+    const caixa =
+      document.getElementById(
+        "sugestoesNome"
+      );
+
+    const itens =
+      caixa
+        ? Array.from(
+            caixa.querySelectorAll(
+              ".suggestion"
+            )
+          )
+        : [];
+
+    if (!itens.length) {
+      return;
+    }
+
+    sugestaoIndice +=
+      direcao;
+
+    if (
+      sugestaoIndice < 0
+    ) {
+      sugestaoIndice =
+        itens.length - 1;
+    }
+
+    if (
+      sugestaoIndice >=
+      itens.length
+    ) {
+      sugestaoIndice = 0;
+    }
+
+    itens.forEach(
+      item =>
+        item.classList.remove(
+          "ativo"
+        )
+    );
+
+    const ativo =
+      itens[
+        sugestaoIndice
+      ];
+
+    ativo.classList.add(
+      "ativo"
+    );
+
+    ativo.scrollIntoView({
+      block: "nearest"
+    });
+
+  }
+
+
+  function selecionarSugestaoAtiva() {
+
+    const caixa =
+      document.getElementById(
+        "sugestoesNome"
+      );
+
+    const itens =
+      caixa
+        ? Array.from(
+            caixa.querySelectorAll(
+              ".suggestion"
+            )
+          )
+        : [];
+
+    if (
+      sugestaoIndice < 0 ||
+      sugestaoIndice >=
+        itens.length
+    ) {
+      return false;
+    }
+
+    const campo =
+      document.getElementById(
+        "nomeInterno"
+      );
+
+    const termo =
+      normalizarTexto(
+        campo.value
+      );
+
+    const encontrados =
+      baseInternos
+        .filter(
+          interno =>
+            normalizarTexto(
+              interno.nome
+            ).includes(termo)
+        )
+        .slice(
+          0,
+          12
+        );
+
+    const escolhido =
+      encontrados
