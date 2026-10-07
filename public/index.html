@@ -2,72 +2,56 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>CPAIG - Guichê de Atendimento</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#f1f4f7;
-  color:#17212b;
+ margin:0;
+ font-family:Arial,Helvetica,sans-serif;
+ background:#f1f4f7;
+ color:#17212b
 }
 
 header{
-  background:#123d25;
-  color:#fff;
-  padding:18px 20px;
-  text-align:center;
-  border-bottom:5px solid #e0b800;
+ background:#123d25;
+ color:#fff;
+ padding:18px 20px;
+ text-align:center;
+ border-bottom:5px solid #e0b800
 }
 
-header h1{
-  margin:0;
-  font-size:28px;
-}
-
-header h2{
-  margin:5px 0 0;
-  font-size:17px;
-  font-weight:normal;
-}
-
-.cpaig{
-  color:#ffd900;
-  font-size:18px;
-  font-weight:bold;
-  margin-top:7px;
-}
+header h1{margin:0;font-size:28px}
+header h2{margin:5px 0 0;font-size:17px;font-weight:normal}
+.cpaig{color:#ffd900;font-size:18px;font-weight:bold;margin-top:7px}
 
 .container{
-  width:96%;
-  max-width:1500px;
-  margin:18px auto;
+ width:96%;
+ max-width:1500px;
+ margin:18px auto
 }
 
 .card{
-  background:#fff;
-  border-radius:10px;
-  padding:18px;
-  margin-bottom:18px;
-  box-shadow:0 2px 8px rgba(0,0,0,.12);
+ background:#fff;
+ border-radius:10px;
+ padding:18px;
+ margin-bottom:18px;
+ box-shadow:0 2px 8px rgba(0,0,0,.12)
 }
 
 .card h3{
-  margin:0 0 15px;
-  color:#123d25;
-  border-bottom:2px solid #e0b800;
-  padding-bottom:8px;
+ margin:0 0 15px;
+ color:#123d25;
+ border-bottom:2px solid #e0b800;
+ padding-bottom:8px
 }
 
 .grid{
-  display:grid;
-  grid-template-columns:repeat(12,1fr);
-  gap:12px;
+ display:grid;
+ grid-template-columns:repeat(12,1fr);
+ gap:12px
 }
 
 .col-12{grid-column:span 12}
@@ -77,434 +61,337 @@ header h2{
 .col-3{grid-column:span 3}
 
 label{
-  display:block;
-  font-weight:bold;
-  margin-bottom:5px;
-  font-size:14px;
+ display:block;
+ font-weight:bold;
+ margin-bottom:5px;
+ font-size:14px
 }
 
-input,
-select,
-button{
-  font-family:inherit;
+input,select{
+ width:100%;
+ height:42px;
+ border:1px solid #b9c1c8;
+ border-radius:6px;
+ padding:8px 10px;
+ font-size:15px;
+ background:#fff
 }
 
-input,
-select{
-  width:100%;
-  height:42px;
-  border:1px solid #b9c1c8;
-  border-radius:6px;
-  padding:8px 10px;
-  font-size:15px;
-  background:#fff;
-}
-
-input:focus,
-select:focus{
-  outline:none;
-  border-color:#123d25;
-  box-shadow:0 0 0 2px rgba(18,61,37,.12);
+input:focus,select:focus{
+ outline:none;
+ border-color:#123d25;
+ box-shadow:0 0 0 2px rgba(18,61,37,.12)
 }
 
 button{
-  border:0;
-  border-radius:6px;
-  padding:10px 15px;
-  cursor:pointer;
-  font-weight:bold;
-  font-size:14px;
+ border:0;
+ border-radius:6px;
+ padding:10px 15px;
+ cursor:pointer;
+ font-weight:bold;
+ font-size:14px
 }
 
-.btn-green{
-  background:#176b3a;
-  color:#fff;
-}
-
-.btn-green:hover{
-  background:#0e542c;
-}
-
-.btn-yellow{
-  background:#e0b800;
-  color:#111;
-}
-
-.btn-blue{
-  background:#1261a0;
-  color:#fff;
-}
-
-.btn-red{
-  background:#b42318;
-  color:#fff;
-}
-
-.btn-gray{
-  background:#65717c;
-  color:#fff;
-}
-
-.btn-purple{
-  background:#6841a5;
-  color:#fff;
-}
-
-.btn-small{
-  padding:7px 10px;
-  font-size:12px;
-}
+.btn-green{background:#176b3a;color:#fff}
+.btn-yellow{background:#e0b800;color:#111}
+.btn-blue{background:#1261a0;color:#fff}
+.btn-red{background:#b42318;color:#fff}
+.btn-gray{background:#65717c;color:#fff}
+.btn-purple{background:#6841a5;color:#fff}
+.btn-small{padding:7px 10px;font-size:12px}
 
 .actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  align-items:center;
+ display:flex;
+ flex-wrap:wrap;
+ gap:8px;
+ align-items:center
 }
 
-.suggestions{
-  position:relative;
-}
+.suggestions{position:relative}
 
 .suggestion-box{
-  position:absolute;
-  z-index:50;
-  left:0;
-  right:0;
-  top:100%;
-  background:#fff;
-  border:1px solid #aaa;
-  border-radius:0 0 7px 7px;
-  max-height:260px;
-  overflow-y:auto;
-  box-shadow:0 4px 10px rgba(0,0,0,.2);
+ position:absolute;
+ z-index:50;
+ left:0;
+ right:0;
+ top:100%;
+ background:#fff;
+ border:1px solid #aaa;
+ border-radius:0 0 7px 7px;
+ max-height:260px;
+ overflow-y:auto;
+ box-shadow:0 4px 10px rgba(0,0,0,.2)
 }
 
 .suggestion-item{
-  padding:10px;
-  cursor:pointer;
-  border-bottom:1px solid #eee;
+ padding:10px;
+ cursor:pointer;
+ border-bottom:1px solid #eee
 }
 
 .suggestion-item:hover,
 .suggestion-item.selected{
-  background:#eaf3ed;
+ background:#eaf3ed
 }
 
-.suggestion-item strong{
-  color:#123d25;
-}
+.suggestion-item strong{color:#123d25}
 
 .info-base{
-  margin-top:8px;
-  font-size:13px;
-  color:#555;
+ margin-top:8px;
+ font-size:13px;
+ color:#555
 }
 
-.badge{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:15px;
-  font-size:12px;
-  font-weight:bold;
-}
-
-.badge-await{
-  background:#fff1b8;
-  color:#725b00;
-}
-
-.badge-received{
-  background:#d8f3df;
-  color:#176b3a;
-}
-
-.badge-guarded{
-  background:#e7def8;
-  color:#56338a;
-}
-
-.table-wrap{
-  overflow-x:auto;
-}
+.table-wrap{overflow-x:auto}
 
 table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
+ width:100%;
+ border-collapse:collapse;
+ font-size:13px
 }
 
 th{
-  background:#123d25;
-  color:#fff;
-  padding:9px 7px;
-  text-align:left;
-  white-space:nowrap;
+ background:#123d25;
+ color:#fff;
+ padding:9px 7px;
+ text-align:left;
+ white-space:nowrap
 }
 
 td{
-  border-bottom:1px solid #ddd;
-  padding:8px 7px;
-  vertical-align:middle;
+ border-bottom:1px solid #ddd;
+ padding:8px 7px;
+ vertical-align:middle
 }
 
-tr:nth-child(even){
-  background:#fafafa;
-}
-
-.status{
-  white-space:nowrap;
-}
+tr:nth-child(even){background:#fafafa}
 
 .empty{
-  text-align:center;
-  color:#777;
-  padding:20px;
+ text-align:center;
+ color:#777;
+ padding:20px
 }
 
+.badge{
+ display:inline-block;
+ padding:5px 9px;
+ border-radius:15px;
+ font-size:12px;
+ font-weight:bold
+}
+
+.badge-await{background:#fff1b8;color:#725b00}
+.badge-received{background:#d8f3df;color:#176b3a}
+.badge-guarded{background:#e7def8;color:#56338a}
+
 .list-count{
-  margin-left:auto;
-  font-weight:bold;
-  color:#123d25;
+ margin-left:auto;
+ font-weight:bold;
+ color:#123d25
 }
 
 .toolbar{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  align-items:center;
-  margin-bottom:12px;
-}
-
-.toolbar select{
-  width:auto;
-  min-width:210px;
+ display:flex;
+ flex-wrap:wrap;
+ gap:10px;
+ align-items:center;
+ margin-bottom:12px
 }
 
 .history-filters{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-bottom:12px;
+ display:flex;
+ flex-wrap:wrap;
+ gap:8px;
+ margin-bottom:12px
 }
 
 .history-filters input,
 .history-filters select{
-  width:auto;
-  min-width:180px;
+ width:auto;
+ min-width:180px
 }
 
 .file-area{
-  border:2px dashed #b9c1c8;
-  padding:15px;
-  border-radius:8px;
-  background:#fafafa;
-}
-
-.file-area input[type=file]{
-  height:auto;
-  border:0;
-  padding:5px;
-}
-
-.print-options{
-  display:grid;
-  grid-template-columns:repeat(12,1fr);
-  gap:10px;
-}
-
-.print-group{
-  border:1px solid #ddd;
-  padding:12px;
-  border-radius:7px;
-}
-
-.print-group h4{
-  margin:0 0 8px;
-  color:#123d25;
-}
-
-.checkbox-list{
-  max-height:210px;
-  overflow-y:auto;
-}
-
-.checkbox-list label{
-  font-weight:normal;
-  padding:5px;
-  border-bottom:1px solid #eee;
-}
-
-.checkbox-list input{
-  width:auto;
-  height:auto;
-  margin-right:7px;
-}
-
-.hidden{
-  display:none !important;
-}
-
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.55);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:1000;
-  padding:15px;
-}
-
-.modal-content{
-  width:100%;
-  max-width:1100px;
-  max-height:94vh;
-  overflow:auto;
-  background:#fff;
-  border-radius:10px;
-  padding:20px;
-}
-
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-
-.modal-header h3{
-  margin:0;
-  color:#123d25;
-}
-
-.close{
-  background:#b42318;
-  color:#fff;
+ border:2px dashed #b9c1c8;
+ padding:15px;
+ border-radius:8px;
+ background:#fafafa
 }
 
 .small-note{
-  color:#666;
-  font-size:12px;
-  margin-top:6px;
+ color:#666;
+ font-size:12px;
+ margin-top:6px
+}
+
+.hidden{display:none!important}
+
+.modal{
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.55);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ z-index:1000;
+ padding:15px
+}
+
+.modal-content{
+ width:100%;
+ max-width:1100px;
+ max-height:94vh;
+ overflow:auto;
+ background:#fff;
+ border-radius:10px;
+ padding:20px
+}
+
+.modal-header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:15px
+}
+
+.modal-header h3{
+ margin:0;
+ color:#123d25
 }
 
 #toast{
-  position:fixed;
-  right:20px;
-  bottom:20px;
-  z-index:2000;
-  background:#123d25;
-  color:#fff;
-  padding:13px 18px;
-  border-radius:7px;
-  display:none;
-  box-shadow:0 4px 12px rgba(0,0,0,.25);
-}
-
-@media(max-width:900px){
-  .col-8,
-  .col-6,
-  .col-4,
-  .col-3{
-    grid-column:span 12;
-  }
-
-  header h1{
-    font-size:23px;
-  }
-
-  .container{
-    width:98%;
-  }
+ position:fixed;
+ right:20px;
+ bottom:20px;
+ z-index:2000;
+ background:#123d25;
+ color:#fff;
+ padding:13px 18px;
+ border-radius:7px;
+ display:none;
+ box-shadow:0 4px 12px rgba(0,0,0,.25)
 }
 
 /* =========================
    IMPRESSÃO
 ========================= */
 
+#printArea{display:none}
+
 @media print{
 
-  @page{
-    size:A4;
-    margin:5mm;
-  }
+ @page{
+  size:A4;
+  margin:5mm
+ }
 
-  body{
-    background:#fff;
-  }
+ body{
+  background:#fff
+ }
 
-  body > *{
-    display:none !important;
-  }
+ body>*{
+  display:none!important
+ }
 
-  #printArea{
-    display:block !important;
-  }
+ #printArea{
+  display:block!important;
+  width:100%
+ }
 
-  .print-page{
-    display:block;
-    width:100%;
-    min-height:280mm;
-    page-break-after:always;
-  }
+ /*
+   IMPORTANTE:
+   Não usar min-height de 280mm.
+   Isso era responsável pela criação
+   das páginas em branco em algumas
+   impressoras/navegadores.
+ */
 
-  .print-page:last-child{
-    page-break-after:auto;
-  }
+ .print-page{
+  width:100%;
+  page-break-after:always;
+  break-after:page;
+  overflow:hidden
+ }
 
-  .print-header{
-    text-align:center;
-    margin-bottom:8px;
-  }
+ .print-page:last-child{
+  page-break-after:auto;
+  break-after:auto
+ }
 
-  .print-header h1{
-    margin:0;
-    font-size:17px;
-  }
+ .print-header{
+  text-align:center;
+  margin-bottom:7px
+ }
 
-  .print-header h2{
-    margin:2px 0;
-    font-size:13px;
-  }
+ .print-header h1{
+  margin:0;
+  font-size:17px
+ }
 
-  .print-header p{
-    margin:2px 0 7px;
-    font-size:10px;
-  }
+ .print-header h2{
+  margin:2px 0;
+  font-size:13px
+ }
 
-  .print-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:9px;
-  }
+ .print-header p{
+  margin:2px 0 7px;
+  font-size:10px
+ }
 
-  .print-table th,
-  .print-table td{
-    border:1px solid #222;
-    padding:3px 4px;
-  }
+ .print-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:9px
+ }
 
-  .print-table th{
-    background:#eee !important;
-    color:#000 !important;
-  }
+ .print-table th,
+ .print-table td{
+  border:1px solid #222;
+  padding:3px 4px
+ }
 
-  .print-table .pavcela{
-    width:55px;
-    text-align:center;
-    white-space:nowrap;
-  }
+ .print-table th{
+  background:#eee!important;
+  color:#000!important
+ }
 
-  .print-table .data{
-    width:62px;
-    text-align:center;
-    white-space:nowrap;
-  }
+ .print-table .pavcela{
+  width:55px;
+  text-align:center;
+  white-space:nowrap
+ }
+
+ .print-table .data{
+  width:62px;
+  text-align:center;
+  white-space:nowrap
+ }
+
+ /*
+   Não deixar o navegador criar
+   quebra automática extra dentro
+   da página.
+ */
+ .print-table,
+ .print-table tr,
+ .print-table td,
+ .print-table th{
+  break-inside:avoid
+ }
 }
 
-#printArea{
-  display:none;
+@media(max-width:900px){
+
+ .col-8,
+ .col-6,
+ .col-4,
+ .col-3{
+  grid-column:span 12
+ }
+
+ header h1{font-size:23px}
+
+ .container{width:98%}
 }
 </style>
 </head>
@@ -512,528 +399,595 @@ tr:nth-child(even){
 <body>
 
 <header>
-  <h1>GUICHÊ DE ATENDIMENTO</h1>
-  <h2>POLÍCIA PENAL DE MATO GROSSO DO SUL</h2>
-  <div class="cpaig">CPAIG</div>
+ <h1>GUICHÊ DE ATENDIMENTO</h1>
+ <h2>POLÍCIA PENAL DE MATO GROSSO DO SUL</h2>
+ <div class="cpaig">CPAIG</div>
 </header>
 
 <div class="container">
 
-  <!-- =========================
-       CADASTRO
-  ========================== -->
-
-  <div class="card">
-
-    <h3>📋 NOVO ATENDIMENTO</h3>
-
-    <div class="grid">
-
-      <div class="col-8 suggestions">
-        <label for="nome">Nome do interno</label>
-        <input
-          id="nome"
-          type="text"
-          autocomplete="off"
-          placeholder="Digite o nome do interno"
-        >
-        <div id="suggestions" class="suggestion-box hidden"></div>
-      </div>
-
-      <div class="col-4">
-        <label for="rgi">RGI</label>
-        <input id="rgi" type="text" readonly>
-      </div>
-
-      <div class="col-4">
-        <label for="pavilhao">Pavilhão</label>
-        <input id="pavilhao" type="text" readonly>
-      </div>
-
-      <div class="col-4">
-        <label for="cela">Cela</label>
-        <select id="cela">
-          <option value="">Selecione</option>
-        </select>
-      </div>
-
-      <div class="col-4">
-        <label for="atendimento">Atendimento</label>
-        <select id="atendimento">
-          <option value="">Selecione</option>
-        </select>
-      </div>
-
-      <div class="col-4">
-        <label for="dataAtendimento">Data do atendimento</label>
-        <div style="display:flex;gap:6px">
-          <input id="dataAtendimento" type="date">
-          <button
-            type="button"
-            class="btn-yellow"
-            onclick="usarHoje()"
-          >HOJE</button>
-        </div>
-      </div>
-
-      <div class="col-8">
-        <label for="assunto">Assunto</label>
-        <input
-          id="assunto"
-          type="text"
-          placeholder="Descreva o assunto"
-        >
-      </div>
-
-      <div class="col-12">
-        <div class="actions">
-          <button
-            type="button"
-            class="btn-green"
-            onclick="entrarNaLista()"
-          >➕ ENTRAR NA LISTA</button>
-
-          <button
-            type="button"
-            class="btn-blue"
-            onclick="enviarLista()"
-          >📤 ENVIAR PARA MESA</button>
-
-          <button
-            type="button"
-            class="btn-gray"
-            onclick="limparFormulario()"
-          >LIMPAR</button>
-        </div>
-      </div>
-
-    </div>
-
-    <div id="baseInfo" class="info-base">
-      Base de internos não carregada.
-    </div>
-
-  </div>
-
-
-  <!-- =========================
-       LISTA PARA ENVIO
-  ========================== -->
-
-  <div class="card">
+<!-- =====================================================
+     NOVO ATENDIMENTO
+===================================================== -->
 
-    <div class="toolbar">
-      <h3 style="margin:0;border:0;padding:0">📝 LISTA DE ATENDIMENTOS</h3>
-      <span id="listaCount" class="list-count">0 atendimento(s)</span>
-    </div>
+<div class="card">
 
-    <div class="small-note">
-      Os atendimentos adicionados aqui ainda não foram enviados para a Mesa.
-      Você pode incluir vários e depois enviar todos de uma vez.
-    </div>
+<h3>📋 NOVO ATENDIMENTO</h3>
 
-    <div class="table-wrap" style="margin-top:12px">
+<div class="grid">
 
-      <table>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>RGI</th>
-            <th>Pav.</th>
-            <th>Cela</th>
-            <th>Atendimento</th>
-            <th>Data</th>
-            <th>Assunto</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
+<div class="col-8 suggestions">
 
-        <tbody id="listaBody"></tbody>
-      </table>
+<label for="nome">Nome do interno</label>
 
-    </div>
+<input
+ id="nome"
+ type="text"
+ autocomplete="off"
+ placeholder="Digite o nome do interno">
 
-  </div>
+<div id="suggestions" class="suggestion-box hidden"></div>
 
+</div>
 
-  <!-- =========================
-       BASE DE INTERNOS
-  ========================== -->
+<div class="col-4">
 
-  <div class="card">
+<label for="rgi">RGI</label>
+<input id="rgi" type="text" readonly>
 
-    <h3>👤 BASE DE INTERNOS</h3>
+</div>
 
-    <div class="file-area">
-
-      <div class="actions">
-
-        <button
-          type="button"
-          class="btn-green"
-          onclick="abrirArquivoExcel()"
-        >🔄 ATUALIZAR BASE DE INTERNOS</button>
-
-        <input
-          id="arquivoExcel"
-          type="file"
-          accept=".xlsx,.xls"
-          class="hidden"
-          onchange="importarExcel(event)"
-        >
+<div class="col-4">
 
-      </div>
+<label for="pavilhao">Pavilhão</label>
+<input id="pavilhao" type="text" readonly>
 
-      <div id="baseStatus" class="small-note">
-        Nenhuma base carregada.
-      </div>
+</div>
 
-    </div>
+<div class="col-4">
 
-  </div>
+<label for="cela">Cela</label>
 
+<select id="cela">
+<option value="">Selecione</option>
+</select>
 
-  <!-- =========================
-       HISTÓRICO
-  ========================== -->
+</div>
 
-  <div class="card">
+<div class="col-4">
 
-    <div class="toolbar">
+<label for="atendimento">Atendimento</label>
 
-      <h3 style="margin:0;border:0;padding:0">
-        📚 HISTÓRICO DE ATENDIMENTOS
-      </h3>
+<select id="atendimento">
+<option value="">Selecione</option>
+</select>
 
-      <button
-        type="button"
-        class="btn-blue"
-        onclick="abrirImpressao()"
-      >🖨️ IMPRIMIR LISTA</button>
+</div>
 
-    </div>
+<div class="col-4">
 
-    <div class="history-filters">
+<label for="dataAtendimento">Data do atendimento</label>
 
-      <input
-        id="filtroHistoricoNome"
-        type="text"
-        placeholder="Pesquisar nome..."
-        oninput="renderHistorico()"
-      >
+<div style="display:flex;gap:6px">
 
-      <select
-        id="filtroHistoricoAtendimento"
-        onchange="renderHistorico()"
-      >
-        <option value="">Todos os atendimentos</option>
-      </select>
+<input id="dataAtendimento" type="date">
 
-      <select
-        id="filtroHistoricoStatus"
-        onchange="renderHistorico()"
-      >
-        <option value="">Todos os status</option>
-        <option value="aguardando_mesa">Aguardando Mesa</option>
-        <option value="recebido">Recebido</option>
-        <option value="guardado">Guardado</option>
-      </select>
+<button
+ type="button"
+ class="btn-yellow"
+ onclick="usarHoje()">
+HOJE
+</button>
 
-      <select
-        id="ordemHistorico"
-        onchange="renderHistorico()"
-      >
-        <option value="envio">Ordem de envio</option>
-        <option value="atendimento">Por atendimento</option>
-      </select>
+</div>
 
-    </div>
+</div>
 
-    <div class="table-wrap">
+<div class="col-8">
 
-      <table>
+<label for="assunto">Assunto</label>
 
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nome</th>
-            <th>RGI</th>
-            <th>Pav.</th>
-            <th>Cela</th>
-            <th>Atendimento</th>
-            <th>Data</th>
-            <th>Assunto</th>
-            <th>Status</th>
-            <th>Enviado em</th>
-            <th>Recebido em</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
+<input
+ id="assunto"
+ type="text"
+ placeholder="Descreva o assunto">
 
-        <tbody id="historicoBody"></tbody>
+</div>
 
-      </table>
+<div class="col-12">
 
-    </div>
+<div class="actions">
 
-  </div>
+<button
+ type="button"
+ class="btn-green"
+ onclick="entrarNaLista()">
+➕ ENTRAR NA LISTA
+</button>
 
-
-  <!-- =========================
-       ATENDIMENTOS GUARDADOS
-  ========================== -->
-
-  <div class="card">
-
-    <div class="toolbar">
-
-      <h3 style="margin:0;border:0;padding:0">
-        🗄️ ATENDIMENTOS GUARDADOS
-      </h3>
-
-      <button
-        type="button"
-        class="btn-purple"
-        onclick="abrirGuardados()"
-      >ABRIR ATENDIMENTOS GUARDADOS</button>
-
-    </div>
-
-    <div id="resumoGuardados" class="small-note"></div>
-
-  </div>
+<button
+ type="button"
+ class="btn-blue"
+ onclick="enviarLista()">
+📤 ENVIAR PARA MESA
+</button>
+
+<button
+ type="button"
+ class="btn-gray"
+ onclick="limparFormulario()">
+LIMPAR
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="baseInfo" class="info-base">
+Base de internos não carregada.
+</div>
 
 </div>
 
 
-<!-- =========================
+<!-- =====================================================
+     LISTA
+===================================================== -->
+
+<div class="card">
+
+<div class="toolbar">
+
+<h3 style="margin:0;border:0;padding:0">
+📝 LISTA DE ATENDIMENTOS
+</h3>
+
+<span id="listaCount" class="list-count">
+0 atendimento(s)
+</span>
+
+</div>
+
+<div class="small-note">
+Os atendimentos adicionados aqui ainda não foram enviados para a Mesa.
+</div>
+
+<div class="table-wrap" style="margin-top:12px">
+
+<table>
+
+<thead>
+<tr>
+<th>Nome</th>
+<th>RGI</th>
+<th>Pav.</th>
+<th>Cela</th>
+<th>Atendimento</th>
+<th>Data</th>
+<th>Assunto</th>
+<th>Ação</th>
+</tr>
+</thead>
+
+<tbody id="listaBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     BASE
+===================================================== -->
+
+<div class="card">
+
+<h3>👤 BASE DE INTERNOS</h3>
+
+<div class="file-area">
+
+<div class="actions">
+
+<button
+ type="button"
+ class="btn-green"
+ onclick="abrirArquivoExcel()">
+🔄 ATUALIZAR BASE DE INTERNOS
+</button>
+
+<input
+ id="arquivoExcel"
+ type="file"
+ accept=".xlsx,.xls"
+ class="hidden"
+ onchange="importarExcel(event)">
+
+</div>
+
+<div id="baseStatus" class="small-note">
+Nenhuma base carregada.
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     HISTÓRICO
+===================================================== -->
+
+<div class="card">
+
+<div class="toolbar">
+
+<h3 style="margin:0;border:0;padding:0">
+📚 HISTÓRICO DE ATENDIMENTOS
+</h3>
+
+<button
+ type="button"
+ class="btn-purple"
+ onclick="guardarTodos()">
+🗄️ GUARDAR TODOS
+</button>
+
+<button
+ type="button"
+ class="btn-blue"
+ onclick="abrirImpressao()">
+🖨️ IMPRIMIR LISTA
+</button>
+
+</div>
+
+<div class="history-filters">
+
+<input
+ id="filtroHistoricoNome"
+ type="text"
+ placeholder="Pesquisar nome..."
+ oninput="renderHistorico()">
+
+<select
+ id="filtroHistoricoAtendimento"
+ onchange="renderHistorico()">
+
+<option value="">Todos os atendimentos</option>
+
+</select>
+
+<select
+ id="ordemHistorico"
+ onchange="renderHistorico()">
+
+<option value="envio">
+Ordem de envio
+</option>
+
+<option value="atendimento">
+Por atendimento
+</option>
+
+</select>
+
+</div>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+
+<tr>
+<th>#</th>
+<th>Nome</th>
+<th>RGI</th>
+<th>Pav.</th>
+<th>Cela</th>
+<th>Atendimento</th>
+<th>Data</th>
+<th>Assunto</th>
+<th>Status</th>
+<th>Enviado em</th>
+<th>Recebido em</th>
+<th>Ação</th>
+</tr>
+
+</thead>
+
+<tbody id="historicoBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     GUARDADOS
+===================================================== -->
+
+<div class="card">
+
+<div class="toolbar">
+
+<h3 style="margin:0;border:0;padding:0">
+🗄️ ATENDIMENTOS GUARDADOS
+</h3>
+
+<span id="resumoGuardados" class="list-count"></span>
+
+<button
+ type="button"
+ class="btn-purple"
+ onclick="abrirGuardados()">
+ABRIR ATENDIMENTOS GUARDADOS
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
      MODAL GUARDADOS
-========================== -->
+===================================================== -->
 
 <div id="modalGuardados" class="modal hidden">
 
-  <div class="modal-content">
+<div class="modal-content">
 
-    <div class="modal-header">
+<div class="modal-header">
 
-      <h3>🗄️ ATENDIMENTOS GUARDADOS</h3>
+<h3>🗄️ ATENDIMENTOS GUARDADOS</h3>
 
-      <button
-        type="button"
-        class="close"
-        onclick="fecharGuardados()"
-      >FECHAR</button>
+<button
+ type="button"
+ class="btn-red"
+ onclick="fecharGuardados()">
+FECHAR
+</button>
 
-    </div>
+</div>
 
-    <div class="history-filters">
+<div class="history-filters">
 
-      <input
-        id="filtroArquivoNome"
-        type="text"
-        placeholder="Nome..."
-        oninput="renderGuardados()"
-      >
+<input
+ id="filtroArquivoNome"
+ type="text"
+ placeholder="Nome..."
+ oninput="renderGuardados()">
 
-      <input
-        id="filtroArquivoData"
-        type="date"
-        onchange="renderGuardados()"
-      >
+<input
+ id="filtroArquivoData"
+ type="date"
+ onchange="renderGuardados()">
 
-      <select
-        id="filtroArquivoAtendimento"
-        onchange="renderGuardados()"
-      >
-        <option value="">Todos os atendimentos</option>
-      </select>
+<select
+ id="filtroArquivoAtendimento"
+ onchange="renderGuardados()">
 
-    </div>
+<option value="">
+Todos os atendimentos
+</option>
 
-    <div class="table-wrap">
+</select>
 
-      <table>
+</div>
 
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>RGI</th>
-            <th>Pav.</th>
-            <th>Cela</th>
-            <th>Atendimento</th>
-            <th>Data</th>
-            <th>Assunto</th>
-            <th>Guardado em</th>
-          </tr>
-        </thead>
+<div class="table-wrap">
 
-        <tbody id="arquivoBody"></tbody>
+<table>
 
-      </table>
+<thead>
 
-    </div>
+<tr>
+<th>Nome</th>
+<th>RGI</th>
+<th>Pav.</th>
+<th>Cela</th>
+<th>Atendimento</th>
+<th>Data</th>
+<th>Assunto</th>
+<th>Guardado em</th>
+</tr>
 
-  </div>
+</thead>
+
+<tbody id="arquivoBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
 
 </div>
 
 
-<!-- =========================
-     MODAL IMPRESSÃO
-========================== -->
+<!-- =====================================================
+     IMPRESSÃO
+===================================================== -->
 
 <div id="modalImpressao" class="modal hidden">
 
-  <div class="modal-content">
+<div class="modal-content">
 
-    <div class="modal-header">
+<div class="modal-header">
 
-      <h3>🖨️ IMPRIMIR LISTA</h3>
+<h3>🖨️ IMPRIMIR LISTA</h3>
 
-      <button
-        type="button"
-        class="close"
-        onclick="fecharImpressao()"
-      >FECHAR</button>
+<button
+ type="button"
+ class="btn-red"
+ onclick="fecharImpressao()">
+FECHAR
+</button>
 
-    </div>
+</div>
 
-    <div class="print-options">
+<div style="
+display:grid;
+grid-template-columns:repeat(12,1fr);
+gap:10px">
 
-      <div class="print-group col-4">
+<div style="
+grid-column:span 4;
+border:1px solid #ddd;
+padding:12px;
+border-radius:7px">
 
-        <h4>Modo de impressão</h4>
+<h4>Modo de impressão</h4>
 
-        <label>
-          <input
-            type="radio"
-            name="modoImpressao"
-            value="atendimento"
-            checked
-            onchange="alterarModoImpressao()"
-          >
-          Por atendimento
-        </label>
+<label>
+<input
+ type="radio"
+ name="modoImpressao"
+ value="atendimento"
+ checked
+ onchange="alterarModoImpressao()">
+Por atendimento
+</label>
 
-        <label>
-          <input
-            type="radio"
-            name="modoImpressao"
-            value="geral"
-            onchange="alterarModoImpressao()"
-          >
-          Por atendimento geral
-        </label>
+<label>
+<input
+ type="radio"
+ name="modoImpressao"
+ value="geral"
+ onchange="alterarModoImpressao()">
+Por atendimento geral
+</label>
 
-        <label>
-          <input
-            type="radio"
-            name="modoImpressao"
-            value="data"
-            onchange="alterarModoImpressao()"
-          >
-          Por data
-        </label>
-
-      </div>
-
-
-      <div id="grupoAtendimento" class="print-group col-4">
-
-        <h4>Atendimentos</h4>
-
-        <div
-          id="listaAtendimentosImpressao"
-          class="checkbox-list"
-        ></div>
-
-      </div>
-
-
-      <div id="grupoData" class="print-group col-4 hidden">
-
-        <h4>Data</h4>
-
-        <input
-          id="dataImpressao"
-          type="date"
-        >
-
-        <br><br>
-
-        <label>
-          <input
-            type="radio"
-            name="tipoData"
-            value="todos"
-            checked
-            onchange="alterarTipoData()"
-          >
-          Todos
-        </label>
-
-        <label>
-          <input
-            type="radio"
-            name="tipoData"
-            value="atendimentos"
-            onchange="alterarTipoData()"
-          >
-          Atendimentos
-        </label>
-
-        <div
-          id="listaAtendimentosData"
-          class="checkbox-list hidden"
-          style="margin-top:8px"
-        ></div>
-
-      </div>
-
-
-      <div class="print-group col-12">
-
-        <label>
-          <input
-            id="umPorPagina"
-            type="checkbox"
-          >
-          Um atendimento por página
-        </label>
-
-        <div class="small-note">
-          Quando marcado, cada categoria de atendimento selecionada será
-          impressa em uma página A4 separada.
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="actions" style="margin-top:15px">
-
-      <button
-        type="button"
-        class="btn-green"
-        onclick="executarImpressao()"
-      >🖨️ IMPRIMIR</button>
-
-      <button
-        type="button"
-        class="btn-gray"
-        onclick="fecharImpressao()"
-      >CANCELAR</button>
-
-    </div>
-
-  </div>
+<label>
+<input
+ type="radio"
+ name="modoImpressao"
+ value="data"
+ onchange="alterarModoImpressao()">
+Por data
+</label>
 
 </div>
 
 
-<!-- =========================
-     ÁREA DE IMPRESSÃO
-========================== -->
+<div
+ id="grupoAtendimento"
+ style="
+grid-column:span 4;
+border:1px solid #ddd;
+padding:12px;
+border-radius:7px">
+
+<h4>Atendimentos</h4>
+
+<div
+ id="listaAtendimentosImpressao"
+ style="max-height:230px;overflow:auto">
+</div>
+
+</div>
+
+
+<div
+ id="grupoData"
+ class="hidden"
+ style="
+grid-column:span 4;
+border:1px solid #ddd;
+padding:12px;
+border-radius:7px">
+
+<h4>Data</h4>
+
+<input
+ id="dataImpressao"
+ type="date">
+
+<br><br>
+
+<label>
+<input
+ type="radio"
+ name="tipoData"
+ value="todos"
+ checked
+ onchange="alterarTipoData()">
+Todos
+</label>
+
+<label>
+<input
+ type="radio"
+ name="tipoData"
+ value="atendimentos"
+ onchange="alterarTipoData()">
+Atendimentos
+</label>
+
+<div
+ id="listaAtendimentosData"
+ class="hidden"
+ style="max-height:180px;overflow:auto;margin-top:8px">
+</div>
+
+</div>
+
+
+<div style="
+grid-column:span 12;
+border:1px solid #ddd;
+padding:12px;
+border-radius:7px">
+
+<label>
+
+<input
+ id="umPorPagina"
+ type="checkbox">
+
+Um atendimento por página
+
+</label>
+
+<div class="small-note">
+Cada categoria selecionada será impressa em sua própria página A4.
+</div>
+
+</div>
+
+</div>
+
+
+<div class="actions" style="margin-top:15px">
+
+<button
+ type="button"
+ class="btn-green"
+ onclick="executarImpressao()">
+🖨️ IMPRIMIR
+</button>
+
+<button
+ type="button"
+ class="btn-gray"
+ onclick="fecharImpressao()">
+CANCELAR
+</button>
+
+</div>
+
+</div>
+
+</div>
+
 
 <div id="printArea"></div>
 
@@ -1042,2295 +996,1857 @@ tr:nth-child(even){
 
 <script>
 
-/* =========================================================
-   CONFIGURAÇÕES
-========================================================= */
+const STORAGE_HISTORICO="atendimentoV2Historico";
+const STORAGE_LISTA="atendimentoV24Lista";
+const STORAGE_BASE="atendimentoV23BaseInternos";
+const STORAGE_BASE_DATA="atendimentoV23BaseData";
+const STORAGE_ARQUIVO="atendimentoV23Arquivo";
+const STORAGE_OUTBOX_ANTIGO="atendimentoV2Outbox";
 
-const STORAGE_HISTORICO = "atendimentoV2Historico";
-const STORAGE_LISTA = "atendimentoV24Lista";
-const STORAGE_BASE = "atendimentoV23BaseInternos";
-const STORAGE_BASE_DATA = "atendimentoV23BaseData";
-const STORAGE_ARQUIVO = "atendimentoV23Arquivo";
-const STORAGE_OUTBOX_ANTIGO = "atendimentoV2Outbox";
-
-const ATENDIMENTOS = [
-  "Jurídico",
-  "Psicossocial",
-  "Médico",
-  "Odontologia",
-  "Trabalho",
-  "Chefia",
-  "Chefe de equipe",
-  "Portaria II",
-  "Identificação",
-  "Limpeza",
-  "Advogado(a)",
-  "Visita Assistida",
-  "Autorização de Saída",
-  "Licença Judicial",
-  "7 dias",
-  "7 dias monitorado",
-  "Alvará",
-  "Salvo conduto",
-  "Domiciliar",
-  "Evasão",
-  "Desvio de Rota",
-  "Falta",
-  "Regressão",
-  "Mudança de Cela",
-  "Hospitalizado",
-  "Outros"
+const ATENDIMENTOS=[
+"Jurídico",
+"Psicossocial",
+"Médico",
+"Odontologia",
+"Trabalho",
+"Chefia",
+"Chefe de equipe",
+"Portaria II",
+"Identificação",
+"Limpeza",
+"Advogado(a)",
+"Visita Assistida",
+"Autorização de Saída",
+"Licença Judicial",
+"7 dias",
+"7 dias monitorado",
+"Alvará",
+"Salvo conduto",
+"Domiciliar",
+"Evasão",
+"Desvio de Rota",
+"Falta",
+"Regressão",
+"Mudança de Cela",
+"Hospitalizado",
+"Outros"
 ];
 
-let baseInternos = [];
-let listaPreparacao = [];
-let historico = [];
-let arquivo = [];
-
-let socket = null;
-let socketAberto = false;
-let reconnectTimer = null;
-
-
-/* =========================================================
-   UTILIDADES
-========================================================= */
+let baseInternos=[];
+let listaPreparacao=[];
+let historico=[];
+let arquivo=[];
+let socket=null;
+let socketAberto=false;
+let reconnectTimer=null;
 
 function $(id){
-  return document.getElementById(id);
+ return document.getElementById(id);
 }
 
-function salvarJSON(chave, valor){
-  localStorage.setItem(chave, JSON.stringify(valor));
+function salvarJSON(chave,valor){
+ localStorage.setItem(chave,JSON.stringify(valor));
 }
 
-function lerJSON(chave, padrao){
-  try{
-    const valor = localStorage.getItem(chave);
-    return valor ? JSON.parse(valor) : padrao;
-  }catch(e){
-    return padrao;
-  }
+function lerJSON(chave,padrao){
+ try{
+  const valor=localStorage.getItem(chave);
+  return valor?JSON.parse(valor):padrao;
+ }catch(e){
+  return padrao;
+ }
 }
 
 function escapeHtml(valor){
-  return String(valor ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+ return String(valor??"")
+ .replaceAll("&","&amp;")
+ .replaceAll("<","&lt;")
+ .replaceAll(">","&gt;")
+ .replaceAll('"',"&quot;")
+ .replaceAll("'","&#039;");
 }
 
 function normalizar(texto){
-  return String(texto ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"")
-    .toLowerCase()
-    .trim();
+ return String(texto??"")
+ .normalize("NFD")
+ .replace(/[\u0300-\u036f]/g,"")
+ .toLowerCase()
+ .trim();
 }
 
 function gerarId(){
-  if(window.crypto && crypto.randomUUID){
-    return crypto.randomUUID();
-  }
-
-  return Date.now().toString(36) +
-    Math.random().toString(36).slice(2);
+ if(window.crypto&&crypto.randomUUID){
+  return crypto.randomUUID();
+ }
+ return Date.now().toString(36)+Math.random().toString(36).slice(2);
 }
 
 function dataHoje(){
-  const d = new Date();
-
-  const ano = d.getFullYear();
-  const mes = String(d.getMonth()+1).padStart(2,"0");
-  const dia = String(d.getDate()).padStart(2,"0");
-
-  return `${ano}-${mes}-${dia}`;
+ const d=new Date();
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
 function formatarData(data){
-  if(!data)return "";
-
-  const partes = String(data).split("-");
-
-  if(partes.length===3){
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-  }
-
-  return data;
+ if(!data)return "";
+ const p=String(data).split("-");
+ return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:data;
 }
 
 function formatarDataHora(valor){
-  if(!valor)return "";
-
-  const d = new Date(valor);
-
-  if(Number.isNaN(d.getTime()))return valor;
-
-  return d.toLocaleString("pt-BR");
+ if(!valor)return "";
+ const d=new Date(valor);
+ return Number.isNaN(d.getTime())?valor:d.toLocaleString("pt-BR");
 }
 
-function mostrarToast(mensagem){
-  const t = $("toast");
-
-  t.textContent = mensagem;
-  t.style.display = "block";
-
-  clearTimeout(window.toastTimer);
-
-  window.toastTimer = setTimeout(()=>{
-    t.style.display = "none";
-  },3500);
+function mostrarToast(msg){
+ const t=$("toast");
+ t.textContent=msg;
+ t.style.display="block";
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>t.style.display="none",3500);
 }
 
 
-/* =========================================================
+/* =========================
    INICIALIZAÇÃO
-========================================================= */
+========================= */
 
 document.addEventListener("DOMContentLoaded",()=>{
 
-  carregarDados();
+ baseInternos=lerJSON(STORAGE_BASE,[]);
+ listaPreparacao=lerJSON(STORAGE_LISTA,[]);
+ historico=lerJSON(STORAGE_HISTORICO,[]);
+ arquivo=lerJSON(STORAGE_ARQUIVO,[]);
 
-  preencherAtendimentos();
+ historico=historico.map(item=>{
+  const novo={...item};
+  if(!novo.recordId)novo.recordId=gerarId();
 
-  preencherCelas();
+  if(novo.status==="pendente"){
+   novo.status="aguardando_mesa";
+  }
 
-  $("dataAtendimento").value = dataHoje();
+  return novo;
+ });
 
-  configurarBuscaNome();
+ /*
+  Migração da antiga fila.
+ */
+ const antiga=lerJSON(STORAGE_OUTBOX_ANTIGO,[]);
 
-  renderLista();
+ if(Array.isArray(antiga)){
 
-  renderHistorico();
+  for(const item of antiga){
 
-  renderResumoGuardados();
+   if(!item.recordId)continue;
 
-  atualizarBaseStatus();
+   const existe=historico.some(
+    h=>h.recordId===item.recordId
+   );
 
-  conectarServidor();
+   if(!existe){
+
+    historico.push({
+     ...item,
+     status:"aguardando_mesa",
+     enviadoEm:item.enviadoEm||item.criadoEm||new Date().toISOString()
+    });
+
+   }
+  }
+ }
+
+ localStorage.removeItem(STORAGE_OUTBOX_ANTIGO);
+
+ salvarJSON(STORAGE_HISTORICO,historico);
+
+ $("dataAtendimento").value=dataHoje();
+
+ preencherAtendimentos();
+ preencherCelas();
+ configurarBuscaNome();
+ atualizarFiltrosAtendimento();
+
+ renderLista();
+ renderHistorico();
+ renderGuardados();
+ atualizarBaseStatus();
+
+ conectarServidor();
 
 });
 
 
-function carregarDados(){
-
-  baseInternos = lerJSON(STORAGE_BASE,[]);
-
-  listaPreparacao = lerJSON(STORAGE_LISTA,[]);
-
-  historico = lerJSON(STORAGE_HISTORICO,[]);
-
-  arquivo = lerJSON(STORAGE_ARQUIVO,[]);
-
-
-  /*
-    Migração dos registros antigos:
-    "pendente" passa a significar
-    "aguardando_mesa".
-  */
-
-  historico = historico.map(item=>{
-
-    const novo = {...item};
-
-    if(novo.status === "pendente"){
-      novo.status = "aguardando_mesa";
-    }
-
-    if(!novo.recordId){
-      novo.recordId = gerarId();
-    }
-
-    return novo;
-
-  });
-
-
-  /*
-    Se existir a antiga outbox, transformamos
-    os registros em histórico aguardando mesa.
-    Assim nada é perdido.
-  */
-
-  const outboxAntigo = lerJSON(STORAGE_OUTBOX_ANTIGO,[]);
-
-  if(Array.isArray(outboxAntigo) && outboxAntigo.length){
-
-    for(const antigo of outboxAntigo){
-
-      const existe = historico.some(
-        h => h.recordId === antigo.recordId
-      );
-
-      if(!existe){
-
-        historico.push({
-          ...antigo,
-          recordId: antigo.recordId || gerarId(),
-          status:"aguardando_mesa",
-          enviadoEm:antigo.enviadoEm || antigo.criadoEm || new Date().toISOString()
-        });
-
-      }
-
-    }
-
-    localStorage.removeItem(STORAGE_OUTBOX_ANTIGO);
-  }
-
-
-  salvarJSON(STORAGE_HISTORICO,historico);
-}
-
-
-/* =========================================================
-   ATENDIMENTOS
-========================================================= */
+/* =========================
+   FORMULÁRIO
+========================= */
 
 function preencherAtendimentos(){
 
-  const select = $("atendimento");
+ const select=$("atendimento");
 
-  for(const nome of ATENDIMENTOS){
+ ATENDIMENTOS.forEach(nome=>{
+  const o=document.createElement("option");
+  o.value=nome;
+  o.textContent=nome;
+  select.appendChild(o);
+ });
 
-    const option = document.createElement("option");
-
-    option.value = nome;
-    option.textContent = nome;
-
-    select.appendChild(option);
-  }
-
-  atualizarFiltrosAtendimento();
 }
-
-
-/* =========================================================
-   CELAS
-========================================================= */
 
 function preencherCelas(){
 
-  const select = $("cela");
+ const select=$("cela");
 
-  for(let i=1;i<=120;i++){
+ for(let i=1;i<=120;i++){
 
-    const valor = String(i).padStart(2,"0");
+  const v=String(i).padStart(2,"0");
 
-    const option = document.createElement("option");
+  const o=document.createElement("option");
 
-    option.value = valor;
-    option.textContent = valor;
+  o.value=v;
+  o.textContent=v;
 
-    select.appendChild(option);
-  }
+  select.appendChild(o);
+ }
 
 }
-
-
-/* =========================================================
-   DATA
-========================================================= */
 
 function usarHoje(){
-  $("dataAtendimento").value = dataHoje();
+ $("dataAtendimento").value=dataHoje();
 }
-
-
-/* =========================================================
-   BUSCA DE INTERNOS
-========================================================= */
-
-function configurarBuscaNome(){
-
-  const campo = $("nome");
-
-  campo.addEventListener("input",()=>{
-    mostrarSugestoes(campo.value);
-  });
-
-  campo.addEventListener("keydown",(event)=>{
-
-    const box = $("suggestions");
-
-    if(box.classList.contains("hidden")){
-
-      if(event.key==="Enter"){
-
-        const primeiro = baseInternos.find(
-          interno =>
-            normalizar(interno.nome).startsWith(
-              normalizar(campo.value)
-            )
-        );
-
-        if(primeiro){
-          selecionarInterno(primeiro);
-          event.preventDefault();
-        }
-
-      }
-
-      return;
-    }
-
-
-    const itens = [...box.querySelectorAll(".suggestion-item")];
-
-    if(!itens.length)return;
-
-
-    if(event.key==="ArrowDown"){
-
-      event.preventDefault();
-
-      let index = itens.findIndex(
-        item=>item.classList.contains("selected")
-      );
-
-      index++;
-
-      if(index>=itens.length)index=0;
-
-      itens.forEach(i=>i.classList.remove("selected"));
-
-      itens[index].classList.add("selected");
-
-      itens[index].scrollIntoView({block:"nearest"});
-
-    }
-
-
-    if(event.key==="ArrowUp"){
-
-      event.preventDefault();
-
-      let index = itens.findIndex(
-        item=>item.classList.contains("selected")
-      );
-
-      index--;
-
-      if(index<0)index=itens.length-1;
-
-      itens.forEach(i=>i.classList.remove("selected"));
-
-      itens[index].classList.add("selected");
-
-      itens[index].scrollIntoView({block:"nearest"});
-
-    }
-
-
-    if(event.key==="Enter"){
-
-      event.preventDefault();
-
-      const selecionado =
-        itens.find(i=>i.classList.contains("selected")) ||
-        itens[0];
-
-      if(selecionado){
-
-        const indice =
-          Number(selecionado.dataset.index);
-
-        selecionarInterno(baseInternos[indice]);
-      }
-
-    }
-
-
-    if(event.key==="Escape"){
-      fecharSugestoes();
-    }
-
-  });
-
-
-  document.addEventListener("click",(event)=>{
-
-    if(
-      !event.target.closest(".suggestions")
-    ){
-      fecharSugestoes();
-    }
-
-  });
-
-}
-
-
-function mostrarSugestoes(texto){
-
-  const box = $("suggestions");
-
-  const termo = normalizar(texto);
-
-  if(!termo || !baseInternos.length){
-
-    fecharSugestoes();
-    return;
-  }
-
-
-  const resultados = [];
-
-  for(let i=0;i<baseInternos.length;i++){
-
-    const interno = baseInternos[i];
-
-    const nome = normalizar(interno.nome);
-
-    if(nome.includes(termo)){
-
-      resultados.push({
-        interno,
-        index:i
-      });
-
-    }
-
-    if(resultados.length>=12)break;
-  }
-
-
-  if(!resultados.length){
-
-    fecharSugestoes();
-    return;
-  }
-
-
-  box.innerHTML = resultados.map((resultado)=>{
-
-    const interno = resultado.interno;
-
-    return `
-      <div
-        class="suggestion-item"
-        data-index="${resultado.index}"
-        onclick="selecionarInterno(baseInternos[${resultado.index}])"
-      >
-        <strong>${escapeHtml(interno.nome)}</strong><br>
-        RGI: ${escapeHtml(interno.rgi || "")}
-        &nbsp; | &nbsp;
-        Pavilhão: ${escapeHtml(interno.pavilhao || "")}
-        &nbsp; | &nbsp;
-        Cela: ${escapeHtml(interno.cela || "")}
-      </div>
-    `;
-
-  }).join("");
-
-  box.classList.remove("hidden");
-}
-
-
-function fecharSugestoes(){
-  $("suggestions").classList.add("hidden");
-}
-
-
-function selecionarInterno(interno){
-
-  if(!interno)return;
-
-  $("nome").value = interno.nome || "";
-  $("rgi").value = interno.rgi || "";
-  $("pavilhao").value = interno.pavilhao || "";
-
-  if(interno.cela){
-
-    $("cela").value =
-      String(interno.cela).padStart(2,"0");
-
-  }
-
-  fecharSugestoes();
-
-  $("atendimento").focus();
-}
-
-
-/* =========================================================
-   LIMPAR FORMULÁRIO
-========================================================= */
 
 function limparFormulario(){
 
-  $("nome").value="";
-  $("rgi").value="";
-  $("pavilhao").value="";
-  $("cela").value="";
-  $("atendimento").value="";
-  $("dataAtendimento").value=dataHoje();
-  $("assunto").value="";
+ $("nome").value="";
+ $("rgi").value="";
+ $("pavilhao").value="";
+ $("cela").value="";
+ $("atendimento").value="";
+ $("dataAtendimento").value=dataHoje();
+ $("assunto").value="";
 
-  fecharSugestoes();
+ fecharSugestoes();
 
-  $("nome").focus();
+ $("nome").focus();
 }
 
 
-/* =========================================================
-   ENTRAR NA LISTA
-========================================================= */
+/* =========================
+   BUSCA
+========================= */
+
+function configurarBuscaNome(){
+
+ const campo=$("nome");
+
+ campo.addEventListener("input",()=>{
+  mostrarSugestoes(campo.value);
+ });
+
+ campo.addEventListener("keydown",event=>{
+
+  const box=$("suggestions");
+
+  if(box.classList.contains("hidden")){
+
+   if(event.key==="Enter"){
+
+    const primeiro=baseInternos.find(
+     i=>normalizar(i.nome).startsWith(normalizar(campo.value))
+    );
+
+    if(primeiro){
+     selecionarInterno(primeiro);
+     event.preventDefault();
+    }
+   }
+
+   return;
+  }
+
+  const itens=[...box.querySelectorAll(".suggestion-item")];
+
+  if(!itens.length)return;
+
+  if(event.key==="ArrowDown"){
+
+   event.preventDefault();
+
+   let n=itens.findIndex(
+    i=>i.classList.contains("selected")
+   );
+
+   n++;
+
+   if(n>=itens.length)n=0;
+
+   itens.forEach(i=>i.classList.remove("selected"));
+   itens[n].classList.add("selected");
+
+  }
+
+  if(event.key==="ArrowUp"){
+
+   event.preventDefault();
+
+   let n=itens.findIndex(
+    i=>i.classList.contains("selected")
+   );
+
+   n--;
+
+   if(n<0)n=itens.length-1;
+
+   itens.forEach(i=>i.classList.remove("selected"));
+   itens[n].classList.add("selected");
+
+  }
+
+  if(event.key==="Enter"){
+
+   event.preventDefault();
+
+   const item=
+    itens.find(i=>i.classList.contains("selected"))||itens[0];
+
+   const indice=Number(item.dataset.index);
+
+   selecionarInterno(baseInternos[indice]);
+
+  }
+
+  if(event.key==="Escape")fecharSugestoes();
+
+ });
+
+ document.addEventListener("click",event=>{
+  if(!event.target.closest(".suggestions")){
+   fecharSugestoes();
+  }
+ });
+
+}
+
+function mostrarSugestoes(texto){
+
+ const box=$("suggestions");
+ const termo=normalizar(texto);
+
+ if(!termo||!baseInternos.length){
+  fecharSugestoes();
+  return;
+ }
+
+ const resultados=[];
+
+ for(let i=0;i<baseInternos.length;i++){
+
+  const nome=normalizar(baseInternos[i].nome);
+
+  if(nome.includes(termo)){
+
+   resultados.push({
+    interno:baseInternos[i],
+    index:i
+   });
+
+  }
+
+  if(resultados.length>=12)break;
+ }
+
+ if(!resultados.length){
+  fecharSugestoes();
+  return;
+ }
+
+ box.innerHTML=resultados.map(r=>`
+
+ <div
+  class="suggestion-item"
+  data-index="${r.index}"
+  onclick="selecionarInterno(baseInternos[${r.index}])">
+
+  <strong>${escapeHtml(r.interno.nome)}</strong><br>
+
+  RGI: ${escapeHtml(r.interno.rgi||"")}
+  |
+  Pavilhão: ${escapeHtml(r.interno.pavilhao||"")}
+  |
+  Cela: ${escapeHtml(r.interno.cela||"")}
+
+ </div>
+
+ `).join("");
+
+ box.classList.remove("hidden");
+}
+
+function fecharSugestoes(){
+ $("suggestions").classList.add("hidden");
+}
+
+function selecionarInterno(interno){
+
+ if(!interno)return;
+
+ $("nome").value=interno.nome||"";
+ $("rgi").value=interno.rgi||"";
+ $("pavilhao").value=interno.pavilhao||"";
+
+ if(interno.cela){
+  $("cela").value=String(interno.cela).padStart(2,"0");
+ }
+
+ fecharSugestoes();
+
+ $("atendimento").focus();
+}
+
+
+/* =========================
+   LISTA DE PREPARAÇÃO
+========================= */
 
 function entrarNaLista(){
 
-  const nome = $("nome").value.trim();
-  const rgi = $("rgi").value.trim();
-  const pavilhao = $("pavilhao").value.trim();
-  const cela = $("cela").value;
-  const atendimento = $("atendimento").value;
-  const dataAtendimento = $("dataAtendimento").value;
-  const assunto = $("assunto").value.trim();
+ const nome=$("nome").value.trim();
+ const rgi=$("rgi").value.trim();
+ const pavilhao=$("pavilhao").value.trim();
+ const cela=$("cela").value;
+ const atendimento=$("atendimento").value;
+ const dataAtendimento=$("dataAtendimento").value;
+ const assunto=$("assunto").value.trim();
 
+ if(!nome){
+  mostrarToast("Informe o nome do interno.");
+  return;
+ }
 
-  if(!nome){
-    mostrarToast("Informe o nome do interno.");
-    $("nome").focus();
-    return;
-  }
+ if(!atendimento){
+  mostrarToast("Selecione o atendimento.");
+  return;
+ }
 
-  if(!atendimento){
-    mostrarToast("Selecione o atendimento.");
-    $("atendimento").focus();
-    return;
-  }
+ if(!dataAtendimento){
+  mostrarToast("Informe a data.");
+  return;
+ }
 
-  if(!dataAtendimento){
-    mostrarToast("Informe a data do atendimento.");
-    $("dataAtendimento").focus();
-    return;
-  }
+ listaPreparacao.push({
 
+  recordId:gerarId(),
+  nome,
+  rgi,
+  pavilhao,
+  cela,
+  atendimento,
+  dataAtendimento,
+  assunto,
+  criadoEm:new Date().toISOString(),
+  status:"lista"
 
-  const registro = {
+ });
 
-    recordId:gerarId(),
+ salvarJSON(STORAGE_LISTA,listaPreparacao);
 
-    nome,
-    rgi,
-    pavilhao,
-    cela,
-    atendimento,
-    dataAtendimento,
-    assunto,
+ renderLista();
 
-    criadoEm:new Date().toISOString(),
+ limparFormulario();
 
-    status:"lista"
-
-  };
-
-
-  listaPreparacao.push(registro);
-
-  salvarJSON(STORAGE_LISTA,listaPreparacao);
-
-  renderLista();
-
-  limparFormulario();
-
-  mostrarToast("Atendimento adicionado à lista.");
+ mostrarToast("Atendimento adicionado à lista.");
 }
-
-
-/* =========================================================
-   RENDER LISTA
-========================================================= */
 
 function renderLista(){
 
-  const body = $("listaBody");
+ const body=$("listaBody");
 
-  $("listaCount").textContent =
-    `${listaPreparacao.length} atendimento(s)`;
+ $("listaCount").textContent=
+  `${listaPreparacao.length} atendimento(s)`;
 
+ if(!listaPreparacao.length){
 
-  if(!listaPreparacao.length){
+  body.innerHTML=`
+  <tr>
+   <td colspan="8" class="empty">
+    Nenhum atendimento aguardando envio.
+   </td>
+  </tr>`;
 
-    body.innerHTML = `
-      <tr>
-        <td colspan="8" class="empty">
-          Nenhum atendimento aguardando envio.
-        </td>
-      </tr>
-    `;
+  return;
+ }
 
-    return;
-  }
+ body.innerHTML=listaPreparacao.map((item,index)=>`
 
+ <tr>
 
-  body.innerHTML = listaPreparacao.map((item,index)=>{
+  <td>${escapeHtml(item.nome)}</td>
+  <td>${escapeHtml(item.rgi)}</td>
+  <td>${escapeHtml(item.pavilhao)}</td>
+  <td>${escapeHtml(item.cela)}</td>
+  <td>${escapeHtml(item.atendimento)}</td>
+  <td>${formatarData(item.dataAtendimento)}</td>
+  <td>${escapeHtml(item.assunto)}</td>
 
-    return `
-      <tr>
+  <td>
+   <button
+    class="btn-red btn-small"
+    onclick="removerDaLista(${index})">
+    REMOVER
+   </button>
+  </td>
 
-        <td>${escapeHtml(item.nome)}</td>
+ </tr>
 
-        <td>${escapeHtml(item.rgi)}</td>
-
-        <td>${escapeHtml(item.pavilhao)}</td>
-
-        <td>${escapeHtml(item.cela)}</td>
-
-        <td>${escapeHtml(item.atendimento)}</td>
-
-        <td>${formatarData(item.dataAtendimento)}</td>
-
-        <td>${escapeHtml(item.assunto)}</td>
-
-        <td>
-          <button
-            class="btn-red btn-small"
-            onclick="removerDaLista(${index})"
-          >
-            REMOVER
-          </button>
-        </td>
-
-      </tr>
-    `;
-
-  }).join("");
-
+ `).join("");
 }
-
 
 function removerDaLista(index){
 
-  if(!confirm("Remover este atendimento da lista?"))return;
+ if(!confirm("Remover este atendimento da lista?"))return;
 
-  listaPreparacao.splice(index,1);
+ listaPreparacao.splice(index,1);
 
-  salvarJSON(STORAGE_LISTA,listaPreparacao);
+ salvarJSON(STORAGE_LISTA,listaPreparacao);
 
-  renderLista();
+ renderLista();
 }
 
 
-/* =========================================================
-   ENVIAR LISTA PARA MESA
-========================================================= */
+/* =========================
+   ENVIO
+========================= */
 
 function enviarLista(){
 
-  if(!listaPreparacao.length){
+ if(!listaPreparacao.length){
 
-    mostrarToast("A lista está vazia.");
+  mostrarToast("A lista está vazia.");
 
-    return;
-  }
+  return;
+ }
 
+ const agora=new Date().toISOString();
 
-  const agora = new Date().toISOString();
+ listaPreparacao.forEach(item=>{
 
+  historico.push({
 
-  for(const item of listaPreparacao){
+   ...item,
 
-    const registro = {
+   status:"aguardando_mesa",
 
-      ...item,
+   enviadoEm:agora
 
-      status:"aguardando_mesa",
+  });
 
-      enviadoEm:agora
+ });
 
-    };
+ salvarJSON(STORAGE_HISTORICO,historico);
 
+ listaPreparacao=[];
 
-    historico.push(registro);
+ salvarJSON(STORAGE_LISTA,listaPreparacao);
 
-  }
+ renderLista();
+ renderHistorico();
 
+ enviarPendentes();
 
-  salvarJSON(STORAGE_HISTORICO,historico);
-
-
-  /*
-    Depois do envio, a lista de preparação
-    é limpa.
-  */
-
-  listaPreparacao=[];
-
-  salvarJSON(STORAGE_LISTA,listaPreparacao);
-
-  renderLista();
-
-  renderHistorico();
-
-
-  enviarPendentes();
-
-
-  mostrarToast(
-    "Atendimentos enviados para a Mesa."
-  );
+ mostrarToast("Atendimentos enviados para a Mesa.");
 
 }
 
 
-/* =========================================================
+/* =========================
    WEBSOCKET
-========================================================= */
+========================= */
 
 function conectarServidor(){
 
-  if(socket){
-    try{
-      socket.close();
-    }catch(e){}
+ const protocolo=
+  location.protocol==="https:"?"wss://":"ws://";
+
+ socket=new WebSocket(protocolo+location.host);
+
+ socket.addEventListener("open",()=>{
+
+  socketAberto=true;
+
+  socket.send(JSON.stringify({
+   type:"register",
+   role:"sender"
+  }));
+
+  setTimeout(enviarPendentes,500);
+
+ });
+
+ socket.addEventListener("message",event=>{
+
+  let mensagem;
+
+  try{
+   mensagem=JSON.parse(event.data);
+  }catch(e){
+   return;
   }
 
+  if(mensagem.type==="record_received"){
 
-  const protocolo =
-    location.protocol==="https:" ? "wss://" : "ws://";
+   confirmarRecebimentoLocal(
+    mensagem.recordId,
+    mensagem.receivedAt
+   );
 
-  const url =
-    protocolo + location.host;
+  }
+
+  if(mensagem.type==="confirm_result"&&mensagem.ok){
+
+   confirmarRecebimentoLocal(
+    mensagem.recordId,
+    mensagem.receivedAt
+   );
+
+  }
+
+ });
+
+ socket.addEventListener("close",()=>{
+
+  socketAberto=false;
+
+  clearTimeout(reconnectTimer);
+
+  reconnectTimer=setTimeout(
+   conectarServidor,
+   3000
+  );
+
+ });
+
+ socket.addEventListener("error",()=>{
+  socketAberto=false;
+ });
+
+}
+
+function enviarPendentes(){
+
+ if(!socketAberto)return;
+
+ historico
+ .filter(i=>i.status==="aguardando_mesa")
+ .forEach(registro=>{
+
+  try{
+
+   socket.send(JSON.stringify({
+
+    type:"send_record",
+
+    recordId:registro.recordId,
+
+    record:registro
+
+   }));
+
+  }catch(e){}
+
+ });
+
+}
+
+setInterval(enviarPendentes,5000);
 
 
-  socket = new WebSocket(url);
+/* =========================
+   RECEBIDO
+========================= */
+
+function confirmarRecebimentoLocal(recordId,receivedAt){
+
+ const registro=
+  historico.find(
+   i=>i.recordId===recordId
+  );
+
+ if(!registro)return;
+
+ registro.status="recebido";
+
+ registro.recebidoEm=
+  receivedAt||
+  registro.recebidoEm||
+  new Date().toISOString();
+
+ salvarJSON(STORAGE_HISTORICO,historico);
+
+ renderHistorico();
+
+ mostrarToast(
+  `Recebido pela Mesa: ${registro.nome}`
+ );
+}
 
 
-  socket.addEventListener("open",()=>{
+/* =========================
+   HISTÓRICO
+========================= */
 
-    socketAberto=true;
+function atualizarFiltrosAtendimento(){
 
-    socket.send(JSON.stringify({
-      type:"register",
-      role:"sender"
-    }));
+ const selects=[
+  $("filtroHistoricoAtendimento"),
+  $("filtroArquivoAtendimento")
+ ];
 
+ selects.forEach(select=>{
 
-    /*
-      Reenvia automaticamente todos os
-      atendimentos que ainda aguardam a Mesa.
-    */
+  if(!select)return;
 
-    setTimeout(()=>{
-      enviarPendentes();
-    },500);
+  const atual=select.value;
 
+  select.innerHTML=
+   `<option value="">
+   Todos os atendimentos
+   </option>`;
 
-    mostrarToast("Conectado à Mesa.");
+  ATENDIMENTOS.forEach(nome=>{
+
+   const o=document.createElement("option");
+
+   o.value=nome;
+   o.textContent=nome;
+
+   select.appendChild(o);
 
   });
 
+  select.value=atual;
 
-  socket.addEventListener("message",(event)=>{
+ });
 
-    let mensagem;
+}
 
-    try{
-      mensagem=JSON.parse(event.data);
-    }catch(e){
-      return;
-    }
+function renderHistorico(){
+
+ const body=$("historicoBody");
+
+ const nomeFiltro=
+  normalizar($("filtroHistoricoNome").value);
+
+ const atendimentoFiltro=
+  $("filtroHistoricoAtendimento").value;
+
+ const ordem=
+  $("ordemHistorico").value;
+
+ let dados=[...historico];
+
+ if(nomeFiltro){
+
+  dados=dados.filter(
+   i=>normalizar(i.nome).includes(nomeFiltro)
+  );
+
+ }
+
+ if(atendimentoFiltro){
+
+  dados=dados.filter(
+   i=>i.atendimento===atendimentoFiltro
+  );
+
+ }
+
+ if(ordem==="atendimento"){
+
+  dados.sort((a,b)=>
+   String(a.atendimento).localeCompare(
+    String(b.atendimento),
+    "pt-BR"
+   )
+  );
+
+ }else{
+
+  dados.sort((a,b)=>
+   new Date(a.enviadoEm||a.criadoEm||0)-
+   new Date(b.enviadoEm||b.criadoEm||0)
+  );
+
+ }
+
+ if(!dados.length){
+
+  body.innerHTML=`
+  <tr>
+   <td colspan="12" class="empty">
+    Nenhum atendimento encontrado.
+   </td>
+  </tr>`;
+
+  return;
+ }
+
+ body.innerHTML=dados.map(item=>{
+
+  let status="";
+
+  if(item.status==="aguardando_mesa"){
+
+   status=`
+   <span class="badge badge-await">
+   AGUARDANDO MESA
+   </span>`;
+
+  }else{
+
+   status=`
+   <span class="badge badge-received">
+   RECEBIDO
+   </span>`;
+
+  }
+
+  let acao="";
+
+  /*
+    BOTÃO GUARDAR APENAS PARA RECEBIDOS.
+  */
+
+  if(item.status==="recebido"){
+
+   acao=`
+   <button
+    class="btn-purple btn-small"
+    onclick="guardarAtendimento('${item.recordId}')">
+    🗄️ GUARDAR
+   </button>`;
+
+  }else{
+
+   acao=`
+   <span class="small-note">
+   Aguardando Mesa
+   </span>`;
+
+  }
+
+  return `
+
+  <tr>
+
+   <td>${escapeHtml(item.recordId.slice(0,8))}</td>
+
+   <td>${escapeHtml(item.nome)}</td>
+
+   <td>${escapeHtml(item.rgi)}</td>
+
+   <td>${escapeHtml(item.pavilhao)}</td>
+
+   <td>${escapeHtml(item.cela)}</td>
+
+   <td>${escapeHtml(item.atendimento)}</td>
+
+   <td>${formatarData(item.dataAtendimento)}</td>
+
+   <td>${escapeHtml(item.assunto)}</td>
+
+   <td>${status}</td>
+
+   <td>${formatarDataHora(item.enviadoEm)}</td>
+
+   <td>${formatarDataHora(item.recebidoEm)}</td>
+
+   <td>${acao}</td>
+
+  </tr>`;
+
+ }).join("");
+}
 
 
-    if(mensagem.type==="record_received"){
+/* =========================
+   GUARDAR
+========================= */
 
-      confirmarRecebimentoLocal(
-        mensagem.recordId,
-        mensagem.receivedAt
-      );
+function guardarAtendimento(recordId){
 
-      return;
-    }
+ const indice=
+  historico.findIndex(
+   i=>i.recordId===recordId
+  );
 
+ if(indice<0)return;
 
-    if(mensagem.type==="confirm_result"){
+ const item=historico[indice];
 
-      if(mensagem.ok){
+ if(item.status!=="recebido"){
 
-        confirmarRecebimentoLocal(
-          mensagem.recordId,
-          mensagem.receivedAt
-        );
+  mostrarToast(
+   "Somente atendimentos recebidos podem ser guardados."
+  );
 
-      }
+  return;
+ }
 
-      return;
-    }
+ item.status="guardado";
 
-  });
+ item.guardadoEm=
+  new Date().toISOString();
 
+ /*
+   IMPORTANTE:
+   Remove do histórico.
+ */
 
-  socket.addEventListener("close",()=>{
+ historico.splice(indice,1);
 
-    socketAberto=false;
+ /*
+   Coloca somente no arquivo.
+ */
 
-    clearTimeout(reconnectTimer);
+ const jaExiste=
+  arquivo.some(
+   i=>i.recordId===recordId
+  );
 
-    reconnectTimer=setTimeout(
-      conectarServidor,
-      3000
-    );
+ if(!jaExiste){
 
-  });
+  arquivo.unshift({...item});
 
+ }
 
-  socket.addEventListener("error",()=>{
+ salvarJSON(STORAGE_HISTORICO,historico);
+ salvarJSON(STORAGE_ARQUIVO,arquivo);
 
-    socketAberto=false;
+ renderHistorico();
+ renderGuardados();
+ renderResumoGuardados();
 
-  });
+ mostrarToast("Atendimento guardado.");
 
 }
 
 
-function enviarPendentes(){
+/* =========================
+   GUARDAR TODOS
+========================= */
 
-  if(!socketAberto)return;
+function guardarTodos(){
 
-  const pendentes =
-    historico.filter(
-      item=>item.status==="aguardando_mesa"
-    );
+ const recebidos=
+  historico.filter(
+   i=>i.status==="recebido"
+  );
 
+ if(!recebidos.length){
 
-  for(const registro of pendentes){
+  mostrarToast(
+   "Não há atendimentos recebidos para guardar."
+  );
 
-    try{
+  return;
+ }
 
-      socket.send(JSON.stringify({
+ if(!confirm(
+  `Guardar ${recebidos.length} atendimento(s) recebido(s)?`
+ ))return;
 
-        type:"send_record",
+ const agora=new Date().toISOString();
 
-        recordId:registro.recordId,
+ recebidos.forEach(item=>{
 
-        record:registro
+  item.status="guardado";
 
-      }));
+  item.guardadoEm=agora;
 
-    }catch(e){}
+  const existe=
+   arquivo.some(
+    a=>a.recordId===item.recordId
+   );
+
+  if(!existe){
+
+   arquivo.unshift({...item});
 
   }
+
+ });
+
+ /*
+   Remove TODOS os guardados do histórico.
+ */
+
+ historico=
+  historico.filter(
+   i=>i.status!=="guardado"
+  );
+
+ salvarJSON(STORAGE_HISTORICO,historico);
+ salvarJSON(STORAGE_ARQUIVO,arquivo);
+
+ renderHistorico();
+ renderGuardados();
+ renderResumoGuardados();
+
+ mostrarToast(
+  `${recebidos.length} atendimento(s) guardado(s).`
+ );
+
+}
+
+
+/* =========================
+   GUARDADOS
+========================= */
+
+function renderResumoGuardados(){
+
+ $("resumoGuardados").textContent=
+  `${arquivo.length} atendimento(s) guardado(s).`;
+
+}
+
+function abrirGuardados(){
+
+ $("modalGuardados").classList.remove("hidden");
+
+ renderGuardados();
+
+}
+
+function fecharGuardados(){
+
+ $("modalGuardados").classList.add("hidden");
+
+}
+
+function renderGuardados(){
+
+ const body=$("arquivoBody");
+
+ const nome=
+  normalizar(
+   $("filtroArquivoNome").value
+  );
+
+ const data=
+  $("filtroArquivoData").value;
+
+ const atendimento=
+  $("filtroArquivoAtendimento").value;
+
+ let dados=[...arquivo];
+
+ if(nome){
+
+  dados=dados.filter(
+   i=>normalizar(i.nome).includes(nome)
+  );
+
+ }
+
+ if(data){
+
+  dados=dados.filter(
+   i=>i.dataAtendimento===data
+  );
+
+ }
+
+ if(atendimento){
+
+  dados=dados.filter(
+   i=>i.atendimento===atendimento
+  );
+
+ }
+
+ if(!dados.length){
+
+  body.innerHTML=`
+  <tr>
+   <td colspan="8" class="empty">
+   Nenhum atendimento guardado.
+   </td>
+  </tr>`;
+
+  return;
+ }
+
+ body.innerHTML=dados.map(item=>`
+
+ <tr>
+
+  <td>${escapeHtml(item.nome)}</td>
+  <td>${escapeHtml(item.rgi)}</td>
+  <td>${escapeHtml(item.pavilhao)}</td>
+  <td>${escapeHtml(item.cela)}</td>
+  <td>${escapeHtml(item.atendimento)}</td>
+  <td>${formatarData(item.dataAtendimento)}</td>
+  <td>${escapeHtml(item.assunto)}</td>
+  <td>${formatarDataHora(item.guardadoEm)}</td>
+
+ </tr>
+
+ `).join("");
+
+}
+
+
+/* =========================
+   EXCEL
+========================= */
+
+function abrirArquivoExcel(){
+ $("arquivoExcel").click();
+}
+
+function importarExcel(event){
+
+ const arquivoSelecionado=
+  event.target.files[0];
+
+ if(!arquivoSelecionado)return;
+
+ const leitor=new FileReader();
+
+ leitor.onload=function(e){
+
+  try{
+
+   const bytes=
+    new Uint8Array(e.target.result);
+
+   processarExcel(bytes);
+
+  }catch(error){
+
+   console.error(error);
+
+   mostrarToast(
+    "Não foi possível importar a planilha."
+   );
+
+  }
+
+ };
+
+ leitor.readAsArrayBuffer(
+  arquivoSelecionado
+ );
+
+}
+
+function processarExcel(bytes){
+
+ if(typeof XLSX==="undefined"){
+
+  carregarSheetJS()
+  .then(()=>{
+   processarExcelComXLSX(bytes);
+  })
+  .catch(()=>{
+   mostrarToast(
+    "Não foi possível carregar o leitor Excel."
+   );
+  });
+
+  return;
+ }
+
+ processarExcelComXLSX(bytes);
+}
+
+function carregarSheetJS(){
+
+ return new Promise((resolve,reject)=>{
+
+  const script=document.createElement("script");
+
+  script.src=
+   "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+
+  script.onload=resolve;
+  script.onerror=reject;
+
+  document.head.appendChild(script);
+
+ });
+
+}
+
+function processarExcelComXLSX(bytes){
+
+ try{
+
+  const workbook=
+   XLSX.read(bytes,{type:"array"});
+
+  let encontrados=[];
+
+  for(const sheetName of workbook.SheetNames){
+
+   const sheet=
+    workbook.Sheets[sheetName];
+
+   const linhas=
+    XLSX.utils.sheet_to_json(
+     sheet,
+     {
+      header:1,
+      defval:""
+     }
+    );
+
+   let headerIndex=-1;
+
+   for(let i=0;i<linhas.length;i++){
+
+    const linha=
+     linhas[i].map(x=>normalizar(x));
+
+    if(
+     linha.some(x=>x.includes("nome do interno"))&&
+     linha.some(x=>x.includes("rgi"))&&
+     linha.some(x=>x.includes("pavilhao"))&&
+     linha.some(x=>x.includes("cela"))
+    ){
+
+     headerIndex=i;
+     break;
+
+    }
+
+   }
+
+   if(headerIndex<0)continue;
+
+   const cabecalho=
+    linhas[headerIndex].map(x=>normalizar(x));
+
+   const indice=(nome)=>
+    cabecalho.findIndex(
+     x=>x.includes(nome)
+    );
+
+   const colNome=indice("nome do interno");
+   const colRgi=indice("rgi");
+   const colPav=indice("pavilhao");
+   const colCela=indice("cela");
+
+   for(
+    let i=headerIndex+1;
+    i<linhas.length;
+    i++
+   ){
+
+    const linha=linhas[i];
+
+    const nome=
+     String(linha[colNome]??"").trim();
+
+    if(!nome)continue;
+
+    if(normalizar(nome)==="totais")continue;
+
+    let cela=
+     String(linha[colCela]??"").trim();
+
+    const numero=parseInt(cela,10);
+
+    if(!Number.isNaN(numero)){
+     cela=String(numero).padStart(2,"0");
+    }
+
+    encontrados.push({
+
+     nome,
+
+     rgi:String(
+      linha[colRgi]??""
+     ).trim(),
+
+     pavilhao:String(
+      linha[colPav]??""
+     ).trim(),
+
+     cela
+
+    });
+
+   }
+
+  }
+
+  const mapa=new Map();
+
+  encontrados.forEach(item=>{
+
+   const chave=
+    normalizar(item.nome)+
+    "|"+
+    normalizar(item.rgi);
+
+   if(!mapa.has(chave)){
+    mapa.set(chave,item);
+   }
+
+  });
+
+  baseInternos=[...mapa.values()];
+
+  salvarJSON(
+   STORAGE_BASE,
+   baseInternos
+  );
+
+  salvarJSON(
+   STORAGE_BASE_DATA,
+   {
+    data:new Date().toISOString(),
+    total:baseInternos.length
+   }
+  );
+
+  atualizarBaseStatus();
+
+  mostrarToast(
+   `Base atualizada: ${baseInternos.length} internos.`
+  );
+
+ }catch(error){
+
+  console.error(error);
+
+  mostrarToast(
+   "Erro ao ler a planilha Excel."
+  );
+
+ }
+
+}
+
+function atualizarBaseStatus(){
+
+ const info=
+  lerJSON(
+   STORAGE_BASE_DATA,
+   null
+  );
+
+ if(!baseInternos.length){
+
+  $("baseInfo").textContent=
+   "Base de internos não carregada.";
+
+  $("baseStatus").textContent=
+   "Nenhuma base carregada.";
+
+  return;
+ }
+
+ const texto=
+  `Base atualizada em ${
+   info?formatarDataHora(info.data):""
+  } • ${
+   baseInternos.length
+  } internos cadastrados.`;
+
+ $("baseInfo").textContent=texto;
+ $("baseStatus").textContent=texto;
+
+}
+
+
+/* =========================
+   IMPRESSÃO
+========================= */
+
+function abrirImpressao(){
+
+ atualizarFiltrosImpressao();
+
+ $("dataImpressao").value=dataHoje();
+
+ $("modalImpressao").classList.remove("hidden");
+
+ alterarModoImpressao();
+
+}
+
+function fecharImpressao(){
+ $("modalImpressao").classList.add("hidden");
+}
+
+function alterarModoImpressao(){
+
+ const modo=
+  document.querySelector(
+   'input[name="modoImpressao"]:checked'
+  ).value;
+
+ if(modo==="data"){
+
+  $("grupoData").classList.remove("hidden");
+  $("grupoAtendimento").classList.add("hidden");
+
+ }else{
+
+  $("grupoData").classList.add("hidden");
+  $("grupoAtendimento").classList.remove("hidden");
+
+ }
+
+ if(modo==="geral"){
+
+  document.querySelectorAll(
+   "#listaAtendimentosImpressao input"
+  ).forEach(input=>{
+   input.checked=true;
+  });
+
+ }
+
+ alterarTipoData();
+
+}
+
+function alterarTipoData(){
+
+ const tipo=
+  document.querySelector(
+   'input[name="tipoData"]:checked'
+  ).value;
+
+ $("listaAtendimentosData")
+ .classList.toggle(
+  "hidden",
+  tipo!=="atendimentos"
+ );
+
+}
+
+function atualizarFiltrosImpressao(){
+
+ $("listaAtendimentosImpressao").innerHTML=
+  ATENDIMENTOS.map((a,i)=>`
+
+  <label style="
+   display:block;
+   padding:5px;
+   font-weight:normal;
+   border-bottom:1px solid #eee">
+
+   <input
+    type="checkbox"
+    value="${escapeHtml(a)}"
+    id="printAt_${i}">
+
+   ${escapeHtml(a)}
+
+  </label>
+
+ `).join("");
+
+ $("listaAtendimentosData").innerHTML=
+  ATENDIMENTOS.map(a=>`
+
+  <label style="
+   display:block;
+   padding:5px;
+   font-weight:normal;
+   border-bottom:1px solid #eee">
+
+   <input
+    type="checkbox"
+    value="${escapeHtml(a)}">
+
+   ${escapeHtml(a)}
+
+  </label>
+
+ `).join("");
+
+}
+
+function obterSelecionados(id){
+
+ return [
+  ...document.querySelectorAll(
+   `#${id} input:checked`
+  )
+ ].map(i=>i.value);
 
 }
 
 
 /*
-  Também tenta reenviar periodicamente.
-  Não existe fila visual.
+  IMPORTANTE:
+  Aqui usamos HISTÓRICO + ARQUIVO.
+  Portanto um atendimento guardado continua
+  disponível na impressão por data.
 */
-
-setInterval(()=>{
-  enviarPendentes();
-},5000);
-
-
-/* =========================================================
-   CONFIRMAÇÃO RECEBIDA DA MESA
-========================================================= */
-
-function confirmarRecebimentoLocal(
-  recordId,
-  receivedAt
-){
-
-  if(!recordId)return;
-
-
-  const registro =
-    historico.find(
-      item=>item.recordId===recordId
-    );
-
-
-  if(!registro)return;
-
-
-  registro.status="recebido";
-
-  registro.recebidoEm =
-    receivedAt ||
-    registro.recebidoEm ||
-    new Date().toISOString();
-
-
-  salvarJSON(STORAGE_HISTORICO,historico);
-
-  renderHistorico();
-
-  mostrarToast(
-    `Recebido pela Mesa: ${registro.nome}`
-  );
-
-}
-
-
-/* =========================================================
-   HISTÓRICO
-========================================================= */
-
-function atualizarFiltrosAtendimento(){
-
-  const selects = [
-    $("filtroHistoricoAtendimento"),
-    $("filtroArquivoAtendimento")
-  ];
-
-  for(const select of selects){
-
-    if(!select)continue;
-
-    const atual=select.value;
-
-    select.innerHTML =
-      `<option value="">Todos os atendimentos</option>`;
-
-
-    for(const atendimento of ATENDIMENTOS){
-
-      const option =
-        document.createElement("option");
-
-      option.value=atendimento;
-      option.textContent=atendimento;
-
-      select.appendChild(option);
-
-    }
-
-    select.value=atual;
-  }
-
-}
-
-
-function renderHistorico(){
-
-  const body=$("historicoBody");
-
-  const nomeFiltro =
-    normalizar(
-      $("filtroHistoricoNome").value
-    );
-
-  const atendimentoFiltro =
-    $("filtroHistoricoAtendimento").value;
-
-  const statusFiltro =
-    $("filtroHistoricoStatus").value;
-
-  const ordem =
-    $("ordemHistorico").value;
-
-
-  let dados = [...historico];
-
-
-  if(nomeFiltro){
-
-    dados=dados.filter(
-      item =>
-        normalizar(item.nome)
-          .includes(nomeFiltro)
-    );
-
-  }
-
-
-  if(atendimentoFiltro){
-
-    dados=dados.filter(
-      item =>
-        item.atendimento===atendimentoFiltro
-    );
-
-  }
-
-
-  if(statusFiltro){
-
-    dados=dados.filter(
-      item =>
-        item.status===statusFiltro
-    );
-
-  }
-
-
-  if(ordem==="atendimento"){
-
-    dados.sort((a,b)=>
-      String(a.atendimento).localeCompare(
-        String(b.atendimento),
-        "pt-BR"
-      )
-    );
-
-  }else{
-
-    dados.sort((a,b)=>
-      new Date(a.enviadoEm || a.criadoEm) -
-      new Date(b.enviadoEm || b.criadoEm)
-    );
-
-  }
-
-
-  if(!dados.length){
-
-    body.innerHTML=`
-      <tr>
-        <td colspan="12" class="empty">
-          Nenhum atendimento encontrado.
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-
-  body.innerHTML=dados.map((item)=>{
-
-    let statusHtml="";
-
-
-    if(item.status==="aguardando_mesa"){
-
-      statusHtml=
-        `<span class="badge badge-await">
-          AGUARDANDO MESA
-        </span>`;
-
-    }
-
-    else if(item.status==="recebido"){
-
-      statusHtml=
-        `<span class="badge badge-received">
-          RECEBIDO
-        </span>`;
-
-    }
-
-    else if(item.status==="guardado"){
-
-      statusHtml=
-        `<span class="badge badge-guarded">
-          GUARDADO
-        </span>`;
-
-    }
-
-
-    let acao="";
-
-
-    if(item.status==="recebido"){
-
-      acao=`
-        <button
-          class="btn-purple btn-small"
-          onclick="guardarAtendimento('${item.recordId}')"
-        >
-          🗄️ GUARDAR
-        </button>
-      `;
-
-    }
-
-    else if(item.status==="aguardando_mesa"){
-
-      acao=`
-        <span class="small-note">
-          Aguardando...
-        </span>
-      `;
-
-    }
-
-    else{
-
-      acao=`
-        <span class="small-note">
-          Arquivado
-        </span>
-      `;
-
-    }
-
-
-    return `
-      <tr>
-
-        <td>${escapeHtml(item.recordId.slice(0,8))}</td>
-
-        <td>${escapeHtml(item.nome)}</td>
-
-        <td>${escapeHtml(item.rgi)}</td>
-
-        <td>${escapeHtml(item.pavilhao)}</td>
-
-        <td>${escapeHtml(item.cela)}</td>
-
-        <td>${escapeHtml(item.atendimento)}</td>
-
-        <td>${formatarData(item.dataAtendimento)}</td>
-
-        <td>${escapeHtml(item.assunto)}</td>
-
-        <td class="status">${statusHtml}</td>
-
-        <td>${formatarDataHora(item.enviadoEm)}</td>
-
-        <td>${formatarDataHora(item.recebidoEm)}</td>
-
-        <td>${acao}</td>
-
-      </tr>
-    `;
-
-  }).join("");
-
-}
-
-
-/* =========================================================
-   GUARDAR
-========================================================= */
-
-function guardarAtendimento(recordId){
-
-  const indice =
-    historico.findIndex(
-      item=>item.recordId===recordId
-    );
-
-
-  if(indice<0)return;
-
-
-  const item = historico[indice];
-
-
-  if(item.status!=="recebido"){
-
-    mostrarToast(
-      "O atendimento ainda não foi recebido pela Mesa."
-    );
-
-    return;
-  }
-
-
-  item.status="guardado";
-
-  item.guardadoEm =
-    new Date().toISOString();
-
-
-  /*
-    O registro continua no histórico para
-    manter a rastreabilidade.
-  */
-
-  arquivo.unshift({...item});
-
-
-  historico[indice]=item;
-
-
-  salvarJSON(STORAGE_HISTORICO,historico);
-
-  salvarJSON(STORAGE_ARQUIVO,arquivo);
-
-
-  renderHistorico();
-
-  renderResumoGuardados();
-
-  mostrarToast("Atendimento guardado.");
-
-}
-
-
-function renderResumoGuardados(){
-
-  const total=arquivo.length;
-
-  $("resumoGuardados").textContent =
-    `${total} atendimento(s) guardado(s).`;
-
-}
-
-
-/* =========================================================
-   MODAL GUARDADOS
-========================================================= */
-
-function abrirGuardados(){
-
-  $("modalGuardados").classList.remove("hidden");
-
-  renderGuardados();
-
-}
-
-
-function fecharGuardados(){
-
-  $("modalGuardados").classList.add("hidden");
-
-}
-
-
-function renderGuardados(){
-
-  const body=$("arquivoBody");
-
-  const nome =
-    normalizar(
-      $("filtroArquivoNome").value
-    );
-
-  const data =
-    $("filtroArquivoData").value;
-
-  const atendimento =
-    $("filtroArquivoAtendimento").value;
-
-
-  let dados=[...arquivo];
-
-
-  if(nome){
-
-    dados=dados.filter(
-      item =>
-        normalizar(item.nome).includes(nome)
-    );
-
-  }
-
-
-  if(data){
-
-    dados=dados.filter(
-      item =>
-        item.dataAtendimento===data
-    );
-
-  }
-
-
-  if(atendimento){
-
-    dados=dados.filter(
-      item =>
-        item.atendimento===atendimento
-    );
-
-  }
-
-
-  if(!dados.length){
-
-    body.innerHTML=`
-      <tr>
-        <td colspan="8" class="empty">
-          Nenhum atendimento guardado encontrado.
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-
-  body.innerHTML=dados.map(item=>`
-
-    <tr>
-
-      <td>${escapeHtml(item.nome)}</td>
-
-      <td>${escapeHtml(item.rgi)}</td>
-
-      <td>${escapeHtml(item.pavilhao)}</td>
-
-      <td>${escapeHtml(item.cela)}</td>
-
-      <td>${escapeHtml(item.atendimento)}</td>
-
-      <td>${formatarData(item.dataAtendimento)}</td>
-
-      <td>${escapeHtml(item.assunto)}</td>
-
-      <td>${formatarDataHora(item.guardadoEm)}</td>
-
-    </tr>
-
-  `).join("");
-
-}
-
-
-/* =========================================================
-   BASE EXCEL
-========================================================= */
-
-function abrirArquivoExcel(){
-
-  $("arquivoExcel").click();
-
-}
-
-
-function importarExcel(event){
-
-  const arquivoSelecionado =
-    event.target.files[0];
-
-  if(!arquivoSelecionado)return;
-
-
-  const leitor = new FileReader();
-
-
-  leitor.onload=function(e){
-
-    try{
-
-      const dados =
-        new Uint8Array(e.target.result);
-
-      processarExcel(dados);
-
-    }catch(error){
-
-      console.error(error);
-
-      mostrarToast(
-        "Não foi possível importar a planilha."
-      );
-
-    }
-
-  };
-
-
-  leitor.readAsArrayBuffer(
-    arquivoSelecionado
-  );
-
-}
-
-
-function processarExcel(bytes){
-
-  /*
-    O SheetJS é carregado somente quando
-    necessário.
-  */
-
-  if(typeof XLSX==="undefined"){
-
-    carregarSheetJS()
-      .then(()=>{
-        processarExcelComXLSX(bytes);
-      })
-      .catch(()=>{
-        mostrarToast(
-          "Não foi possível carregar o leitor de Excel."
-        );
-      });
-
-    return;
-  }
-
-
-  processarExcelComXLSX(bytes);
-
-}
-
-
-function carregarSheetJS(){
-
-  return new Promise((resolve,reject)=>{
-
-    const script =
-      document.createElement("script");
-
-    script.src =
-      "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
-
-    script.onload=resolve;
-
-    script.onerror=reject;
-
-    document.head.appendChild(script);
-
-  });
-
-}
-
-
-function processarExcelComXLSX(bytes){
-
-  try{
-
-    const workbook =
-      XLSX.read(bytes,{type:"array"});
-
-    let encontrados=[];
-
-
-    for(const sheetName of workbook.SheetNames){
-
-      const sheet =
-        workbook.Sheets[sheetName];
-
-      const linhas =
-        XLSX.utils.sheet_to_json(
-          sheet,
-          {
-            header:1,
-            defval:""
-          }
-        );
-
-
-      let headerIndex=-1;
-
-
-      for(let i=0;i<linhas.length;i++){
-
-        const linha =
-          linhas[i].map(
-            x=>normalizar(x)
-          );
-
-
-        const temNome =
-          linha.some(
-            x=>x.includes("nome do interno")
-          );
-
-        const temRgi =
-          linha.some(
-            x=>x==="rgi" ||
-            x.includes("rgi")
-          );
-
-        const temPav =
-          linha.some(
-            x=>x.includes("pavilhao")
-          );
-
-        const temCela =
-          linha.some(
-            x=>x.includes("cela")
-          );
-
-
-        if(
-          temNome &&
-          temRgi &&
-          temPav &&
-          temCela
-        ){
-
-          headerIndex=i;
-          break;
-
-        }
-
-      }
-
-
-      if(headerIndex<0)continue;
-
-
-      const cabecalho =
-        linhas[headerIndex].map(
-          x=>normalizar(x)
-        );
-
-
-      function indiceColuna(nome){
-
-        return cabecalho.findIndex(
-          x=>x.includes(nome)
-        );
-
-      }
-
-
-      const colNome =
-        indiceColuna("nome do interno");
-
-      const colRgi =
-        indiceColuna("rgi");
-
-      const colPav =
-        indiceColuna("pavilhao");
-
-      const colCela =
-        indiceColuna("cela");
-
-
-      for(
-        let i=headerIndex+1;
-        i<linhas.length;
-        i++
-      ){
-
-        const linha=linhas[i];
-
-
-        const nome =
-          String(
-            linha[colNome] ?? ""
-          ).trim();
-
-
-        if(!nome)continue;
-
-
-        if(
-          normalizar(nome)==="totais"
-        )continue;
-
-
-        const registro={
-
-          nome,
-
-          rgi:String(
-            linha[colRgi] ?? ""
-          ).trim(),
-
-          pavilhao:String(
-            linha[colPav] ?? ""
-          ).trim(),
-
-          cela:String(
-            linha[colCela] ?? ""
-          ).trim()
-
-        };
-
-
-        if(registro.cela){
-
-          const numero =
-            parseInt(
-              registro.cela,
-              10
-            );
-
-          if(!Number.isNaN(numero)){
-
-            registro.cela =
-              String(numero)
-                .padStart(2,"0");
-
-          }
-
-        }
-
-
-        encontrados.push(registro);
-
-      }
-
-    }
-
-
-    /*
-      Remove duplicidades.
-    */
-
-    const mapa=new Map();
-
-
-    for(const item of encontrados){
-
-      const chave =
-        normalizar(item.nome) +
-        "|" +
-        normalizar(item.rgi);
-
-      if(!mapa.has(chave)){
-        mapa.set(chave,item);
-      }
-
-    }
-
-
-    baseInternos=[...mapa.values()];
-
-
-    salvarJSON(
-      STORAGE_BASE,
-      baseInternos
-    );
-
-
-    const atualizacao={
-      data:new Date().toISOString(),
-      total:baseInternos.length
-    };
-
-
-    salvarJSON(
-      STORAGE_BASE_DATA,
-      atualizacao
-    );
-
-
-    atualizarBaseStatus();
-
-
-    mostrarToast(
-      `Base atualizada: ${baseInternos.length} internos.`
-    );
-
-
-  }catch(error){
-
-    console.error(error);
-
-    mostrarToast(
-      "Erro ao ler a planilha Excel."
-    );
-
-  }
-
-}
-
-
-function atualizarBaseStatus(){
-
-  const info =
-    lerJSON(
-      STORAGE_BASE_DATA,
-      null
-    );
-
-
-  if(!baseInternos.length){
-
-    $("baseInfo").textContent =
-      "Base de internos não carregada.";
-
-    $("baseStatus").textContent =
-      "Nenhuma base carregada.";
-
-    return;
-  }
-
-
-  const texto =
-    `Base atualizada em ${
-      info ? formatarDataHora(info.data) : ""
-    } • ${
-      baseInternos.length
-    } internos cadastrados.`;
-
-
-  $("baseInfo").textContent=texto;
-
-  $("baseStatus").textContent=texto;
-
-}
-
-
-/* =========================================================
-   IMPRESSÃO
-========================================================= */
-
-function abrirImpressao(){
-
-  atualizarFiltrosImpressao();
-
-  $("dataImpressao").value =
-    dataHoje();
-
-  $("modalImpressao").classList.remove("hidden");
-
-  alterarModoImpressao();
-
-}
-
-
-function fecharImpressao(){
-
-  $("modalImpressao").classList.add("hidden");
-
-}
-
-
-function alterarModoImpressao(){
-
-  const modo =
-    document.querySelector(
-      'input[name="modoImpressao"]:checked'
-    ).value;
-
-
-  if(modo==="data"){
-
-    $("grupoData").classList.remove("hidden");
-
-    $("grupoAtendimento").classList.add("hidden");
-
-  }else{
-
-    $("grupoData").classList.add("hidden");
-
-    $("grupoAtendimento").classList.remove("hidden");
-
-  }
-
-
-  if(modo==="geral"){
-
-    document.querySelectorAll(
-      '#listaAtendimentosImpressao input'
-    ).forEach(input=>{
-      input.checked=true;
-    });
-
-  }
-
-
-  alterarTipoData();
-
-}
-
-
-function alterarTipoData(){
-
-  const tipo =
-    document.querySelector(
-      'input[name="tipoData"]:checked'
-    ).value;
-
-
-  const box =
-    $("listaAtendimentosData");
-
-
-  if(tipo==="atendimentos"){
-
-    box.classList.remove("hidden");
-
-  }else{
-
-    box.classList.add("hidden");
-
-  }
-
-}
-
-
-function atualizarFiltrosImpressao(){
-
-  const box =
-    $("listaAtendimentosImpressao");
-
-
-  box.innerHTML=ATENDIMENTOS.map(
-    (atendimento,index)=>`
-
-      <label>
-        <input
-          type="checkbox"
-          value="${escapeHtml(atendimento)}"
-          id="printAt_${index}"
-        >
-        ${escapeHtml(atendimento)}
-      </label>
-
-    `
-  ).join("");
-
-
-  const boxData =
-    $("listaAtendimentosData");
-
-
-  boxData.innerHTML=ATENDIMENTOS.map(
-    (atendimento,index)=>`
-
-      <label>
-        <input
-          type="checkbox"
-          value="${escapeHtml(atendimento)}"
-          id="printDataAt_${index}"
-        >
-        ${escapeHtml(atendimento)}
-      </label>
-
-    `
-  ).join("");
-
-}
-
-
-function obterAtendimentosSelecionados(id){
-
-  return [
-    ...document.querySelectorAll(
-      `#${id} input[type="checkbox"]:checked`
-    )
-  ].map(
-    input=>input.value
-  );
-
-}
-
 
 function obterDadosParaImpressao(){
 
-  const modo =
-    document.querySelector(
-      'input[name="modoImpressao"]:checked'
-    ).value;
+ const modo=
+  document.querySelector(
+   'input[name="modoImpressao"]:checked'
+  ).value;
+
+ const mapa=new Map();
+
+ /*
+   Histórico atual.
+ */
+ historico.forEach(item=>{
+  mapa.set(item.recordId,item);
+ });
+
+ /*
+   Guardados também entram.
+ */
+ arquivo.forEach(item=>{
+  mapa.set(item.recordId,item);
+ });
+
+ let dados=[...mapa.values()];
 
 
-  /*
-    Histórico + guardados.
-    Evita duplicar um guardado que
-    também está no histórico.
-  */
+ if(modo==="atendimento"){
 
-  const mapa=new Map();
+  const escolhidos=
+   obterSelecionados(
+    "listaAtendimentosImpressao"
+   );
+
+  if(!escolhidos.length){
+
+   mostrarToast(
+    "Selecione pelo menos um atendimento."
+   );
+
+   return null;
+  }
+
+  dados=dados.filter(
+   item=>escolhidos.includes(item.atendimento)
+  );
+
+ }
 
 
-  for(const item of historico){
+ if(modo==="geral"){
 
-    mapa.set(
-      item.recordId,
-      item
+  const escolhidos=
+   obterSelecionados(
+    "listaAtendimentosImpressao"
+   );
+
+  if(escolhidos.length){
+
+   dados=dados.filter(
+    item=>escolhidos.includes(item.atendimento)
+   );
+
+  }
+
+ }
+
+
+ if(modo==="data"){
+
+  const data=$("dataImpressao").value;
+
+  if(!data){
+
+   mostrarToast("Selecione a data.");
+
+   return null;
+  }
+
+  dados=dados.filter(
+   item=>item.dataAtendimento===data
+  );
+
+  const tipo=
+   document.querySelector(
+    'input[name="tipoData"]:checked'
+   ).value;
+
+  if(tipo==="atendimentos"){
+
+   const escolhidos=
+    obterSelecionados(
+     "listaAtendimentosData"
     );
 
-  }
+   if(!escolhidos.length){
 
-
-  for(const item of arquivo){
-
-    mapa.set(
-      item.recordId,
-      item
+    mostrarToast(
+     "Selecione pelo menos um atendimento."
     );
 
-  }
+    return null;
+   }
 
-
-  let dados=[...mapa.values()];
-
-
-  if(modo==="atendimento"){
-
-    const selecionados =
-      obterAtendimentosSelecionados(
-        "listaAtendimentosImpressao"
-      );
-
-
-    if(!selecionados.length){
-
-      mostrarToast(
-        "Selecione pelo menos um atendimento."
-      );
-
-      return null;
-    }
-
-
-    dados=dados.filter(
-      item =>
-        selecionados.includes(
-          item.atendimento
-        )
-    );
+   dados=dados.filter(
+    item=>escolhidos.includes(item.atendimento)
+   );
 
   }
 
-
-  if(modo==="geral"){
-
-    const selecionados =
-      obterAtendimentosSelecionados(
-        "listaAtendimentosImpressao"
-      );
+ }
 
 
-    /*
-      Se nenhum for selecionado,
-      imprime todos.
-    */
+ dados.sort((a,b)=>{
 
-    if(selecionados.length){
+  const x=
+   String(a.atendimento)
+   .localeCompare(
+    String(b.atendimento),
+    "pt-BR"
+   );
 
-      dados=dados.filter(
-        item =>
-          selecionados.includes(
-            item.atendimento
-          )
-      );
+  if(x!==0)return x;
 
-    }
+  return String(a.nome)
+   .localeCompare(
+    String(b.nome),
+    "pt-BR"
+   );
 
-  }
+ });
 
-
-  if(modo==="data"){
-
-    const data =
-      $("dataImpressao").value;
-
-
-    if(!data){
-
-      mostrarToast(
-        "Selecione a data."
-      );
-
-      return null;
-    }
-
-
-    dados=dados.filter(
-      item =>
-        item.dataAtendimento===data
-    );
-
-
-    const tipo =
-      document.querySelector(
-        'input[name="tipoData"]:checked'
-      ).value;
-
-
-    if(tipo==="atendimentos"){
-
-      const selecionados =
-        obterAtendimentosSelecionados(
-          "listaAtendimentosData"
-        );
-
-
-      if(!selecionados.length){
-
-        mostrarToast(
-          "Selecione pelo menos um atendimento."
-        );
-
-        return null;
-      }
-
-
-      dados=dados.filter(
-        item =>
-          selecionados.includes(
-            item.atendimento
-          )
-      );
-
-    }
-
-  }
-
-
-  dados.sort((a,b)=>{
-
-    const atendimento =
-      String(a.atendimento)
-        .localeCompare(
-          String(b.atendimento),
-          "pt-BR"
-        );
-
-
-    if(atendimento!==0){
-      return atendimento;
-    }
-
-
-    return String(a.nome)
-      .localeCompare(
-        String(b.nome),
-        "pt-BR"
-      );
-
-  });
-
-
-  return dados;
-
+ return dados;
 }
 
 
 function executarImpressao(){
 
-  const dados =
-    obterDadosParaImpressao();
+ const dados=
+  obterDadosParaImpressao();
+
+ if(!dados)return;
+
+ if(!dados.length){
+
+  mostrarToast(
+   "Nenhum atendimento encontrado para impressão."
+  );
+
+  return;
+ }
+
+ const umPorPagina=
+  $("umPorPagina").checked;
+
+ const grupos=[];
 
 
-  if(!dados)return;
+ if(umPorPagina){
 
+  const mapa=new Map();
 
-  if(!dados.length){
+  dados.forEach(item=>{
 
-    mostrarToast(
-      "Nenhum atendimento encontrado para impressão."
-    );
+   if(!mapa.has(item.atendimento)){
+    mapa.set(item.atendimento,[]);
+   }
 
-    return;
-  }
+   mapa.get(item.atendimento).push(item);
 
+  });
 
-  const modo =
-    document.querySelector(
-      'input[name="modoImpressao"]:checked'
-    ).value;
+  for(const [atendimento,itens] of mapa){
 
-
-  const umPorPagina =
-    $("umPorPagina").checked;
-
-
-  const grupos=[];
-
-
-  if(umPorPagina){
-
-    /*
-      Cada atendimento recebe sua própria página.
-      Não existe uma página inicial com tudo.
-    */
-
-    const mapa=new Map();
-
-
-    for(const item of dados){
-
-      if(!mapa.has(item.atendimento)){
-        mapa.set(
-          item.atendimento,
-          []
-        );
-      }
-
-      mapa.get(item.atendimento).push(item);
-
-    }
-
-
-    for(const [atendimento,itens] of mapa){
-
-      grupos.push({
-        titulo:atendimento,
-        itens
-      });
-
-    }
-
-  }else{
-
-    let titulo="LISTA DE ATENDIMENTOS";
-
-
-    if(modo==="data"){
-
-      titulo =
-        `ATENDIMENTOS DE ${
-          formatarData(
-            $("dataImpressao").value
-          )
-        }`;
-
-    }
-
-
-    grupos.push({
-      titulo,
-      itens:dados
-    });
+   grupos.push({
+    titulo:atendimento,
+    itens
+   });
 
   }
 
+ }else{
 
-  gerarAreaImpressao(grupos);
+  const modo=
+   document.querySelector(
+    'input[name="modoImpressao"]:checked'
+   ).value;
 
+  let titulo="LISTA DE ATENDIMENTOS";
 
-  fecharImpressao();
+  if(modo==="data"){
 
+   titulo=
+    `ATENDIMENTOS DE ${
+     formatarData(
+      $("dataImpressao").value
+     )
+    }`;
 
-  setTimeout(()=>{
+  }
 
-    window.print();
+  grupos.push({
+   titulo,
+   itens:dados
+  });
 
-  },300);
+ }
+
+ gerarAreaImpressao(grupos);
+
+ fecharImpressao();
+
+ /*
+   Uma única chamada de impressão.
+   Sem window.print() repetido.
+ */
+
+ setTimeout(()=>{
+  window.print();
+ },250);
 
 }
 
 
 function gerarAreaImpressao(grupos){
 
-  const area=$("printArea");
+ const area=$("printArea");
 
-  area.innerHTML="";
+ area.innerHTML="";
 
+ grupos.forEach((grupo,index)=>{
 
-  for(const grupo of grupos){
+  const pagina=
+   document.createElement("div");
 
-    const pagina =
-      document.createElement("div");
+  pagina.className="print-page";
 
-    pagina.className="print-page";
+  /*
+    Não colocar altura fixa.
+    Isso evita a página vazia.
+  */
 
+  pagina.innerHTML=`
 
-    const hoje =
-      formatarData(
-        dataHoje()
-      );
+  <div class="print-header">
 
+   <h1>
+    CPAIG - LISTA DE ATENDIMENTOS
+   </h1>
 
-    pagina.innerHTML=`
+   <h2>
+    ${escapeHtml(grupo.titulo)}
+   </h2>
 
-      <div class="print-header">
+   <p>
+    Impressão: ${formatarData(dataHoje())}
+   </p>
 
-        <h1>
-          CPAIG - LISTA DE ATENDIMENTOS
-        </h1>
+  </div>
 
-        <h2>
-          ${escapeHtml(grupo.titulo)}
-        </h2>
+  <table class="print-table">
 
-        <p>
-          Impressão: ${hoje}
-        </p>
+   <thead>
 
-      </div>
+    <tr>
 
-      <table class="print-table">
+     <th>Nome do interno</th>
 
-        <thead>
+     <th>RGI</th>
 
-          <tr>
+     <th class="pavcela">
+      Pav./Cela
+     </th>
 
-            <th>Nome do interno</th>
+     <th>Atendimento</th>
 
-            <th>RGI</th>
+     <th class="data">
+      Data
+     </th>
 
-            <th class="pavcela">
-              Pav./Cela
-            </th>
+     <th>Assunto</th>
 
-            <th>Atendimento</th>
+    </tr>
 
-            <th class="data">
-              Data
-            </th>
+   </thead>
 
-            <th>Assunto</th>
+   <tbody>
 
-          </tr>
+    ${grupo.itens.map(item=>`
 
-        </thead>
+    <tr>
 
-        <tbody>
+     <td>
+      ${escapeHtml(item.nome)}
+     </td>
 
-          ${grupo.itens.map(item=>`
+     <td>
+      ${escapeHtml(item.rgi)}
+     </td>
 
-            <tr>
+     <td class="pavcela">
+      ${escapeHtml(item.pavilhao)}
+      /
+      ${escapeHtml(item.cela)}
+     </td>
 
-              <td>
-                ${escapeHtml(item.nome)}
-              </td>
+     <td>
+      ${escapeHtml(item.atendimento)}
+     </td>
 
-              <td>
-                ${escapeHtml(item.rgi)}
-              </td>
+     <td class="data">
+      ${formatarData(item.dataAtendimento)}
+     </td>
 
-              <td class="pavcela">
-                ${escapeHtml(item.pavilhao)}
-                /
-                ${escapeHtml(item.cela)}
-              </td>
+     <td>
+      ${escapeHtml(item.assunto)}
+     </td>
 
-              <td>
-                ${escapeHtml(item.atendimento)}
-              </td>
+    </tr>
 
-              <td class="data">
-                ${formatarData(
-                  item.dataAtendimento
-                )}
-              </td>
+    `).join("")}
 
-              <td>
-                ${escapeHtml(item.assunto)}
-              </td>
+   </tbody>
 
-            </tr>
+  </table>
 
-          `).join("")}
+  `;
 
-        </tbody>
+  area.appendChild(pagina);
 
-      </table>
-
-    `;
-
-
-    area.appendChild(pagina);
-
-  }
+ });
 
 }
 
 
-/* =========================================================
-   FECHAR MODAIS CLICANDO FORA
-========================================================= */
+/* =========================
+   FECHAR MODAIS
+========================= */
 
 $("modalGuardados").addEventListener(
-  "click",
-  function(event){
-
-    if(event.target===this){
-      fecharGuardados();
-    }
-
-  }
+ "click",
+ function(e){
+  if(e.target===this)fecharGuardados();
+ }
 );
-
 
 $("modalImpressao").addEventListener(
-  "click",
-  function(event){
-
-    if(event.target===this){
-      fecharImpressao();
-    }
-
-  }
+ "click",
+ function(e){
+  if(e.target===this)fecharImpressao();
+ }
 );
 
 </script>
 
-
-<!-- SheetJS para leitura da base Excel -->
-<script
-  src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 </body>
 </html>
