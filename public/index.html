@@ -1,16 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Guichê V2 - Sistema de Atendimento</title>
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Guichê V2 - Sistema de Atendimento
+  </title>
+
 
   <style>
 
     * {
       box-sizing: border-box;
     }
+
 
     body {
       margin: 0;
@@ -19,6 +29,7 @@
       color: #222;
     }
 
+
     header {
       background: #111;
       color: white;
@@ -26,10 +37,12 @@
       text-align: center;
     }
 
+
     header h1 {
       margin: 0;
       font-size: 24px;
     }
+
 
     .cpaig {
       margin-top: 6px;
@@ -38,10 +51,12 @@
       font-weight: bold;
     }
 
+
     .subtitulo {
       margin-top: 8px;
       font-size: 16px;
     }
+
 
     main {
       max-width: 1000px;
@@ -49,13 +64,16 @@
       padding: 0 15px;
     }
 
+
     .card {
       background: white;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.10);
     }
+
 
     .grid {
       display: grid;
@@ -63,19 +81,23 @@
       gap: 15px;
     }
 
+
     .campo {
       display: flex;
       flex-direction: column;
     }
 
+
     .campo.full {
       grid-column: 1 / -1;
     }
+
 
     label {
       font-weight: bold;
       margin-bottom: 6px;
     }
+
 
     input,
     select {
@@ -87,33 +109,24 @@
       background: white;
     }
 
-    .campo-atendimento-data {
+
+    .atendimento-data {
       display: grid;
       grid-template-columns: 1fr 190px;
       gap: 10px;
     }
 
-    .campo-data {
-      display: flex;
-      flex-direction: column;
-    }
 
     .linha-data {
       display: flex;
       gap: 6px;
     }
 
+
     .linha-data input {
       min-width: 0;
     }
 
-    .btn-hoje {
-      padding: 10px 12px;
-      background: #555;
-      color: white;
-      border-radius: 8px;
-      white-space: nowrap;
-    }
 
     button {
       border: none;
@@ -124,6 +137,14 @@
       cursor: pointer;
     }
 
+
+    .btn-hoje {
+      background: #555;
+      color: white;
+      white-space: nowrap;
+    }
+
+
     .botoes {
       display: flex;
       gap: 10px;
@@ -131,20 +152,24 @@
       flex-wrap: wrap;
     }
 
+
     .btn-adicionar {
       background: #333;
       color: white;
     }
+
 
     .btn-enviar {
       background: #16803c;
       color: white;
     }
 
+
     .btn-imprimir {
       background: #1769aa;
       color: white;
     }
+
 
     .status {
       padding: 12px;
@@ -153,15 +178,18 @@
       font-weight: bold;
     }
 
+
     .status.online {
       background: #d9f5df;
       color: #176b2e;
     }
 
+
     .status.offline {
       background: #ffe0e0;
       color: #9b1c1c;
     }
+
 
     .fila-item,
     .historico-item {
@@ -172,6 +200,7 @@
       background: #fafafa;
     }
 
+
     .historico-topo {
       display: flex;
       justify-content: space-between;
@@ -180,10 +209,12 @@
       margin-bottom: 8px;
     }
 
+
     .nome {
       font-weight: bold;
       font-size: 18px;
     }
+
 
     .badge {
       display: inline-block;
@@ -193,15 +224,18 @@
       font-weight: bold;
     }
 
+
     .badge.pendente {
       background: #ffe4a3;
       color: #765300;
     }
 
+
     .badge.recebido {
       background: #ccefd4;
       color: #176b2e;
     }
+
 
     .controles-historico {
       display: flex;
@@ -211,19 +245,25 @@
       flex-wrap: wrap;
     }
 
+
     .controles-historico label {
       margin: 0;
     }
 
+
     .controles-historico select {
       max-width: 240px;
     }
+
 
     .vazio {
       color: #777;
       text-align: center;
       padding: 20px;
     }
+
+
+    /* MODAL DE IMPRESSÃO */
 
     .modal-fundo {
       display: none;
@@ -238,17 +278,20 @@
       padding: 20px;
     }
 
+
     .modal {
       background: white;
-      max-width: 650px;
+      max-width: 700px;
       margin: 30px auto;
       border-radius: 12px;
       padding: 20px;
     }
 
+
     .modal h2 {
       margin-top: 0;
     }
+
 
     .opcao-impressao {
       border: 1px solid #ddd;
@@ -257,10 +300,63 @@
       margin-bottom: 10px;
     }
 
-    .opcao-impressao label {
+
+    .opcao-impressao > label {
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 7px;
     }
+
+
+    .lista-selecao {
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      padding: 5px;
+      background: #fff;
+    }
+
+
+    .item-selecao {
+      display: block;
+      padding: 8px;
+      margin: 0;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: normal;
+    }
+
+
+    .item-selecao:hover {
+      background: #f1f1f1;
+    }
+
+
+    .item-selecao input {
+      width: auto;
+      margin-right: 8px;
+    }
+
+
+    .radio-linha {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+
+    .radio-linha label {
+      font-weight: normal;
+      margin: 0;
+    }
+
+
+    .radio-linha input {
+      width: auto;
+      margin-right: 5px;
+    }
+
 
     .modal-botoes {
       display: flex;
@@ -269,14 +365,17 @@
       margin-top: 20px;
     }
 
+
     .btn-cancelar {
       background: #777;
       color: white;
     }
 
+
     #areaImpressao {
       display: none;
     }
+
 
     @media (max-width: 700px) {
 
@@ -288,11 +387,14 @@
         grid-column: auto;
       }
 
-      .campo-atendimento-data {
+      .atendimento-data {
         grid-template-columns: 1fr;
       }
 
     }
+
+
+    /* IMPRESSÃO */
 
     @media print {
 
@@ -300,10 +402,12 @@
         visibility: hidden !important;
       }
 
+
       #areaImpressao,
       #areaImpressao * {
         visibility: visible !important;
       }
+
 
       #areaImpressao {
         display: block !important;
@@ -311,38 +415,45 @@
         left: 0;
         top: 0;
         width: 100%;
-        padding: 8mm;
+        padding: 4mm;
       }
+
 
       .print-cabecalho {
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 7px;
       }
+
 
       .print-cabecalho h1 {
-        font-size: 16px;
-        margin: 0 0 4px 0;
+        font-size: 15px;
+        margin: 0 0 3px 0;
       }
+
 
       .print-data {
-        font-size: 12px;
-        margin-bottom: 8px;
+        font-size: 11px;
+        margin-bottom: 5px;
       }
 
+
       .print-grupo {
-        margin-bottom: 10px;
+        margin-bottom: 7px;
       }
+
 
       .print-grupo.pagina {
         page-break-after: always;
       }
 
+
       .print-grupo h2 {
-        font-size: 13px;
-        margin: 5px 0;
-        padding-bottom: 3px;
+        font-size: 12px;
+        margin: 4px 0;
+        padding-bottom: 2px;
         border-bottom: 1px solid #000;
       }
+
 
       .print-tabela {
         width: 100%;
@@ -350,68 +461,75 @@
         table-layout: fixed;
       }
 
+
       .print-tabela th,
       .print-tabela td {
         border: 1px solid #000;
         padding: 2px 3px;
-        font-size: 9px;
-        line-height: 1.15;
+        font-size: 8.5px;
+        line-height: 1.1;
+        word-wrap: break-word;
       }
+
 
       .print-tabela th {
         font-weight: bold;
       }
 
+
       .col-nome {
-        width: 34%;
+        width: 32%;
       }
 
+
       .col-rgi {
-        width: 16%;
+        width: 14%;
       }
+
 
       .col-pavilhao {
         width: 9%;
-        text-align: center;
+        text-align: center !important;
       }
+
 
       .col-cela {
-        width: 7%;
-        text-align: center;
+        width: 6%;
+        text-align: center !important;
       }
+
 
       .col-atendimento {
-        width: 20%;
+        width: 24%;
       }
+
 
       .col-data {
-        width: 14%;
-        text-align: center;
+        width: 15%;
+        text-align: center !important;
       }
 
-      .print-tabela th.col-pavilhao,
-      .print-tabela td.col-pavilhao,
-      .print-tabela th.col-cela,
-      .print-tabela td.col-cela {
-        text-align: center;
-        padding-left: 1px;
-        padding-right: 1px;
-      }
 
       @page {
         size: A4;
-        margin: 8mm;
+        margin: 5mm;
       }
+
     }
 
   </style>
+
 </head>
+
 
 <body>
 
+
 <header>
 
-  <h1>POLÍCIA PENAL DE MATO GROSSO DO SUL</h1>
+  <h1>
+    POLÍCIA PENAL DE MATO GROSSO DO SUL
+  </h1>
 
   <div class="cpaig">
     CPAIG
@@ -426,6 +544,7 @@
 
 <main>
 
+
   <div
     id="status"
     class="status offline"
@@ -436,9 +555,13 @@
 
   <section class="card">
 
-    <h2>Novo atendimento</h2>
+    <h2>
+      Novo atendimento
+    </h2>
+
 
     <div class="grid">
+
 
       <div class="campo">
 
@@ -494,7 +617,9 @@
           <option value="DISCIPLINAR RISCO">
             DISCIPLINAR RISCO
           </option>
-          <option value="CP">CP</option>
+          <option value="CP">
+            CP
+          </option>
           <option value="VIRTUAL">
             VIRTUAL
           </option>
@@ -521,13 +646,15 @@
       </div>
 
 
-      <div class="campo">
+      <div class="campo full">
 
         <label>
           Atendimento e data
         </label>
 
-        <div class="campo-atendimento-data">
+
+        <div class="atendimento-data">
+
 
           <select id="atendimento">
 
@@ -565,26 +692,23 @@
           </select>
 
 
-          <div class="campo-data">
+          <div class="linha-data">
 
-            <div class="linha-data">
+            <input
+              type="date"
+              id="dataAtendimento"
+            >
 
-              <input
-                type="date"
-                id="dataAtendimento"
-              >
-
-              <button
-                type="button"
-                class="btn-hoje"
-                onclick="colocarHoje()"
-              >
-                HOJE
-              </button>
-
-            </div>
+            <button
+              type="button"
+              class="btn-hoje"
+              onclick="colocarHoje()"
+            >
+              HOJE
+            </button>
 
           </div>
+
 
         </div>
 
@@ -606,10 +730,12 @@
 
       </div>
 
+
     </div>
 
 
     <div class="botoes">
+
 
       <button
         class="btn-adicionar"
@@ -634,6 +760,7 @@
         🖨️ IMPRIMIR
       </button>
 
+
     </div>
 
   </section>
@@ -641,7 +768,9 @@
 
   <section class="card">
 
-    <h2>Fila atual</h2>
+    <h2>
+      Fila atual
+    </h2>
 
     <div id="fila"></div>
 
@@ -653,6 +782,7 @@
     <h2>
       Histórico de atendimentos enviados
     </h2>
+
 
     <div class="controles-historico">
 
@@ -677,14 +807,16 @@
 
     </div>
 
+
     <div id="historico"></div>
 
   </section>
 
+
 </main>
 
 
-<!-- PAINEL DE IMPRESSÃO -->
+<!-- MODAL DE IMPRESSÃO -->
 
 <div
   id="modalImpressao"
@@ -692,6 +824,7 @@
 >
 
   <div class="modal">
+
 
     <h2>
       Opções de impressão
@@ -703,6 +836,7 @@
       <label for="tipoImpressao">
         Tipo de impressão
       </label>
+
 
       <select
         id="tipoImpressao"
@@ -726,193 +860,94 @@
     </div>
 
 
+    <!-- POR ATENDIMENTO -->
+
     <div
       id="opcaoAtendimento"
       class="opcao-impressao"
     >
 
-      <label for="filtroAtendimento">
-        Escolha o atendimento
+      <label>
+        Escolha um ou mais atendimentos
       </label>
 
-<div
-  id="listaAtendimentos"
-  style="
-    max-height:220px;
-    overflow-y:auto;
-    border:1px solid #bbb;
-    border-radius:8px;
-    padding:8px;
-    background:#fff;
-  "
->
-</div>
+
+      <div
+        id="listaAtendimentos"
+        class="lista-selecao"
+      ></div>
 
     </div>
 
 
-<div
-  id="opcaoData"
-  class="opcao-impressao"
-  style="display:none;"
->
+    <!-- POR DATA -->
 
-  <label for="filtroData">
-    Escolha a data
-  </label>
-
-  <input
-    type="date"
-    id="filtroData"
-  >
-
-  <div style="margin-top:12px;">
-
-    <label>
-      <input
-        type="radio"
-        name="modoData"
-        value="todos"
-        checked
-        onchange="atualizarModoData()"
-      >
-      Todos
-    </label>
-
-    <label
-      style="margin-left:15px;"
+    <div
+      id="opcaoData"
+      class="opcao-impressao"
+      style="display:none;"
     >
+
+      <label for="filtroData">
+        Escolha a data
+      </label>
+
+
       <input
-        type="radio"
-        name="modoData"
-        value="atendimentos"
-        onchange="atualizarModoData()"
+        type="date"
+        id="filtroData"
+        onchange="atualizarAtendimentosDaData()"
       >
-      Atendimentos
-    </label>
-
-  </div>
 
 
-  <div
-    id="atendimentosData"
-    style="
-      display:none;
-      margin-top:10px;
-      max-height:180px;
-      overflow-y:auto;
-      border:1px solid #bbb;
-      border-radius:8px;
-      padding:8px;
-    "
-  >
-  </div>
-function atualizarModoData() {
+      <div class="radio-linha">
 
-  const modo =
-    document.querySelector(
-      'input[name="modoData"]:checked'
-    )?.value ||
-    "todos";
-
-
-  const area =
-    document.getElementById(
-      "atendimentosData"
-    );
-
-
-  if (
-    modo !== "atendimentos"
-  ) {
-
-    area.style.display =
-      "none";
-
-    return;
-  }
-
-
-  area.style.display =
-    "block";
-
-
-  const data =
-    document.getElementById(
-      "filtroData"
-    ).value;
-
-
-  const atendimentos =
-    [
-      ...new Set(
-        historico
-          .filter(
-            item =>
-              item.dataAtendimento ===
-              data
-          )
-          .map(
-            item =>
-              item.atendimento
-          )
-          .filter(Boolean)
-      )
-    ]
-    .sort(
-      (a,b) =>
-        a.localeCompare(
-          b,
-          "pt-BR"
-        )
-    );
-
-
-  area.innerHTML = "";
-
-
-  atendimentos.forEach(
-    atendimento => {
-
-      area.innerHTML += `
-
-        <label
-          style="
-            display:block;
-            padding:6px;
-          "
-        >
+        <label>
 
           <input
-            type="checkbox"
-            class="filtro-atendimento-data"
-            value="${escapeHtml(atendimento)}"
+            type="radio"
+            name="modoData"
+            value="todos"
+            checked
+            onchange="atualizarModoData()"
           >
 
-          ${escapeHtml(atendimento)}
+          Todos
 
         </label>
 
-      `;
-    }
-  );
-}
+
+        <label>
+
+          <input
+            type="radio"
+            name="modoData"
+            value="atendimentos"
+            onchange="atualizarModoData()"
+          >
+
+          Atendimentos
+
+        </label>
+
+      </div>
+
+
+      <div
+        id="atendimentosData"
+        class="lista-selecao"
+        style="display:none;margin-top:10px;"
+      ></div>
 
     </div>
 
 
-<div
-  id="opcaoPagina"
-  class="opcao-impressao"
->
-  <label>
-    <input
-      type="checkbox"
-      id="umPorPagina"
+    <!-- PAGINAÇÃO -->
+
+    <div
+      id="opcaoPagina"
+      class="opcao-impressao"
     >
-    Um atendimento por página
-  </label>
-</div>
 
       <label>
 
@@ -947,6 +982,7 @@ function atualizarModoData() {
 
     </div>
 
+
   </div>
 
 </div>
@@ -957,12 +993,17 @@ function atualizarModoData() {
 
 <script>
 
+
   const WS_URL =
-    (location.protocol === "https:" ? "wss://" : "ws://") +
+    (location.protocol === "https:"
+      ? "wss://"
+      : "ws://") +
     location.host;
 
 
   let ws = null;
+
+  let reconectando = false;
 
   let fila = [];
 
@@ -984,39 +1025,66 @@ function atualizarModoData() {
 
 
   const nomeEl =
-    document.getElementById("nome");
+    document.getElementById(
+      "nome"
+    );
+
 
   const rgiEl =
-    document.getElementById("rgi");
+    document.getElementById(
+      "rgi"
+    );
+
 
   const pavilhaoEl =
-    document.getElementById("pavilhao");
+    document.getElementById(
+      "pavilhao"
+    );
+
 
   const celaEl =
-    document.getElementById("cela");
+    document.getElementById(
+      "cela"
+    );
+
 
   const atendimentoEl =
-    document.getElementById("atendimento");
+    document.getElementById(
+      "atendimento"
+    );
+
 
   const dataAtendimentoEl =
     document.getElementById(
       "dataAtendimento"
     );
 
+
   const assuntoEl =
-    document.getElementById("assunto");
+    document.getElementById(
+      "assunto"
+    );
+
 
   const statusEl =
-    document.getElementById("status");
+    document.getElementById(
+      "status"
+    );
+
 
   const filaEl =
-    document.getElementById("fila");
+    document.getElementById(
+      "fila"
+    );
+
 
   const historicoEl =
-    document.getElementById("historico");
+    document.getElementById(
+      "historico"
+    );
 
 
-  // Criar celas 01 a 120
+  /* CELAS 01 A 120 */
 
   for (
     let i = 1;
@@ -1025,15 +1093,25 @@ function atualizarModoData() {
   ) {
 
     const numero =
-      String(i).padStart(2, "0");
+      String(i).padStart(
+        2,
+        "0"
+      );
+
 
     const option =
       document.createElement(
         "option"
       );
 
-    option.value = numero;
-    option.textContent = numero;
+
+    option.value =
+      numero;
+
+
+    option.textContent =
+      numero;
+
 
     celaEl.appendChild(
       option
@@ -1046,20 +1124,18 @@ function atualizarModoData() {
     const agora =
       new Date();
 
-    const ano =
-      agora.getFullYear();
 
-    const mes =
+    return (
+      agora.getFullYear() +
+      "-" +
       String(
         agora.getMonth() + 1
-      ).padStart(2, "0");
-
-    const dia =
+      ).padStart(2, "0") +
+      "-" +
       String(
         agora.getDate()
-      ).padStart(2, "0");
-
-    return `${ano}-${mes}-${dia}`;
+      ).padStart(2, "0")
+    );
   }
 
 
@@ -1067,20 +1143,23 @@ function atualizarModoData() {
 
     dataAtendimentoEl.value =
       dataHoje();
-
   }
 
 
-  function formatarData(
-    data
-  ) {
+  dataAtendimentoEl.value =
+    dataHoje();
+
+
+  function formatarData(data) {
 
     if (!data) {
       return "-";
     }
 
+
     const partes =
       String(data).split("-");
+
 
     if (
       partes.length === 3
@@ -1094,6 +1173,7 @@ function atualizarModoData() {
         partes[0]
       );
     }
+
 
     return new Date(
       data
@@ -1133,8 +1213,8 @@ function atualizarModoData() {
     ) {
 
       return crypto.randomUUID();
-
     }
+
 
     return (
       Date.now().toString(36) +
@@ -1170,6 +1250,19 @@ function atualizarModoData() {
 
   function conectar() {
 
+    if (
+      ws &&
+      (
+        ws.readyState ===
+        WebSocket.OPEN ||
+        ws.readyState ===
+        WebSocket.CONNECTING
+      )
+    ) {
+      return;
+    }
+
+
     try {
 
       ws =
@@ -1180,16 +1273,30 @@ function atualizarModoData() {
 
       ws.onopen = () => {
 
+        reconectando =
+          false;
+
+
         atualizarStatus(
           true
         );
 
+
         ws.send(
           JSON.stringify({
-            type: "register",
-            role: "sender"
+            type:
+              "register",
+
+            role:
+              "sender"
           })
         );
+
+
+        /*
+         * Reenvia imediatamente
+         * tudo que ainda está pendente.
+         */
 
         enviarPendentes();
       };
@@ -1200,6 +1307,7 @@ function atualizarModoData() {
       ) => {
 
         let mensagem;
+
 
         try {
 
@@ -1248,7 +1356,6 @@ function atualizarModoData() {
 
           renderHistorico();
         }
-
       };
 
 
@@ -1258,10 +1365,27 @@ function atualizarModoData() {
           false
         );
 
-        setTimeout(
-          conectar,
-          3000
-        );
+
+        if (
+          !reconectando
+        ) {
+
+          reconectando =
+            true;
+
+
+          setTimeout(
+            () => {
+
+              reconectando =
+                false;
+
+              conectar();
+
+            },
+            500
+          );
+        }
       };
 
 
@@ -1279,9 +1403,10 @@ function atualizarModoData() {
         false
       );
 
+
       setTimeout(
         conectar,
-        3000
+        500
       );
     }
   }
@@ -1304,6 +1429,7 @@ function atualizarModoData() {
 
       ws.send(
         JSON.stringify({
+
           type:
             "send_record",
 
@@ -1312,6 +1438,7 @@ function atualizarModoData() {
 
           record:
             item.record
+
         })
       );
     }
@@ -1323,21 +1450,27 @@ function atualizarModoData() {
     const nome =
       nomeEl.value.trim();
 
+
     const rgi =
       rgiEl.value.trim();
+
 
     const pavilhao =
       pavilhaoEl.value;
 
+
     const cela =
       celaEl.value;
+
 
     const atendimento =
       atendimentoEl.value;
 
+
     const dataAtendimento =
       dataAtendimentoEl.value ||
       dataHoje();
+
 
     const assunto =
       assuntoEl.value.trim();
@@ -1504,6 +1637,7 @@ function atualizarModoData() {
 
           assunto:
             item.assunto
+
         };
 
 
@@ -1542,6 +1676,7 @@ function atualizarModoData() {
 
 
     fila = [];
+
 
     renderFila();
 
@@ -1612,7 +1747,7 @@ function atualizarModoData() {
       historico
         .slice()
         .sort(
-          (a, b) => {
+          (a,b) => {
 
             if (
               ordem ===
@@ -1628,6 +1763,7 @@ function atualizarModoData() {
                   ),
                   "pt-BR"
                 );
+
 
               if (
                 cmp !== 0
@@ -1650,120 +1786,118 @@ function atualizarModoData() {
 
 
     historicoEl.innerHTML =
-      lista
-        .map(
-          item => {
+      lista.map(
+        item => `
 
-            const pendente =
-              !item.recebidoEm;
+          <div class="historico-item">
 
+            <div class="historico-topo">
 
-            return `
-
-              <div class="historico-item">
-
-                <div class="historico-topo">
-
-                  <div class="nome">
-                    ${escapeHtml(
-                      item.nome
-                    )}
-                  </div>
-
-                  <span
-                    class="badge ${
-                      pendente
-                        ? "pendente"
-                        : "recebido"
-                    }"
-                  >
-                    ${
-                      pendente
-                        ? "PENDENTE"
-                        : "RECEBIDO"
-                    }
-                  </span>
-
-                </div>
-
-                <div>
-                  RGI:
-                  ${escapeHtml(
-                    item.rgi
-                  )}
-                </div>
-
-                <div>
-                  Pavilhão:
-                  ${escapeHtml(
-                    item.pavilhao
-                  )}
-                  —
-                  Cela:
-                  ${escapeHtml(
-                    item.cela
-                  )}
-                </div>
-
-                <div>
-                  Atendimento:
-                  <strong>
-                    ${escapeHtml(
-                      item.atendimento
-                    )}
-                  </strong>
-                </div>
-
-                <div>
-                  Data do atendimento:
-                  <strong>
-                    ${formatarData(
-                      item.dataAtendimento
-                    )}
-                  </strong>
-                </div>
-
-                ${
-                  item.assunto
-                    ? `
-                      <div>
-                        Assunto:
-                        ${escapeHtml(
-                          item.assunto
-                        )}
-                      </div>
-                    `
-                    : ""
-                }
-
-                <div>
-                  Enviado:
-                  ${new Date(
-                    item.enviadoEm
-                  ).toLocaleString(
-                    "pt-BR"
-                  )}
-                </div>
-
-                <div>
-                  Recebido:
-                  ${
-                    item.recebidoEm
-                      ? new Date(
-                          item.recebidoEm
-                        ).toLocaleString(
-                          "pt-BR"
-                        )
-                      : "Aguardando MESA"
-                  }
-                </div>
-
+              <div class="nome">
+                ${escapeHtml(
+                  item.nome
+                )}
               </div>
 
-            `;
-          }
-        )
-        .join("");
+              <span
+                class="badge ${
+                  item.recebidoEm
+                    ? "recebido"
+                    : "pendente"
+                }"
+              >
+                ${
+                  item.recebidoEm
+                    ? "RECEBIDO"
+                    : "PENDENTE"
+                }
+              </span>
+
+            </div>
+
+
+            <div>
+              RGI:
+              ${escapeHtml(
+                item.rgi
+              )}
+            </div>
+
+
+            <div>
+              Pavilhão:
+              ${escapeHtml(
+                item.pavilhao
+              )}
+              —
+              Cela:
+              ${escapeHtml(
+                item.cela
+              )}
+            </div>
+
+
+            <div>
+              Atendimento:
+              <strong>
+                ${escapeHtml(
+                  item.atendimento
+                )}
+              </strong>
+            </div>
+
+
+            <div>
+              Data do atendimento:
+              <strong>
+                ${formatarData(
+                  item.dataAtendimento
+                )}
+              </strong>
+            </div>
+
+
+            ${
+              item.assunto
+                ? `
+                  <div>
+                    Assunto:
+                    ${escapeHtml(
+                      item.assunto
+                    )}
+                  </div>
+                `
+                : ""
+            }
+
+
+            <div>
+              Enviado:
+              ${new Date(
+                item.enviadoEm
+              ).toLocaleString(
+                "pt-BR"
+              )}
+            </div>
+
+
+            <div>
+              Recebido:
+              ${
+                item.recebidoEm
+                  ? new Date(
+                      item.recebidoEm
+                    ).toLocaleString(
+                      "pt-BR"
+                    )
+                  : "Aguardando MESA"
+              }
+            </div>
+
+          </div>
+
+        `
+      ).join("");
   }
 
 
@@ -1797,23 +1931,29 @@ function atualizarModoData() {
   }
 
 
-  /*
-   * IMPRESSÃO
-   */
+  /* =========================
+     IMPRESSÃO
+     ========================= */
+
 
   function abrirImpressao() {
 
-    preencherFiltroAtendimento();
+    preencherListaAtendimentos();
 
     document.getElementById(
       "filtroData"
     ).value =
       dataHoje();
 
+
+    atualizarAtendimentosDaData();
+
+
     document.getElementById(
       "modalImpressao"
     ).style.display =
       "block";
+
 
     atualizarOpcoesImpressao();
   }
@@ -1828,202 +1968,158 @@ function atualizarModoData() {
   }
 
 
-function preencherFiltroAtendimento() {
+  function preencherListaAtendimentos() {
 
-  const container =
-    document.getElementById(
-      "listaAtendimentos"
-    );
+    const container =
+      document.getElementById(
+        "listaAtendimentos"
+      );
 
-  container.innerHTML = "";
-
-
-  const atendimentos =
-    [
-      ...new Set(
-        historico
-          .map(
-            x => x.atendimento
-          )
-          .filter(Boolean)
-      )
-    ]
-    .sort(
-      (a, b) =>
-        a.localeCompare(
-          b,
-          "pt-BR"
-        )
-    );
-
-
-  if (!atendimentos.length) {
 
     container.innerHTML =
-      '<div style="color:#777;padding:8px;">Nenhum atendimento disponível.</div>';
-
-    return;
-  }
+      "";
 
 
-  atendimentos.forEach(
-    atendimento => {
-
-      const label =
-        document.createElement(
-          "label"
-        );
-
-      label.style.display =
-        "block";
-
-      label.style.padding =
-        "8px";
-
-      label.style.cursor =
-        "pointer";
-
-
-      const checkbox =
-        document.createElement(
-          "input"
-        );
-
-      checkbox.type =
-        "checkbox";
-
-      checkbox.value =
-        atendimento;
-
-      checkbox.className =
-        "filtro-atendimento";
-
-
-      label.appendChild(
-        checkbox
-      );
-
-      label.appendChild(
-        document.createTextNode(
-          " " + atendimento
-        )
-      );
-
-
-      container.appendChild(
-        label
-      );
-    }
-  );
-}
-
-
-function atualizarOpcoesImpressao() {
-
-  const tipo =
-    document.getElementById(
-      "tipoImpressao"
-    ).value;
-
-
-  document.getElementById(
-    "opcaoAtendimento"
-  ).style.display =
-    tipo === "atendimento"
-      ? "block"
-      : "none";
-
-
-  document.getElementById(
-    "opcaoData"
-  ).style.display =
-    tipo === "data"
-      ? "block"
-      : "none";
-
-
-  /*
-   * Agora "um por página"
-   * aparece em TODAS as modalidades.
-   */
-  document.getElementById(
-    "opcaoPagina"
-  ).style.display =
-    "block";
-}
-
-
-function executarImpressao() {
-
-  const tipo =
-    document.getElementById(
-      "tipoImpressao"
-    ).value;
-
-
-  let registros = [];
-
-
-  /*
-   * POR ATENDIMENTO
-   * Permite selecionar vários.
-   */
-  if (
-    tipo === "atendimento"
-  ) {
-
-    const selecionados =
+    const atendimentos =
       [
-        ...document.querySelectorAll(
-          ".filtro-atendimento:checked"
+        ...new Set(
+          historico
+            .map(
+              x =>
+                x.atendimento
+            )
+            .filter(Boolean)
         )
       ]
-      .map(
-        checkbox =>
-          checkbox.value
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "pt-BR"
+          )
       );
 
 
-    if (
-      !selecionados.length
-    ) {
+    if (!atendimentos.length) {
 
-      alert(
-        "Selecione pelo menos um atendimento."
-      );
+      container.innerHTML =
+        '<div class="vazio">Nenhum atendimento disponível.</div>';
 
       return;
     }
 
 
-    registros =
-      historico.filter(
-        item =>
-          selecionados.includes(
-            item.atendimento
-          )
+    atendimentos.forEach(
+      atendimento => {
+
+        container.innerHTML += `
+
+          <label class="item-selecao">
+
+            <input
+              type="checkbox"
+              class="filtro-atendimento"
+              value="${escapeHtml(
+                atendimento
+              )}"
+            >
+
+            ${escapeHtml(
+              atendimento
+            )}
+
+          </label>
+
+        `;
+      }
+    );
+  }
+
+
+  function atualizarOpcoesImpressao() {
+
+    const tipo =
+      document.getElementById(
+        "tipoImpressao"
+      ).value;
+
+
+    document.getElementById(
+      "opcaoAtendimento"
+    ).style.display =
+      tipo === "atendimento"
+        ? "block"
+        : "none";
+
+
+    document.getElementById(
+      "opcaoData"
+    ).style.display =
+      tipo === "data"
+        ? "block"
+        : "none";
+
+
+    /*
+     * Disponível em TODOS os modos.
+     */
+
+    document.getElementById(
+      "opcaoPagina"
+    ).style.display =
+      "block";
+
+
+    if (
+      tipo === "data"
+    ) {
+
+      atualizarModoData();
+    }
+  }
+
+
+  function atualizarModoData() {
+
+    const modo =
+      document.querySelector(
+        'input[name="modoData"]:checked'
+      )?.value ||
+      "todos";
+
+
+    const area =
+      document.getElementById(
+        "atendimentosData"
       );
+
+
+    if (
+      modo === "todos"
+    ) {
+
+      area.style.display =
+        "none";
+
+      return;
+    }
+
+
+    area.style.display =
+      "block";
+
+
+    atualizarAtendimentosDaData();
   }
 
 
-  /*
-   * ATENDIMENTO GERAL
-   */
-  if (
-    tipo === "geral"
-  ) {
+  function atualizarAtendimentosDaData() {
 
-    registros =
-      historico.slice();
-  }
+    const area =
+      document.getElementById(
+        "atendimentosData"
+      );
 
-
-  /*
-   * POR DATA
-   */
-  if (
-    tipo === "data"
-  ) {
 
     const data =
       document.getElementById(
@@ -2031,45 +2127,94 @@ function executarImpressao() {
       ).value;
 
 
-    if (!data) {
-
-      alert(
-        "Escolha a data."
+    const atendimentos =
+      [
+        ...new Set(
+          historico
+            .filter(
+              item =>
+                item.dataAtendimento ===
+                data
+            )
+            .map(
+              item =>
+                item.atendimento
+            )
+            .filter(Boolean)
+        )
+      ]
+      .sort(
+        (a,b) =>
+          a.localeCompare(
+            b,
+            "pt-BR"
+          )
       );
+
+
+    area.innerHTML =
+      "";
+
+
+    if (!atendimentos.length) {
+
+      area.innerHTML =
+        '<div class="vazio">Nenhum atendimento encontrado para esta data.</div>';
 
       return;
     }
 
 
-    const modoData =
-      document.querySelector(
-        'input[name="modoData"]:checked'
-      )?.value ||
-      "todos";
+    atendimentos.forEach(
+      atendimento => {
+
+        area.innerHTML += `
+
+          <label class="item-selecao">
+
+            <input
+              type="checkbox"
+              class="filtro-atendimento-data"
+              value="${escapeHtml(
+                atendimento
+              )}"
+            >
+
+            ${escapeHtml(
+              atendimento
+            )}
+
+          </label>
+
+        `;
+      }
+    );
+  }
 
 
-    registros =
-      historico.filter(
-        item =>
-          item.dataAtendimento ===
-          data
-      );
+  function executarImpressao() {
+
+    const tipo =
+      document.getElementById(
+        "tipoImpressao"
+      ).value;
+
+
+    let registros = [];
 
 
     /*
-     * Se o usuário escolher
-     * ATENDIMENTOS, filtra
-     * novamente pelos tipos marcados.
+     * POR ATENDIMENTO
      */
+
     if (
-      modoData ===
-      "atendimentos"
+      tipo === "atendimento"
     ) {
 
       const selecionados =
         [
           ...document.querySelectorAll(
-            ".filtro-atendimento-data:checked"
+            ".filtro-atendimento:checked"
           )
         ]
         .map(
@@ -2083,7 +2228,7 @@ function executarImpressao() {
       ) {
 
         alert(
-          "Selecione pelo menos um atendimento para esta data."
+          "Selecione pelo menos um atendimento."
         );
 
         return;
@@ -2091,49 +2236,140 @@ function executarImpressao() {
 
 
       registros =
-        registros.filter(
+        historico.filter(
           item =>
             selecionados.includes(
               item.atendimento
             )
         );
     }
-  }
 
 
-  if (!registros.length) {
+    /*
+     * ATENDIMENTO GERAL
+     */
 
-    alert(
-      "Não existem atendimentos para os filtros escolhidos."
+    if (
+      tipo === "geral"
+    ) {
+
+      registros =
+        historico.slice();
+    }
+
+
+    /*
+     * POR DATA
+     */
+
+    if (
+      tipo === "data"
+    ) {
+
+      const data =
+        document.getElementById(
+          "filtroData"
+        ).value;
+
+
+      if (!data) {
+
+        alert(
+          "Escolha a data."
+        );
+
+        return;
+      }
+
+
+      registros =
+        historico.filter(
+          item =>
+            item.dataAtendimento ===
+            data
+        );
+
+
+      const modo =
+        document.querySelector(
+          'input[name="modoData"]:checked'
+        )?.value ||
+        "todos";
+
+
+      if (
+        modo ===
+        "atendimentos"
+      ) {
+
+        const selecionados =
+          [
+            ...document.querySelectorAll(
+              ".filtro-atendimento-data:checked"
+            )
+          ]
+          .map(
+            checkbox =>
+              checkbox.value
+          );
+
+
+        if (
+          !selecionados.length
+        ) {
+
+          alert(
+            "Selecione pelo menos um atendimento."
+          );
+
+          return;
+        }
+
+
+        registros =
+          registros.filter(
+            item =>
+              selecionados.includes(
+                item.atendimento
+              )
+          );
+      }
+    }
+
+
+    if (!registros.length) {
+
+      alert(
+        "Não existem atendimentos para os filtros escolhidos."
+      );
+
+      return;
+    }
+
+
+    const umPorPagina =
+      document.getElementById(
+        "umPorPagina"
+      ).checked;
+
+
+    gerarAreaImpressao(
+      registros,
+      tipo,
+      umPorPagina
     );
 
-    return;
+
+    fecharImpressao();
+
+
+    setTimeout(
+      () => {
+        window.print();
+      },
+      100
+    );
   }
-
-
-  const umPorPagina =
-    document.getElementById(
-      "umPorPagina"
-    ).checked;
-
-
-  gerarAreaImpressao(
-    registros,
-    tipo,
-    umPorPagina
-  );
-
-
-  fecharImpressao();
-
-
-  setTimeout(
-    () => {
-      window.print();
-    },
-    100
-  );
-}
 
 
   function gerarAreaImpressao(
@@ -2152,54 +2388,33 @@ function executarImpressao() {
       "";
 
 
+    const datas =
+      [
+        ...new Set(
+          registros
+            .map(
+              x =>
+                x.dataAtendimento
+            )
+            .filter(Boolean)
+        )
+      ];
+
+
     if (
-      tipo === "data"
-    ) {
-
-      const data =
-        document.getElementById(
-          "filtroData"
-        ).value;
-
-      tituloData =
-        "Data: " +
-        formatarData(
-          data
-        );
-
-    } else if (
-      registros.length === 1
+      datas.length === 1
     ) {
 
       tituloData =
         "Data: " +
         formatarData(
-          registros[0]
-            .dataAtendimento
+          datas[0]
         );
 
     } else {
 
-      const datas =
-        [
-          ...new Set(
-            registros
-              .map(
-                x =>
-                  x.dataAtendimento
-              )
-              .filter(Boolean)
-          )
-        ];
-
-
       tituloData =
-        datas.length === 1
-          ? "Data: " +
-            formatarData(
-              datas[0]
-            )
-          : "Data: múltiplos dias";
+        "Data: múltiplos dias";
     }
 
 
@@ -2219,6 +2434,11 @@ function executarImpressao() {
 
     `;
 
+
+    /*
+     * GERAL:
+     * separa por atendimento.
+     */
 
     if (
       tipo === "geral"
@@ -2268,19 +2488,23 @@ function executarImpressao() {
                 atendimento
               ],
               atendimento,
-              false
+              umPorPagina
             );
         }
       );
 
+
     } else {
+
+      /*
+       * ATENDIMENTO OU DATA
+       */
 
       html +=
         montarTabela(
           registros,
           tipo === "atendimento"
-            ? registros[0]
-                .atendimento
+            ? "Atendimentos selecionados"
             : "Atendimentos",
           umPorPagina
         );
@@ -2295,14 +2519,14 @@ function executarImpressao() {
   function montarTabela(
     registros,
     titulo,
-    pagina
+    umPorPagina
   ) {
 
     return `
 
       <div
         class="print-grupo ${
-          pagina
+          umPorPagina
             ? "pagina"
             : ""
         }"
@@ -2314,9 +2538,8 @@ function executarImpressao() {
           )}
         </h2>
 
-        <table
-          class="print-tabela"
-        >
+
+        <table class="print-tabela">
 
           <thead>
 
@@ -2349,6 +2572,7 @@ function executarImpressao() {
             </tr>
 
           </thead>
+
 
           <tbody>
 
@@ -2422,10 +2646,6 @@ function executarImpressao() {
 
     `;
   }
-
-
-  dataAtendimentoEl.value =
-    dataHoje();
 
 
   renderFila();
