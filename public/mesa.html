@@ -829,23 +829,13 @@ textarea{
    CONFIGURAÇÕES
 ============================================================ */
 
-const STORAGE_HISTORICO =
-  "mesaAtendimentosV23";
-
-const STORAGE_ARQUIVO =
-  "mesaAtendimentosV23Arquivo";
-
-const STORAGE_PENDENTES =
-  "mesaAtendimentosV24Pendentes";
-
-const STORAGE_RECUSAS_ENVIO =
-  "mesaAtendimentosV26RecusasEnvio";
-
-const STORAGE_SOM =
-  "mesaAtendimentosV24Som";
-
-const STORAGE_BASE_EXCEL =
-  "atendimentoV23BaseInternos";
+const STORAGE_HISTORICO = "mesaAtendimentosV23";
+const STORAGE_ARQUIVO = "mesaAtendimentosV23Arquivo";
+const STORAGE_PENDENTES = "mesaAtendimentosV24Pendentes";
+const STORAGE_RECUSAS_ENVIO = "mesaAtendimentosV26RecusasEnvio";
+const STORAGE_RECUSAS_LOCAL = "mesaAtendimentosV27RecusasLocal";
+const STORAGE_SOM = "mesaAtendimentosV24Som";
+const STORAGE_BASE_EXCEL = "atendimentoV23BaseInternos";
 
 const ATENDIMENTOS = [
   "Jurídico",
@@ -895,8 +885,18 @@ let recordIdRecusaAtual = null;
 let ordemHistorico = "envio";
 
 /*
- * Guarda os IDs de recusas que já foram confirmadas pelo servidor.
- * Isso evita que a mesma recusa seja reenviada desnecessariamente.
+ * IMPORTANTE:
+ * Esta lista representa recusas feitas nesta MESA.
+ *
+ * Ela é persistente no localStorage.
+ *
+ * Mesmo que o servidor envie novamente o mesmo
+ * atendimento, ele NÃO volta para pendentes.
+ */
+let recusasLocais = new Set();
+
+/*
+ * Recusas que o servidor já confirmou.
  */
 const recusasConfirmadas = new Set();
 
@@ -910,10 +910,7 @@ function $(id){
 
 function gerarId(){
 
-  if(
-    window.crypto &&
-    crypto.randomUUID
-  ){
+  if(window.crypto && crypto.randomUUID){
     return crypto.randomUUID();
   }
 
@@ -993,9 +990,7 @@ function formatarData(valor){
     return "-";
   }
 
-  if(
-    /^\d{4}-\d{2}-\d{2}$/.test(String(valor))
-  ){
+  if(/^\d{4}-\d{2}-\d{2}$/.test(String(valor))){
 
     const [ano,mes,dia] =
       String(valor).split("-");
@@ -1054,6 +1049,91 @@ function recordIdSeguro(valor){
 }
 
 /* ============================================================
+   RECUSAS LOCAIS
+============================================================ */
+
+function carregarRecusasLocais(){
+
+  const lista =
+    lerJSON(
+      STORAGE_RECUSAS_LOCAL,
+      []
+    );
+
+  recusasLocais =
+    new Set(
+      Array.isArray(lista)
+        ? lista.map(
+            id => String(id)
+          )
+        : []
+    );
+
+  /*
+   * Compatibilidade com recusas que já estavam
+   * salvas na fila antiga.
+   */
+  recusasEnvio.forEach(
+    registro=>{
+      if(registro.recordId){
+        recusasLocais.add(
+          String(registro.recordId)
+        );
+      }
+    }
+  );
+}
+
+function salvarRecusasLocais(){
+
+  salvarJSON(
+    STORAGE_RECUSAS_LOCAL,
+    [...recusasLocais]
+  );
+}
+
+function marcarComoRecusadoLocalmente(recordId){
+
+  if(!recordId){
+    return;
+  }
+
+  recusasLocais.add(
+    String(recordId)
+  );
+
+  salvarRecusasLocais();
+}
+
+function estaRecusadoLocalmente(recordId){
+
+  return recusasLocais.has(
+    String(recordId)
+  );
+}
+
+/*
+ * Remove somente quando o usuário fizer
+ * REENVIAR manualmente.
+ */
+function liberarRecusaParaReenvio(recordId){
+
+  if(!recordId){
+    return;
+  }
+
+  recusasLocais.delete(
+    String(recordId)
+  );
+
+  recusasConfirmadas.delete(
+    String(recordId)
+  );
+
+  salvarRecusasLocais();
+}
+
+/* ============================================================
    STORAGE
 ============================================================ */
 
@@ -1078,6 +1158,8 @@ function salvarTudo(){
     STORAGE_RECUSAS_ENVIO,
     recusasEnvio
   );
+
+  salvarRecusasLocais();
 
   localStorage.setItem(
     STORAGE_SOM,
@@ -1116,7 +1198,24 @@ function carregarTudo(){
       STORAGE_SOM
     ) !== "0";
 
+  carregarRecusasLocais();
+
+  /*
+   * LIMPEZA DE SEGURANÇA:
+   * qualquer registro que já tenha sido recusado
+   * nunca pode continuar em pendentes.
+   */
+  pendentes =
+    pendentes.filter(
+      registro =>
+        !estaRecusadoLocalmente(
+          registro.recordId
+        )
+    );
+
   atualizarBotaoSom();
+
+  salvarTudo();
 
   renderPendentes();
   renderHistorico();
@@ -1339,16 +1438,8 @@ function conectarServidor(){
         "success"
       );
 
-      /*
-       * Primeiro confirmamos registros que já foram
-       * recebidos anteriormente.
-       */
       reenviarConfirmacoesConhecidas();
 
-      /*
-       * Depois reenviamos recusas que ficaram
-       * aguardando confirmação.
-       */
       reenviarRecusasPendentes();
 
       iniciarHeartbeat();
@@ -1540,14 +1631,6 @@ function tratarMensagemServidor(mensagem){
     return;
   }
 
-  /*
-   * CONFIRMAÇÃO DO ENVIO DA RECUSA.
-   *
-   * O servidor V2.7.0 responde:
-   * { type:"refuse_result", ok:true, recordId }
-   *
-   * Só depois disso retiramos a recusa da fila local.
-   */
   if(
     mensagem.type === "refuse_result"
   ){
@@ -1586,6 +1669,11 @@ function tratarConfirmacaoRecusa(mensagem){
     return;
   }
 
+  /*
+   * Mesmo antes desta confirmação o registro
+   * já está bloqueado localmente.
+   */
+
   if(mensagem.ok === true){
 
     recusasConfirmadas.add(
@@ -1596,16 +1684,19 @@ function tratarConfirmacaoRecusa(mensagem){
       recordId
     );
 
+    mostrarToast(
+      "Recusa confirmada pelo servidor.",
+      "success"
+    );
+
     return;
   }
 
   /*
-   * Se o servidor informou que o atendimento
-   * já não está pendente, mantemos a recusa
-   * somente se ainda não tivermos confirmação.
+   * NÃO colocamos o registro de volta
+   * nos pendentes em hipótese alguma.
    *
-   * Isso evita apagar uma recusa que poderia
-   * precisar ser reenviada após uma reconexão.
+   * Ele continuará bloqueado localmente.
    */
 }
 
@@ -1642,7 +1733,8 @@ function localizarRegistroLocal(recordId){
   const p =
     pendentes.find(
       item =>
-        item.recordId === recordId
+        String(item.recordId) ===
+        String(recordId)
     );
 
   if(p){
@@ -1655,7 +1747,8 @@ function localizarRegistroLocal(recordId){
   const h =
     historico.find(
       item =>
-        item.recordId === recordId
+        String(item.recordId) ===
+        String(recordId)
     );
 
   if(h){
@@ -1668,7 +1761,8 @@ function localizarRegistroLocal(recordId){
   const a =
     arquivo.find(
       item =>
-        item.recordId === recordId
+        String(item.recordId) ===
+        String(recordId)
     );
 
   if(a){
@@ -1689,20 +1783,45 @@ function receberNovoRegistro(mensagem){
     );
 
   const recordId =
-    registro.recordId;
+    String(registro.recordId);
 
   /*
-   * Se esta MESA já recusou este registro,
-   * nunca deve fazê-lo reaparecer como pendente.
+   * ========================================================
+   * CORREÇÃO PRINCIPAL
+   *
+   * Se este registro já foi recusado nesta MESA,
+   * o servidor pode até mandar o new_record novamente,
+   * mas a MESA simplesmente IGNORA.
+   *
+   * Portanto ele não volta para ATENDIMENTOS PENDENTES.
+   * ========================================================
    */
   if(
-    recusasConfirmadas.has(
-      String(recordId)
+    estaRecusadoLocalmente(
+      recordId
     )
   ){
 
-    return;
+    /*
+     * Se o servidor ainda tiver o atendimento
+     * como pendente, enviamos novamente a recusa.
+     */
+    const recusa =
+      recusasEnvio.find(
+        item =>
+          String(item.recordId) ===
+          recordId
+      );
 
+    if(recusa){
+
+      enviarRecusaParaGuiche(
+        recusa
+      );
+
+    }
+
+    return;
   }
 
   const conhecido =
@@ -1770,7 +1889,8 @@ function receberUm(recordId){
   const indice =
     pendentes.findIndex(
       item =>
-        item.recordId === recordId
+        String(item.recordId) ===
+        String(recordId)
     );
 
   if(indice < 0){
@@ -1794,7 +1914,8 @@ function receberUm(recordId){
   const existente =
     historico.find(
       item =>
-        item.recordId === recordId
+        String(item.recordId) ===
+        String(recordId)
     );
 
   if(existente){
@@ -1953,9 +2074,12 @@ function adicionarRecusaNaFila(registro){
     );
 
   /*
-   * Se já foi confirmado pelo servidor,
-   * não adicionamos novamente.
+   * PRIMEIRO BLOQUEIA O REGISTRO.
    */
+  marcarComoRecusadoLocalmente(
+    recordId
+  );
+
   if(
     recusasConfirmadas.has(
       recordId
@@ -2000,17 +2124,10 @@ function removerRecusaDaFila(recordId){
         id
     );
 
-  if(
-    novaFila.length !==
-    recusasEnvio.length
-  ){
+  recusasEnvio =
+    novaFila;
 
-    recusasEnvio =
-      novaFila;
-
-    salvarTudo();
-
-  }
+  salvarTudo();
 }
 
 function reenviarRecusasPendentes(){
@@ -2027,10 +2144,6 @@ function reenviarRecusasPendentes(){
     return;
   }
 
-  /*
-   * Uma cópia evita alteração da fila durante
-   * o processamento das confirmações.
-   */
   const copia =
     recusasEnvio.map(
       registro => ({
@@ -2068,15 +2181,22 @@ function enviarRecusaParaGuiche(registro){
   }
 
   const recordId =
-    registro.recordId;
+    String(registro.recordId || "");
 
   if(!recordId){
     return false;
   }
 
+  /*
+   * A recusa já está bloqueada localmente.
+   */
+  marcarComoRecusadoLocalmente(
+    recordId
+  );
+
   if(
     recusasConfirmadas.has(
-      String(recordId)
+      recordId
     )
   ){
     return true;
@@ -2092,27 +2212,19 @@ function enviarRecusaParaGuiche(registro){
     return false;
   }
 
-  /*
-   * ESTE É O PONTO PRINCIPAL DA CORREÇÃO.
-   *
-   * O mesmo recordId que veio do GUICHÊ
-   * é devolvido ao servidor.
-   *
-   * O servidor V2.7.0 usa o ownerId associado
-   * ao envio original para entregar a recusa
-   * somente ao GUICHÊ correto.
-   */
   return enviarMensagem({
 
     type:"refuse_record",
 
     recordId:
+
       recordId,
 
     record:{
       ...registro,
 
       recordId:
+
         recordId,
 
       status:
@@ -2141,6 +2253,18 @@ function enviarRecusaParaGuiche(registro){
 ============================================================ */
 
 function renderPendentes(){
+
+  /*
+   * SEGURANÇA EXTRA:
+   * jamais mostrar recusados na tela.
+   */
+  pendentes =
+    pendentes.filter(
+      registro =>
+        !estaRecusadoLocalmente(
+          registro.recordId
+        )
+    );
 
   const container =
     $("pendentesContainer");
@@ -2576,8 +2700,8 @@ function abrirRecusa(recordId){
   const registro =
     pendentes.find(
       item =>
-        item.recordId ===
-        recordId
+        String(item.recordId) ===
+        String(recordId)
     );
 
   if(!registro){
@@ -2677,12 +2801,12 @@ function confirmarRecusa(){
   }
 
   const recordId =
-    recordIdRecusaAtual;
+    String(recordIdRecusaAtual);
 
   const indice =
     pendentes.findIndex(
       item =>
-        item.recordId ===
+        String(item.recordId) ===
         recordId
     );
 
@@ -2700,7 +2824,19 @@ function confirmarRecusa(){
     new Date().toISOString();
 
   /*
-   * O registro sai imediatamente dos pendentes.
+   * ========================================================
+   * PRIMEIRA COISA:
+   * bloqueamos definitivamente este recordId nesta MESA.
+   *
+   * Isso acontece ANTES de enviar qualquer mensagem.
+   * ========================================================
+   */
+  marcarComoRecusadoLocalmente(
+    recordId
+  );
+
+  /*
+   * Remove imediatamente dos pendentes.
    */
   pendentes.splice(
     indice,
@@ -2736,16 +2872,17 @@ function confirmarRecusa(){
   };
 
   /*
-   * Primeiro salvamos localmente.
-   * Assim, mesmo se o celular/computador
-   * perder a conexão logo depois de clicar,
-   * a recusa não desaparece.
+   * Guarda a recusa para eventual reconexão.
    */
   adicionarRecusaNaFila(
     recusado
   );
 
+  /*
+   * Salva e redesenha ANTES do envio.
+   */
   salvarTudo();
+
   renderPendentes();
 
   fecharRecusa();
@@ -2760,14 +2897,14 @@ function confirmarRecusa(){
   if(enviado){
 
     mostrarToast(
-      "Recusa enviada ao GUICHÊ. Aguardando confirmação do servidor.",
+      "❌ Atendimento recusado. Removido da MESA e enviado ao GUICHÊ.",
       "success"
     );
 
   }else{
 
     mostrarToast(
-      "Recusa registrada. Será enviada automaticamente quando a conexão voltar.",
+      "❌ Atendimento recusado. Removido da MESA. A recusa será enviada quando a conexão voltar.",
       "warning"
     );
 
@@ -4097,7 +4234,7 @@ function inicializar(){
   );
 
   /*
-   * Tenta novamente as recusas pendentes.
+   * Tenta reenviar recusas pendentes.
    */
   setInterval(
     ()=>{
