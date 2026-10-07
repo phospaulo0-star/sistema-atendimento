@@ -2,4983 +2,5131 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-<title>CPAIG - Guichê de Atendimento</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guichê de Atendimento - CPAIG</title>
 
 <style>
-
 *{
- box-sizing:border-box
+  box-sizing:border-box;
 }
 
 body{
- margin:0;
- font-family:Arial,Helvetica,sans-serif;
- background:#f1f4f7;
- color:#17212b
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
 }
 
 header{
- background:#123d25;
- color:#fff;
- padding:18px 20px;
- text-align:center;
- border-bottom:5px solid #e0b800
+  background:#0b3d2e;
+  color:#fff;
+  padding:18px 22px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
 }
 
-header h1{
- margin:0;
- font-size:28px
+.header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
 }
 
-header h2{
- margin:5px 0 0;
- font-size:17px;
- font-weight:normal
+.logo h1{
+  margin:0;
+  font-size:26px;
 }
 
-.cpaig{
- color:#ffd900;
- font-size:18px;
- font-weight:bold;
- margin-top:7px
+.logo .sub{
+  margin-top:5px;
+  font-size:14px;
+  font-weight:bold;
+  color:#ffd83d;
+}
+
+.logo .cpaig{
+  margin-top:3px;
+  font-size:16px;
+  font-weight:bold;
+  color:#ffd83d;
+}
+
+.status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:14px;
+}
+
+.status-dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#ef4444;
+}
+
+.status-dot.online{
+  background:#22c55e;
 }
 
 .container{
- width:96%;
- max-width:1500px;
- margin:18px auto
+  max-width:1500px;
+  margin:20px auto;
+  padding:0 15px 50px;
 }
 
-.card{
- background:#fff;
- border-radius:10px;
- padding:18px;
- margin-bottom:18px;
- box-shadow:0 2px 8px rgba(0,0,0,.12)
+.toolbar{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
 }
 
-.card h3{
- margin:0 0 15px;
- color:#123d25;
- border-bottom:2px solid #e0b800;
- padding-bottom:8px
+button{
+  border:0;
+  border-radius:7px;
+  padding:10px 14px;
+  cursor:pointer;
+  font-weight:bold;
+  font-size:14px;
+}
+
+button:hover{
+  filter:brightness(.96);
+}
+
+.btn-green{
+  background:#15803d;
+  color:#fff;
+}
+
+.btn-blue{
+  background:#2563eb;
+  color:#fff;
+}
+
+.btn-orange{
+  background:#ea580c;
+  color:#fff;
+}
+
+.btn-red{
+  background:#dc2626;
+  color:#fff;
+}
+
+.btn-yellow{
+  background:#eab308;
+  color:#111827;
+}
+
+.btn-gray{
+  background:#64748b;
+  color:#fff;
+}
+
+.btn-dark{
+  background:#1e293b;
+  color:#fff;
+}
+
+.btn-purple{
+  background:#7c3aed;
+  color:#fff;
+}
+
+.section{
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(15,23,42,.08);
+  margin-bottom:20px;
+  overflow:hidden;
+}
+
+.section-header{
+  padding:14px 16px;
+  border-bottom:1px solid #e5e7eb;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.section-header h2{
+  margin:0;
+  font-size:19px;
+}
+
+.section-body{
+  padding:15px;
+}
+
+.counter{
+  background:#e2e8f0;
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:13px;
+  font-weight:bold;
 }
 
 .grid{
- display:grid;
- grid-template-columns:repeat(12,1fr);
- gap:12px
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
 }
 
-.col-12{grid-column:span 12}
-.col-8{grid-column:span 8}
-.col-6{grid-column:span 6}
-.col-4{grid-column:span 4}
-.col-3{grid-column:span 3}
+.form-group{
+  margin-bottom:14px;
+}
 
-label{
- display:block;
- font-weight:bold;
- margin-bottom:5px;
- font-size:14px
+.form-group label{
+  display:block;
+  margin-bottom:6px;
+  font-size:13px;
+  font-weight:bold;
 }
 
 input,
 select,
 textarea{
- width:100%;
- border:1px solid #b9c1c8;
- border-radius:6px;
- padding:8px 10px;
- font-size:14px;
- background:#fff
-}
-
-input,
-select{
- height:40px
-}
-
-textarea{
- min-height:120px;
- resize:vertical
+  width:100%;
+  border:1px solid #cbd5e1;
+  border-radius:7px;
+  padding:10px;
+  font:inherit;
+  background:#fff;
 }
 
 input:focus,
 select:focus,
 textarea:focus{
- outline:none;
- border-color:#123d25;
- box-shadow:0 0 0 2px rgba(18,61,37,.12)
+  outline:2px solid rgba(37,99,235,.2);
+  border-color:#2563eb;
 }
 
-button{
- border:0;
- border-radius:6px;
- padding:10px 15px;
- cursor:pointer;
- font-weight:bold;
- font-size:14px
-}
-
-button:hover{
- opacity:.9
-}
-
-.btn-green{
- background:#176b3a;
- color:#fff
-}
-
-.btn-yellow{
- background:#e0b800;
- color:#111
-}
-
-.btn-blue{
- background:#1261a0;
- color:#fff
-}
-
-.btn-red{
- background:#b42318;
- color:#fff
-}
-
-.btn-gray{
- background:#65717c;
- color:#fff
-}
-
-.btn-purple{
- background:#6841a5;
- color:#fff
-}
-
-.btn-small{
- padding:7px 10px;
- font-size:12px
-}
-
-.actions{
- display:flex;
- flex-wrap:wrap;
- gap:8px;
- align-items:center
-}
-
-.toolbar{
- display:flex;
- flex-wrap:wrap;
- gap:10px;
- align-items:center;
- margin-bottom:12px
-}
-
-.list-count{
- margin-left:auto;
- font-weight:bold;
- color:#123d25
+textarea{
+  min-height:100px;
+  resize:vertical;
 }
 
 .suggestions{
- position:relative
+  position:relative;
 }
 
 .suggestion-box{
- position:absolute;
- z-index:50;
- left:0;
- right:0;
- top:100%;
- background:#fff;
- border:1px solid #aaa;
- border-radius:0 0 7px 7px;
- max-height:260px;
- overflow-y:auto;
- box-shadow:0 4px 10px rgba(0,0,0,.2)
+  position:absolute;
+  left:0;
+  right:0;
+  top:100%;
+  z-index:50;
+  background:#fff;
+  border:1px solid #cbd5e1;
+  border-top:0;
+  max-height:260px;
+  overflow:auto;
+  box-shadow:0 5px 15px rgba(0,0,0,.12);
 }
 
-.suggestion-item{
- padding:10px;
- cursor:pointer;
- border-bottom:1px solid #eee
+.suggestion{
+  padding:10px;
+  cursor:pointer;
+  border-bottom:1px solid #e5e7eb;
 }
 
-.suggestion-item:hover,
-.suggestion-item.selected{
- background:#eaf3ed
+.suggestion:hover,
+.suggestion.active{
+  background:#eff6ff;
+}
+
+.suggestion strong{
+  display:block;
+}
+
+.suggestion small{
+  color:#64748b;
 }
 
 .info-base{
- margin-top:8px;
- font-size:13px;
- color:#555
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:5px;
+}
+
+.info-chip{
+  background:#eff6ff;
+  color:#1e40af;
+  padding:5px 8px;
+  border-radius:14px;
+  font-size:12px;
+  font-weight:bold;
 }
 
 .table-wrap{
- overflow-x:auto
+  width:100%;
+  overflow-x:auto;
 }
 
 table{
- width:100%;
- border-collapse:collapse;
- font-size:13px
+  width:100%;
+  border-collapse:collapse;
+  min-width:1050px;
+}
+
+th,
+td{
+  padding:9px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+  vertical-align:middle;
+  font-size:13px;
 }
 
 th{
- background:#123d25;
- color:#fff;
- padding:9px 7px;
- text-align:left;
- white-space:nowrap
+  background:#f8fafc;
+  color:#334155;
+  position:sticky;
+  top:0;
+  z-index:2;
 }
 
-td{
- border-bottom:1px solid #ddd;
- padding:8px 7px;
- vertical-align:middle
-}
-
-tr:nth-child(even){
- background:#fafafa
+tr:hover td{
+  background:#f8fafc;
 }
 
 .empty{
- text-align:center;
- color:#777;
- padding:25px
+  text-align:center;
+  padding:30px 15px;
+  color:#64748b;
 }
 
 .badge{
- display:inline-block;
- padding:5px 9px;
- border-radius:15px;
- font-size:12px;
- font-weight:bold
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:14px;
+  font-size:12px;
+  font-weight:bold;
+  white-space:nowrap;
 }
 
-.badge-await{
- background:#fff1b8;
- color:#725b00
+.badge-waiting{
+  background:#fef3c7;
+  color:#92400e;
 }
 
 .badge-received{
- background:#d8f3df;
- color:#176b3a
+  background:#dcfce7;
+  color:#166534;
 }
 
 .badge-refused{
- background:#fbe1df;
- color:#a71910
+  background:#fee2e2;
+  color:#991b1b;
 }
 
 .badge-guarded{
- background:#e7def8;
- color:#56338a
+  background:#dbeafe;
+  color:#1e40af;
 }
 
-.note{
- color:#666;
- font-size:12px;
- margin-top:5px
+.actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
 }
 
-.small-note{
- color:#666;
- font-size:12px
-}
-
-.hidden{
- display:none!important
-}
-
-.file-area{
- border:2px dashed #b9c1c8;
- padding:15px;
- border-radius:8px;
- background:#fafafa
-}
-
-.modal{
- position:fixed;
- inset:0;
- background:rgba(0,0,0,.55);
- display:flex;
- align-items:center;
- justify-content:center;
- z-index:1000;
- padding:15px
-}
-
-.modal-content{
- width:100%;
- max-width:1100px;
- max-height:94vh;
- overflow:auto;
- background:#fff;
- border-radius:10px;
- padding:20px
-}
-
-.modal-header{
- display:flex;
- justify-content:space-between;
- align-items:center;
- margin-bottom:15px
-}
-
-.modal-header h3{
- margin:0;
- color:#123d25
-}
-
-.history-filters{
- display:flex;
- flex-wrap:wrap;
- gap:8px;
- margin-bottom:12px
-}
-
-.history-filters input,
-.history-filters select{
- width:auto;
- min-width:180px
+.actions button{
+  padding:7px 9px;
+  font-size:12px;
 }
 
 .refusal-box{
- background:#fff7f6;
- border:1px solid #efb0aa;
- border-radius:7px;
- padding:10px;
- margin-top:5px
+  margin-top:7px;
+  padding:8px;
+  background:#fff1f2;
+  border:1px solid #fecdd3;
+  border-radius:7px;
+  color:#881337;
+  white-space:pre-wrap;
 }
 
-.refusal-title{
- color:#a71910;
- font-weight:bold
+.refusal-edit{
+  margin-top:8px;
 }
 
-.refusal-message{
- color:#7b1a14;
- font-size:13px;
- margin-top:5px;
- white-space:pre-wrap
+.small{
+  font-size:12px;
+  color:#64748b;
 }
 
-.pavilhao-list{
- max-height:260px;
- overflow:auto;
- border:1px solid #ddd;
- border-radius:6px;
- padding:5px
+.modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.62);
+  z-index:1000;
+  padding:20px;
+  overflow:auto;
 }
 
-.pavilhao-option{
- display:block;
- padding:7px 8px;
- border-bottom:1px solid #eee;
- cursor:pointer;
- font-weight:normal
+.modal-overlay.show{
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-.pavilhao-option:hover{
- background:#f3f5f6
+.modal{
+  width:min(900px,100%);
+  max-height:94vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 15px 50px rgba(0,0,0,.3);
 }
 
-#toast{
- position:fixed;
- right:20px;
- bottom:20px;
- z-index:2000;
- background:#123d25;
- color:#fff;
- padding:13px 18px;
- border-radius:7px;
- display:none;
- box-shadow:0 4px 12px rgba(0,0,0,.25)
+.modal-header{
+  padding:16px 18px;
+  border-bottom:1px solid #e5e7eb;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-#printArea{
- display:none
+.modal-header h3{
+  margin:0;
 }
 
+.modal-body{
+  padding:18px;
+}
 
-/* =====================================================
-   IMPRESSÃO
-===================================================== */
+.modal-footer{
+  padding:14px 18px;
+  border-top:1px solid #e5e7eb;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.close{
+  background:transparent;
+  color:#475569;
+  font-size:22px;
+  padding:2px 7px;
+}
+
+.print-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.radio-group{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.radio-option{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  border:1px solid #cbd5e1;
+  border-radius:7px;
+  padding:8px 10px;
+  cursor:pointer;
+}
+
+.radio-option input{
+  width:auto;
+}
+
+.checkbox-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  max-height:220px;
+  overflow:auto;
+  border:1px solid #e2e8f0;
+  border-radius:7px;
+  padding:10px;
+}
+
+.checkbox-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+}
+
+.checkbox-item input{
+  width:auto;
+}
+
+.toast{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:2000;
+  background:#1e293b;
+  color:#fff;
+  padding:12px 16px;
+  border-radius:8px;
+  box-shadow:0 5px 20px rgba(0,0,0,.25);
+  display:none;
+  max-width:420px;
+}
+
+.toast.show{
+  display:block;
+}
+
+.toast.success{
+  background:#166534;
+}
+
+.toast.error{
+  background:#991b1b;
+}
+
+.toast.warning{
+  background:#92400e;
+}
+
+.excel-info{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:8px;
+  padding:10px;
+  margin-top:10px;
+}
+
+.print-page{
+  width:100%;
+  page-break-inside:avoid;
+  break-inside:avoid;
+}
+
+.print-page + .print-page{
+  page-break-before:always;
+  break-before:page;
+}
+
+.print-header{
+  text-align:center;
+  margin-bottom:14px;
+}
+
+.print-header h1{
+  margin:0 0 4px;
+  font-size:18px;
+}
+
+.print-header h2{
+  margin:0 0 4px;
+  font-size:14px;
+}
+
+.print-header p{
+  margin:2px 0;
+  font-size:11px;
+}
+
+.print-table{
+  width:100%;
+  min-width:0;
+  border-collapse:collapse;
+}
+
+.print-table th,
+.print-table td{
+  border:1px solid #111;
+  padding:5px;
+  font-size:10px;
+}
+
+.print-table th{
+  background:#eee;
+  position:static;
+}
+
+.print-pavcela{
+  text-align:center;
+  white-space:nowrap;
+  font-weight:bold;
+}
+
+@media(max-width:800px){
+  .grid,
+  .print-grid{
+    grid-template-columns:1fr;
+  }
+
+  .checkbox-list{
+    grid-template-columns:1fr;
+  }
+
+  .logo h1{
+    font-size:21px;
+  }
+}
 
 @media print{
+  @page{
+    size:A4 portrait;
+    margin:5mm;
+  }
 
- @page{
-  size:A4;
-  margin:5mm
- }
+  body{
+    background:#fff;
+  }
 
- body{
-  background:#fff
- }
+  body > *:not(#areaImpressao){
+    display:none !important;
+  }
 
- body>*{
-  display:none!important
- }
-
- #printArea{
-  display:block!important;
-  width:100%
- }
-
- /*
-   NÃO usar page-break-after obrigatório.
-   A quebra é feita somente antes
-   das páginas seguintes.
- */
-
- .print-page{
-  width:100%;
-  break-inside:avoid;
-  page-break-after:auto;
-  break-after:auto
- }
-
- .print-page + .print-page{
-  break-before:page;
-  page-break-before:always
- }
-
- .print-header{
-  text-align:center;
-  margin-bottom:7px
- }
-
- .print-header h1{
-  margin:0;
-  font-size:17px
- }
-
- .print-header h2{
-  margin:2px 0;
-  font-size:13px
- }
-
- .print-header p{
-  margin:2px 0 7px;
-  font-size:10px
- }
-
- .print-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:9px
- }
-
- .print-table th,
- .print-table td{
-  border:1px solid #222;
-  padding:3px 4px
- }
-
- .print-table th{
-  background:#eee!important;
-  color:#000!important
- }
-
- .print-table .pavcela{
-  width:55px;
-  text-align:center;
-  white-space:nowrap
- }
-
- .print-table .data{
-  width:62px;
-  text-align:center;
-  white-space:nowrap
- }
-
- .print-table,
- .print-table tr,
- .print-table td,
- .print-table th{
-  break-inside:avoid
- }
+  #areaImpressao{
+    display:block !important;
+  }
 }
-
-
-@media(max-width:900px){
-
- .col-8,
- .col-6,
- .col-4,
- .col-3{
-  grid-column:span 12
- }
-
- header h1{
-  font-size:23px
- }
-
- .container{
-  width:98%
- }
-
-}
-
 </style>
 </head>
 
 <body>
 
 <header>
+  <div class="header-top">
 
- <h1>GUICHÊ DE ATENDIMENTO</h1>
+    <div class="logo">
+      <h1>GUICHÊ DE ATENDIMENTO</h1>
 
- <h2>
-  POLÍCIA PENAL DE MATO GROSSO DO SUL
- </h2>
+      <div class="sub">
+        POLÍCIA PENAL DE MATO GROSSO DO SUL
+      </div>
 
- <div class="cpaig">
-  CPAIG
- </div>
+      <div class="cpaig">
+        CPAIG
+      </div>
+    </div>
 
+    <div class="status">
+      <span id="statusDot" class="status-dot"></span>
+      <span id="statusTexto">Conectando...</span>
+    </div>
+
+  </div>
 </header>
-
 
 <div class="container">
 
-
-<!-- =====================================================
-     NOVO ATENDIMENTO
-===================================================== -->
-
-<div class="card">
-
- <h3>
-  📋 NOVO ATENDIMENTO
- </h3>
-
-
- <div class="grid">
-
-
-  <div class="col-8 suggestions">
-
-   <label>
-    Nome do interno
-   </label>
-
-   <input
-    id="nome"
-    type="text"
-    autocomplete="off"
-    placeholder="Digite o nome do interno">
-
-   <div
-    id="suggestions"
-    class="suggestion-box hidden">
-   </div>
-
-  </div>
-
-
-  <div class="col-4">
-
-   <label>
-    RGI
-   </label>
-
-   <input
-    id="rgi"
-    type="text"
-    readonly>
-
-  </div>
-
-
-  <div class="col-4">
-
-   <label>
-    Pavilhão
-   </label>
-
-   <input
-    id="pavilhao"
-    type="text"
-    readonly>
-
-  </div>
-
-
-  <div class="col-4">
-
-   <label>
-    Cela
-   </label>
-
-   <select id="cela">
-
-    <option value="">
-     Selecione
-    </option>
-
-   </select>
-
-  </div>
-
-
-  <div class="col-4">
-
-   <label>
-    Atendimento
-   </label>
-
-   <select id="atendimento">
-
-    <option value="">
-     Selecione
-    </option>
-
-   </select>
-
-  </div>
-
-
-  <div class="col-4">
-
-   <label>
-    Data do atendimento
-   </label>
-
-   <div style="display:flex;gap:6px">
-
-    <input
-     id="dataAtendimento"
-     type="date">
-
-    <button
-     type="button"
-     class="btn-yellow"
-     onclick="usarHoje()">
-     HOJE
-    </button>
-
-   </div>
-
-  </div>
-
-
-  <div class="col-8">
-
-   <label>
-    Assunto
-   </label>
-
-   <input
-    id="assunto"
-    type="text"
-    placeholder="Descreva o assunto">
-
-  </div>
-
-
-  <div class="col-12">
-
-   <div class="actions">
-
-    <button
-     type="button"
-     class="btn-green"
-     onclick="entrarNaLista()">
-     ➕ ENTRAR NA LISTA
-    </button>
-
-
-    <button
-     type="button"
-     class="btn-blue"
-     onclick="enviarLista()">
-     📤 ENVIAR PARA MESA
-    </button>
-
-
-    <button
-     type="button"
-     class="btn-gray"
-     onclick="limparFormulario()">
-     LIMPAR
-    </button>
-
-   </div>
-
-  </div>
-
- </div>
-
-
- <div
-  id="baseInfo"
-  class="info-base">
-  Base de internos não carregada.
- </div>
-
-</div>
-
-
-<!-- =====================================================
-     LISTA DE PREPARAÇÃO
-===================================================== -->
-
-<div class="card">
-
- <div class="toolbar">
-
-  <h3 style="margin:0;border:0;padding:0">
-   📝 LISTA DE ATENDIMENTOS
-  </h3>
-
-  <span
-   id="listaCount"
-   class="list-count">
-   0 atendimento(s)
-  </span>
-
- </div>
-
-
- <div class="note">
-
-  Os cadastros adicionados nesta lista
-  ainda não foram enviados para a Mesa.
-
- </div>
-
-
- <div class="table-wrap"
-      style="margin-top:12px">
-
-  <table>
-
-   <thead>
-
-    <tr>
-
-     <th>Nome</th>
-     <th>RGI</th>
-     <th>Pav.</th>
-     <th>Cela</th>
-     <th>Atendimento</th>
-     <th>Data</th>
-     <th>Assunto</th>
-     <th>Ação</th>
-
-    </tr>
-
-   </thead>
-
-   <tbody id="listaBody"></tbody>
-
-  </table>
-
- </div>
-
-</div>
-
-
-<!-- =====================================================
-     BASE DE INTERNOS
-===================================================== -->
-
-<div class="card">
-
- <h3>
-  👤 BASE DE INTERNOS
- </h3>
-
-
- <div class="file-area">
-
-  <div class="actions">
-
-   <button
-    type="button"
-    class="btn-green"
-    onclick="abrirArquivoExcel()">
-    🔄 ATUALIZAR BASE DE INTERNOS
-   </button>
-
-
-   <input
-    id="arquivoExcel"
-    type="file"
-    accept=".xlsx,.xls"
-    class="hidden"
-    onchange="importarExcel(event)">
-
-  </div>
-
-
-  <div
-   id="baseStatus"
-   class="small-note">
-   Nenhuma base carregada.
-  </div>
-
- </div>
-
-</div>
-
-
-<!-- =====================================================
-     HISTÓRICO
-===================================================== -->
-
-<div class="card">
-
- <div class="toolbar">
-
-  <h3 style="margin:0;border:0;padding:0">
-   📚 HISTÓRICO DE ATENDIMENTOS
-  </h3>
-
-
-  <button
-   type="button"
-   class="btn-purple"
-   onclick="guardarTodos()">
-   🗄️ GUARDAR TODOS
-  </button>
-
-
-  <button
-   type="button"
-   class="btn-blue"
-   onclick="abrirImpressao()">
-   🖨️ IMPRIMIR LISTA
-  </button>
-
- </div>
-
-
- <div class="history-filters">
-
-  <input
-   id="filtroHistoricoNome"
-   type="text"
-   placeholder="Pesquisar nome..."
-   oninput="renderHistorico()">
-
-
-  <select
-   id="filtroHistoricoAtendimento"
-   onchange="renderHistorico()">
-
-   <option value="">
-    Todos os atendimentos
-   </option>
-
-  </select>
-
-
-  <select
-   id="ordemHistorico"
-   onchange="renderHistorico()">
-
-   <option value="envio">
-    Ordem de envio
-   </option>
-
-   <option value="atendimento">
-    Por atendimento
-   </option>
-
-  </select>
-
- </div>
-
-
- <div class="table-wrap">
-
-  <table>
-
-   <thead>
-
-    <tr>
-
-     <th>Nome</th>
-     <th>RGI</th>
-     <th>Pav.</th>
-     <th>Cela</th>
-     <th>Atendimento</th>
-     <th>Data</th>
-     <th>Assunto</th>
-     <th>Status</th>
-     <th>Enviado em</th>
-     <th>Recebido em</th>
-     <th>Observação</th>
-     <th>Ação</th>
-
-    </tr>
-
-   </thead>
-
-   <tbody id="historicoBody"></tbody>
-
-  </table>
-
- </div>
-
-</div>
-
-
-<!-- =====================================================
-     GUARDADOS
-===================================================== -->
-
-<div class="card">
-
- <div class="toolbar">
-
-  <h3 style="margin:0;border:0;padding:0">
-   🗄️ ATENDIMENTOS GUARDADOS
-  </h3>
-
-
-  <span
-   id="resumoGuardados"
-   class="list-count">
-  </span>
-
-
-  <button
-   type="button"
-   class="btn-purple"
-   onclick="abrirGuardados()">
-   ABRIR ATENDIMENTOS GUARDADOS
-  </button>
-
- </div>
-
-</div>
-
-
-</div>
-
-
-<!-- =====================================================
-     MODAL GUARDADOS
-===================================================== -->
-
-<div
- id="modalGuardados"
- class="modal hidden">
-
- <div class="modal-content">
-
-  <div class="modal-header">
-
-   <h3>
-    🗄️ ATENDIMENTOS GUARDADOS
-   </h3>
-
-   <button
-    type="button"
-    class="btn-red"
-    onclick="fecharGuardados()">
-    FECHAR
-   </button>
-
-  </div>
-
-
-  <div class="history-filters">
-
-   <input
-    id="filtroArquivoNome"
-    type="text"
-    placeholder="Nome..."
-    oninput="renderGuardados()">
-
-
-   <input
-    id="filtroArquivoData"
-    type="date"
-    onchange="renderGuardados()">
-
-
-   <select
-    id="filtroArquivoAtendimento"
-    onchange="renderGuardados()">
-
-    <option value="">
-     Todos os atendimentos
-    </option>
-
-   </select>
-
-  </div>
-
-
-  <div class="table-wrap">
-
-   <table>
-
-    <thead>
-
-     <tr>
-
-      <th>Nome</th>
-      <th>RGI</th>
-      <th>Pav.</th>
-      <th>Cela</th>
-      <th>Atendimento</th>
-      <th>Data</th>
-      <th>Assunto</th>
-      <th>Guardado em</th>
-
-     </tr>
-
-    </thead>
-
-    <tbody id="arquivoBody"></tbody>
-
-   </table>
-
-  </div>
-
- </div>
-
-</div>
-
-
-<!-- =====================================================
-     IMPRESSÃO
-===================================================== -->
-
-<div
- id="modalImpressao"
- class="modal hidden">
-
- <div class="modal-content">
-
-  <div class="modal-header">
-
-   <h3>
-    🖨️ IMPRIMIR LISTA
-   </h3>
-
-   <button
-    type="button"
-    class="btn-red"
-    onclick="fecharImpressao()">
-    FECHAR
-   </button>
-
-  </div>
-
-
-  <div style="
-   display:grid;
-   grid-template-columns:repeat(12,1fr);
-   gap:10px">
-
-
-   <!-- MODO -->
-
-   <div style="
-    grid-column:span 4;
-    border:1px solid #ddd;
-    padding:12px;
-    border-radius:7px">
-
-    <h4>
-     Modo de impressão
-    </h4>
-
-
-    <label>
-
-     <input
-      type="radio"
-      name="modoImpressao"
-      value="atendimento"
-      checked
-      onchange="alterarModoImpressao()">
-
-     Por atendimento
-
-    </label>
-
-
-    <label>
-
-     <input
-      type="radio"
-      name="modoImpressao"
-      value="geral"
-      onchange="alterarModoImpressao()">
-
-     Por atendimento geral
-
-    </label>
-
-
-    <label>
-
-     <input
-      type="radio"
-      name="modoImpressao"
-      value="data"
-      onchange="alterarModoImpressao()">
-
-     Por data
-
-    </label>
-
-
-    <label>
-
-     <input
-      type="radio"
-      name="modoImpressao"
-      value="pavilhao"
-      onchange="alterarModoImpressao()">
-
-     Por Pavilhão
-
-    </label>
-
-   </div>
-
-
-   <!-- ATENDIMENTOS -->
-
-   <div
-    id="grupoAtendimento"
-    style="
-     grid-column:span 4;
-     border:1px solid #ddd;
-     padding:12px;
-     border-radius:7px">
-
-    <h4>
-     Atendimentos
-    </h4>
-
-
-    <div
-     id="listaAtendimentosImpressao"
-     style="max-height:230px;overflow:auto">
+  <!-- CADASTRO -->
+  <section class="section">
+
+    <div class="section-header">
+      <h2>📝 NOVO ATENDIMENTO</h2>
     </div>
 
-   </div>
+    <div class="section-body">
 
+      <div class="grid">
 
-   <!-- DATA -->
+        <div class="form-group suggestions">
 
-   <div
-    id="grupoData"
-    class="hidden"
-    style="
-     grid-column:span 4;
-     border:1px solid #ddd;
-     padding:12px;
-     border-radius:7px">
+          <label for="nomeInterno">
+            Nome do interno
+          </label>
 
-    <h4>
-     Data
-    </h4>
+          <input
+            id="nomeInterno"
+            autocomplete="off"
+            placeholder="Digite o nome do interno..."
+          >
 
+          <div
+            id="sugestoesInternos"
+            class="suggestion-box"
+            style="display:none;"
+          ></div>
 
-    <input
-     id="dataImpressao"
-     type="date">
+          <div
+            id="infoInterno"
+            class="info-base"
+          ></div>
 
+        </div>
 
-    <br><br>
+        <div class="form-group">
 
+          <label for="rgi">
+            RGI
+          </label>
 
-    <label>
+          <input
+            id="rgi"
+            placeholder="RGI"
+          >
 
-     <input
-      type="radio"
-      name="tipoData"
-      value="todos"
-      checked
-      onchange="alterarTipoData()">
+        </div>
 
-     Todos
+        <div class="form-group">
 
-    </label>
+          <label for="pavilhao">
+            Pavilhão
+          </label>
 
+          <input
+            id="pavilhao"
+            placeholder="Pavilhão"
+          >
 
-    <label>
+        </div>
 
-     <input
-      type="radio"
-      name="tipoData"
-      value="atendimentos"
-      onchange="alterarTipoData()">
+        <div class="form-group">
 
-     Atendimentos
+          <label for="cela">
+            Cela
+          </label>
 
-    </label>
+          <select id="cela">
+            <option value="">
+              Selecione
+            </option>
+          </select>
 
+        </div>
 
-    <div
-     id="listaAtendimentosData"
-     class="hidden"
-     style="
-      max-height:180px;
-      overflow:auto;
-      margin-top:8px">
-    </div>
+        <div class="form-group">
 
-   </div>
+          <label for="atendimento">
+            Atendimento
+          </label>
 
+          <select id="atendimento">
 
-   <!-- PAVILHÃO -->
+            <option value="">
+              Selecione
+            </option>
 
-   <div
-    id="grupoPavilhao"
-    class="hidden"
-    style="
-     grid-column:span 4;
-     border:1px solid #ddd;
-     padding:12px;
-     border-radius:7px">
+          </select>
 
-    <h4>
-     Pavilhão
-    </h4>
+        </div>
 
+        <div class="form-group">
 
-    <div class="small-note">
-     Selecione um ou mais pavilhões.
-    </div>
+          <label for="dataAtendimento">
+            Data do atendimento
+          </label>
 
+          <div style="display:flex;gap:7px;">
 
-    <div
-     id="listaPavilhoesImpressao"
-     class="pavilhao-list"
-     style="margin-top:8px">
-    </div>
+            <input
+              type="date"
+              id="dataAtendimento"
+            >
 
-   </div>
+            <button
+              type="button"
+              class="btn-gray"
+              onclick="usarHoje()"
+            >
+              HOJE
+            </button>
 
+          </div>
 
-   <!-- UM POR PÁGINA -->
+        </div>
 
-   <div style="
-    grid-column:span 12;
-    border:1px solid #ddd;
-    padding:12px;
-    border-radius:7px">
+        <div class="form-group" style="grid-column:1/-1;">
 
-    <label>
+          <label for="assunto">
+            Assunto / descrição
+          </label>
 
-     <input
-      id="umPorPagina"
-      type="checkbox">
+          <textarea
+            id="assunto"
+            placeholder="Descreva o assunto do atendimento..."
+          ></textarea>
 
-     Um atendimento por página
-
-    </label>
-
-
-    <div class="small-note">
-
-     Cada categoria selecionada será
-     impressa em sua própria página A4.
-
-    </div>
-
-   </div>
-
-  </div>
-
-
-  <div
-   class="actions"
-   style="margin-top:15px">
-
-   <button
-    type="button"
-    class="btn-green"
-    onclick="executarImpressao()">
-    🖨️ IMPRIMIR
-   </button>
-
-
-   <button
-    type="button"
-    class="btn-gray"
-    onclick="fecharImpressao()">
-    CANCELAR
-   </button>
-
-  </div>
-
- </div>
-
-</div>
-
-
-<div id="printArea"></div>
-
-<div id="toast"></div>
-
-
-<script>
-
-/* =====================================================
-   CONFIGURAÇÃO
-===================================================== */
-
-const STORAGE_HISTORICO=
- "atendimentoV2Historico";
-
-const STORAGE_LISTA=
- "atendimentoV24Lista";
-
-const STORAGE_BASE=
- "atendimentoV23BaseInternos";
-
-const STORAGE_BASE_DATA=
- "atendimentoV23BaseData";
-
-const STORAGE_ARQUIVO=
- "atendimentoV23Arquivo";
-
-const STORAGE_OUTBOX_ANTIGO=
- "atendimentoV2Outbox";
-
-
-const ATENDIMENTOS=[
-
- "Jurídico",
- "Psicossocial",
- "Médico",
- "Odontologia",
- "Trabalho",
- "Chefia",
- "Chefe de equipe",
- "Portaria II",
- "Identificação",
- "Limpeza",
- "Advogado(a)",
- "Visita Assistida",
- "Autorização de Saída",
- "Licença Judicial",
- "7 dias",
- "7 dias monitorado",
- "Alvará",
- "Salvo conduto",
- "Domiciliar",
- "Evasão",
- "Desvio de Rota",
- "Falta",
- "Regressão",
- "Mudança de Cela",
- "Hospitalizado",
- "Outros"
-
-];
-
-
-let baseInternos=[];
-let listaPreparacao=[];
-let historico=[];
-let arquivo=[];
-
-let socket=null;
-let socketAberto=false;
-let reconnectTimer=null;
-
-
-/* =====================================================
-   UTILIDADES
-===================================================== */
-
-function $(id){
- return document.getElementById(id);
-}
-
-
-function salvarJSON(chave,valor){
-
- localStorage.setItem(
-  chave,
-  JSON.stringify(valor)
- );
-
-}
-
-
-function lerJSON(chave,padrao){
-
- try{
-
-  const valor=
-   localStorage.getItem(chave);
-
-  return valor
-   ?JSON.parse(valor)
-   :padrao;
-
- }catch(e){
-
-  return padrao;
-
- }
-
-}
-
-
-function normalizar(texto){
-
- return String(texto??"")
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g,"")
-  .toLowerCase()
-  .trim();
-
-}
-
-
-function escapeHtml(valor){
-
- return String(valor??"")
-  .replaceAll("&","&amp;")
-  .replaceAll("<","&lt;")
-  .replaceAll(">","&gt;")
-  .replaceAll('"',"&quot;")
-  .replaceAll("'","&#039;");
-
-}
-
-
-function gerarId(){
-
- if(
-  window.crypto &&
-  crypto.randomUUID
- ){
-
-  return crypto.randomUUID();
-
- }
-
- return Date.now().toString(36)+
-  Math.random().toString(36).slice(2);
-
-}
-
-
-function dataHoje(){
-
- const d=new Date();
-
- return `${
-  d.getFullYear()
- }-${
-  String(d.getMonth()+1).padStart(2,"0")
- }-${
-  String(d.getDate()).padStart(2,"0")}`;
-
-}
-
-
-function formatarData(data){
-
- if(!data)return "";
-
- const p=
-  String(data).split("-");
-
- return p.length===3
-  ?`${p[2]}/${p[1]}/${p[0]}`
-  :data;
-
-}
-
-
-function formatarDataHora(valor){
-
- if(!valor)return "";
-
- const d=new Date(valor);
-
- return Number.isNaN(d.getTime())
-  ?valor
-  :d.toLocaleString("pt-BR");
-
-}
-
-
-function mostrarToast(msg){
-
- const t=$("toast");
-
- t.textContent=msg;
-
- t.style.display="block";
-
- clearTimeout(
-  window.toastTimer
- );
-
- window.toastTimer=
-  setTimeout(
-   ()=>t.style.display="none",
-   3500
-  );
-
-}
-
-
-/* =====================================================
-   INICIALIZAÇÃO
-===================================================== */
-
-document.addEventListener(
- "DOMContentLoaded",
- iniciar
-);
-
-
-function iniciar(){
-
- baseInternos=
-  lerJSON(
-   STORAGE_BASE,
-   []
-  );
-
-
- listaPreparacao=
-  lerJSON(
-   STORAGE_LISTA,
-   []
-  );
-
-
- historico=
-  lerJSON(
-   STORAGE_HISTORICO,
-   []
-  );
-
-
- arquivo=
-  lerJSON(
-   STORAGE_ARQUIVO,
-   []
-  );
-
-
- /*
-   Garante IDs e migra registros
-   antigos para o novo padrão.
- */
-
- historico=
-  historico.map(item=>{
-
-   const novo={
-    ...item
-   };
-
-
-   if(!novo.recordId){
-
-    novo.recordId=
-     novo.id||
-     gerarId();
-
-   }
-
-
-   if(novo.status==="pendente"){
-
-    novo.status=
-     "aguardando_mesa";
-
-   }
-
-
-   return novo;
-
-  });
-
-
- /*
-   Migra a antiga fila de envio.
- */
-
- const antiga=
-  lerJSON(
-   STORAGE_OUTBOX_ANTIGO,
-   []
-  );
-
-
- if(Array.isArray(antiga)){
-
-  antiga.forEach(item=>{
-
-   if(!item.recordId)return;
-
-
-   const existe=
-    historico.some(
-     h=>
-      h.recordId===
-      item.recordId
-    );
-
-
-   if(!existe){
-
-    historico.push({
-
-     ...item,
-
-     status:
-      "aguardando_mesa",
-
-     enviadoEm:
-      item.enviadoEm||
-      item.criadoEm||
-      new Date().toISOString()
-
-    });
-
-   }
-
-  });
-
- }
-
-
- localStorage.removeItem(
-  STORAGE_OUTBOX_ANTIGO
- );
-
-
- salvarJSON(
-  STORAGE_HISTORICO,
-  historico
- );
-
-
- $("dataAtendimento").value=
-  dataHoje();
-
-
- preencherAtendimentos();
-
- preencherCelas();
-
- configurarBuscaNome();
-
- atualizarFiltrosAtendimento();
-
- renderLista();
-
- renderHistorico();
-
- renderGuardados();
-
- renderResumoGuardados();
-
- atualizarBaseStatus();
-
- conectarServidor();
-
-}
-
-
-/* =====================================================
-   FORMULÁRIO
-===================================================== */
-
-function preencherAtendimentos(){
-
- const select=
-  $("atendimento");
-
-
- ATENDIMENTOS.forEach(nome=>{
-
-  const option=
-   document.createElement(
-    "option"
-   );
-
-  option.value=nome;
-
-  option.textContent=nome;
-
-  select.appendChild(
-   option
-  );
-
- });
-
-}
-
-
-function preencherCelas(){
-
- const select=
-  $("cela");
-
-
- for(let i=1;i<=120;i++){
-
-  const numero=
-   String(i).padStart(2,"0");
-
-
-  const option=
-   document.createElement(
-    "option"
-   );
-
-  option.value=numero;
-
-  option.textContent=numero;
-
-  select.appendChild(
-   option
-  );
-
- }
-
-}
-
-
-function usarHoje(){
-
- $("dataAtendimento").value=
-  dataHoje();
-
-}
-
-
-function limparFormulario(){
-
- $("nome").value="";
- $("rgi").value="";
- $("pavilhao").value="";
- $("cela").value="";
- $("atendimento").value="";
- $("assunto").value="";
- $("dataAtendimento").value=
-  dataHoje();
-
-
- $("suggestions")
-  .classList
-  .add("hidden");
-
-}
-
-
-function configurarBuscaNome(){
-
- const campo=
-  $("nome");
-
-
- campo.addEventListener(
-  "input",
-  pesquisarNome
- );
-
-
- campo.addEventListener(
-  "keydown",
-  event=>{
-
-   if(event.key==="Escape"){
-
-    $("suggestions")
-     .classList
-     .add("hidden");
-
-   }
-
-   if(
-    event.key==="Enter"
-   ){
-
-    const primeiro=
-     document.querySelector(
-      ".suggestion-item"
-     );
-
-
-    if(primeiro){
-
-     primeiro.click();
-
-     event.preventDefault();
-
-    }
-
-   }
-
-  }
- );
-
-
- document.addEventListener(
-  "click",
-  event=>{
-
-   if(
-    !event.target.closest(
-     ".suggestions"
-    )
-   ){
-
-    $("suggestions")
-     .classList
-     .add("hidden");
-
-   }
-
-  }
- );
-
-}
-
-
-function pesquisarNome(){
-
- const texto=
-  normalizar(
-   $("nome").value
-  );
-
-
- const box=
-  $("suggestions");
-
-
- if(!texto){
-
-  box.classList.add(
-   "hidden"
-  );
-
-  return;
-
- }
-
-
- const resultados=
-  baseInternos
-   .filter(
-    item=>
-     normalizar(
-      item.nome
-     ).includes(texto)
-   )
-   .slice(0,20);
-
-
- if(!resultados.length){
-
-  box.innerHTML=
-   `<div class="suggestion-item">
-    Nenhum interno encontrado.
-   </div>`;
-
-  box.classList.remove(
-   "hidden"
-  );
-
-  return;
-
- }
-
-
- box.innerHTML=
-  resultados.map(
-   item=>`
-
-   <div
-    class="suggestion-item"
-    onclick='selecionarInterno(${JSON.stringify(item).replace(/'/g,"&#39;")})'>
-
-    <strong>
-     ${escapeHtml(item.nome)}
-    </strong>
-
-    <br>
-
-    RGI:
-    ${escapeHtml(item.rgi)}
-
-    • Pavilhão:
-    ${escapeHtml(item.pavilhao)}
-
-    • Cela:
-    ${escapeHtml(item.cela)}
-
-   </div>
-
-  `
- ).join("");
-
-
- box.classList.remove(
-  "hidden"
- );
-
-}
-
-
-function selecionarInterno(item){
-
- $("nome").value=
-  item.nome||"";
-
-
- $("rgi").value=
-  item.rgi||"";
-
-
- $("pavilhao").value=
-  item.pavilhao||"";
-
-
- $("cela").value=
-  item.cela||"";
-
-
- $("suggestions")
-  .classList
-  .add("hidden");
-
-}
-
-
-/* =====================================================
-   LISTA DE PREPARAÇÃO
-===================================================== */
-
-function entrarNaLista(){
-
- const nome=
-  $("nome").value.trim();
-
- const rgi=
-  $("rgi").value.trim();
-
- const pavilhao=
-  $("pavilhao").value.trim();
-
- const cela=
-  $("cela").value.trim();
-
- const atendimento=
-  $("atendimento").value.trim();
-
- const dataAtendimento=
-  $("dataAtendimento").value;
-
- const assunto=
-  $("assunto").value.trim();
-
-
- if(
-  !nome||
-  !rgi||
-  !pavilhao||
-  !cela||
-  !atendimento||
-  !dataAtendimento
- ){
-
-  alert(
-   "Preencha Nome, RGI, Pavilhão, Cela, Atendimento e Data."
-  );
-
-  return;
-
- }
-
-
- const registro={
-
-  recordId:
-   gerarId(),
-
-  nome,
-
-  rgi,
-
-  pavilhao,
-
-  cela,
-
-  atendimento,
-
-  dataAtendimento,
-
-  assunto,
-
-  criadoEm:
-   new Date().toISOString(),
-
-  status:
-   "preparacao"
-
- };
-
-
- listaPreparacao.push(
-  registro
- );
-
-
- salvarJSON(
-  STORAGE_LISTA,
-  listaPreparacao
- );
-
-
- renderLista();
-
- limparFormulario();
-
-
- mostrarToast(
-  "Cadastro entrou na lista."
- );
-
-}
-
-
-function removerDaLista(recordId){
-
- listaPreparacao=
-  listaPreparacao.filter(
-   item=>
-    item.recordId!==recordId
-  );
-
-
- salvarJSON(
-  STORAGE_LISTA,
-  listaPreparacao
- );
-
-
- renderLista();
-
-}
-
-
-function renderLista(){
-
- const body=
-  $("listaBody");
-
-
- $("listaCount").textContent=
-  `${listaPreparacao.length} atendimento(s)`;
-
-
- if(!listaPreparacao.length){
-
-  body.innerHTML=`
-
-   <tr>
-
-    <td
-     colspan="8"
-     class="empty">
-
-     Nenhum atendimento
-     aguardando envio.
-
-    </td>
-
-   </tr>
-
-  `;
-
-  return;
-
- }
-
-
- body.innerHTML=
-  listaPreparacao.map(
-   item=>`
-
-   <tr>
-
-    <td>
-     ${escapeHtml(item.nome)}
-    </td>
-
-    <td>
-     ${escapeHtml(item.rgi)}
-    </td>
-
-    <td>
-     ${escapeHtml(item.pavilhao)}
-    </td>
-
-    <td>
-     ${escapeHtml(item.cela)}
-    </td>
-
-    <td>
-     ${escapeHtml(item.atendimento)}
-    </td>
-
-    <td>
-     ${formatarData(
-      item.dataAtendimento
-     )}
-    </td>
-
-    <td>
-     ${escapeHtml(item.assunto)}
-    </td>
-
-    <td>
-
-     <button
-      class="btn-red btn-small"
-      onclick="removerDaLista('${item.recordId}')">
-
-      🗑️
-
-     </button>
-
-    </td>
-
-   </tr>
-
-  `
-  ).join("");
-
-}
-
-
-/* =====================================================
-   ENVIAR LISTA
-===================================================== */
-
-function enviarLista(){
-
- if(!listaPreparacao.length){
-
-  mostrarToast(
-   "Não há cadastros na lista."
-  );
-
-  return;
-
- }
-
-
- if(!socketAberto){
-
-  alert(
-   "O Guichê não está conectado ao servidor."
-  );
-
-  return;
-
- }
-
-
- const agora=
-  new Date().toISOString();
-
-
- const enviados=[];
-
-
- listaPreparacao.forEach(
-  registro=>{
-
-   const item={
-
-    ...registro,
-
-    status:
-     "aguardando_mesa",
-
-    enviadoEm:
-     agora,
-
-    recebidoEm:
-     null,
-
-    recusadoEm:
-     null,
-
-    motivoRecusa:
-     ""
-
-   };
-
-
-   historico.push(
-    item
-   );
-
-
-   enviados.push(
-    item
-   );
-
-
-   try{
-
-    socket.send(
-     JSON.stringify({
-
-      type:
-       "send_record",
-
-      recordId:
-       item.recordId,
-
-      record:
-       item
-
-     })
-    );
-
-   }catch(e){}
-
-  }
- );
-
-
- listaPreparacao=[];
-
-
- salvarJSON(
-  STORAGE_LISTA,
-  listaPreparacao
- );
-
-
- salvarJSON(
-  STORAGE_HISTORICO,
-  historico
- );
-
-
- renderLista();
-
- renderHistorico();
-
-
- mostrarToast(
-  `${enviados.length} atendimento(s) enviados para a Mesa.`
- );
-
-}
-
-
-/* =====================================================
-   WEBSOCKET
-===================================================== */
-
-function conectarServidor(){
-
- if(socket){
-
-  try{
-   socket.close();
-  }catch(e){}
-
- }
-
-
- const protocolo=
-  location.protocol==="https:"
-   ?"wss://"
-   :"ws://";
-
-
- socket=
-  new WebSocket(
-   protocolo+
-   location.host
-  );
-
-
- socket.addEventListener(
-  "open",
-  ()=>{
-
-   socketAberto=true;
-
-
-   socket.send(
-    JSON.stringify({
-
-     type:
-      "register",
-
-     role:
-      "sender"
-
-    })
-   );
-
-
-   /*
-     Reenvia registros ainda aguardando
-     confirmação da Mesa.
-   */
-
-   setTimeout(
-    enviarPendentes,
-    500
-   );
-
-
-   mostrarToast(
-    "Guichê conectado ao servidor."
-   );
-
-  }
- );
-
-
- socket.addEventListener(
-  "message",
-  event=>{
-
-   let mensagem;
-
-
-   try{
-
-    mensagem=
-     JSON.parse(
-      event.data
-     );
-
-   }catch(e){
-
-    return;
-
-   }
-
-
-   /*
-     Mesa recebeu.
-   */
-
-   if(
-    mensagem.type===
-    "record_received"
-   ){
-
-    confirmarRecebimentoLocal(
-     mensagem.recordId,
-     mensagem.receivedAt
-    );
-
-    return;
-
-   }
-
-
-   /*
-     Resultado da confirmação.
-   */
-
-   if(
-    mensagem.type===
-    "confirm_result" &&
-    mensagem.ok
-   ){
-
-    confirmarRecebimentoLocal(
-     mensagem.recordId,
-     mensagem.receivedAt
-    );
-
-    return;
-
-   }
-
-
-   /*
-     NOVO:
-     Mesa recusou.
-   */
-
-   if(
-    mensagem.type===
-    "record_refused"
-   ){
-
-    receberRecusaDaMesa(
-     mensagem
-    );
-
-    return;
-
-   }
-
-  }
- );
-
-
- socket.addEventListener(
-  "close",
-  ()=>{
-
-   socketAberto=false;
-
-
-   clearTimeout(
-    reconnectTimer
-   );
-
-
-   reconnectTimer=
-    setTimeout(
-     conectarServidor,
-     3000
-    );
-
-  }
- );
-
-
- socket.addEventListener(
-  "error",
-  ()=>{
-
-   socketAberto=false;
-
-  }
- );
-
-}
-
-
-/* =====================================================
-   REENVIO AUTOMÁTICO
-===================================================== */
-
-function enviarPendentes(){
-
- if(!socketAberto)return;
-
-
- historico
-  .filter(
-   item=>
-    item.status===
-    "aguardando_mesa"
-  )
-  .forEach(
-   registro=>{
-
-    try{
-
-     socket.send(
-      JSON.stringify({
-
-       type:
-        "send_record",
-
-       recordId:
-        registro.recordId,
-
-       record:
-        registro
-
-      })
-     );
-
-    }catch(e){}
-
-   }
-  );
-
-}
-
-
-setInterval(
- enviarPendentes,
- 5000
-);
-
-
-/* =====================================================
-   CONFIRMAÇÃO RECEBIDA
-===================================================== */
-
-function confirmarRecebimentoLocal(
- recordId,
- receivedAt
-){
-
- const registro=
-  historico.find(
-   item=>
-    item.recordId===
-    recordId
-  );
-
-
- if(!registro)return;
-
-
- registro.status=
-  "recebido";
-
-
- registro.recebidoEm=
-  receivedAt||
-  new Date().toISOString();
-
-
- registro.motivoRecusa=
-  "";
-
-
- registro.recusadoEm=
-  null;
-
-
- salvarJSON(
-  STORAGE_HISTORICO,
-  historico
- );
-
-
- renderHistorico();
-
-
- mostrarToast(
-  `Recebido pela Mesa: ${registro.nome}`
- );
-
-}
-
-
-/* =====================================================
-   RECUSA DA MESA
-===================================================== */
-
-function receberRecusaDaMesa(
- mensagem
-){
-
- const recordId=
-  mensagem.recordId;
-
-
- const registro=
-  historico.find(
-   item=>
-    item.recordId===
-    recordId
-  );
-
-
- if(!registro){
-
-  /*
-    Se por algum motivo o histórico local
-    não tiver mais o cadastro, cria uma cópia
-    usando o registro enviado pela Mesa.
-  */
-
-  if(mensagem.record){
-
-   historico.unshift({
-
-    ...mensagem.record,
-
-    recordId,
-
-    status:
-     "recusado",
-
-    recusadoEm:
-     mensagem.refusedAt||
-     new Date().toISOString(),
-
-    motivoRecusa:
-     mensagem.reason||
-     mensagem.record.motivoRecusa||
-     ""
-
-   });
-
-   salvarJSON(
-    STORAGE_HISTORICO,
-    historico
-   );
-
-  }
-
- }else{
-
-  registro.status=
-   "recusado";
-
-
-  registro.recusadoEm=
-   mensagem.refusedAt||
-   new Date().toISOString();
-
-
-  registro.motivoRecusa=
-   mensagem.reason||
-   mensagem.record?.motivoRecusa||
-   "";
-
-
-  registro.recebidoEm=
-   null;
-
- }
-
-
- renderHistorico();
-
-
- mostrarToast(
-  `❌ Cadastro recusado pela Mesa: ${
-   registro?.nome||
-   mensagem.record?.nome||
-   ""
-  }`
- );
-
-}
-
-
-/* =====================================================
-   HISTÓRICO
-===================================================== */
-
-function atualizarFiltrosAtendimento(){
-
- const selects=[
-
-  $("filtroHistoricoAtendimento"),
-
-  $("filtroArquivoAtendimento")
-
- ];
-
-
- selects.forEach(
-  select=>{
-
-   if(!select)return;
-
-
-   const atual=
-    select.value;
-
-
-   select.innerHTML=
-    `<option value="">
-     Todos os atendimentos
-    </option>`;
-
-
-   ATENDIMENTOS.forEach(
-    nome=>{
-
-     const option=
-      document.createElement(
-       "option"
-      );
-
-
-     option.value=
-      nome;
-
-
-     option.textContent=
-      nome;
-
-
-     select.appendChild(
-      option
-     );
-
-    }
-   );
-
-
-   select.value=
-    atual;
-
-  }
- );
-
-}
-
-
-function renderHistorico(){
-
- const body=
-  $("historicoBody");
-
-
- const nomeFiltro=
-  normalizar(
-   $("filtroHistoricoNome").value
-  );
-
-
- const atendimentoFiltro=
-  $("filtroHistoricoAtendimento").value;
-
-
- const ordem=
-  $("ordemHistorico").value;
-
-
- let dados=
-  [...historico];
-
-
- if(nomeFiltro){
-
-  dados=
-   dados.filter(
-    item=>
-     normalizar(
-      item.nome
-     ).includes(
-      nomeFiltro
-     )
-   );
-
- }
-
-
- if(atendimentoFiltro){
-
-  dados=
-   dados.filter(
-    item=>
-     item.atendimento===
-     atendimentoFiltro
-   );
-
- }
-
-
- if(ordem==="atendimento"){
-
-  dados.sort(
-   (a,b)=>
-    String(
-     a.atendimento
-    ).localeCompare(
-     String(
-      b.atendimento
-     ),
-     "pt-BR"
-    )
-  );
-
- }else{
-
-  dados.sort(
-   (a,b)=>
-    new Date(
-     a.enviadoEm||
-     a.criadoEm||
-     0
-    )-
-    new Date(
-     b.enviadoEm||
-     b.criadoEm||
-     0
-    )
-  );
-
- }
-
-
- if(!dados.length){
-
-  body.innerHTML=`
-
-   <tr>
-
-    <td
-     colspan="12"
-     class="empty">
-
-     Nenhum atendimento encontrado.
-
-    </td>
-
-   </tr>
-
-  `;
-
-  return;
-
- }
-
-
- body.innerHTML=
-  dados.map(
-   item=>{
-
-    let status="";
-
-    let observacao="";
-
-    let acao="";
-
-
-    if(
-     item.status===
-     "aguardando_mesa"
-    ){
-
-     status=`
-
-      <span
-       class="badge badge-await">
-
-       AGUARDANDO MESA
-
-      </span>
-
-     `;
-
-
-     acao=`
-
-      <span
-       class="small-note">
-
-       Aguardando Mesa
-
-      </span>
-
-     `;
-
-    }
-
-
-    else if(
-     item.status===
-     "recebido"
-    ){
-
-     status=`
-
-      <span
-       class="badge badge-received">
-
-       RECEBIDO
-
-      </span>
-
-     `;
-
-
-     acao=`
-
-      <button
-       class="btn-purple btn-small"
-       onclick="guardarAtendimento('${item.recordId}')">
-
-       🗄️ GUARDAR
-
-      </button>
-
-     `;
-
-    }
-
-
-    else if(
-     item.status===
-     "recusado"
-    ){
-
-     status=`
-
-      <span
-       class="badge badge-refused">
-
-       ❌ RECUSADO
-
-      </span>
-
-     `;
-
-
-     observacao=`
-
-      <div
-       class="refusal-box">
-
-       <div
-        class="refusal-title">
-
-        Motivo da recusa:
-
-       </div>
-
-       <div
-        class="refusal-message">
-
-        ${escapeHtml(
-         item.motivoRecusa||
-         "Sem justificativa informada."
-        )}
-
-       </div>
-
-       <div class="small-note">
-
-        Recusado em:
-        ${formatarDataHora(
-         item.recusadoEm
-        )}
-
-       </div>
+        </div>
 
       </div>
 
-     `;
-
-
-     acao=`
-
-      <button
-       class="btn-yellow btn-small"
-       onclick="reenviarRecusado('${item.recordId}')">
-
-       📤 REENVIAR
-
-      </button>
-
-     `;
-
-    }
-
-
-    else{
-
-     status=`
-
-      <span
-       class="badge badge-guarded">
-
-       ${escapeHtml(
-        item.status||
-        "GUARDADO"
-       )}
-
-      </span>
-
-     `;
-
-    }
-
-
-    return `
-
-     <tr>
-
-      <td>
-       ${escapeHtml(item.nome)}
-      </td>
-
-      <td>
-       ${escapeHtml(item.rgi)}
-      </td>
-
-      <td>
-       ${escapeHtml(item.pavilhao)}
-      </td>
-
-      <td>
-       ${escapeHtml(item.cela)}
-      </td>
-
-      <td>
-       ${escapeHtml(item.atendimento)}
-      </td>
-
-      <td>
-       ${formatarData(
-        item.dataAtendimento
-       )}
-      </td>
-
-      <td>
-       ${escapeHtml(item.assunto)}
-      </td>
-
-      <td>
-       ${status}
-      </td>
-
-      <td>
-       ${formatarDataHora(
-        item.enviadoEm
-       )}
-      </td>
-
-      <td>
-       ${formatarDataHora(
-        item.recebidoEm
-       )}
-      </td>
-
-      <td>
-       ${observacao}
-      </td>
-
-      <td>
-       ${acao}
-      </td>
-
-     </tr>
-
-    `;
-
-   }
-  ).join("");
-
-}
-
-
-/* =====================================================
-   REENVIAR RECUSADO
-===================================================== */
-
-function reenviarRecusado(
- recordId
-){
-
- const registro=
-  historico.find(
-   item=>
-    item.recordId===
-    recordId
-  );
-
-
- if(!registro){
-
-  mostrarToast(
-   "Cadastro não encontrado."
-  );
-
-  return;
-
- }
-
-
- if(
-  registro.status!=="recusado"
- ){
-
-  mostrarToast(
-   "Este cadastro não está recusado."
-  );
-
-  return;
-
- }
-
-
- if(!socketAberto){
-
-  mostrarToast(
-   "O Guichê está desconectado da Mesa."
-  );
-
-  return;
-
- }
-
-
- registro.status=
-  "aguardando_mesa";
-
-
- registro.enviadoEm=
-  new Date().toISOString();
-
-
- registro.recebidoEm=
-  null;
-
-
- registro.recusadoEm=
-  null;
-
-
- registro.motivoRecusa=
-  "";
-
-
- salvarJSON(
-  STORAGE_HISTORICO,
-  historico
- );
-
-
- try{
-
-  socket.send(
-   JSON.stringify({
-
-    type:
-     "send_record",
-
-    recordId:
-     registro.recordId,
-
-    record:
-     registro
-
-   })
-  );
-
-
-  renderHistorico();
-
-
-  mostrarToast(
-   `Cadastro reenviado para a Mesa: ${registro.nome}`
-  );
-
-
- }catch(e){
-
-  registro.status=
-   "recusado";
-
-
-  salvarJSON(
-   STORAGE_HISTORICO,
-   historico
-  );
-
-
-  renderHistorico();
-
-
-  mostrarToast(
-   "Não foi possível reenviar."
-  );
-
- }
-
-}
-
-
-/* =====================================================
-   GUARDAR
-===================================================== */
-
-function guardarAtendimento(
- recordId
-){
-
- const indice=
-  historico.findIndex(
-   item=>
-    item.recordId===
-    recordId
-  );
-
-
- if(indice<0)return;
-
-
- const item=
-  historico[indice];
-
-
- if(
-  item.status!=="recebido"
- ){
-
-  mostrarToast(
-   "Somente atendimentos recebidos podem ser guardados."
-  );
-
-  return;
-
- }
-
-
- item.status=
-  "guardado";
-
-
- item.guardadoEm=
-  new Date().toISOString();
-
-
- const jaExiste=
-  arquivo.some(
-   a=>
-    a.recordId===
-    recordId
-  );
-
-
- if(!jaExiste){
-
-  arquivo.unshift({
-   ...item
-  });
-
- }
-
-
- /*
-   Sai do histórico.
- */
-
- historico.splice(
-  indice,
-  1
- );
-
-
- salvarJSON(
-  STORAGE_HISTORICO,
-  historico
- );
-
-
- salvarJSON(
-  STORAGE_ARQUIVO,
-  arquivo
- );
-
-
- renderHistorico();
-
- renderGuardados();
-
- renderResumoGuardados();
-
-
- mostrarToast(
-  "Atendimento guardado."
- );
-
-}
-
-
-/* =====================================================
-   GUARDAR TODOS
-===================================================== */
-
-function guardarTodos(){
-
- const recebidos=
-  historico.filter(
-   item=>
-    item.status===
-    "recebido"
-  );
-
-
- if(!recebidos.length){
-
-  mostrarToast(
-   "Não há atendimentos recebidos para guardar."
-  );
-
-  return;
-
- }
-
-
- if(!confirm(
-  `Guardar ${recebidos.length} atendimento(s) recebido(s)?`
- )){
-
-  return;
-
- }
-
-
- const agora=
-  new Date().toISOString();
-
-
- recebidos.forEach(
-  item=>{
-
-   item.status=
-    "guardado";
-
-
-   item.guardadoEm=
-    agora;
-
-
-   const existe=
-    arquivo.some(
-     a=>
-      a.recordId===
-      item.recordId
-    );
-
-
-   if(!existe){
-
-    arquivo.unshift({
-     ...item
-    });
-
-   }
-
-  }
- );
-
-
- historico=
-  historico.filter(
-   item=>
-    item.status!=="guardado"
-  );
-
-
- salvarJSON(
-  STORAGE_HISTORICO,
-  historico
- );
-
-
- salvarJSON(
-  STORAGE_ARQUIVO,
-  arquivo
- );
-
-
- renderHistorico();
-
- renderGuardados();
-
- renderResumoGuardados();
-
-
- mostrarToast(
-  `${recebidos.length} atendimento(s) guardado(s).`
- );
-
-}
-
-
-/* =====================================================
-   GUARDADOS
-===================================================== */
-
-function renderResumoGuardados(){
-
- $("resumoGuardados").textContent=
-  `${arquivo.length} atendimento(s) guardado(s).`;
-
-}
-
-
-function abrirGuardados(){
-
- $("modalGuardados")
-  .classList
-  .remove("hidden");
-
-
- renderGuardados();
-
-}
-
-
-function fecharGuardados(){
-
- $("modalGuardados")
-  .classList
-  .add("hidden");
-
-}
-
-
-function renderGuardados(){
-
- const body=
-  $("arquivoBody");
-
-
- const nome=
-  normalizar(
-   $("filtroArquivoNome").value
-  );
-
-
- const data=
-  $("filtroArquivoData").value;
-
-
- const atendimento=
-  $("filtroArquivoAtendimento").value;
-
-
- let dados=
-  [...arquivo];
-
-
- if(nome){
-
-  dados=
-   dados.filter(
-    item=>
-     normalizar(
-      item.nome
-     ).includes(
-      nome
-     )
-   );
-
- }
-
-
- if(data){
-
-  dados=
-   dados.filter(
-    item=>
-     item.dataAtendimento===
-     data
-   );
-
- }
-
-
- if(atendimento){
-
-  dados=
-   dados.filter(
-    item=>
-     item.atendimento===
-     atendimento
-   );
-
- }
-
-
- if(!dados.length){
-
-  body.innerHTML=`
-
-   <tr>
-
-    <td
-     colspan="8"
-     class="empty">
-
-     Nenhum atendimento guardado.
-
-    </td>
-
-   </tr>
-
-  `;
-
-  return;
-
- }
-
-
- body.innerHTML=
-  dados.map(
-   item=>`
-
-   <tr>
-
-    <td>
-     ${escapeHtml(item.nome)}
-    </td>
-
-    <td>
-     ${escapeHtml(item.rgi)}
-    </td>
-
-    <td>
-     ${escapeHtml(item.pavilhao)}
-    </td>
-
-    <td>
-     ${escapeHtml(item.cela)}
-    </td>
-
-    <td>
-     ${escapeHtml(item.atendimento)}
-    </td>
-
-    <td>
-     ${formatarData(
-      item.dataAtendimento
-     )}
-    </td>
-
-    <td>
-     ${escapeHtml(item.assunto)}
-    </td>
-
-    <td>
-     ${formatarDataHora(
-      item.guardadoEm
-     )}
-    </td>
-
-   </tr>
-
-  `
-  ).join("");
-
-}
-
-
-/* =====================================================
-   EXCEL
-===================================================== */
-
-function abrirArquivoExcel(){
-
- $("arquivoExcel").click();
-
-}
-
-
-function importarExcel(event){
-
- const arquivoSelecionado=
-  event.target.files[0];
-
-
- if(!arquivoSelecionado)return;
-
-
- const leitor=
-  new FileReader();
-
-
- leitor.onload=
-  function(e){
-
-   try{
-
-    const bytes=
-     new Uint8Array(
-      e.target.result
-     );
-
-
-    processarExcel(
-     bytes
-    );
-
-   }catch(error){
-
-    console.error(error);
-
-    mostrarToast(
-     "Não foi possível importar a planilha."
-    );
-
-   }
-
-  };
-
-
- leitor.readAsArrayBuffer(
-  arquivoSelecionado
- );
-
-}
-
-
-function processarExcel(bytes){
-
- if(
-  typeof XLSX===
-  "undefined"
- ){
-
-  carregarSheetJS()
-   .then(
-    ()=>{
-     processarExcelComXLSX(
-      bytes
-     );
-    }
-   )
-   .catch(
-    ()=>{
-     mostrarToast(
-      "Não foi possível carregar o leitor Excel."
-     );
-    }
-   );
-
-  return;
-
- }
-
-
- processarExcelComXLSX(
-  bytes
- );
-
-}
-
-
-function carregarSheetJS(){
-
- return new Promise(
-  (resolve,reject)=>{
-
-   const script=
-    document.createElement(
-     "script"
-    );
-
-
-   script.src=
-    "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
-
-
-   script.onload=
-    resolve;
-
-
-   script.onerror=
-    reject;
-
-
-   document.head.appendChild(
-    script
-   );
-
-  }
- );
-
-}
-
-
-function processarExcelComXLSX(
- bytes
-){
-
- try{
-
-  const workbook=
-   XLSX.read(
-    bytes,
-    {
-     type:"array"
-    }
-   );
-
-
-  let encontrados=[];
-
-
-  for(
-   const sheetName
-   of workbook.SheetNames
-  ){
-
-   const sheet=
-    workbook.Sheets[
-     sheetName
-    ];
-
-
-   const linhas=
-    XLSX.utils.sheet_to_json(
-     sheet,
-     {
-      header:1,
-      defval:""
-     }
-    );
-
-
-   let headerIndex=-1;
-
-
-   for(
-    let i=0;
-    i<linhas.length;
-    i++
-   ){
-
-    const linha=
-     linhas[i].map(
-      x=>normalizar(x)
-     );
-
-
-    if(
-     linha.some(
-      x=>x.includes(
-       "nome do interno"
-      )
-     )&&
-     linha.some(
-      x=>x.includes("rgi")
-     )&&
-     linha.some(
-      x=>x.includes("pavilhao")
-     )&&
-     linha.some(
-      x=>x.includes("cela")
-     )
-    ){
-
-     headerIndex=i;
-
-     break;
-
-    }
-
-   }
-
-
-   if(headerIndex<0)continue;
-
-
-   const cabecalho=
-    linhas[
-     headerIndex
-    ].map(
-     x=>normalizar(x)
-    );
-
-
-   const indice=
-    nome=>
-     cabecalho.findIndex(
-      x=>x.includes(nome)
-     );
-
-
-   const colNome=
-    indice(
-     "nome do interno"
-    );
-
-
-   const colRgi=
-    indice("rgi");
-
-
-   const colPav=
-    indice("pavilhao");
-
-
-   const colCela=
-    indice("cela");
-
-
-   for(
-    let i=headerIndex+1;
-    i<linhas.length;
-    i++
-   ){
-
-    const linha=
-     linhas[i];
-
-
-    const nome=
-     String(
-      linha[colNome]??""
-     ).trim();
-
-
-    if(!nome)continue;
-
-
-    if(
-     normalizar(nome)==="totais"
-    ){
-
-     continue;
-
-    }
-
-
-    let cela=
-     String(
-      linha[colCela]??""
-     ).trim();
-
-
-    const numero=
-     parseInt(
-      cela,
-      10
-     );
-
-
-    if(
-     !Number.isNaN(
-      numero
-     )
-    ){
-
-     cela=
-      String(numero)
-       .padStart(
-        2,
-        "0"
-       );
-
-    }
-
-
-    encontrados.push({
-
-     nome,
-
-     rgi:
-      String(
-       linha[colRgi]??""
-      ).trim(),
-
-     pavilhao:
-      String(
-       linha[colPav]??""
-      ).trim(),
-
-     cela
-
-    });
-
-   }
-
-  }
-
-
-  const mapa=
-   new Map();
-
-
-  encontrados.forEach(
-   item=>{
-
-    const chave=
-     normalizar(item.nome)+
-     "|" +
-     normalizar(item.rgi);
-
-
-    if(
-     !mapa.has(chave)
-    ){
-
-     mapa.set(
-      chave,
-      item
-     );
-
-    }
-
-   }
-  );
-
-
-  baseInternos=
-   [...mapa.values()];
-
-
-  salvarJSON(
-   STORAGE_BASE,
-   baseInternos
-  );
-
-
-  salvarJSON(
-   STORAGE_BASE_DATA,
-   {
-
-    data:
-     new Date().toISOString(),
-
-    total:
-     baseInternos.length
-
-   }
-  );
-
-
-  atualizarBaseStatus();
-
-
-  mostrarToast(
-   `Base atualizada: ${baseInternos.length} internos.`
-  );
-
-
- }catch(error){
-
-  console.error(error);
-
-  mostrarToast(
-   "Erro ao ler a planilha Excel."
-  );
-
- }
-
-}
-
-
-function atualizarBaseStatus(){
-
- const info=
-  lerJSON(
-   STORAGE_BASE_DATA,
-   null
-  );
-
-
- if(!baseInternos.length){
-
-  $("baseInfo").textContent=
-   "Base de internos não carregada.";
-
-
-  $("baseStatus").textContent=
-   "Nenhuma base carregada.";
-
-
-  return;
-
- }
-
-
- const texto=
-  `Base atualizada em ${
-   info
-    ?formatarDataHora(info.data)
-    :""
-  } • ${
-   baseInternos.length
-  } internos cadastrados.`;
-
-
- $("baseInfo").textContent=
-  texto;
-
-
- $("baseStatus").textContent=
-  texto;
-
-}
-
-
-/* =====================================================
-   IMPRESSÃO
-===================================================== */
-
-function abrirImpressao(){
-
- atualizarFiltrosImpressao();
-
- preencherPavilhoesImpressao();
-
-
- $("dataImpressao").value=
-  dataHoje();
-
-
- $("modalImpressao")
-  .classList
-  .remove("hidden");
-
-
- alterarModoImpressao();
-
-}
-
-
-function fecharImpressao(){
-
- $("modalImpressao")
-  .classList
-  .add("hidden");
-
-}
-
-
-function alterarModoImpressao(){
-
- const modo=
-  document.querySelector(
-   'input[name="modoImpressao"]:checked'
-  ).value;
-
-
- $("grupoData")
-  .classList
-  .toggle(
-   "hidden",
-   modo!=="data"
-  );
-
-
- $("grupoPavilhao")
-  .classList
-  .toggle(
-   "hidden",
-   modo!=="pavilhao"
-  );
-
-
- $("grupoAtendimento")
-  .classList
-  .toggle(
-   "hidden",
-   modo==="data"||
-   modo==="pavilhao"
-  );
-
-
- if(
-  modo==="geral"
- ){
-
-  document.querySelectorAll(
-   "#listaAtendimentosImpressao input"
-  ).forEach(
-   input=>{
-    input.checked=true;
-   }
-  );
-
- }
-
-
- alterarTipoData();
-
-}
-
-
-function alterarTipoData(){
-
- const tipo=
-  document.querySelector(
-   'input[name="tipoData"]:checked'
-  ).value;
-
-
- $("listaAtendimentosData")
-  .classList
-  .toggle(
-   "hidden",
-   tipo!=="atendimentos"
-  );
-
-}
-
-
-function atualizarFiltrosImpressao(){
-
- $("listaAtendimentosImpressao")
-  .innerHTML=
-   ATENDIMENTOS.map(
-    (a,i)=>`
-
-    <label
-     style="
-      display:block;
-      padding:5px;
-      font-weight:normal;
-      border-bottom:1px solid #eee">
-
-     <input
-      type="checkbox"
-      value="${escapeHtml(a)}"
-      id="printAt_${i}">
-
-     ${escapeHtml(a)}
-
-    </label>
-
-   `
-   ).join("");
-
-
- $("listaAtendimentosData")
-  .innerHTML=
-   ATENDIMENTOS.map(
-    a=>`
-
-    <label
-     style="
-      display:block;
-      padding:5px;
-      font-weight:normal;
-      border-bottom:1px solid #eee">
-
-     <input
-      type="checkbox"
-      value="${escapeHtml(a)}">
-
-     ${escapeHtml(a)}
-
-    </label>
-
-   `
-   ).join("");
-
-}
-
-
-function obterPavilhoesImpressao(){
-
- const mapa=
-  new Map();
-
-
- historico.forEach(
-  item=>{
-
-   const pav=
-    String(
-     item.pavilhao||
-     ""
-    ).trim();
-
-
-   if(pav){
-
-    mapa.set(
-     pav,
-     pav
-    );
-
-   }
-
-  }
- );
-
-
- arquivo.forEach(
-  item=>{
-
-   const pav=
-    String(
-     item.pavilhao||
-     ""
-    ).trim();
-
-
-   if(pav){
-
-    mapa.set(
-     pav,
-     pav
-    );
-
-   }
-
-  }
- );
-
-
- return [
-  ...mapa.values()
- ].sort(
-  (a,b)=>
-   a.localeCompare(
-    b,
-    "pt-BR",
-    {
-     numeric:true
-    }
-   )
- );
-
-}
-
-
-function preencherPavilhoesImpressao(){
-
- const box=
-  $("listaPavilhoesImpressao");
-
-
- const pavilhoes=
-  obterPavilhoesImpressao();
-
-
- if(!pavilhoes.length){
-
-  box.innerHTML=`
-
-   <div class="empty">
-
-    Nenhum pavilhão encontrado.
-
-   </div>
-
-  `;
-
-  return;
-
- }
-
-
- box.innerHTML=
-  pavilhoes.map(
-   (pav,index)=>`
-
-   <label
-    class="pavilhao-option">
-
-    <input
-     type="checkbox"
-     value="${escapeHtml(pav)}"
-     id="printPav_${index}">
-
-    Pavilhão
-    ${escapeHtml(pav)}
-
-   </label>
-
-  `
-  ).join("");
-
-}
-
-
-function obterSelecionados(id){
-
- return [
-  ...document.querySelectorAll(
-   `#${id} input:checked`
-  )
- ].map(
-  input=>input.value
- );
-
-}
-
-
-/* =====================================================
-   DADOS PARA IMPRESSÃO
-===================================================== */
-
-function obterDadosParaImpressao(){
-
- const modo=
-  document.querySelector(
-   'input[name="modoImpressao"]:checked'
-  ).value;
-
-
- const mapa=
-  new Map();
-
-
- /*
-   Histórico + guardados.
-   Guardados continuam disponíveis
-   para impressão.
- */
-
- historico.forEach(
-  item=>{
-   mapa.set(
-    item.recordId,
-    item
-   );
-  }
- );
-
-
- arquivo.forEach(
-  item=>{
-   mapa.set(
-    item.recordId,
-    item
-   );
-  }
- );
-
-
- let dados=
-  [...mapa.values()];
-
-
- if(
-  modo==="atendimento"
- ){
-
-  const escolhidos=
-   obterSelecionados(
-    "listaAtendimentosImpressao"
-   );
-
-
-  if(!escolhidos.length){
-
-   mostrarToast(
-    "Selecione pelo menos um atendimento."
-   );
-
-   return null;
-
-  }
-
-
-  dados=
-   dados.filter(
-    item=>
-     escolhidos.includes(
-      item.atendimento
-     )
-   );
-
- }
-
-
- if(
-  modo==="geral"
- ){
-
-  const escolhidos=
-   obterSelecionados(
-    "listaAtendimentosImpressao"
-   );
-
-
-  if(escolhidos.length){
-
-   dados=
-    dados.filter(
-     item=>
-      escolhidos.includes(
-       item.atendimento
-      )
-    );
-
-  }
-
- }
-
-
- if(
-  modo==="data"
- ){
-
-  const data=
-   $("dataImpressao").value;
-
-
-  if(!data){
-
-   mostrarToast(
-    "Selecione a data."
-   );
-
-   return null;
-
-  }
-
-
-  dados=
-   dados.filter(
-    item=>
-     item.dataAtendimento===
-     data
-   );
-
-
-  const tipo=
-   document.querySelector(
-    'input[name="tipoData"]:checked'
-   ).value;
-
-
-  if(
-   tipo==="atendimentos"
-  ){
-
-   const escolhidos=
-    obterSelecionados(
-     "listaAtendimentosData"
-    );
-
-
-   if(!escolhidos.length){
-
-    mostrarToast(
-     "Selecione pelo menos um atendimento."
-    );
-
-    return null;
-
-   }
-
-
-   dados=
-    dados.filter(
-     item=>
-      escolhidos.includes(
-       item.atendimento
-      )
-    );
-
-  }
-
- }
-
-
- if(
-  modo==="pavilhao"
- ){
-
-  const escolhidos=
-   obterSelecionados(
-    "listaPavilhoesImpressao"
-   );
-
-
-  if(!escolhidos.length){
-
-   mostrarToast(
-    "Selecione pelo menos um pavilhão."
-   );
-
-   return null;
-
-  }
-
-
-  dados=
-   dados.filter(
-    item=>
-     escolhidos.includes(
-      String(
-       item.pavilhao||
-       ""
-      )
-     )
-   );
-
- }
-
-
- dados.sort(
-  (a,b)=>{
-
-   const atendimento=
-    String(
-     a.atendimento||
-     ""
-    ).localeCompare(
-     String(
-      b.atendimento||
-      ""
-     ),
-     "pt-BR"
-    );
-
-
-   if(
-    atendimento!==0
-   ){
-
-    return atendimento;
-
-   }
-
-
-   return String(
-    a.nome||
-    ""
-   ).localeCompare(
-    String(
-     b.nome||
-     ""
-    ),
-    "pt-BR"
-   );
-
-  }
- );
-
-
- return dados;
-
-}
-
-
-/* =====================================================
-   EXECUTAR IMPRESSÃO
-===================================================== */
-
-function executarImpressao(){
-
- const dados=
-  obterDadosParaImpressao();
-
-
- if(!dados)return;
-
-
- if(!dados.length){
-
-  mostrarToast(
-   "Nenhum atendimento encontrado para impressão."
-  );
-
-  return;
-
- }
-
-
- const umPorPagina=
-  $("umPorPagina").checked;
-
-
- const grupos=[];
-
-
- if(
-  umPorPagina
- ){
-
-  /*
-    Uma página por tipo de atendimento.
-    Somente categorias que realmente
-    possuem registros são criadas.
-  */
-
-  const mapa=
-   new Map();
-
-
-  dados.forEach(
-   item=>{
-
-    if(
-     !mapa.has(
-      item.atendimento
-     )
-    ){
-
-     mapa.set(
-      item.atendimento,
-      []
-     );
-
-    }
-
-
-    mapa.get(
-     item.atendimento
-    ).push(
-     item
-    );
-
-   }
-  );
-
-
-  for(
-   const [
-    atendimento,
-    itens
-   ]
-   of mapa
-  ){
-
-   if(!itens.length)continue;
-
-
-   grupos.push({
-
-    titulo:
-     atendimento,
-
-    itens
-
-   });
-
-  }
-
- }else{
-
-  const modo=
-   document.querySelector(
-    'input[name="modoImpressao"]:checked'
-   ).value;
-
-
-  let titulo=
-   "LISTA DE ATENDIMENTOS";
-
-
-  if(
-   modo==="data"
-  ){
-
-   titulo=
-    `ATENDIMENTOS DE ${
-     formatarData(
-      $("dataImpressao").value
-     )
-    }`;
-
-  }
-
-
-  if(
-   modo==="pavilhao"
-  ){
-
-   const escolhidos=
-    obterSelecionados(
-     "listaPavilhoesImpressao"
-    );
-
-
-   if(
-    escolhidos.length===1
-   ){
-
-    titulo=
-     `PAVILHÃO ${escolhidos[0]}`;
-
-   }else{
-
-    titulo=
-     "ATENDIMENTOS POR PAVILHÃO";
-
-   }
-
-  }
-
-
-  grupos.push({
-
-   titulo,
-
-   itens:dados
-
-  });
-
- }
-
-
- if(!grupos.length){
-
-  mostrarToast(
-   "Não há conteúdo para imprimir."
-  );
-
-  return;
-
- }
-
-
- gerarAreaImpressao(
-  grupos
- );
-
-
- fecharImpressao();
-
-
- /*
-   Somente UMA chamada.
- */
-
- setTimeout(
-  ()=>{
-   window.print();
-  },
-  250
- );
-
-}
-
-
-/* =====================================================
-   ÁREA DE IMPRESSÃO
-===================================================== */
-
-function gerarAreaImpressao(
- grupos
-){
-
- const area=
-  $("printArea");
-
-
- area.innerHTML="";
-
-
- grupos.forEach(
-  grupo=>{
-
-   if(
-    !grupo.itens||
-    !grupo.itens.length
-   ){
-
-    return;
-
-   }
-
-
-   const pagina=
-    document.createElement(
-     "div"
-    );
-
-
-   pagina.className=
-    "print-page";
-
-
-   pagina.innerHTML=`
-
-    <div
-     class="print-header">
-
-     <h1>
-      CPAIG - LISTA DE ATENDIMENTOS
-     </h1>
-
-
-     <h2>
-      ${escapeHtml(
-       grupo.titulo
-      )}
-     </h2>
-
-
-     <p>
-      Impressão:
-      ${formatarData(
-       dataHoje()
-      )}
-     </p>
+      <div class="toolbar">
+
+        <button
+          class="btn-blue"
+          onclick="entrarNaLista()"
+        >
+          ➕ ENTRAR NA LISTA
+        </button>
+
+        <button
+          class="btn-green"
+          onclick="enviarParaMesa()"
+        >
+          📤 ENVIAR PARA MESA
+        </button>
+
+        <button
+          class="btn-orange"
+          onclick="abrirImpressao()"
+        >
+          🖨️ IMPRIMIR
+        </button>
+
+        <button
+          class="btn-dark"
+          onclick="abrirGuardados()"
+        >
+          📁 ATENDIMENTOS GUARDADOS
+        </button>
+
+      </div>
+
+      <div class="excel-info">
+
+        <strong>Base de internos:</strong>
+
+        <span id="baseStatus">
+          Nenhuma base carregada.
+        </span>
+
+        <div style="margin-top:8px;">
+
+          <input
+            type="file"
+            id="arquivoExcel"
+            accept=".xlsx,.xls"
+            style="display:none;"
+            onchange="importarExcel(event)"
+          >
+
+          <button
+            class="btn-purple"
+            onclick="selecionarExcel()"
+          >
+            🔄 ATUALIZAR BASE DE INTERNOS
+          </button>
+
+        </div>
+
+      </div>
 
     </div>
 
+  </section>
 
-    <table
-     class="print-table">
+  <!-- LISTA DE PREPARAÇÃO -->
+  <section class="section">
 
-     <thead>
+    <div class="section-header">
 
-      <tr>
+      <h2>
+        📋 LISTA DE ATENDIMENTOS PARA ENVIO
+      </h2>
 
-       <th>
-        Nome do interno
-       </th>
+      <span
+        id="contadorPreparacao"
+        class="counter"
+      >
+        0
+      </span>
 
-       <th>
-        RGI
-       </th>
+    </div>
 
-       <th class="pavcela">
-        Pav./Cela
-       </th>
+    <div class="section-body">
 
-       <th>
-        Atendimento
-       </th>
+      <div id="preparacaoContainer"></div>
 
-       <th class="data">
-        Data
-       </th>
+    </div>
 
-       <th>
-        Assunto
-       </th>
+  </section>
 
-      </tr>
+  <!-- HISTÓRICO -->
+  <section class="section">
 
-     </thead>
+    <div class="section-header">
 
+      <h2>
+        📚 HISTÓRICO DE ATENDIMENTOS
+      </h2>
 
-     <tbody>
+      <span
+        id="contadorHistorico"
+        class="counter"
+      >
+        0
+      </span>
 
-      ${
-       grupo.itens.map(
-        item=>`
+    </div>
+
+    <div class="section-body">
+
+      <div class="toolbar">
+
+        <button
+          class="btn-gray"
+          onclick="ordenarHistorico('envio')"
+        >
+          ↕ ORDEM DE ENVIO
+        </button>
+
+        <button
+          class="btn-gray"
+          onclick="ordenarHistorico('atendimento')"
+        >
+          ↕ POR ATENDIMENTO
+        </button>
+
+      </div>
+
+      <div id="historicoContainer"></div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- MODAL EDIÇÃO DE RECUSA -->
+<div id="modalEditarRecusa" class="modal-overlay">
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h3>
+        ✏️ EDITAR RECUSA
+      </h3>
+
+      <button
+        class="close"
+        onclick="fecharEditarRecusa()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div
+        id="dadosEditarRecusa"
+        class="small"
+        style="margin-bottom:14px;"
+      ></div>
+
+      <div class="form-group">
+
+        <label for="motivoRecusaEditado">
+          Motivo da recusa
+        </label>
+
+        <textarea
+          id="motivoRecusaEditado"
+          placeholder="Edite o motivo da recusa antes de reenviar..."
+        ></textarea>
+
+      </div>
+
+      <div class="small">
+        O texto alterado será enviado para a MESA junto com o cadastro atualizado.
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button
+        class="btn-gray"
+        onclick="fecharEditarRecusa()"
+      >
+        CANCELAR
+      </button>
+
+      <button
+        class="btn-blue"
+        onclick="salvarEdicaoRecusa()"
+      >
+        💾 SALVAR MOTIVO
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- MODAL GUARDADOS -->
+<div id="modalGuardados" class="modal-overlay">
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h3>
+        📁 ATENDIMENTOS GUARDADOS
+      </h3>
+
+      <button
+        class="close"
+        onclick="fecharGuardados()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="form-group">
+
+        <input
+          id="filtroGuardados"
+          placeholder="Pesquisar por nome, RGI, atendimento ou data..."
+          oninput="renderGuardados()"
+        >
+
+      </div>
+
+      <div id="guardadosContainer"></div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button
+        class="btn-gray"
+        onclick="fecharGuardados()"
+      >
+        FECHAR
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- MODAL IMPRESSÃO -->
+<div id="modalImpressao" class="modal-overlay">
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h3>
+        🖨️ IMPRESSÃO
+      </h3>
+
+      <button
+        class="close"
+        onclick="fecharImpressao()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="modal-body">
+
+      <div class="form-group">
+
+        <label>
+          Tipo de impressão
+        </label>
+
+        <div class="radio-group">
+
+          <label class="radio-option">
+
+            <input
+              type="radio"
+              name="modoPrint"
+              value="atendimento"
+              checked
+              onchange="alterarModoImpressao()"
+            >
+
+            Por atendimento
+
+          </label>
+
+          <label class="radio-option">
+
+            <input
+              type="radio"
+              name="modoPrint"
+              value="geral"
+              onchange="alterarModoImpressao()"
+            >
+
+            Por atendimento geral
+
+          </label>
+
+          <label class="radio-option">
+
+            <input
+              type="radio"
+              name="modoPrint"
+              value="data"
+              onchange="alterarModoImpressao()"
+            >
+
+            Por data
+
+          </label>
+
+        </div>
+
+      </div>
+
+      <!-- POR ATENDIMENTO -->
+      <div id="grupoPrintAtendimento">
+
+        <div class="print-grid">
+
+          <div class="form-group">
+
+            <label>
+              Atendimentos
+            </label>
+
+            <div
+              id="listaAtendimentosImpressao"
+              class="checkbox-list"
+            ></div>
+
+          </div>
+
+          <div class="form-group">
+
+            <label>
+              Pavilhão — filtro opcional
+            </label>
+
+            <div
+              id="listaPavilhoesAtendimento"
+              class="checkbox-list"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- GERAL -->
+      <div
+        id="grupoPrintGeral"
+        style="display:none;"
+      >
+
+        <div class="form-group">
+
+          <label>
+            Pavilhão — filtro opcional
+          </label>
+
+          <div
+            id="listaPavilhoesGeral"
+            class="checkbox-list"
+          ></div>
+
+        </div>
+
+      </div>
+
+      <!-- DATA -->
+      <div
+        id="grupoPrintData"
+        style="display:none;"
+      >
+
+        <div class="print-grid">
+
+          <div>
+
+            <div class="form-group">
+
+              <label for="printData">
+                Data
+              </label>
+
+              <input
+                type="date"
+                id="printData"
+              >
+
+            </div>
+
+            <div class="form-group">
+
+              <label>
+                Tipo
+              </label>
+
+              <div class="radio-group">
+
+                <label class="radio-option">
+
+                  <input
+                    type="radio"
+                    name="tipoData"
+                    value="todos"
+                    checked
+                    onchange="alterarTipoData()"
+                  >
+
+                  Todos
+
+                </label>
+
+                <label class="radio-option">
+
+                  <input
+                    type="radio"
+                    name="tipoData"
+                    value="atendimentos"
+                    onchange="alterarTipoData()"
+                  >
+
+                  Atendimentos
+
+                </label>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div>
+
+            <div
+              id="grupoAtendimentosData"
+              class="form-group"
+              style="display:none;"
+            >
+
+              <label>
+                Atendimentos
+              </label>
+
+              <div
+                id="listaAtendimentosData"
+                class="checkbox-list"
+              ></div>
+
+            </div>
+
+            <div class="form-group">
+
+              <label>
+                Pavilhão — filtro opcional
+              </label>
+
+              <div
+                id="listaPavilhoesData"
+                class="checkbox-list"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button
+        class="btn-gray"
+        onclick="fecharImpressao()"
+      >
+        CANCELAR
+      </button>
+
+      <button
+        class="btn-blue"
+        onclick="executarImpressao()"
+      >
+        🖨️ IMPRIMIR
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div
+  id="areaImpressao"
+  style="display:none;"
+></div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   CONFIGURAÇÕES
+============================================================ */
+
+const STORAGE_PREPARACAO =
+  "guicheAtendimentosV23Preparacao";
+
+const STORAGE_HISTORICO =
+  "guicheAtendimentosV23Historico";
+
+const STORAGE_ARQUIVO =
+  "guicheAtendimentosV23Arquivo";
+
+const STORAGE_BASE =
+  "atendimentoV23BaseInternos";
+
+const ATENDIMENTOS = [
+  "Jurídico",
+  "Psicossocial",
+  "Médico",
+  "Odontologia",
+  "Trabalho",
+  "Chefia",
+  "Chefe de equipe",
+  "Portaria II",
+  "Identificação",
+  "Limpeza",
+  "Advogado(a)",
+  "Visita Assistida",
+  "Autorização de Saída",
+  "Licença Judicial",
+  "7 dias",
+  "7 dias monitorado",
+  "Alvará",
+  "Salvo conduto",
+  "Domiciliar",
+  "Evasão",
+  "Desvio de Rota",
+  "Falta",
+  "Regressão",
+  "Mudança de Cela",
+  "Hospitalizado",
+  "Outros"
+];
+
+let baseInternos = [];
+
+let preparacao = [];
+let historico = [];
+let arquivo = [];
+
+let socket = null;
+let reconnectTimer = null;
+
+let indiceSugestao = -1;
+
+let recordIdEditandoRecusa = null;
+
+let ordemHistorico = "envio";
+
+/* ============================================================
+   UTILITÁRIOS
+============================================================ */
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function gerarId(){
+
+  if(
+    window.crypto &&
+    crypto.randomUUID
+  ){
+    return crypto.randomUUID();
+  }
+
+  return "guiche-" +
+    Date.now() +
+    "-" +
+    Math.random()
+      .toString(36)
+      .slice(2);
+}
+
+function normalizar(valor){
+
+  return String(valor ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase()
+    .trim();
+}
+
+function escapeHtml(valor){
+
+  return String(valor ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function salvarJSON(chave,valor){
+
+  localStorage.setItem(
+    chave,
+    JSON.stringify(valor)
+  );
+}
+
+function lerJSON(chave,padrao){
+
+  try{
+
+    const valor =
+      localStorage.getItem(chave);
+
+    if(!valor){
+      return padrao;
+    }
+
+    return JSON.parse(valor) ?? padrao;
+
+  }catch(e){
+
+    return padrao;
+
+  }
+}
+
+function valorRegistro(
+  registro,
+  ...nomes
+){
+
+  for(
+    const nome of nomes
+  ){
+
+    if(
+      registro &&
+      registro[nome] !== undefined &&
+      registro[nome] !== null &&
+      String(
+        registro[nome]
+      ).trim() !== ""
+    ){
+
+      return registro[nome];
+
+    }
+
+  }
+
+  return "";
+}
+
+function formatarDataHora(valor){
+
+  if(!valor){
+    return "-";
+  }
+
+  const d =
+    new Date(valor);
+
+  if(
+    Number.isNaN(
+      d.getTime()
+    )
+  ){
+    return String(valor);
+  }
+
+  return d.toLocaleString(
+    "pt-BR"
+  );
+}
+
+function formatarData(valor){
+
+  if(!valor){
+    return "-";
+  }
+
+  if(
+    /^\d{4}-\d{2}-\d{2}$/
+      .test(String(valor))
+  ){
+
+    const [
+      ano,
+      mes,
+      dia
+    ] =
+      String(valor).split("-");
+
+    return `${dia}/${mes}/${ano}`;
+
+  }
+
+  const d =
+    new Date(valor);
+
+  if(
+    Number.isNaN(
+      d.getTime()
+    )
+  ){
+    return String(valor);
+  }
+
+  return d.toLocaleDateString(
+    "pt-BR"
+  );
+}
+
+function mostrarToast(
+  mensagem,
+  tipo=""
+){
+
+  const toast =
+    $("toast");
+
+  toast.textContent =
+    mensagem;
+
+  toast.className =
+    "toast show " + tipo;
+
+  clearTimeout(
+    mostrarToast.timer
+  );
+
+  mostrarToast.timer =
+    setTimeout(()=>{
+      toast.className =
+        "toast";
+    },3500);
+}
+
+/* ============================================================
+   STORAGE
+============================================================ */
+
+function salvarTudo(){
+
+  salvarJSON(
+    STORAGE_PREPARACAO,
+    preparacao
+  );
+
+  salvarJSON(
+    STORAGE_HISTORICO,
+    historico
+  );
+
+  salvarJSON(
+    STORAGE_ARQUIVO,
+    arquivo
+  );
+
+  salvarJSON(
+    STORAGE_BASE,
+    baseInternos
+  );
+}
+
+function carregarTudo(){
+
+  preparacao =
+    lerJSON(
+      STORAGE_PREPARACAO,
+      []
+    );
+
+  historico =
+    lerJSON(
+      STORAGE_HISTORICO,
+      []
+    );
+
+  arquivo =
+    lerJSON(
+      STORAGE_ARQUIVO,
+      []
+    );
+
+  baseInternos =
+    lerJSON(
+      STORAGE_BASE,
+      []
+    );
+
+  renderPreparacao();
+  renderHistorico();
+  renderGuardados();
+  atualizarStatusBase();
+}
+
+/* ============================================================
+   DATA
+============================================================ */
+
+function usarHoje(){
+
+  const hoje =
+    new Date();
+
+  const ano =
+    hoje.getFullYear();
+
+  const mes =
+    String(
+      hoje.getMonth()+1
+    ).padStart(2,"0");
+
+  const dia =
+    String(
+      hoje.getDate()
+    ).padStart(2,"0");
+
+  $("dataAtendimento").value =
+    `${ano}-${mes}-${dia}`;
+}
+
+/* ============================================================
+   ATENDIMENTOS / CELA
+============================================================ */
+
+function preencherAtendimentos(){
+
+  const select =
+    $("atendimento");
+
+  select.innerHTML =
+    `<option value="">Selecione</option>`;
+
+  ATENDIMENTOS.forEach(
+    atendimento=>{
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        atendimento;
+
+      option.textContent =
+        atendimento;
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+}
+
+function preencherCelas(){
+
+  const select =
+    $("cela");
+
+  select.innerHTML =
+    `<option value="">Selecione</option>`;
+
+  for(
+    let i=1;
+    i<=120;
+    i++
+  ){
+
+    const valor =
+      String(i)
+        .padStart(2,"0");
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value =
+      valor;
+
+    option.textContent =
+      valor;
+
+    select.appendChild(
+      option
+    );
+
+  }
+}
+
+/* ============================================================
+   EXCEL
+============================================================ */
+
+function selecionarExcel(){
+
+  $("arquivoExcel").click();
+}
+
+function atualizarStatusBase(){
+
+  const quantidade =
+    baseInternos.length;
+
+  if(!quantidade){
+
+    $("baseStatus").textContent =
+      "Nenhuma base carregada.";
+
+    return;
+  }
+
+  const data =
+    localStorage.getItem(
+      STORAGE_BASE + "_atualizadaEm"
+    );
+
+  $("baseStatus").textContent =
+    `${quantidade} internos carregados` +
+    (
+      data
+        ? ` — última atualização: ${formatarDataHora(data)}`
+        : ""
+    );
+}
+
+async function importarExcel(event){
+
+  const arquivoSelecionado =
+    event.target.files?.[0];
+
+  if(!arquivoSelecionado){
+    return;
+  }
+
+  try{
+
+    if(
+      !window.XLSX
+    ){
+
+      throw new Error(
+        "Biblioteca do Excel não carregada."
+      );
+
+    }
+
+    const buffer =
+      await arquivoSelecionado.arrayBuffer();
+
+    const workbook =
+      XLSX.read(
+        buffer,
+        {
+          type:"array"
+        }
+      );
+
+    const primeiraAba =
+      workbook.Sheets[
+        workbook.SheetNames[0]
+      ];
+
+    const linhas =
+      XLSX.utils.sheet_to_json(
+        primeiraAba,
+        {
+          header:1,
+          defval:""
+        }
+      );
+
+    let indiceCabecalho = -1;
+
+    for(
+      let i=0;
+      i<linhas.length;
+      i++
+    ){
+
+      const linha =
+        linhas[i].map(
+          valor =>
+            normalizar(valor)
+        );
+
+      if(
+        linha.includes(
+          "nome do interno"
+        ) &&
+        linha.includes(
+          "rgi"
+        )
+      ){
+
+        indiceCabecalho =
+          i;
+
+        break;
+
+      }
+
+    }
+
+    if(
+      indiceCabecalho < 0
+    ){
+
+      throw new Error(
+        "Não foi possível localizar o cabeçalho da planilha."
+      );
+
+    }
+
+    const cabecalho =
+      linhas[indiceCabecalho].map(
+        valor =>
+          normalizar(valor)
+      );
+
+    const idxNome =
+      cabecalho.findIndex(
+        x =>
+          x ===
+          "nome do interno"
+      );
+
+    const idxRgi =
+      cabecalho.findIndex(
+        x =>
+          x === "rgi"
+      );
+
+    const idxPavilhao =
+      cabecalho.findIndex(
+        x =>
+          x === "pavilhao"
+      );
+
+    const idxCela =
+      cabecalho.findIndex(
+        x =>
+          x === "cela"
+      );
+
+    const novaBase = [];
+
+    for(
+      let i =
+        indiceCabecalho + 1;
+      i < linhas.length;
+      i++
+    ){
+
+      const linha =
+        linhas[i];
+
+      const nome =
+        String(
+          linha[idxNome] ?? ""
+        ).trim();
+
+      if(!nome){
+        continue;
+      }
+
+      if(
+        normalizar(nome) ===
+        "totais"
+      ){
+        continue;
+      }
+
+      novaBase.push({
+
+        nome,
+        rgi:
+          String(
+            linha[idxRgi] ?? ""
+          ).trim(),
+
+        pavilhao:
+          String(
+            linha[idxPavilhao] ?? ""
+          ).trim(),
+
+        cela:
+          normalizarCela(
+            linha[idxCela]
+          )
+
+      });
+
+    }
+
+    if(!novaBase.length){
+
+      throw new Error(
+        "Nenhum interno foi encontrado na planilha."
+      );
+
+    }
+
+    baseInternos =
+      novaBase;
+
+    localStorage.setItem(
+      STORAGE_BASE + "_atualizadaEm",
+      new Date().toISOString()
+    );
+
+    salvarTudo();
+
+    atualizarStatusBase();
+
+    mostrarToast(
+      `Base atualizada com ${baseInternos.length} internos.`,
+      "success"
+    );
+
+    event.target.value = "";
+
+  }catch(e){
+
+    console.error(e);
+
+    mostrarToast(
+      e.message ||
+      "Erro ao importar a base.",
+      "error"
+    );
+
+    event.target.value = "";
+  }
+}
+
+function normalizarCela(valor){
+
+  if(
+    valor === null ||
+    valor === undefined ||
+    String(valor).trim() === ""
+  ){
+    return "";
+  }
+
+  const texto =
+    String(valor).trim();
+
+  const numero =
+    Number(texto);
+
+  if(
+    Number.isFinite(numero) &&
+    numero >= 1 &&
+    numero <= 120
+  ){
+
+    return String(
+      Math.trunc(numero)
+    ).padStart(2,"0");
+
+  }
+
+  const somenteNumero =
+    texto.match(/\d+/);
+
+  if(somenteNumero){
+
+    const n =
+      Number(
+        somenteNumero[0]
+      );
+
+    if(
+      n >= 1 &&
+      n <= 120
+    ){
+
+      return String(
+        n
+      ).padStart(2,"0");
+
+    }
+
+  }
+
+  return texto;
+}
+
+/* ============================================================
+   BUSCA DE INTERNO
+============================================================ */
+
+function buscarInternos(texto){
+
+  const termo =
+    normalizar(texto);
+
+  if(!termo){
+    return [];
+  }
+
+  return baseInternos
+    .filter(
+      interno =>
+        normalizar(
+          interno.nome
+        ).includes(termo)
+    )
+    .slice(0,20);
+}
+
+function mostrarSugestoes(){
+
+  const texto =
+    $("nomeInterno").value;
+
+  const resultados =
+    buscarInternos(texto);
+
+  const box =
+    $("sugestoesInternos");
+
+  indiceSugestao = -1;
+
+  if(
+    !texto.trim() ||
+    !resultados.length
+  ){
+
+    box.style.display =
+      "none";
+
+    box.innerHTML =
+      "";
+
+    return;
+  }
+
+  box.innerHTML =
+    resultados.map(
+      (interno,index)=>`
+
+        <div
+          class="suggestion"
+          data-index="${index}"
+          onclick="selecionarInterno(${index})"
+        >
+
+          <strong>
+            ${escapeHtml(interno.nome)}
+          </strong>
+
+          <small>
+            RGI: ${escapeHtml(interno.rgi || "-")}
+            |
+            Pavilhão: ${escapeHtml(interno.pavilhao || "-")}
+            |
+            Cela: ${escapeHtml(interno.cela || "-")}
+          </small>
+
+        </div>
+
+      `
+    ).join("");
+
+  window.resultadosSugestao =
+    resultados;
+
+  box.style.display =
+    "block";
+}
+
+function selecionarInterno(index){
+
+  const resultados =
+    window.resultadosSugestao || [];
+
+  const interno =
+    resultados[index];
+
+  if(!interno){
+    return;
+  }
+
+  $("nomeInterno").value =
+    interno.nome || "";
+
+  $("rgi").value =
+    interno.rgi || "";
+
+  $("pavilhao").value =
+    interno.pavilhao || "";
+
+  $("cela").value =
+    interno.cela || "";
+
+  $("sugestoesInternos")
+    .style.display =
+      "none";
+
+  mostrarInfoInterno(
+    interno
+  );
+}
+
+function mostrarInfoInterno(
+  interno
+){
+
+  $("infoInterno").innerHTML = `
+
+    <span class="info-chip">
+      RGI: ${escapeHtml(
+        interno.rgi || "-"
+      )}
+    </span>
+
+    <span class="info-chip">
+      Pavilhão: ${escapeHtml(
+        interno.pavilhao || "-"
+      )}
+    </span>
+
+    <span class="info-chip">
+      Cela: ${escapeHtml(
+        interno.cela || "-"
+      )}
+    </span>
+
+  `;
+}
+
+$("nomeInterno")
+  .addEventListener(
+    "input",
+    mostrarSugestoes
+  );
+
+$("nomeInterno")
+  .addEventListener(
+    "keydown",
+    event=>{
+
+      const box =
+        $("sugestoesInternos");
+
+      if(
+        box.style.display ===
+        "none"
+      ){
+        return;
+      }
+
+      const itens =
+        box.querySelectorAll(
+          ".suggestion"
+        );
+
+      if(
+        event.key ===
+        "ArrowDown"
+      ){
+
+        event.preventDefault();
+
+        indiceSugestao =
+          Math.min(
+            indiceSugestao + 1,
+            itens.length - 1
+          );
+
+      }
+
+      if(
+        event.key ===
+        "ArrowUp"
+      ){
+
+        event.preventDefault();
+
+        indiceSugestao =
+          Math.max(
+            indiceSugestao - 1,
+            0
+          );
+
+      }
+
+      if(
+        event.key ===
+        "Enter"
+      ){
+
+        event.preventDefault();
+
+        if(
+          indiceSugestao >= 0
+        ){
+
+          selecionarInterno(
+            indiceSugestao
+          );
+
+        }else if(
+          itens.length === 1
+        ){
+
+          selecionarInterno(0);
+
+        }
+
+      }
+
+      itens.forEach(
+        (item,index)=>{
+          item.classList.toggle(
+            "active",
+            index ===
+            indiceSugestao
+          );
+        }
+      );
+
+    }
+  );
+
+document.addEventListener(
+  "click",
+  event=>{
+
+    if(
+      !event.target.closest(
+        ".suggestions"
+      )
+    ){
+
+      $("sugestoesInternos")
+        .style.display =
+          "none";
+
+    }
+
+  }
+);
+
+/* ============================================================
+   PREPARAÇÃO
+============================================================ */
+
+function limparFormulario(){
+
+  $("nomeInterno").value =
+    "";
+
+  $("rgi").value =
+    "";
+
+  $("pavilhao").value =
+    "";
+
+  $("cela").value =
+    "";
+
+  $("atendimento").value =
+    "";
+
+  $("dataAtendimento").value =
+    "";
+
+  $("assunto").value =
+    "";
+
+  $("infoInterno").innerHTML =
+    "";
+
+  $("sugestoesInternos")
+    .style.display =
+      "none";
+
+  $("nomeInterno").focus();
+}
+
+function obterDadosFormulario(){
+
+  const nome =
+    $("nomeInterno")
+      .value
+      .trim();
+
+  const rgi =
+    $("rgi")
+      .value
+      .trim();
+
+  const pavilhao =
+    $("pavilhao")
+      .value
+      .trim();
+
+  const cela =
+    $("cela")
+      .value
+      .trim();
+
+  const atendimento =
+    $("atendimento")
+      .value
+      .trim();
+
+  const dataAtendimento =
+    $("dataAtendimento")
+      .value;
+
+  const assunto =
+    $("assunto")
+      .value
+      .trim();
+
+  if(!nome){
+
+    mostrarToast(
+      "Informe o nome do interno.",
+      "warning"
+    );
+
+    $("nomeInterno").focus();
+
+    return null;
+  }
+
+  if(!atendimento){
+
+    mostrarToast(
+      "Selecione o atendimento.",
+      "warning"
+    );
+
+    $("atendimento").focus();
+
+    return null;
+  }
+
+  if(!dataAtendimento){
+
+    mostrarToast(
+      "Informe a data do atendimento.",
+      "warning"
+    );
+
+    $("dataAtendimento").focus();
+
+    return null;
+  }
+
+  return {
+
+    recordId:
+      gerarId(),
+
+    nome,
+
+    nomeInterno:
+      nome,
+
+    rgi,
+
+    pavilhao,
+
+    cela,
+
+    atendimento,
+
+    dataAtendimento,
+
+    assunto,
+
+    enviadoEm:null,
+
+    recebidoEm:null,
+
+    recusadoEm:null,
+
+    motivoRecusa:"",
+
+    status:"preparacao",
+
+    historicoRecusas:[]
+
+  };
+}
+
+function entrarNaLista(){
+
+  const registro =
+    obterDadosFormulario();
+
+  if(!registro){
+    return;
+  }
+
+  preparacao.push(
+    registro
+  );
+
+  salvarTudo();
+
+  renderPreparacao();
+
+  limparFormulario();
+
+  mostrarToast(
+    "Atendimento adicionado à lista.",
+    "success"
+  );
+}
+
+function removerDaPreparacao(
+  recordId
+){
+
+  const indice =
+    preparacao.findIndex(
+      item =>
+        item.recordId ===
+        recordId
+    );
+
+  if(indice < 0){
+    return;
+  }
+
+  preparacao.splice(
+    indice,
+    1
+  );
+
+  salvarTudo();
+
+  renderPreparacao();
+
+  mostrarToast(
+    "Atendimento removido da lista.",
+    "success"
+  );
+}
+
+function renderPreparacao(){
+
+  const container =
+    $("preparacaoContainer");
+
+  $("contadorPreparacao")
+    .textContent =
+      preparacao.length;
+
+  if(!preparacao.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        Nenhum atendimento aguardando envio.
+        <br>
+        Use <strong>➕ ENTRAR NA LISTA</strong>
+        para preparar os atendimentos.
+      </div>
+    `;
+
+    return;
+  }
+
+  let html = `
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>RGI</th>
+            <th>Pav/Cela</th>
+            <th>Atendimento</th>
+            <th>Data</th>
+            <th>Assunto</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+
+        <tbody>
+  `;
+
+  preparacao.forEach(
+    (registro,index)=>{
+
+      html += `
 
         <tr>
 
-         <td>
-          ${escapeHtml(
-           item.nome
-          )}
-         </td>
+          <td>
+            ${index + 1}
+          </td>
 
-         <td>
-          ${escapeHtml(
-           item.rgi
-          )}
-         </td>
+          <td>
+            <strong>
+              ${escapeHtml(
+                registro.nome
+              )}
+            </strong>
+          </td>
 
-         <td class="pavcela">
+          <td>
+            ${escapeHtml(
+              registro.rgi
+            )}
+          </td>
 
-          ${escapeHtml(
-           item.pavilhao
-          )}
+          <td class="print-pavcela">
+            ${escapeHtml(
+              registro.pavilhao
+            )}
+            /
+            ${escapeHtml(
+              registro.cela
+            )}
+          </td>
 
-          /
+          <td>
+            ${escapeHtml(
+              registro.atendimento
+            )}
+          </td>
 
-          ${escapeHtml(
-           item.cela
-          )}
+          <td>
+            ${escapeHtml(
+              formatarData(
+                registro.dataAtendimento
+              )
+            )}
+          </td>
 
-         </td>
+          <td>
+            ${escapeHtml(
+              registro.assunto ||
+              "-"
+            )}
+          </td>
 
-         <td>
-          ${escapeHtml(
-           item.atendimento
-          )}
-         </td>
+          <td>
 
-         <td class="data">
-          ${formatarData(
-           item.dataAtendimento
-          )}
-         </td>
+            <button
+              class="btn-red"
+              onclick="removerDaPreparacao('${escapeHtml(registro.recordId)}')"
+            >
+              🗑️
+            </button>
 
-         <td>
-          ${escapeHtml(
-           item.assunto
-          )}
-         </td>
+          </td>
 
         </tr>
 
-        `
-       ).join("")
+      `;
+
+    }
+  );
+
+  html += `
+        </tbody>
+
+      </table>
+
+    </div>
+  `;
+
+  container.innerHTML =
+    html;
+}
+
+/* ============================================================
+   ENVIO PARA MESA
+============================================================ */
+
+function enviarParaMesa(){
+
+  if(!preparacao.length){
+
+    mostrarToast(
+      "A lista de envio está vazia.",
+      "warning"
+    );
+
+    return;
+  }
+
+  /*
+   * Sem conexão, não apagamos a preparação.
+   */
+  if(
+    !socket ||
+    socket.readyState !==
+      WebSocket.OPEN
+  ){
+
+    mostrarToast(
+      "GUICHÊ está sem conexão com o servidor. Os atendimentos permanecem na lista.",
+      "warning"
+    );
+
+    return;
+  }
+
+  const agora =
+    new Date().toISOString();
+
+  const enviados =
+    [];
+
+  preparacao.forEach(
+    registro=>{
+
+      const envio = {
+        ...registro,
+
+        enviadoEm:
+          agora,
+
+        status:
+          "aguardando_mesa",
+
+        recebidoEm:
+          null,
+
+        recusadoEm:
+          null
+      };
+
+      const enviado =
+        socket.send(
+          JSON.stringify({
+
+            type:"send_record",
+
+            recordId:
+              envio.recordId,
+
+            record:
+              envio
+
+          })
+        );
+
+      /*
+       * WebSocket.send não retorna confirmação do servidor.
+       * Consideramos o envio aceito quando o socket está aberto.
+       */
+      enviados.push(
+        envio
+      );
+
+    }
+  );
+
+  /*
+   * Os registros enviados imediatamente entram no histórico
+   * como AGUARDANDO MESA.
+   */
+  enviados.forEach(
+    registro=>{
+
+      const existente =
+        historico.find(
+          item =>
+            item.recordId ===
+            registro.recordId
+        );
+
+      if(existente){
+
+        Object.assign(
+          existente,
+          registro
+        );
+
+      }else{
+
+        historico.push(
+          registro
+        );
+
       }
 
-     </tbody>
+    }
+  );
 
-    </table>
+  preparacao = [];
 
-   `;
+  salvarTudo();
 
+  renderPreparacao();
+  renderHistorico();
 
-   area.appendChild(
-    pagina
-   );
+  mostrarToast(
+    `${enviados.length} atendimento(s) enviado(s) para a MESA.`,
+    "success"
+  );
+}
+
+/* ============================================================
+   WEBSOCKET
+============================================================ */
+
+function definirStatus(
+  online,
+  texto
+){
+
+  $("statusDot")
+    .classList.toggle(
+      "online",
+      online
+    );
+
+  $("statusTexto")
+    .textContent =
+      texto;
+}
+
+function conectarServidor(){
+
+  clearTimeout(
+    reconnectTimer
+  );
+
+  definirStatus(
+    false,
+    "Conectando..."
+  );
+
+  try{
+
+    const protocolo =
+      location.protocol === "https:"
+        ? "wss:"
+        : "ws:";
+
+    socket =
+      new WebSocket(
+        protocolo +
+        "//" +
+        location.host
+      );
+
+  }catch(e){
+
+    agendarReconexao();
+
+    return;
+  }
+
+  socket.addEventListener(
+    "open",
+    ()=>{
+
+      definirStatus(
+        true,
+        "GUICHÊ conectado"
+      );
+
+      socket.send(
+        JSON.stringify({
+          type:"register",
+          role:"sender"
+        })
+      );
+
+      mostrarToast(
+        "GUICHÊ conectado ao servidor.",
+        "success"
+      );
+
+      reenviarAguardandoMesa();
+
+    }
+  );
+
+  socket.addEventListener(
+    "message",
+    event=>{
+
+      let mensagem;
+
+      try{
+
+        mensagem =
+          JSON.parse(
+            event.data
+          );
+
+      }catch(e){
+
+        return;
+
+      }
+
+      tratarMensagemServidor(
+        mensagem
+      );
+
+    }
+  );
+
+  socket.addEventListener(
+    "close",
+    ()=>{
+
+      definirStatus(
+        false,
+        "Desconectado — tentando reconectar"
+      );
+
+      agendarReconexao();
+
+    }
+  );
+
+  socket.addEventListener(
+    "error",
+    ()=>{
+
+      definirStatus(
+        false,
+        "Erro de conexão"
+      );
+
+    }
+  );
+}
+
+function agendarReconexao(){
+
+  clearTimeout(
+    reconnectTimer
+  );
+
+  reconnectTimer =
+    setTimeout(
+      conectarServidor,
+      3000
+    );
+}
+
+function reenviarAguardandoMesa(){
+
+  if(
+    !socket ||
+    socket.readyState !==
+      WebSocket.OPEN
+  ){
+    return;
+  }
+
+  const aguardando =
+    historico.filter(
+      registro =>
+        registro.status ===
+        "aguardando_mesa"
+    );
+
+  aguardando.forEach(
+    registro=>{
+
+      socket.send(
+        JSON.stringify({
+
+          type:"send_record",
+
+          recordId:
+            registro.recordId,
+
+          record:
+            registro
+
+        })
+      );
+
+    }
+  );
+}
+
+function tratarMensagemServidor(
+  mensagem
+){
+
+  if(
+    mensagem.type ===
+    "connected"
+  ){
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "registered"
+  ){
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "record_received"
+  ){
+
+    receberConfirmacaoMesa(
+      mensagem
+    );
+
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "record_refused"
+  ){
+
+    receberRecusaDaMesa(
+      mensagem
+    );
+
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "confirm_result"
+  ){
+
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "refuse_result"
+  ){
+
+    return;
+  }
+
+  if(
+    mensagem.type ===
+    "error"
+  ){
+
+    mostrarToast(
+      mensagem.message ||
+      "Erro do servidor.",
+      "error"
+    );
 
   }
- );
 
 }
 
+/* ============================================================
+   CONFIRMAÇÃO DA MESA
+============================================================ */
 
-/* =====================================================
-   FECHAR MODAIS
-===================================================== */
+function receberConfirmacaoMesa(
+  mensagem
+){
 
-$("modalGuardados")
- .addEventListener(
-  "click",
-  function(event){
+  const recordId =
+    mensagem.recordId;
 
-   if(
-    event.target===
-    this
-   ){
+  if(!recordId){
+    return;
+  }
 
-    fecharGuardados();
+  const registro =
+    historico.find(
+      item =>
+        item.recordId ===
+        recordId
+    );
 
-   }
+  if(!registro){
+    return;
+  }
+
+  registro.status =
+    "recebido";
+
+  registro.recebidoEm =
+    mensagem.receivedAt ||
+    new Date().toISOString();
+
+  /*
+   * Se havia motivo de recusa anterior,
+   * ele permanece no cadastro.
+   */
+  salvarTudo();
+
+  renderHistorico();
+
+  mostrarToast(
+    "A MESA recebeu o atendimento.",
+    "success"
+  );
+}
+
+/* ============================================================
+   RECUSA RECEBIDA DA MESA
+============================================================ */
+
+function receberRecusaDaMesa(
+  mensagem
+){
+
+  const recordId =
+    mensagem.recordId;
+
+  if(!recordId){
+    return;
+  }
+
+  let registro =
+    historico.find(
+      item =>
+        item.recordId ===
+        recordId
+    );
+
+  /*
+   * Se por alguma razão o GUICHÊ não tiver o registro
+   * no histórico, cria a partir do cadastro enviado pela Mesa.
+   */
+  if(!registro){
+
+    registro = {
+      ...(mensagem.record || {})
+    };
+
+    registro.recordId =
+      recordId;
+
+    historico.push(
+      registro
+    );
+
+  }else{
+
+    Object.assign(
+      registro,
+      mensagem.record || {}
+    );
 
   }
- );
 
+  const motivo =
+    mensagem.reason ||
+    mensagem.record?.motivoRecusa ||
+    "Motivo não informado.";
 
-$("modalImpressao")
- .addEventListener(
-  "click",
-  function(event){
+  const recusadoEm =
+    mensagem.refusedAt ||
+    mensagem.record?.recusadoEm ||
+    new Date().toISOString();
 
-   if(
-    event.target===
-    this
-   ){
+  registro.status =
+    "recusado";
 
-    fecharImpressao();
+  registro.recusadoEm =
+    recusadoEm;
 
-   }
+  registro.motivoRecusa =
+    motivo;
 
-  }
- );
+  registro.recebidoEm =
+    null;
 
+  registro.enviadoEm =
+    registro.enviadoEm ||
+    new Date().toISOString();
 
-document.addEventListener(
- "keydown",
- event=>{
-
+  /*
+   * Mantém histórico das recusas.
+   */
   if(
-   event.key===
-   "Escape"
+    !Array.isArray(
+      registro.historicoRecusas
+    )
   ){
 
-   fecharGuardados();
-
-   fecharImpressao();
+    registro.historicoRecusas =
+      [];
 
   }
 
- }
+  registro.historicoRecusas.push({
+
+    motivo,
+
+    em:
+      recusadoEm,
+
+    origem:
+      "MESA"
+
+  });
+
+  salvarTudo();
+
+  renderHistorico();
+
+  mostrarToast(
+    "Atendimento recusado pela MESA. Verifique o motivo.",
+    "warning"
+  );
+
+}
+
+/* ============================================================
+   HISTÓRICO
+============================================================ */
+
+function ordenarHistorico(
+  tipo
+){
+
+  ordemHistorico =
+    tipo;
+
+  renderHistorico();
+}
+
+function renderHistorico(){
+
+  const container =
+    $("historicoContainer");
+
+  $("contadorHistorico")
+    .textContent =
+      historico.length;
+
+  if(!historico.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        Nenhum atendimento no histórico.
+      </div>
+    `;
+
+    return;
+  }
+
+  const lista =
+    [...historico];
+
+  if(
+    ordemHistorico ===
+    "atendimento"
+  ){
+
+    lista.sort(
+      (a,b)=>
+        normalizar(
+          a.atendimento
+        ).localeCompare(
+          normalizar(
+            b.atendimento
+          ),
+          "pt-BR"
+        )
+    );
+
+  }else{
+
+    lista.sort(
+      (a,b)=>
+        new Date(
+          a.enviadoEm || 0
+        ) -
+        new Date(
+          b.enviadoEm || 0
+        )
+    );
+
+  }
+
+  let html = `
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Nome</th>
+            <th>RGI</th>
+            <th>Pav/Cela</th>
+            <th>Atendimento</th>
+            <th>Data</th>
+            <th>Status</th>
+            <th>Informação</th>
+            <th>Ação</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+  `;
+
+  lista.forEach(
+    registro=>{
+
+      let statusHtml =
+        "";
+
+      let infoHtml =
+        "";
+
+      let acaoHtml =
+        "";
+
+      if(
+        registro.status ===
+        "aguardando_mesa"
+      ){
+
+        statusHtml = `
+          <span class="badge badge-waiting">
+            ⏳ AGUARDANDO MESA
+          </span>
+        `;
+
+        infoHtml = `
+          Enviado em:
+          ${escapeHtml(
+            formatarDataHora(
+              registro.enviadoEm
+            )
+          )}
+        `;
+
+        acaoHtml = `
+          <button
+            class="btn-red"
+            onclick="excluirHistorico('${escapeHtml(registro.recordId)}')"
+          >
+            🗑️ EXCLUIR
+          </button>
+        `;
+
+      }else if(
+        registro.status ===
+        "recebido"
+      ){
+
+        statusHtml = `
+          <span class="badge badge-received">
+            ✅ RECEBIDO
+          </span>
+        `;
+
+        infoHtml = `
+          Recebido em:
+          ${escapeHtml(
+            formatarDataHora(
+              registro.recebidoEm
+            )
+          )}
+        `;
+
+        acaoHtml = `
+          <div class="actions">
+
+            <button
+              class="btn-yellow"
+              onclick="guardarAtendimento('${escapeHtml(registro.recordId)}')"
+            >
+              🗄️ GUARDAR
+            </button>
+
+            <button
+              class="btn-red"
+              onclick="excluirHistorico('${escapeHtml(registro.recordId)}')"
+            >
+              🗑️ EXCLUIR
+            </button>
+
+          </div>
+        `;
+
+      }else if(
+        registro.status ===
+        "recusado"
+      ){
+
+        statusHtml = `
+          <span class="badge badge-refused">
+            ❌ RECUSADO
+          </span>
+        `;
+
+        infoHtml = `
+
+          <div class="refusal-box">
+
+            <strong>
+              Motivo da recusa:
+            </strong>
+
+            <br>
+
+            ${escapeHtml(
+              registro.motivoRecusa ||
+              "Motivo não informado."
+            )}
+
+            <div class="small" style="margin-top:6px;">
+
+              Recusado em:
+              ${escapeHtml(
+                formatarDataHora(
+                  registro.recusadoEm
+                )
+              )}
+
+            </div>
+
+          </div>
+
+        `;
+
+        /*
+         * AQUI ESTÁ A NOVA REGRA:
+         *
+         * O GUICHÊ pode editar o motivo,
+         * reenviar para a Mesa ou arquivar.
+         */
+
+        acaoHtml = `
+
+          <div class="actions">
+
+            <button
+              class="btn-orange"
+              onclick="abrirEditarRecusa('${escapeHtml(registro.recordId)}')"
+            >
+              ✏️ EDITAR RECUSA
+            </button>
+
+            <button
+              class="btn-green"
+              onclick="reenviarRecusado('${escapeHtml(registro.recordId)}')"
+            >
+              📤 REENVIAR
+            </button>
+
+            <button
+              class="btn-yellow"
+              onclick="arquivarRecusado('${escapeHtml(registro.recordId)}')"
+            >
+              🗄️ ARQUIVAR
+            </button>
+
+            <button
+              class="btn-red"
+              onclick="excluirHistorico('${escapeHtml(registro.recordId)}')"
+            >
+              🗑️ EXCLUIR
+            </button>
+
+          </div>
+
+        `;
+
+      }else if(
+        registro.status ===
+        "guardado"
+      ){
+
+        statusHtml = `
+          <span class="badge badge-guarded">
+            🗄️ GUARDADO
+          </span>
+        `;
+
+        infoHtml =
+          "Atendimento arquivado.";
+
+        acaoHtml =
+          `<span class="small">Arquivado</span>`;
+
+      }
+
+      html += `
+
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHtml(
+                registro.nome ||
+                registro.nomeInterno ||
+                ""
+              )}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(
+              registro.rgi || ""
+            )}
+          </td>
+
+          <td class="print-pavcela">
+            ${escapeHtml(
+              registro.pavilhao || ""
+            )}
+            /
+            ${escapeHtml(
+              registro.cela || ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              registro.atendimento || ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatarData(
+                registro.dataAtendimento
+              )
+            )}
+          </td>
+
+          <td>
+            ${statusHtml}
+          </td>
+
+          <td>
+            ${infoHtml}
+          </td>
+
+          <td>
+            ${acaoHtml}
+          </td>
+
+        </tr>
+
+      `;
+
+    }
+  );
+
+  html += `
+        </tbody>
+
+      </table>
+
+    </div>
+  `;
+
+  container.innerHTML =
+    html;
+}
+
+/* ============================================================
+   EDITAR RECUSA
+============================================================ */
+
+function abrirEditarRecusa(
+  recordId
+){
+
+  const registro =
+    historico.find(
+      item =>
+        item.recordId ===
+        recordId
+    );
+
+  if(!registro){
+    return;
+  }
+
+  if(
+    registro.status !==
+    "recusado"
+  ){
+
+    mostrarToast(
+      "Este atendimento não está recusado.",
+      "warning"
+    );
+
+    return;
+  }
+
+  recordIdEditandoRecusa =
+    recordId;
+
+  $("dadosEditarRecusa")
+    .innerHTML = `
+
+      <strong>
+        Interno:
+      </strong>
+      ${escapeHtml(
+        registro.nome ||
+        registro.nomeInterno ||
+        ""
+      )}
+
+      &nbsp; | &nbsp;
+
+      <strong>
+        RGI:
+      </strong>
+      ${escapeHtml(
+        registro.rgi || ""
+      )}
+
+      &nbsp; | &nbsp;
+
+      <strong>
+        Atendimento:
+      </strong>
+      ${escapeHtml(
+        registro.atendimento || ""
+      )}
+
+    `;
+
+  $("motivoRecusaEditado")
+    .value =
+      registro.motivoRecusa ||
+      "";
+
+  $("modalEditarRecusa")
+    .classList.add("show");
+
+  setTimeout(
+    ()=>{
+      $("motivoRecusaEditado")
+        .focus();
+    },
+    100
+  );
+}
+
+function fecharEditarRecusa(){
+
+  recordIdEditandoRecusa =
+    null;
+
+  $("motivoRecusaEditado")
+    .value =
+      "";
+
+  $("modalEditarRecusa")
+    .classList.remove(
+      "show"
+    );
+}
+
+function salvarEdicaoRecusa(){
+
+  if(
+    !recordIdEditandoRecusa
+  ){
+    return;
+  }
+
+  const motivo =
+    $("motivoRecusaEditado")
+      .value
+      .trim();
+
+  if(!motivo){
+
+    mostrarToast(
+      "Informe o motivo da recusa.",
+      "warning"
+    );
+
+    return;
+  }
+
+  const registro =
+    historico.find(
+      item =>
+        item.recordId ===
+        recordIdEditandoRecusa
+    );
+
+  if(!registro){
+    return;
+  }
+
+  const motivoAnterior =
+    registro.motivoRecusa ||
+    "";
+
+  registro.motivoRecusa =
+    motivo;
+
+  if(
+    !Array.isArray(
+      registro.historicoRecusas
+    )
+  ){
+
+    registro.historicoRecusas =
+      [];
+
+  }
+
+  registro.historicoRecusas.push({
+
+    motivo,
+
+    em:
+      new Date().toISOString(),
+
+    origem:
+      "GUICHÊ",
+
+    motivoAnterior
+
+  });
+
+  salvarTudo();
+
+  renderHistorico();
+
+  fecharEditarRecusa();
+
+  mostrarToast(
+    "Motivo da recusa atualizado.",
+    "success"
+  );
+}
+
+/* ============================================================
+   REENVIAR RECUSADO
+============================================================ */
+
+function reenviarRecusado(
+  recordId
+){
+
+  const registro =
+    historico.find(
+      item =>
+        item.recordId ===
+        recordId
+    );
+
+  if(!registro){
+    return;
+  }
+
+  if(
+    registro.status !==
+    "recusado"
+  ){
+
+    mostrarToast(
+      "Este atendimento não está recusado.",
+      "warning"
+    );
+
+    return;
+  }
+
+  /*
+   * Se o usuário clicar em REENVIAR sem editar,
+   * o motivo original continua.
+   */
+  if(
+    !registro.motivoRecusa ||
+    !registro.motivoRecusa.trim()
+  ){
+
+    mostrarToast(
+      "O motivo da recusa precisa estar preenchido.",
+      "warning"
+    );
+
+    abrirEditarRecusa(
+      recordId
+    );
+
+    return;
+  }
+
+  if(
+    !socket ||
+    socket.readyState !==
+      WebSocket.OPEN
+  ){
+
+    mostrarToast(
+      "GUICHÊ está sem conexão. Não foi possível reenviar.",
+      "warning"
+    );
+
+    return;
+  }
+
+  const agora =
+    new Date().toISOString();
+
+  /*
+   * O cadastro volta para a MESA com status
+   * aguardando_mesa.
+   *
+   * Mantemos o motivo da recusa.
+   */
+  registro.status =
+    "aguardando_mesa";
+
+  registro.enviadoEm =
+    agora;
+
+  registro.recebidoEm =
+    null;
+
+  registro.recusadoEm =
+    registro.recusadoEm ||
+    agora;
+
+  /*
+   * NÃO apagamos motivoRecusa.
+   *
+   * Assim a Mesa continua sabendo por que
+   * esse atendimento havia sido recusado.
+   */
+
+  const enviado =
+    enviarParaMesaNovamente(
+      registro
+    );
+
+  if(!enviado){
+
+    registro.status =
+      "recusado";
+
+    salvarTudo();
+
+    renderHistorico();
+
+    mostrarToast(
+      "Não foi possível enviar para a Mesa.",
+      "error"
+    );
+
+    return;
+  }
+
+  salvarTudo();
+
+  renderHistorico();
+
+  mostrarToast(
+    "Atendimento reenviado para a MESA.",
+    "success"
+  );
+}
+
+function enviarParaMesaNovamente(
+  registro
+){
+
+  if(
+    !socket ||
+    socket.readyState !==
+      WebSocket.OPEN
+  ){
+
+    return false;
+  }
+
+  socket.send(
+    JSON.stringify({
+
+      type:"send_record",
+
+      recordId:
+        registro.recordId,
+
+      record:{
+        ...registro,
+
+        status:
+          "aguardando_mesa",
+
+        reenviadoEm:
+          new Date().toISOString()
+
+      }
+
+    })
+  );
+
+  return true;
+}
+
+/* ============================================================
+   ARQUIVAR RECUSADO
+============================================================ */
+
+function arquivarRecusado(
+  recordId
+){
+
+  const indice =
+    historico.findIndex(
+      item =>
+        item.recordId ===
+        recordId
+    );
+
+  if(indice < 0){
+    return;
+  }
+
+  const registro =
+    historico[indice];
+
+  if(
+    registro.status !==
+    "recusado"
+  ){
+
+    mostrarToast(
+      "Somente recusados podem ser arquivados desta forma.",
+      "warning"
+    );
+
+    return;
+  }
+
+  registro.status =
+    "guardado";
+
+  registro.guardadoEm =
+    new Date().toISOString();
+
+  /*
+   * O motivo permanece dentro do arquivo.
+   */
+  historico.splice(
+    indice,
+    1
+  );
+
+  arquivo.push(
+    registro
+  );
+
+  salvarTudo();
+
+  renderHistorico();
+  renderGuardados();
+
+  mostrarToast(
+    "Atendimento recusado arquivado.",
+    "success"
+  );
+}
+
+/* ============================================================
+   GUARDAR RECEBIDO
+============================================================ */
+
+function guardarAtendimento(
+  recordId
+){
+
+  const indice =
+    historico.findIndex(
+      item =>
+        item.recordId ===
+        recordId
+    );
+
+  if(indice < 0){
+    return;
+  }
+
+  const registro =
+    historico[indice];
+
+  if(
+    registro.status !==
+    "recebido"
+  ){
+
+    mostrarToast(
+      "Este atendimento ainda não foi recebido.",
+      "warning"
+    );
+
+    return;
+  }
+
+  registro.status =
+    "guardado";
+
+  registro.guardadoEm =
+    new Date().toISOString();
+
+  historico.splice(
+    indice,
+    1
+  );
+
+  arquivo.push(
+    registro
+  );
+
+  salvarTudo();
+
+  renderHistorico();
+  renderGuardados();
+
+  mostrarToast(
+    "Atendimento guardado.",
+    "success"
+  );
+}
+
+function excluirHistorico(
+  recordId
+){
+
+  const indice =
+    historico.findIndex(
+      item =>
+        item.recordId ===
+        recordId
+    );
+
+  if(indice < 0){
+    return;
+  }
+
+  if(
+    !confirm(
+      "Deseja realmente excluir este atendimento do histórico?"
+    )
+  ){
+    return;
+  }
+
+  historico.splice(
+    indice,
+    1
+  );
+
+  salvarTudo();
+
+  renderHistorico();
+
+  mostrarToast(
+    "Atendimento excluído.",
+    "success"
+  );
+}
+
+/* ============================================================
+   GUARDADOS
+============================================================ */
+
+function abrirGuardados(){
+
+  renderGuardados();
+
+  $("modalGuardados")
+    .classList.add(
+      "show"
+    );
+}
+
+function fecharGuardados(){
+
+  $("modalGuardados")
+    .classList.remove(
+      "show"
+    );
+}
+
+function renderGuardados(){
+
+  const container =
+    $("guardadosContainer");
+
+  const termo =
+    normalizar(
+      $("filtroGuardados")
+        ?.value || ""
+    );
+
+  let lista =
+    [...arquivo];
+
+  if(termo){
+
+    lista =
+      lista.filter(
+        registro=>{
+
+          const texto = [
+
+            registro.nome,
+
+            registro.nomeInterno,
+
+            registro.rgi,
+
+            registro.pavilhao,
+
+            registro.cela,
+
+            registro.atendimento,
+
+            registro.dataAtendimento,
+
+            registro.motivoRecusa
+
+          ].join(" ");
+
+          return normalizar(
+            texto
+          ).includes(
+            termo
+          );
+
+        }
+      );
+
+  }
+
+  lista.sort(
+    (a,b)=>
+      new Date(
+        b.guardadoEm || 0
+      ) -
+      new Date(
+        a.guardadoEm || 0
+      )
+  );
+
+  if(!lista.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        Nenhum atendimento guardado.
+      </div>
+    `;
+
+    return;
+  }
+
+  let html = `
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Nome</th>
+            <th>RGI</th>
+            <th>Pav/Cela</th>
+            <th>Atendimento</th>
+            <th>Data</th>
+            <th>Status</th>
+            <th>Guardado em</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+  `;
+
+  lista.forEach(
+    registro=>{
+
+      const recusado =
+        Array.isArray(
+          registro.historicoRecusas
+        ) &&
+        registro.historicoRecusas.length > 0;
+
+      html += `
+
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHtml(
+                registro.nome ||
+                registro.nomeInterno ||
+                ""
+              )}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(
+              registro.rgi || ""
+            )}
+          </td>
+
+          <td class="print-pavcela">
+            ${escapeHtml(
+              registro.pavilhao || ""
+            )}
+            /
+            ${escapeHtml(
+              registro.cela || ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              registro.atendimento || ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatarData(
+                registro.dataAtendimento
+              )
+            )}
+          </td>
+
+          <td>
+
+            ${
+              recusado
+
+                ? `
+                  <span class="badge badge-refused">
+                    ❌ RECUSADO / GUARDADO
+                  </span>
+
+                  <div class="refusal-box">
+                    ${escapeHtml(
+                      registro.motivoRecusa ||
+                      ""
+                    )}
+                  </div>
+                `
+
+                : `
+                  <span class="badge badge-guarded">
+                    🗄️ GUARDADO
+                  </span>
+                `
+            }
+
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatarDataHora(
+                registro.guardadoEm
+              )
+            )}
+          </td>
+
+        </tr>
+
+      `;
+
+    }
+  );
+
+  html += `
+        </tbody>
+
+      </table>
+
+    </div>
+  `;
+
+  container.innerHTML =
+    html;
+}
+
+/* ============================================================
+   IMPRESSÃO
+============================================================ */
+
+function abrirImpressao(){
+
+  preencherAtendimentosImpressao();
+  preencherPavilhoesImpressao();
+
+  $("printData").value =
+    new Date()
+      .toISOString()
+      .slice(0,10);
+
+  alterarModoImpressao();
+
+  $("modalImpressao")
+    .classList.add(
+      "show"
+    );
+}
+
+function fecharImpressao(){
+
+  $("modalImpressao")
+    .classList.remove(
+      "show"
+    );
+}
+
+function obterModoImpressao(){
+
+  return document.querySelector(
+    'input[name="modoPrint"]:checked'
+  )?.value ||
+  "atendimento";
+}
+
+function alterarModoImpressao(){
+
+  const modo =
+    obterModoImpressao();
+
+  $("grupoPrintAtendimento")
+    .style.display =
+      modo === "atendimento"
+        ? "block"
+        : "none";
+
+  $("grupoPrintGeral")
+    .style.display =
+      modo === "geral"
+        ? "block"
+        : "none";
+
+  $("grupoPrintData")
+    .style.display =
+      modo === "data"
+        ? "block"
+        : "none";
+
+  if(
+    modo === "data"
+  ){
+
+    alterarTipoData();
+
+  }
+}
+
+function alterarTipoData(){
+
+  const tipo =
+    document.querySelector(
+      'input[name="tipoData"]:checked'
+    )?.value ||
+    "todos";
+
+  $("grupoAtendimentosData")
+    .style.display =
+      tipo === "atendimentos"
+        ? "block"
+        : "none";
+}
+
+function preencherAtendimentosImpressao(){
+
+  const container =
+    $("listaAtendimentosImpressao");
+
+  container.innerHTML =
+    ATENDIMENTOS.map(
+      (atendimento,index)=>`
+
+        <label class="checkbox-item">
+
+          <input
+            type="checkbox"
+            value="${escapeHtml(atendimento)}"
+            checked
+          >
+
+          ${escapeHtml(atendimento)}
+
+        </label>
+
+      `
+    ).join("");
+}
+
+function preencherAtendimentosData(){
+
+  const container =
+    $("listaAtendimentosData");
+
+  container.innerHTML =
+    ATENDIMENTOS.map(
+      atendimento=>`
+
+        <label class="checkbox-item">
+
+          <input
+            type="checkbox"
+            value="${escapeHtml(atendimento)}"
+          >
+
+          ${escapeHtml(atendimento)}
+
+        </label>
+
+      `
+    ).join("");
+}
+
+function obterPavilhoesDaBase(){
+
+  const conjunto =
+    new Set();
+
+  baseInternos.forEach(
+    interno=>{
+
+      const pavilhao =
+        String(
+          interno.pavilhao || ""
+        ).trim();
+
+      if(pavilhao){
+        conjunto.add(
+          pavilhao
+        );
+      }
+
+    }
+  );
+
+  return [
+    ...conjunto
+  ].sort(
+    (a,b)=>
+      a.localeCompare(
+        b,
+        "pt-BR",
+        {
+          numeric:true,
+          sensitivity:"base"
+        }
+      )
+  );
+}
+
+function preencherPavilhoesImpressao(){
+
+  const pavilhoes =
+    obterPavilhoesDaBase();
+
+  preencherListaPavilhoes(
+    $("listaPavilhoesAtendimento"),
+    "pavAt_",
+    pavilhoes
+  );
+
+  preencherListaPavilhoes(
+    $("listaPavilhoesGeral"),
+    "pavGeral_",
+    pavilhoes
+  );
+
+  preencherListaPavilhoes(
+    $("listaPavilhoesData"),
+    "pavData_",
+    pavilhoes
+  );
+}
+
+function preencherListaPavilhoes(
+  container,
+  prefixo,
+  pavilhoes
+){
+
+  if(!pavilhoes.length){
+
+    container.innerHTML = `
+      <div class="small">
+        Base Excel não carregada ou sem pavilhões.
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    pavilhoes.map(
+      (pavilhao,index)=>`
+
+        <label class="checkbox-item">
+
+          <input
+            type="checkbox"
+            id="${prefixo}${index}"
+            value="${escapeHtml(pavilhao)}"
+          >
+
+          ${escapeHtml(pavilhao)}
+
+        </label>
+
+      `
+    ).join("");
+}
+
+function obterMarcados(
+  containerId
+){
+
+  const container =
+    $(containerId);
+
+  if(!container){
+    return [];
+  }
+
+  return [
+    ...container.querySelectorAll(
+      'input[type="checkbox"]:checked'
+    )
+  ].map(
+    input =>
+      input.value
+  );
+}
+
+function todosRegistrosImpressao(){
+
+  const mapa =
+    new Map();
+
+  [
+    ...historico,
+    ...arquivo
+  ].forEach(
+    registro=>{
+
+      if(
+        registro.recordId
+      ){
+
+        mapa.set(
+          registro.recordId,
+          {
+            ...registro
+          }
+        );
+
+      }
+
+    }
+  );
+
+  return [
+    ...mapa.values()
+  ];
+}
+
+function registroData(
+  registro
+){
+
+  const valor =
+    registro.dataAtendimento ||
+    "";
+
+  if(
+    /^\d{4}-\d{2}-\d{2}$/
+      .test(String(valor))
+  ){
+    return String(valor);
+  }
+
+  const d =
+    new Date(valor);
+
+  if(
+    Number.isNaN(
+      d.getTime()
+    )
+  ){
+    return "";
+  }
+
+  return [
+
+    d.getFullYear(),
+
+    String(
+      d.getMonth()+1
+    ).padStart(2,"0"),
+
+    String(
+      d.getDate()
+    ).padStart(2,"0")
+
+  ].join("-");
+}
+
+function filtrarAtendimento(
+  registros,
+  atendimentos
+){
+
+  if(!atendimentos.length){
+    return [];
+  }
+
+  const permitidos =
+    new Set(
+      atendimentos.map(
+        normalizar
+      )
+    );
+
+  return registros.filter(
+    registro =>
+      permitidos.has(
+        normalizar(
+          registro.atendimento
+        )
+      )
+  );
+}
+
+function filtrarPavilhao(
+  registros,
+  pavilhoes
+){
+
+  if(!pavilhoes.length){
+    return registros;
+  }
+
+  const permitidos =
+    new Set(
+      pavilhoes.map(
+        normalizar
+      )
+    );
+
+  return registros.filter(
+    registro =>
+      permitidos.has(
+        normalizar(
+          registro.pavilhao
+        )
+      )
+  );
+}
+
+function obterDadosImpressao(){
+
+  let registros =
+    todosRegistrosImpressao();
+
+  const modo =
+    obterModoImpressao();
+
+  if(
+    modo === "atendimento"
+  ){
+
+    const atendimentos =
+      obterMarcados(
+        "listaAtendimentosImpressao"
+      );
+
+    if(!atendimentos.length){
+
+      throw new Error(
+        "Selecione pelo menos um atendimento."
+      );
+
+    }
+
+    const pavilhoes =
+      obterMarcados(
+        "listaPavilhoesAtendimento"
+      );
+
+    registros =
+      filtrarAtendimento(
+        registros,
+        atendimentos
+      );
+
+    registros =
+      filtrarPavilhao(
+        registros,
+        pavilhoes
+      );
+
+    return {
+      modo,
+      registros,
+      grupos:
+        atendimentos
+    };
+  }
+
+  if(
+    modo === "geral"
+  ){
+
+    const pavilhoes =
+      obterMarcados(
+        "listaPavilhoesGeral"
+      );
+
+    registros =
+      filtrarPavilhao(
+        registros,
+        pavilhoes
+      );
+
+    return {
+      modo,
+      registros,
+      grupos:
+        ATENDIMENTOS
+    };
+  }
+
+  if(
+    modo === "data"
+  ){
+
+    const data =
+      $("printData").value;
+
+    if(!data){
+
+      throw new Error(
+        "Selecione a data."
+      );
+
+    }
+
+    const tipo =
+      document.querySelector(
+        'input[name="tipoData"]:checked'
+      )?.value ||
+      "todos";
+
+    registros =
+      registros.filter(
+        registro =>
+          registroData(
+            registro
+          ) === data
+      );
+
+    const pavilhoes =
+      obterMarcados(
+        "listaPavilhoesData"
+      );
+
+    registros =
+      filtrarPavilhao(
+        registros,
+        pavilhoes
+      );
+
+    let grupos =
+      [];
+
+    if(
+      tipo ===
+      "atendimentos"
+    ){
+
+      grupos =
+        obterMarcados(
+          "listaAtendimentosData"
+        );
+
+      if(!grupos.length){
+
+        throw new Error(
+          "Selecione pelo menos um atendimento."
+        );
+
+      }
+
+      registros =
+        filtrarAtendimento(
+          registros,
+          grupos
+        );
+
+    }else{
+
+      grupos =
+        ATENDIMENTOS.filter(
+          atendimento =>
+            registros.some(
+              registro =>
+                normalizar(
+                  registro.atendimento
+                ) ===
+                normalizar(
+                  atendimento
+                )
+            )
+        );
+
+    }
+
+    return {
+      modo,
+      registros,
+      grupos,
+      data
+    };
+  }
+
+  return {
+    modo,
+    registros,
+    grupos:ATENDIMENTOS
+  };
+}
+
+function gerarPaginaPrint(
+  registros,
+  titulo,
+  subtitulo=""
+){
+
+  if(!registros.length){
+    return "";
+  }
+
+  let linhas = "";
+
+  const ordenados =
+    [...registros].sort(
+      (a,b)=>
+        normalizar(
+          a.nome ||
+          a.nomeInterno ||
+          ""
+        ).localeCompare(
+          normalizar(
+            b.nome ||
+            b.nomeInterno ||
+            ""
+          ),
+          "pt-BR"
+        )
+    );
+
+  ordenados.forEach(
+    registro=>{
+
+      linhas += `
+
+        <tr>
+
+          <td>
+            ${escapeHtml(
+              registro.nome ||
+              registro.nomeInterno ||
+              ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              registro.rgi ||
+              ""
+            )}
+          </td>
+
+          <td class="print-pavcela">
+            ${escapeHtml(
+              registro.pavilhao ||
+              ""
+            )}
+            /
+            ${escapeHtml(
+              registro.cela ||
+              ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              registro.atendimento ||
+              ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              formatarData(
+                registro.dataAtendimento
+              )
+            )}
+          </td>
+
+          <td>
+            ${
+              registro.status ===
+              "recusado"
+                ? "RECUSADO"
+                :
+              registro.status ===
+              "recebido"
+                ? "RECEBIDO"
+                :
+              registro.status ===
+              "guardado"
+                ? "GUARDADO"
+                :
+                "AGUARDANDO"
+            }
+          </td>
+
+        </tr>
+
+      `;
+
+    }
+  );
+
+  return `
+
+    <div class="print-page">
+
+      <div class="print-header">
+
+        <h1>
+          CPAIG - LISTA DE ATENDIMENTOS
+        </h1>
+
+        <h2>
+          ${escapeHtml(titulo)}
+        </h2>
+
+        ${
+          subtitulo
+            ? `<p>${escapeHtml(subtitulo)}</p>`
+            : ""
+        }
+
+        <p>
+          Impressão:
+          ${escapeHtml(
+            formatarDataHora(
+              new Date().toISOString()
+            )
+          )}
+        </p>
+
+      </div>
+
+      <table class="print-table">
+
+        <thead>
+
+          <tr>
+            <th>Nome do interno</th>
+            <th>RGI</th>
+            <th>Pav/Cela</th>
+            <th>Atendimento</th>
+            <th>Data</th>
+            <th>Status</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+          ${linhas}
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+}
+
+function executarImpressao(){
+
+  let dados;
+
+  try{
+
+    dados =
+      obterDadosImpressao();
+
+  }catch(e){
+
+    mostrarToast(
+      e.message,
+      "warning"
+    );
+
+    return;
+  }
+
+  if(!dados.registros.length){
+
+    mostrarToast(
+      "Nenhum atendimento encontrado para os filtros.",
+      "warning"
+    );
+
+    return;
+  }
+
+  const paginas =
+    [];
+
+  dados.grupos.forEach(
+    atendimento=>{
+
+      const grupo =
+        dados.registros.filter(
+          registro =>
+            normalizar(
+              registro.atendimento
+            ) ===
+            normalizar(
+              atendimento
+            )
+        );
+
+      if(!grupo.length){
+        return;
+      }
+
+      paginas.push(
+        gerarPaginaPrint(
+          grupo,
+          atendimento,
+          dados.modo === "data"
+            ? "Data: " +
+              formatarData(
+                dados.data
+              )
+            : ""
+        )
+      );
+
+    }
+  );
+
+  if(!paginas.length){
+
+    mostrarToast(
+      "Nenhum atendimento encontrado para os filtros.",
+      "warning"
+    );
+
+    return;
+  }
+
+  $("areaImpressao")
+    .innerHTML =
+      paginas.join("");
+
+  fecharImpressao();
+
+  setTimeout(
+    ()=>{
+      window.print();
+    },
+    250
+  );
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+============================================================ */
+
+function inicializar(){
+
+  preencherAtendimentos();
+  preencherCelas();
+
+  carregarTudo();
+
+  usarHoje();
+
+  conectarServidor();
+
+  window.addEventListener(
+    "storage",
+    event=>{
+
+      if(
+        event.key ===
+        STORAGE_BASE
+      ){
+
+        baseInternos =
+          lerJSON(
+            STORAGE_BASE,
+            []
+          );
+
+        atualizarStatusBase();
+        preencherPavilhoesImpressao();
+
+      }
+
+    }
+  );
+
+  setInterval(
+    reenviarAguardandoMesa,
+    10000
+  );
+
+  setInterval(
+    ()=>{
+      baseInternos =
+        lerJSON(
+          STORAGE_BASE,
+          baseInternos
+        );
+
+      atualizarStatusBase();
+
+      preencherPavilhoesImpressao();
+
+    },
+    10000
+  );
+}
+
+/* ============================================================
+   MODAIS
+============================================================ */
+
+$("modalEditarRecusa")
+  .addEventListener(
+    "click",
+    event=>{
+
+      if(
+        event.target ===
+        $("modalEditarRecusa")
+      ){
+
+        fecharEditarRecusa();
+
+      }
+
+    }
+  );
+
+$("modalGuardados")
+  .addEventListener(
+    "click",
+    event=>{
+
+      if(
+        event.target ===
+        $("modalGuardados")
+      ){
+
+        fecharGuardados();
+
+      }
+
+    }
+  );
+
+$("modalImpressao")
+  .addEventListener(
+    "click",
+    event=>{
+
+      if(
+        event.target ===
+        $("modalImpressao")
+      ){
+
+        fecharImpressao();
+
+      }
+
+    }
+  );
+
+document.addEventListener(
+  "keydown",
+  event=>{
+
+    if(
+      event.key ===
+      "Escape"
+    ){
+
+      fecharEditarRecusa();
+      fecharGuardados();
+      fecharImpressao();
+
+    }
+
+  }
+);
+
+window.addEventListener(
+  "load",
+  inicializar
 );
 
 </script>
 
-
-<script
- src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
-</script>
+<!-- Biblioteca para leitura de Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 </body>
 </html>
