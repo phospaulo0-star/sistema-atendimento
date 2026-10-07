@@ -735,39 +735,184 @@
         Escolha o atendimento
       </label>
 
-      <select id="filtroAtendimento">
-
-        <option value="">
-          Selecione
-        </option>
-
-      </select>
+<div
+  id="listaAtendimentos"
+  style="
+    max-height:220px;
+    overflow-y:auto;
+    border:1px solid #bbb;
+    border-radius:8px;
+    padding:8px;
+    background:#fff;
+  "
+>
+</div>
 
     </div>
 
 
-    <div
-      id="opcaoData"
-      class="opcao-impressao"
-      style="display:none;"
-    >
+<div
+  id="opcaoData"
+  class="opcao-impressao"
+  style="display:none;"
+>
 
-      <label for="filtroData">
-        Escolha a data
-      </label>
+  <label for="filtroData">
+    Escolha a data
+  </label>
 
+  <input
+    type="date"
+    id="filtroData"
+  >
+
+  <div style="margin-top:12px;">
+
+    <label>
       <input
-        type="date"
-        id="filtroData"
+        type="radio"
+        name="modoData"
+        value="todos"
+        checked
+        onchange="atualizarModoData()"
       >
+      Todos
+    </label>
+
+    <label
+      style="margin-left:15px;"
+    >
+      <input
+        type="radio"
+        name="modoData"
+        value="atendimentos"
+        onchange="atualizarModoData()"
+      >
+      Atendimentos
+    </label>
+
+  </div>
+
+
+  <div
+    id="atendimentosData"
+    style="
+      display:none;
+      margin-top:10px;
+      max-height:180px;
+      overflow-y:auto;
+      border:1px solid #bbb;
+      border-radius:8px;
+      padding:8px;
+    "
+  >
+  </div>
+function atualizarModoData() {
+
+  const modo =
+    document.querySelector(
+      'input[name="modoData"]:checked'
+    )?.value ||
+    "todos";
+
+
+  const area =
+    document.getElementById(
+      "atendimentosData"
+    );
+
+
+  if (
+    modo !== "atendimentos"
+  ) {
+
+    area.style.display =
+      "none";
+
+    return;
+  }
+
+
+  area.style.display =
+    "block";
+
+
+  const data =
+    document.getElementById(
+      "filtroData"
+    ).value;
+
+
+  const atendimentos =
+    [
+      ...new Set(
+        historico
+          .filter(
+            item =>
+              item.dataAtendimento ===
+              data
+          )
+          .map(
+            item =>
+              item.atendimento
+          )
+          .filter(Boolean)
+      )
+    ]
+    .sort(
+      (a,b) =>
+        a.localeCompare(
+          b,
+          "pt-BR"
+        )
+    );
+
+
+  area.innerHTML = "";
+
+
+  atendimentos.forEach(
+    atendimento => {
+
+      area.innerHTML += `
+
+        <label
+          style="
+            display:block;
+            padding:6px;
+          "
+        >
+
+          <input
+            type="checkbox"
+            class="filtro-atendimento-data"
+            value="${escapeHtml(atendimento)}"
+          >
+
+          ${escapeHtml(atendimento)}
+
+        </label>
+
+      `;
+    }
+  );
+}
 
     </div>
 
 
-    <div
-      id="opcaoPagina"
-      class="opcao-impressao"
+<div
+  id="opcaoPagina"
+  class="opcao-impressao"
+>
+  <label>
+    <input
+      type="checkbox"
+      id="umPorPagina"
     >
+    Um atendimento por página
+  </label>
+</div>
 
       <label>
 
@@ -1683,230 +1828,312 @@
   }
 
 
-  function preencherFiltroAtendimento() {
+function preencherFiltroAtendimento() {
 
-    const select =
-      document.getElementById(
-        "filtroAtendimento"
-      );
+  const container =
+    document.getElementById(
+      "listaAtendimentos"
+    );
 
-
-    const atual =
-      select.value;
+  container.innerHTML = "";
 
 
-    const atendimentos =
-      [
-        ...new Set(
-          historico
-            .map(
-              x =>
-                x.atendimento
-            )
-            .filter(Boolean)
-        )
-      ]
-      .sort(
-        (a,b) =>
-          a.localeCompare(
-            b,
-            "pt-BR"
+  const atendimentos =
+    [
+      ...new Set(
+        historico
+          .map(
+            x => x.atendimento
           )
-      );
-
-
-    select.innerHTML =
-      '<option value="">Selecione</option>';
-
-
-    atendimentos.forEach(
-      atendimento => {
-
-        const option =
-          document.createElement(
-            "option"
-          );
-
-        option.value =
-          atendimento;
-
-        option.textContent =
-          atendimento;
-
-        select.appendChild(
-          option
-        );
-      }
+          .filter(Boolean)
+      )
+    ]
+    .sort(
+      (a, b) =>
+        a.localeCompare(
+          b,
+          "pt-BR"
+        )
     );
 
 
-    if (
-      atendimentos.includes(
-        atual
-      )
-    ) {
+  if (!atendimentos.length) {
 
-      select.value =
-        atual;
-    }
+    container.innerHTML =
+      '<div style="color:#777;padding:8px;">Nenhum atendimento disponível.</div>';
+
+    return;
   }
 
 
-  function atualizarOpcoesImpressao() {
+  atendimentos.forEach(
+    atendimento => {
 
-    const tipo =
-      document.getElementById(
-        "tipoImpressao"
-      ).value;
+      const label =
+        document.createElement(
+          "label"
+        );
+
+      label.style.display =
+        "block";
+
+      label.style.padding =
+        "8px";
+
+      label.style.cursor =
+        "pointer";
 
 
-    const atendimento =
-      document.getElementById(
-        "opcaoAtendimento"
+      const checkbox =
+        document.createElement(
+          "input"
+        );
+
+      checkbox.type =
+        "checkbox";
+
+      checkbox.value =
+        atendimento;
+
+      checkbox.className =
+        "filtro-atendimento";
+
+
+      label.appendChild(
+        checkbox
       );
 
-    const data =
-      document.getElementById(
-        "opcaoData"
-      );
-
-    const pagina =
-      document.getElementById(
-        "opcaoPagina"
+      label.appendChild(
+        document.createTextNode(
+          " " + atendimento
+        )
       );
 
 
-    atendimento.style.display =
-      tipo === "atendimento"
-        ? "block"
-        : "none";
+      container.appendChild(
+        label
+      );
+    }
+  );
+}
 
 
-    data.style.display =
-      tipo === "data"
-        ? "block"
-        : "none";
+function atualizarOpcoesImpressao() {
+
+  const tipo =
+    document.getElementById(
+      "tipoImpressao"
+    ).value;
 
 
-    pagina.style.display =
-      tipo === "atendimento"
-        ? "block"
-        : "none";
-  }
+  document.getElementById(
+    "opcaoAtendimento"
+  ).style.display =
+    tipo === "atendimento"
+      ? "block"
+      : "none";
 
 
-  function executarImpressao() {
+  document.getElementById(
+    "opcaoData"
+  ).style.display =
+    tipo === "data"
+      ? "block"
+      : "none";
 
-    const tipo =
-      document.getElementById(
-        "tipoImpressao"
-      ).value;
+
+  /*
+   * Agora "um por página"
+   * aparece em TODAS as modalidades.
+   */
+  document.getElementById(
+    "opcaoPagina"
+  ).style.display =
+    "block";
+}
 
 
-    let registros = [];
+function executarImpressao() {
+
+  const tipo =
+    document.getElementById(
+      "tipoImpressao"
+    ).value;
+
+
+  let registros = [];
+
+
+  /*
+   * POR ATENDIMENTO
+   * Permite selecionar vários.
+   */
+  if (
+    tipo === "atendimento"
+  ) {
+
+    const selecionados =
+      [
+        ...document.querySelectorAll(
+          ".filtro-atendimento:checked"
+        )
+      ]
+      .map(
+        checkbox =>
+          checkbox.value
+      );
 
 
     if (
-      tipo === "atendimento"
+      !selecionados.length
     ) {
-
-      const atendimento =
-        document.getElementById(
-          "filtroAtendimento"
-        ).value;
-
-
-      if (!atendimento) {
-
-        alert(
-          "Escolha o atendimento que deseja imprimir."
-        );
-
-        return;
-      }
-
-
-      registros =
-        historico.filter(
-          x =>
-            x.atendimento ===
-            atendimento
-        );
-
-    }
-
-
-    if (
-      tipo === "geral"
-    ) {
-
-      registros =
-        historico.slice();
-    }
-
-
-    if (
-      tipo === "data"
-    ) {
-
-      const data =
-        document.getElementById(
-          "filtroData"
-        ).value;
-
-
-      if (!data) {
-
-        alert(
-          "Escolha a data que deseja imprimir."
-        );
-
-        return;
-      }
-
-
-      registros =
-        historico.filter(
-          x =>
-            x.dataAtendimento ===
-            data
-        );
-    }
-
-
-    if (!registros.length) {
 
       alert(
-        "Não existem atendimentos para os filtros escolhidos."
+        "Selecione pelo menos um atendimento."
       );
 
       return;
     }
 
 
-    const umPorPagina =
-      document.getElementById(
-        "umPorPagina"
-      ).checked;
-
-
-    gerarAreaImpressao(
-      registros,
-      tipo,
-      umPorPagina
-    );
-
-
-    fecharImpressao();
-
-
-    setTimeout(
-      () => {
-        window.print();
-      },
-      150
-    );
+    registros =
+      historico.filter(
+        item =>
+          selecionados.includes(
+            item.atendimento
+          )
+      );
   }
+
+
+  /*
+   * ATENDIMENTO GERAL
+   */
+  if (
+    tipo === "geral"
+  ) {
+
+    registros =
+      historico.slice();
+  }
+
+
+  /*
+   * POR DATA
+   */
+  if (
+    tipo === "data"
+  ) {
+
+    const data =
+      document.getElementById(
+        "filtroData"
+      ).value;
+
+
+    if (!data) {
+
+      alert(
+        "Escolha a data."
+      );
+
+      return;
+    }
+
+
+    const modoData =
+      document.querySelector(
+        'input[name="modoData"]:checked'
+      )?.value ||
+      "todos";
+
+
+    registros =
+      historico.filter(
+        item =>
+          item.dataAtendimento ===
+          data
+      );
+
+
+    /*
+     * Se o usuário escolher
+     * ATENDIMENTOS, filtra
+     * novamente pelos tipos marcados.
+     */
+    if (
+      modoData ===
+      "atendimentos"
+    ) {
+
+      const selecionados =
+        [
+          ...document.querySelectorAll(
+            ".filtro-atendimento-data:checked"
+          )
+        ]
+        .map(
+          checkbox =>
+            checkbox.value
+        );
+
+
+      if (
+        !selecionados.length
+      ) {
+
+        alert(
+          "Selecione pelo menos um atendimento para esta data."
+        );
+
+        return;
+      }
+
+
+      registros =
+        registros.filter(
+          item =>
+            selecionados.includes(
+              item.atendimento
+            )
+        );
+    }
+  }
+
+
+  if (!registros.length) {
+
+    alert(
+      "Não existem atendimentos para os filtros escolhidos."
+    );
+
+    return;
+  }
+
+
+  const umPorPagina =
+    document.getElementById(
+      "umPorPagina"
+    ).checked;
+
+
+  gerarAreaImpressao(
+    registros,
+    tipo,
+    umPorPagina
+  );
+
+
+  fecharImpressao();
+
+
+  setTimeout(
+    () => {
+      window.print();
+    },
+    100
+  );
+}
 
 
   function gerarAreaImpressao(
