@@ -7,7 +7,7 @@ const path = require("path");
 const app = express();
 const server = http.createServer(app);
 
-const VERSAO = "2.9.0";
+const VERSAO = "2.9.1";
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -20,34 +20,7 @@ const wss = new WebSocket.Server({ server });
 const clientes = new Map();
 const pendentes = new Map();
 const recusasPendentes = new Map();
-
-/*
-clientes:
-  WebSocket -> {
-    ws,
-    role,
-    clientId,
-    ownerId
-  }
-
-pendentes:
-  recordId -> {
-    recordId,
-    record,
-    ownerId,
-    createdAt,
-    updatedAt
-  }
-
-recusasPendentes:
-  recordId -> {
-    recordId,
-    record,
-    ownerId,
-    reason,
-    refusedAt
-  }
-*/
+const recebidos = new Map();
 
 /* =========================================================
    FUNÇÕES AUXILIARES
@@ -318,7 +291,6 @@ function receberNovoAtendimento(ws, dados) {
   }
 
   const cliente = clientes.get(ws);
-
   const recordId = String(dados.recordId || "").trim();
 
   if (!recordId) {
@@ -335,9 +307,36 @@ function receberNovoAtendimento(ws, dados) {
   const recusaAnterior = recusasPendentes.get(recordId);
 
   /*
-   * O proprietário é identificado pelo clientId persistente
-   * do GUICHÊ. Não usamos o identificador temporário do socket.
+   * Evita recriar uma pendência por causa de uma tentativa
+   * atrasada do GUICHÊ, caso a MESA já tenha confirmado
+   * o recebimento desse mesmo atendimento.
+   *
+   * Um atendimento recusado pode ser reenviado.
    */
+  const recebimentoAnterior = recebidos.get(recordId);
+
+  if (recebimentoAnterior && !recusaAnterior) {
+    enviar(ws, {
+      type: "record_received",
+      recordId,
+      receivedAt: recebimentoAnterior.receivedAt
+    });
+
+    enviar(ws, {
+      type: "send_result",
+      ok: true,
+      recordId,
+      alreadyReceived: true
+    });
+
+    console.log(
+      "Envio duplicado ignorado; atendimento já recebido:",
+      recordId
+    );
+
+    return;
+  }
+
   const ownerRecebido =
     typeof dados.ownerId === "string" && dados.ownerId.trim()
       ? dados.ownerId.trim()
@@ -366,10 +365,6 @@ function receberNovoAtendimento(ws, dados) {
 
   const agora = agoraISO();
 
-  /*
-   * Mantém os dados anteriores quando o reenvio não
-   * contém algum campo. Os dados novos prevalecem.
-   */
   const registro = {
     ...(anterior?.record || recusaAnterior?.record || {}),
     ...registroRecebido,
@@ -377,13 +372,12 @@ function receberNovoAtendimento(ws, dados) {
   };
 
   /*
-   * Um reenvio pode chegar com reenvio=true,
-   * reenviadoEm ou status aguardando_mesa.
+   * O status aguardando_mesa, sozinho, não caracteriza
+   * reenvio. O marcador explícito ou uma recusa anterior
+   * é que identifica o reenvio.
    */
   const ehReenvio = Boolean(
     registro.reenvio === true ||
-    registro.reenviadoEm ||
-    registro.status === "aguardando_mesa" ||
     recusaAnterior
   );
 
@@ -399,10 +393,6 @@ function receberNovoAtendimento(ws, dados) {
       registro.status || "aguardando_mesa";
   }
 
-  /*
-   * Ao reenviar, cancela a recusa anterior do mesmo
-   * atendimento para que ele volte à fila da MESA.
-   */
   recusasPendentes.delete(recordId);
 
   const pendente = {
@@ -465,17 +455,17 @@ function confirmarRecebimento(ws, dados) {
 
   const pendente = pendentes.get(recordId);
 
-  /*
-   * A MESA pode reenviar confirmações de registros
-   * que já constam no histórico local. Isso é normal.
-   */
   if (!pendente) {
+    const recebidoAnterior = recebidos.get(recordId);
+
     enviar(ws, {
       type: "confirm_result",
       ok: true,
       recordId,
-      alreadyConfirmed: true
+      alreadyConfirmed: true,
+      receivedAt: recebidoAnterior?.receivedAt || null
     });
+
     return;
   }
 
@@ -488,9 +478,6 @@ function confirmarRecebimento(ws, dados) {
     receivedAt
   };
 
-  /*
-   * Avisa o GUICHÊ proprietário, se estiver conectado.
-   */
   const proprietario = encontrarClientePorId(
     pendente.ownerId
   );
@@ -499,17 +486,21 @@ function confirmarRecebimento(ws, dados) {
     enviar(proprietario.ws, confirmacao);
   }
 
-  /*
-   * Avisa também as demais MESAS conectadas.
-   */
   transmitirParaRole(
     "receiver",
     confirmacao
   );
 
   /*
-   * A confirmação permite retirar o registro da fila.
+   * Mantém um marcador em memória para que mensagens
+   * atrasadas não recriem a pendência.
    */
+  recebidos.set(recordId, {
+    recordId,
+    ownerId: pendente.ownerId,
+    receivedAt
+  });
+
   pendentes.delete(recordId);
 
   enviar(ws, {
@@ -552,10 +543,6 @@ function recusarAtendimento(ws, dados) {
 
   const pendente = pendentes.get(recordId);
 
-  /*
-   * Se a recusa já existe, repetimos a entrega.
-   * Isso permite recuperar mensagens após reconexões.
-   */
   if (!pendente) {
     const recusaExistente =
       recusasPendentes.get(recordId);
@@ -582,6 +569,7 @@ function recusarAtendimento(ws, dados) {
       "Atendimento não está mais pendente.",
       recordId
     );
+
     return;
   }
 
@@ -623,22 +611,11 @@ function recusarAtendimento(ws, dados) {
     refusedAt
   };
 
-  /*
-   * A recusa permanece guardada até o GUICHÊ
-   * proprietário confirmar o recebimento.
-   */
   recusasPendentes.set(recordId, recusa);
-
-  /*
-   * Remove o atendimento da fila de pendentes da MESA.
-   */
   pendentes.delete(recordId);
 
   const entregue = enviarRecusaAoGuiche(recusa);
 
-  /*
-   * Remove o atendimento das demais MESAS abertas.
-   */
   transmitirParaRole(
     "receiver",
     {
@@ -704,13 +681,10 @@ function confirmarRecebimentoRecusa(ws, dados) {
       recordId,
       alreadyConfirmed: true
     });
+
     return;
   }
 
-  /*
-   * Só o GUICHÊ proprietário pode retirar a recusa
-   * da fila de entrega.
-   */
   if (
     !recusa.ownerId ||
     !cliente.clientId ||
@@ -722,6 +696,7 @@ function confirmarRecebimentoRecusa(ws, dados) {
       "Este GUICHÊ não é o proprietário do atendimento.",
       recordId
     );
+
     return;
   }
 
@@ -763,10 +738,6 @@ function atualizarStatusRegistro(ws, dados) {
     return;
   }
 
-  /*
-   * Somente o GUICHÊ proprietário ou uma MESA conectada
-   * pode atualizar o status de um registro pendente.
-   */
   if (
     cliente.role === "sender" &&
     cliente.clientId !== pendente.ownerId
@@ -820,6 +791,7 @@ wss.on("connection", (ws) => {
         "error",
         "Mensagem inválida. Envie um JSON válido."
       );
+
       return;
     }
 
@@ -833,6 +805,7 @@ wss.on("connection", (ws) => {
         "error",
         "Formato de mensagem inválido."
       );
+
       return;
     }
 
@@ -940,6 +913,10 @@ app.get("/status", (_req, res) => {
     ok: true,
     version: VERSAO,
     clientes: listaClientes,
+
+    recebidos: Array.from(
+      recebidos.values()
+    ),
 
     pendentes: Array.from(
       pendentes.values()
