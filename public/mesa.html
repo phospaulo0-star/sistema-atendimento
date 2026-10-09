@@ -338,13 +338,33 @@ textarea{
 
 .print-page{
   width:100%;
-  page-break-inside:avoid;
-  break-inside:avoid
+  page-break-inside:auto;
+  break-inside:auto;
+  margin:0;
+  padding:0
 }
 
 .print-page+.print-page{
   page-break-before:always;
   break-before:page
+}
+
+.print-table{
+  page-break-inside:auto;
+  break-inside:auto;
+}
+
+.print-table thead{
+  display:table-header-group
+}
+
+.print-table tfoot{
+  display:table-footer-group
+}
+
+.print-table tr{
+  page-break-inside:avoid;
+  break-inside:avoid
 }
 
 .print-header{
