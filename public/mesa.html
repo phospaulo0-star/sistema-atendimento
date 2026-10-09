@@ -1838,7 +1838,6 @@ function receberNovoRegistro(mensagem){
   const ehReenvio =
     mensagem.reenvio === true ||
     registro.reenvio === true ||
-    registro.status === "aguardando_mesa" ||
     !!registro.reenviadoEm;
 
   if(ehReenvio){
