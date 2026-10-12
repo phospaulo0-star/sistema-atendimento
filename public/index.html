@@ -219,6 +219,7 @@ header img{width:55px;height:55px}
 <option value="atendimento">Por atendimento</option>
 </select>
 <button class="btn-guardar-todos" onclick="guardarTodosRecebidos()">🗄️ GUARDAR TODOS</button>
+<button class="btn-secundario" onclick="baixarBackupSemanalConta()">📊 BACKUP SEMANAL EXCEL</button>
 </div>
 <div id="historico"></div>
 </div>
@@ -815,6 +816,31 @@ document.getElementById("atendimento").value="";
 document.getElementById("dataAtendimento").value=dataHojeISO();
 document.getElementById("assunto").value="";
 limparSugestoes();
+}
+
+function formatarDataBackup(d){
+return String(d.getFullYear())+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function periodoSemanaBackupAtual(){
+const hoje=new Date();hoje.setHours(12,0,0,0);
+const deslocamento=(hoje.getDay()+6)%7;
+const inicio=new Date(hoje);inicio.setDate(hoje.getDate()-deslocamento);
+const fim=new Date(inicio);fim.setDate(inicio.getDate()+6);
+return {from:formatarDataBackup(inicio),to:formatarDataBackup(fim)};
+}
+async function baixarBackupSemanalConta(){
+try{
+const periodo=periodoSemanaBackupAtual();
+const resposta=await fetch("/api/me/backup-weekly.xlsx?from="+encodeURIComponent(periodo.from)+"&to="+encodeURIComponent(periodo.to),{credentials:"same-origin",cache:"no-store"});
+if(!resposta.ok){let detalhe="Não foi possível gerar o Excel semanal.";try{const erro=await resposta.json();detalhe=erro.message||detalhe}catch{}throw new Error(detalhe)}
+const quantidade=resposta.headers.get("X-Backup-Count")||"0";
+const blob=await resposta.blob();
+const url=URL.createObjectURL(blob);const link=document.createElement("a");
+const login=(usuarioLogado&&usuarioLogado.username?usuarioLogado.username:"conta").replace(/[^a-z0-9._-]/gi,"_");
+link.href=url;link.download="Backup_Guiche_"+login+"_"+periodo.from+"_a_"+periodo.to+".xlsx";
+document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+alert("Excel semanal baixado.\nPeríodo pela Data do Atendimento: "+periodo.from+" a "+periodo.to+".\nAtendimentos incluídos: "+quantidade+".\n\nO arquivo contém apenas os atendimentos desta conta. Guarde-o em local protegido.");
+}catch(erro){console.error(erro);alert("Não foi possível baixar o Excel semanal.\n\n"+(erro.message||"Verifique sua conexão e tente novamente."));}
 }
 
 function entrarNaLista(){
