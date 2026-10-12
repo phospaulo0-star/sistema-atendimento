@@ -7,12 +7,14 @@ const crypto = require('crypto');
 const path = require('path');
 const { promisify } = require('util');
 const { Pool } = require('pg');
+const ExcelJS = require('exceljs');
+const archiver = require('archiver');
 
 const scryptAsync = promisify(crypto.scrypt);
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-const VERSAO = '2.10.0';
+const VERSAO = '2.10.2';
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PORT = process.env.PORT || 3000;
 const SESSION_COOKIE = 'sa_session';
@@ -257,6 +259,169 @@ function dadosAtendimento(row) {
     guicheArchivedAt: row.guiche_archived_at || null,
     mesaArchivedAt: row.mesa_archived_at || null
   };
+}
+
+// A data de referência do backup semanal é a data agendada no formulário,
+// independente de quando o atendimento foi criado ou atualizado.
+const DATA_AGENDADA_SQL = `CASE
+  WHEN COALESCE(record->>'dataAtendimento', '') ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+    THEN record->>'dataAtendimento'
+  WHEN COALESCE(record->>'dataAtendimento', '') ~ '^[0-9]{2}/[0-9]{2}/[0-9]{4}$'
+    THEN substring(record->>'dataAtendimento' from 7 for 4) || '-' || substring(record->>'dataAtendimento' from 4 for 2) || '-' || substring(record->>'dataAtendimento' from 1 for 2)
+  ELSE NULL
+END`;
+
+function lerPeriodoSemanal(req, res) {
+  const inicio = typeof req.query.from === 'string' ? req.query.from : '';
+  const fim = typeof req.query.to === 'string' ? req.query.to : '';
+  const formatoISO = /^\d{4}-\d{2}-\d{2}$/;
+  const dataValida = valor => {
+    if (!formatoISO.test(valor)) return false;
+    const d = new Date(`${valor}T00:00:00.000Z`);
+    return Number.isFinite(d.getTime()) && d.toISOString().slice(0, 10) === valor;
+  };
+  if (!dataValida(inicio) || !dataValida(fim)) {
+    res.status(400).json({ ok: false, message: 'Informe início e fim da semana no formato AAAA-MM-DD.' });
+    return null;
+  }
+  const inicioMs = Date.parse(`${inicio}T00:00:00.000Z`);
+  const fimMs = Date.parse(`${fim}T00:00:00.000Z`);
+  const dias = (fimMs - inicioMs) / 86400000 + 1;
+  if (dias !== 7 || new Date(inicioMs).getUTCDay() !== 1 || new Date(fimMs).getUTCDay() !== 0) {
+    res.status(400).json({ ok: false, message: 'O backup semanal precisa cobrir uma semana completa, de segunda-feira a domingo.' });
+    return null;
+  }
+  return { from: inicio, to: fim, basis: 'dataAtendimento', basisLabel: 'Data do Atendimento do formulário (data agendada)' };
+}
+
+function dataAgendadaParaExcel(valor) {
+  const texto = String(valor || '').trim();
+  let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(texto);
+  if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(texto);
+  if (m) return new Date(Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1])));
+  return null;
+}
+function dataHoraParaExcel(valor) {
+  if (!valor) return '';
+  const data = new Date(valor);
+  return Number.isFinite(data.getTime()) ? data : '';
+}
+function statusParaExcel(row) {
+  const status = String(row.status || '').toLowerCase();
+  if (status === 'aguardando_mesa') return 'Aguardando Mesa';
+  if (status === 'recebido') return 'Recebido';
+  if (status === 'recusado') return 'Recusado';
+  if (status === 'guardado') return 'Guardado';
+  return status || 'Não informado';
+}
+function nomeArquivoSeguro(valor) {
+  const seguro = String(valor || 'conta').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9._-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 70);
+  return seguro || 'conta';
+}
+async function consultarAtendimentosSemana(periodo, ownerId = null) {
+  const parametros = [periodo.from, periodo.to];
+  let filtroConta = '';
+  if (ownerId) {
+    parametros.push(ownerId);
+    filtroConta = ' AND a.owner_id=$3';
+  }
+  const result = await pool.query(
+    `SELECT a.*, u.username AS owner_username, u.full_name AS owner_full_name
+       FROM attendances a LEFT JOIN users u ON u.id=a.owner_id
+      WHERE ${DATA_AGENDADA_SQL} BETWEEN $1 AND $2${filtroConta}
+      ORDER BY ${DATA_AGENDADA_SQL}, a.created_at`,
+    parametros
+  );
+  return result.rows;
+}
+async function criarPlanilhaAtendimentos({ periodo, rows, titulo, escopo }) {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Sistema Atendimento CPAIG';
+  workbook.subject = 'Backup semanal de atendimentos';
+  workbook.title = titulo;
+  workbook.created = new Date();
+  workbook.modified = new Date();
+  workbook.properties = { date1904: false };
+
+  const resumo = workbook.addWorksheet('Resumo');
+  resumo.columns = [{ width: 34 }, { width: 70 }];
+  resumo.addRow([titulo]);
+  resumo.mergeCells('A1:B1');
+  resumo.getRow(1).font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
+  resumo.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF20252B' } };
+  resumo.addRow(['Período pela Data do Atendimento', `${periodo.from} a ${periodo.to}`]);
+  resumo.addRow(['Critério', 'Data agendada no formulário; não é a data de envio.']);
+  resumo.addRow(['Escopo da cópia', escopo]);
+  resumo.addRow(['Gerado em', new Date()]);
+  resumo.getCell('B5').numFmt = 'dd/mm/yyyy hh:mm';
+  resumo.addRow(['Total de atendimentos', rows.length]);
+  resumo.addRow([]);
+  resumo.addRow(['Situação', 'Quantidade']);
+  resumo.getRow(8).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  resumo.getRow(8).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF46515C' } };
+  const contagem = new Map();
+  for (const row of rows) {
+    const label = statusParaExcel(row);
+    contagem.set(label, (contagem.get(label) || 0) + 1);
+  }
+  for (const [label, count] of [...contagem.entries()].sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))) resumo.addRow([label, count]);
+  resumo.views = [{ state: 'frozen', ySplit: 1 }];
+
+  const sheet = workbook.addWorksheet('Atendimentos', { views: [{ state: 'frozen', ySplit: 1 }] });
+  const headers = [
+    'Data do Atendimento', 'Nome do Interno', 'RGI', 'Pavilhão', 'Cela', 'Atendimento', 'Assunto',
+    'Situação', 'Login de origem', 'Nome do Guichê', 'Enviado em', 'Recebido em', 'Recusado em',
+    'Motivo da recusa', 'Guardado no Guichê', 'Guardado na Mesa', 'ID do registro'
+  ];
+  sheet.columns = [
+    { width: 18 }, { width: 32 }, { width: 18 }, { width: 14 }, { width: 10 }, { width: 24 },
+    { width: 46 }, { width: 19 }, { width: 22 }, { width: 30 }, { width: 22 }, { width: 22 },
+    { width: 22 }, { width: 40 }, { width: 20 }, { width: 20 }, { width: 40 }
+  ];
+  sheet.addRow(headers);
+  const cabecalho = sheet.getRow(1);
+  cabecalho.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  cabecalho.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF20252B' } };
+  cabecalho.alignment = { vertical: 'middle', wrapText: true };
+  cabecalho.height = 32;
+
+  for (const row of rows) {
+    const record = normalizarRegistro(row.record);
+    sheet.addRow([
+      dataAgendadaParaExcel(record.dataAtendimento) || '',
+      String(record.nome || ''), String(record.rgi || record.identificacao || ''),
+      String(record.pavilhao || ''), String(record.cela || ''), String(record.atendimento || ''),
+      String(record.assunto || ''), statusParaExcel(row), String(row.owner_username || '(conta excluída)'),
+      String(row.owner_full_name || ''), dataHoraParaExcel(row.created_at),
+      dataHoraParaExcel(row.received_at), dataHoraParaExcel(row.refused_at),
+      String(row.refusal_reason || record.motivoRecusa || ''), row.guiche_archived_at ? 'Sim' : 'Não',
+      row.mesa_archived_at ? 'Sim' : 'Não', String(row.record_id || '')
+    ]);
+  }
+  sheet.autoFilter = { from: { row: 1, column: 1 }, to: { row: Math.max(1, rows.length + 1), column: headers.length } };
+  [1].forEach(n => { sheet.getColumn(n).numFmt = 'dd/mm/yyyy'; });
+  [11, 12, 13].forEach(n => { sheet.getColumn(n).numFmt = 'dd/mm/yyyy hh:mm'; });
+  for (let r = 2; r <= rows.length + 1; r++) {
+    const row = sheet.getRow(r);
+    row.alignment = { vertical: 'top', wrapText: true };
+    if (r % 2 === 0) row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F5F8' } };
+  }
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer);
+}
+async function criarZipPlanilhas(entries) {
+  return new Promise((resolve, reject) => {
+    const zip = archiver('zip', { zlib: { level: 8 } });
+    const partes = [];
+    zip.on('data', parte => partes.push(parte));
+    zip.on('warning', erro => { if (erro.code === 'ENOENT') return; reject(erro); });
+    zip.on('error', reject);
+    zip.on('end', () => resolve(Buffer.concat(partes)));
+    for (const entry of entries) zip.append(entry.buffer, { name: entry.name });
+    try { zip.finalize(); } catch (erro) { reject(erro); }
+  });
 }
 
 async function inicializarBanco() {
@@ -539,6 +704,52 @@ app.get('/api/me/attendances', exigirBanco, exigirAutenticacao, async (req, res)
     })) });
   } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível carregar o histórico desta conta.' }); }
 });
+app.get('/api/me/backup-data', exigirBanco, exigirAutenticacao, async (req, res) => {
+  if (!['guiche', 'mesa', 'admin'].includes(req.user.role)) {
+    return res.status(403).json({ ok: false, message: 'Esta conta não pode gerar backup de atendimentos.' });
+  }
+  const periodo = lerPeriodoSemanal(req, res);
+  if (!periodo) return;
+  try {
+    const params = [periodo.from, periodo.to];
+    let filtro = `${DATA_AGENDADA_SQL} BETWEEN $1 AND $2`;
+    if (req.user.role === 'guiche') {
+      params.push(req.user.id);
+      filtro += ` AND owner_id=$3`;
+    } else if (req.user.role === 'mesa') {
+      filtro += ` AND status <> 'recusado'`;
+    }
+    const result = await pool.query(
+      `SELECT * FROM attendances WHERE ${filtro} ORDER BY ${DATA_AGENDADA_SQL}, created_at`,
+      params
+    );
+    const attendances = result.rows.map(row => {
+      const item = dadosAtendimento(row);
+      if (req.user.role === 'guiche' && row.guiche_archived_at) item.status = 'guardado';
+      if (req.user.role === 'mesa' && row.mesa_archived_at) item.status = 'guardado';
+      return item;
+    });
+    res.json({
+      ok: true,
+      format: 'sistema-atendimento-backup-conta',
+      version: VERSAO,
+      generatedAt: agoraISO(),
+      account: { username: req.user.username, fullName: req.user.full_name, role: req.user.role },
+      scope: req.user.role === 'guiche'
+        ? 'Somente atendimentos pertencentes a esta conta do Guichê.'
+        : req.user.role === 'mesa'
+          ? 'Atendimentos não recusados visíveis à Mesa.'
+          : 'Atendimentos de todas as contas, conforme acesso administrativo.',
+      period: periodo,
+      count: attendances.length,
+      attendances
+    });
+  } catch (e) {
+    console.error('Erro gerando backup da conta:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível gerar o backup semanal desta conta.' });
+  }
+});
+
 app.post('/api/me/import-legacy', exigirBanco, exigirAutenticacao, async (req, res) => {
   if (!['guiche', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Somente contas do Guichê podem importar o histórico local.' });
   const lista = req.body?.attendances;
@@ -729,6 +940,131 @@ app.get('/api/admin/events', exigirBanco, exigirAutenticacao, exigirAdmin, async
     res.json({ ok: true, events: result.rows });
   } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível carregar o registro administrativo.' }); }
 });
+app.get('/api/me/backup-weekly.xlsx', exigirBanco, exigirAutenticacao, async (req, res) => {
+  if (!['guiche', 'mesa'].includes(req.user.role)) {
+    return res.status(403).json({ ok: false, message: 'Use o backup do painel administrativo para exportar a cópia geral.' });
+  }
+  const periodo = lerPeriodoSemanal(req, res);
+  if (!periodo) return;
+  try {
+    const rows = await consultarAtendimentosSemana(periodo, req.user.role === 'guiche' ? req.user.id : null);
+    const escopo = req.user.role === 'guiche'
+      ? `Somente os atendimentos da conta ${req.user.username}.`
+      : 'Todos os atendimentos do sistema no período, de todos os Guichês e todas as situações, inclusive recusados.';
+    const buffer = await criarPlanilhaAtendimentos({ periodo, rows, titulo: req.user.role === 'guiche' ? `Backup semanal — ${req.user.username}` : 'Backup semanal total — Mesa', escopo });
+    await registrarAuditoria(req.user.id, 'backup_excel_semanal_gerado', null, { from: periodo.from, to: periodo.to, count: rows.length, role: req.user.role });
+    const login = nomeArquivoSeguro(req.user.username);
+    const nome = req.user.role === 'guiche'
+      ? `Backup_Guiche_${login}_${periodo.from}_a_${periodo.to}.xlsx`
+      : `Backup_Mesa_Total_${periodo.from}_a_${periodo.to}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${nome}"`);
+    res.setHeader('X-Backup-Count', String(rows.length));
+    res.setHeader('X-Backup-From', periodo.from);
+    res.setHeader('X-Backup-To', periodo.to);
+    res.send(buffer);
+  } catch (e) {
+    console.error('Erro gerando Excel semanal da conta:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível gerar o Excel semanal.' });
+  }
+});
+
+app.get('/api/admin/backup-weekly.xlsx', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
+  const periodo = lerPeriodoSemanal(req, res);
+  if (!periodo) return;
+  try {
+    const rows = await consultarAtendimentosSemana(periodo);
+    const buffer = await criarPlanilhaAtendimentos({
+      periodo, rows, titulo: 'Backup semanal total — Administrador',
+      escopo: 'Todos os atendimentos do sistema no período, de todos os Guichês e todas as situações, inclusive recusados.'
+    });
+    await registrarAuditoria(req.user.id, 'backup_excel_semanal_geral_gerado', null, { from: periodo.from, to: periodo.to, count: rows.length });
+    const nome = `Backup_Administrador_Total_${periodo.from}_a_${periodo.to}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${nome}"`);
+    res.setHeader('X-Backup-Count', String(rows.length));
+    res.send(buffer);
+  } catch (e) {
+    console.error('Erro gerando Excel semanal total:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível gerar o Excel semanal total.' });
+  }
+});
+
+// Para a tarefa semanal automática: um arquivo Excel por conta Guichê e cópias gerais
+// para a Mesa e para o administrador. O ZIP é gerado sob demanda, sem gravar arquivos
+// sensíveis no disco efêmero do serviço Render.
+app.get('/api/admin/backup-weekly-bundle.zip', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
+  const periodo = lerPeriodoSemanal(req, res);
+  if (!periodo) return;
+  try {
+    const [usersResult, rows] = await Promise.all([
+      pool.query("SELECT id, username, full_name FROM users WHERE role='guiche' ORDER BY username_normalized"),
+      consultarAtendimentosSemana(periodo)
+    ]);
+    const entries = [];
+    for (const user of usersResult.rows) {
+      const propios = rows.filter(row => row.owner_id === user.id);
+      const buffer = await criarPlanilhaAtendimentos({
+        periodo, rows: propios, titulo: `Backup semanal — ${user.username}`,
+        escopo: `Somente os atendimentos da conta Guichê ${user.username}.`
+      });
+      entries.push({
+        name: `Guiches/Backup_Guiche_${nomeArquivoSeguro(user.username)}_${periodo.from}_a_${periodo.to}.xlsx`,
+        buffer
+      });
+    }
+    const totalMesa = await criarPlanilhaAtendimentos({
+      periodo, rows, titulo: 'Backup semanal total — Mesa',
+      escopo: 'Todos os atendimentos do sistema no período, de todos os Guichês e todas as situações, inclusive recusados.'
+    });
+    entries.push({ name: `Mesa/Backup_Mesa_Total_${periodo.from}_a_${periodo.to}.xlsx`, buffer: totalMesa });
+    const totalAdmin = await criarPlanilhaAtendimentos({
+      periodo, rows, titulo: 'Backup semanal total — Administrador',
+      escopo: 'Todos os atendimentos do sistema no período, de todos os Guichês e todas as situações, inclusive recusados.'
+    });
+    entries.push({ name: `Administrador/Backup_Administrador_Total_${periodo.from}_a_${periodo.to}.xlsx`, buffer: totalAdmin });
+    await registrarAuditoria(req.user.id, 'backup_excel_semanal_automatico_gerado', null, { from: periodo.from, to: periodo.to, count: rows.length, workbooks: entries.length });
+    const zipBuffer = await criarZipPlanilhas(entries);
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="Backups_Semanais_${periodo.from}_a_${periodo.to}.zip"`);
+    res.setHeader('X-Backup-Count', String(rows.length));
+    res.send(zipBuffer);
+  } catch (e) {
+    console.error('Erro montando pacote automático de backups Excel:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível preparar o pacote automático de backups Excel.' });
+  }
+});
+
+app.get('/api/admin/backup-weekly', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
+  const periodo = lerPeriodoSemanal(req, res);
+  if (!periodo) return;
+  try {
+    const [users, attendance, base] = await Promise.all([
+      pool.query('SELECT id,username,full_name,role,is_active,created_at,updated_at,last_login_at,deleted_at FROM users ORDER BY created_at'),
+      pool.query(
+        `SELECT * FROM attendances WHERE ${DATA_AGENDADA_SQL} BETWEEN $1 AND $2 ORDER BY ${DATA_AGENDADA_SQL}, created_at`,
+        [periodo.from, periodo.to]
+      ),
+      pool.query('SELECT items,updated_at,updated_by FROM internal_base WHERE singleton_id=1')
+    ]);
+    await registrarAuditoria(req.user.id, 'backup_semanal_gerado', null, {
+      from: periodo.from, to: periodo.to, count: attendance.rows.length, basis: 'dataAtendimento'
+    });
+    const events = await pool.query('SELECT id,actor_user_id,action,target_user_id,details,created_at FROM audit_log ORDER BY id');
+    res.json({
+      format: 'sistema-atendimento-backup', version: VERSAO, generatedAt: agoraISO(),
+      backupType: 'semanal', period: periodo, count: attendance.rows.length,
+      notice: 'Backup semanal: a seleção dos atendimentos considera a Data do Atendimento (data agendada), não a data de envio. Contém dados operacionais sensíveis.',
+      users: users.rows, attendances: attendance.rows,
+      internalBase: base.rows[0] || { items: [], updated_at: null, updated_by: null },
+      auditLog: events.rows
+    });
+  } catch (e) {
+    console.error('Erro no backup semanal:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível gerar o backup semanal.' });
+  }
+});
+
 app.get('/api/admin/backup-data', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
   try {
     const [users, attendance, base, events] = await Promise.all([
