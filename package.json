@@ -1,14 +1,18 @@
-
 {
   "name": "sistema-atendimento",
-  "version": "2.0.0",
+  "version": "2.10.0",
   "private": true,
+  "description": "Sistema de Atendimento CPAIG - autenticação, painel administrativo e persistência PostgreSQL",
   "scripts": {
-    "start": "node servidor.js"
+    "start": "node servidor.js",
+    "check": "node --check servidor.js"
   },
   "dependencies": {
     "express": "^4.21.2",
     "ws": "^8.18.0",
     "pg": "^8.16.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

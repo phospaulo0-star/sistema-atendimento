@@ -1,984 +1,1011 @@
-const express = require("express");
-const http = require("http");
-const WebSocket = require("ws");
-const crypto = require("crypto");
-const path = require("path");
+'use strict';
 
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
+const crypto = require('crypto');
+const path = require('path');
+const { promisify } = require('util');
+const { Pool } = require('pg');
+
+const scryptAsync = promisify(crypto.scrypt);
 const app = express();
 const server = http.createServer(app);
-
-const VERSAO = "2.9.1";
-
-app.use(express.static(path.join(__dirname, "public")));
-
 const wss = new WebSocket.Server({ server });
+const VERSAO = '2.10.0';
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const PORT = process.env.PORT || 3000;
+const SESSION_COOKIE = 'sa_session';
+const SESSION_HORAS = 12;
 
-/* =========================================================
-   ARMAZENAMENTO EM MEMÓRIA
-========================================================= */
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: /neon\.tech/i.test(process.env.DATABASE_URL)
+        ? { rejectUnauthorized: false }
+        : undefined,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000
+    })
+  : null;
 
+let dbReady = false;
+let dbErrorMessage = null;
 const clientes = new Map();
 const pendentes = new Map();
 const recusasPendentes = new Map();
 const recebidos = new Map();
+const tentativasLogin = new Map();
 
-/* =========================================================
-   FUNÇÕES AUXILIARES
-========================================================= */
-
-function agoraISO() {
-  return new Date().toISOString();
-}
-
-function criarId() {
-  return crypto.randomUUID();
-}
-
-function enviar(ws, dados) {
-  if (!ws || ws.readyState !== WebSocket.OPEN) {
-    return false;
-  }
-
-  try {
-    ws.send(JSON.stringify(dados));
-    return true;
-  } catch (erro) {
-    console.error("Erro ao enviar WebSocket:", erro);
-    return false;
-  }
-}
-
-function responderErro(ws, tipo, mensagem, recordId) {
-  const resposta = {
-    type: tipo,
-    ok: false,
-    message: mensagem
-  };
-
-  if (recordId) {
-    resposta.recordId = recordId;
-  }
-
-  enviar(ws, resposta);
-}
-
-function clienteAutorizado(ws, role) {
-  const cliente = clientes.get(ws);
-
-  return Boolean(
-    cliente &&
-    cliente.role === role &&
-    ws.readyState === WebSocket.OPEN
-  );
-}
-
-function encontrarClientePorId(clientId) {
-  if (!clientId) {
-    return null;
-  }
-
-  for (const cliente of clientes.values()) {
-    if (
-      cliente.clientId === clientId &&
-      cliente.ws.readyState === WebSocket.OPEN
-    ) {
-      return cliente;
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+app.use(express.json({ limit: '15mb' }));
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'same-origin');
+  res.setHeader('Cache-Control', 'no-store');
+  const metodosAlteracao = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+  const origem = req.headers.origin;
+  if (metodosAlteracao.has(req.method) && origem) {
+    try {
+      if (new URL(origem).host !== req.get('host')) {
+        return res.status(403).json({ ok: false, message: 'Origem da solicitação não autorizada.' });
+      }
+    } catch {
+      return res.status(403).json({ ok: false, message: 'Origem da solicitação inválida.' });
     }
   }
+  next();
+});
 
+function agoraISO() { return new Date().toISOString(); }
+function criarId() { return crypto.randomUUID(); }
+function normalizarUsuario(v) { return String(v || '').trim().toLocaleLowerCase('pt-BR'); }
+function textoSeguro(v, max = 200) { return String(v ?? '').trim().slice(0, max); }
+function normalizarRegistro(v) {
+  return v && typeof v === 'object' && !Array.isArray(v) ? { ...v } : {};
+}
+function extrairCookie(req, nome) {
+  const cabecalho = req.headers.cookie || '';
+  for (const item of cabecalho.split(';')) {
+    const [chave, ...resto] = item.trim().split('=');
+    if (chave === nome) return resto.join('=');
+  }
   return null;
 }
-
-function transmitirParaRole(role, dados, ignorarWs = null) {
+function hashToken(token) {
+  return crypto.createHash('sha256').update(String(token)).digest('hex');
+}
+function cookieSeguro(req) {
+  return req.secure || String(req.headers['x-forwarded-proto'] || '').includes('https');
+}
+function definirCookie(res, token, req) {
+  const opcoes = [
+    `${SESSION_COOKIE}=${token}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    `Max-Age=${SESSION_HORAS * 60 * 60}`
+  ];
+  if (cookieSeguro(req)) opcoes.push('Secure');
+  res.setHeader('Set-Cookie', opcoes.join('; '));
+}
+function limparCookie(res, req) {
+  const opcoes = [`${SESSION_COOKIE}=`, 'Path=/', 'HttpOnly', 'SameSite=Lax', 'Max-Age=0'];
+  if (cookieSeguro(req)) opcoes.push('Secure');
+  res.setHeader('Set-Cookie', opcoes.join('; '));
+}
+function usuarioPublico(row) {
+  return {
+    id: row.id,
+    username: row.username,
+    fullName: row.full_name,
+    role: row.role,
+    isActive: row.is_active,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    lastLoginAt: row.last_login_at,
+    deletedAt: row.deleted_at || null
+  };
+}
+function perfilValido(role, canal) {
+  if (role === 'admin') return canal === 'sender' || canal === 'receiver';
+  if (role === 'guiche') return canal === 'sender';
+  if (role === 'mesa') return canal === 'receiver';
+  return false;
+}
+function enviar(ws, dados) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return false;
+  try { ws.send(JSON.stringify(dados)); return true; }
+  catch (e) { console.error('Erro ao enviar WebSocket:', e.message); return false; }
+}
+function responderErro(ws, type, message, recordId) {
+  const resposta = { type, ok: false, message };
+  if (recordId) resposta.recordId = recordId;
+  enviar(ws, resposta);
+}
+function transmitirParaCanal(role, dados, ignorarWs = null) {
   let enviados = 0;
-
   for (const cliente of clientes.values()) {
-    if (
-      cliente.role === role &&
-      cliente.ws !== ignorarWs &&
-      cliente.ws.readyState === WebSocket.OPEN
-    ) {
-      if (enviar(cliente.ws, dados)) {
-        enviados++;
-      }
+    if (cliente.canal === role && cliente.ws !== ignorarWs && cliente.ws.readyState === WebSocket.OPEN) {
+      if (enviar(cliente.ws, dados)) enviados++;
     }
   }
-
   return enviados;
 }
-
-function normalizarRegistro(registro) {
-  if (
-    registro &&
-    typeof registro === "object" &&
-    !Array.isArray(registro)
-  ) {
-    return { ...registro };
+function transmitirParaUsuario(userId, dados, canal = 'sender') {
+  let enviados = 0;
+  for (const cliente of clientes.values()) {
+    if (cliente.user && cliente.user.id === userId && cliente.canal === canal && cliente.ws.readyState === WebSocket.OPEN) {
+      if (enviar(cliente.ws, dados)) enviados++;
+    }
   }
-
-  return {};
+  return enviados;
 }
-
-/* =========================================================
-   ENVIO DE ATENDIMENTO PARA A MESA
-========================================================= */
-
-function transmitirNovoAtendimento(pendente, wsEspecifico = null) {
-  if (!pendente) {
-    return;
-  }
-
+function enviarNovoAtendimento(pendente, wsEspecifico = null) {
+  if (!pendente) return;
   const mensagem = {
-    type: "new_record",
-    recordId: pendente.recordId,
-    record: pendente.record,
-    createdAt: pendente.createdAt,
-    updatedAt: pendente.updatedAt,
-    sentAt: pendente.createdAt,
-    reenvio: Boolean(
-      pendente.record &&
-      pendente.record.reenvio
-    )
+    type: 'new_record', recordId: pendente.recordId, record: pendente.record,
+    createdAt: pendente.createdAt, updatedAt: pendente.updatedAt,
+    sentAt: pendente.createdAt, reenvio: Boolean(pendente.record && pendente.record.reenvio)
   };
-
-  if (wsEspecifico) {
-    enviar(wsEspecifico, mensagem);
-    return;
-  }
-
-  transmitirParaRole("receiver", mensagem);
+  if (wsEspecifico) enviar(wsEspecifico, mensagem);
+  else transmitirParaCanal('receiver', mensagem);
 }
-
 function enviarPendentesParaMesa(ws) {
-  for (const pendente of pendentes.values()) {
-    transmitirNovoAtendimento(pendente, ws);
-  }
+  for (const item of pendentes.values()) enviarNovoAtendimento(item, ws);
 }
-
-/* =========================================================
-   ENVIO DE RECUSA PARA O GUICHÊ
-========================================================= */
-
-function enviarRecusaAoGuiche(recusa, wsEspecifico = null) {
-  if (!recusa || !recusa.ownerId) {
-    return false;
-  }
-
-  let destino = wsEspecifico;
-
-  if (!destino) {
-    const cliente = encontrarClientePorId(recusa.ownerId);
-
-    if (!cliente) {
-      return false;
-    }
-
-    destino = cliente.ws;
-  }
-
-  const clienteDestino = clientes.get(destino);
-
-  if (
-    !clienteDestino ||
-    clienteDestino.role !== "sender" ||
-    clienteDestino.clientId !== recusa.ownerId
-  ) {
-    return false;
-  }
-
-  return enviar(destino, {
-    type: "record_refused",
-    recordId: recusa.recordId,
-    record: recusa.record,
-    reason: recusa.reason,
-    refusedAt: recusa.refusedAt,
-    ownerId: recusa.ownerId,
-    status: "recusado"
-  });
-}
-
-function enviarRecusasPendentesParaGuiche(ws, clientId) {
-  if (!clientId) {
-    return;
-  }
-
-  for (const recusa of recusasPendentes.values()) {
-    if (recusa.ownerId === clientId) {
-      enviarRecusaAoGuiche(recusa, ws);
-    }
-  }
-}
-
-/* =========================================================
-   REGISTRO DO CLIENTE
-========================================================= */
-
-function registrarCliente(ws, dados) {
-  const cliente = clientes.get(ws);
-
-  if (!cliente) {
-    return;
-  }
-
-  const role =
-    dados.role === "receiver"
-      ? "receiver"
-      : dados.role === "sender"
-        ? "sender"
-        : null;
-
-  if (!role) {
-    responderErro(
-      ws,
-      "error",
-      "Papel do cliente inválido."
-    );
-    return;
-  }
-
-  cliente.role = role;
-
-  cliente.clientId =
-    typeof dados.clientId === "string" &&
-    dados.clientId.trim()
-      ? dados.clientId.trim()
-      : null;
-
-  cliente.ownerId =
-    typeof dados.ownerId === "string" &&
-    dados.ownerId.trim()
-      ? dados.ownerId.trim()
-      : cliente.clientId;
-
-  console.log(
-    "Cliente registrado:",
-    role,
-    cliente.clientId || "(sem clientId)"
-  );
-
-  enviar(ws, {
-    type: "registered",
-    role,
-    clientId: cliente.clientId,
-    version: VERSAO
-  });
-
-  if (role === "receiver") {
-    enviarPendentesParaMesa(ws);
-  }
-
-  if (role === "sender") {
-    enviarRecusasPendentesParaGuiche(
-      ws,
-      cliente.clientId
-    );
-  }
-}
-
-/* =========================================================
-   NOVO ATENDIMENTO / REENVIO DO GUICHÊ
-========================================================= */
-
-function receberNovoAtendimento(ws, dados) {
-  if (!clienteAutorizado(ws, "sender")) {
-    responderErro(
-      ws,
-      "send_result",
-      "Somente o GUICHÊ pode enviar atendimentos.",
-      dados.recordId
-    );
-    return;
-  }
-
-  const cliente = clientes.get(ws);
-  const recordId = String(dados.recordId || "").trim();
-
-  if (!recordId) {
-    responderErro(
-      ws,
-      "send_result",
-      "recordId não informado."
-    );
-    return;
-  }
-
-  const registroRecebido = normalizarRegistro(dados.record);
-  const anterior = pendentes.get(recordId);
-  const recusaAnterior = recusasPendentes.get(recordId);
-
-  /*
-   * Evita recriar uma pendência por causa de uma tentativa
-   * atrasada do GUICHÊ, caso a MESA já tenha confirmado
-   * o recebimento desse mesmo atendimento.
-   *
-   * Um atendimento recusado pode ser reenviado.
-   */
-  const recebimentoAnterior = recebidos.get(recordId);
-
-  if (recebimentoAnterior && !recusaAnterior) {
-    enviar(ws, {
-      type: "record_received",
-      recordId,
-      receivedAt: recebimentoAnterior.receivedAt
-    });
-
-    enviar(ws, {
-      type: "send_result",
-      ok: true,
-      recordId,
-      alreadyReceived: true
-    });
-
-    console.log(
-      "Envio duplicado ignorado; atendimento já recebido:",
-      recordId
-    );
-
-    return;
-  }
-
-  const ownerRecebido =
-    typeof dados.ownerId === "string" && dados.ownerId.trim()
-      ? dados.ownerId.trim()
-      : cliente.clientId;
-
-  const ownerId =
-    anterior?.ownerId ||
-    recusaAnterior?.ownerId ||
-    ownerRecebido ||
-    cliente.clientId ||
-    null;
-
-  if (
-    ownerId &&
-    cliente.clientId &&
-    ownerId !== cliente.clientId
-  ) {
-    responderErro(
-      ws,
-      "send_result",
-      "Este GUICHÊ não corresponde ao proprietário do atendimento.",
-      recordId
-    );
-    return;
-  }
-
-  const agora = agoraISO();
-
-  const registro = {
-    ...(anterior?.record || recusaAnterior?.record || {}),
-    ...registroRecebido,
-    recordId
+function enviarRecusa(recusa, wsEspecifico = null) {
+  if (!recusa || !recusa.ownerId) return false;
+  const msg = {
+    type: 'record_refused', recordId: recusa.recordId, record: recusa.record,
+    reason: recusa.reason, refusedAt: recusa.refusedAt, ownerId: recusa.ownerId, status: 'recusado'
   };
+  if (wsEspecifico) {
+    const c = clientes.get(wsEspecifico);
+    if (!c || c.canal !== 'sender' || !c.user || c.user.id !== recusa.ownerId) return false;
+    return enviar(wsEspecifico, msg);
+  }
+  return transmitirParaUsuario(recusa.ownerId, msg, 'sender') > 0;
+}
+function enviarRecusasPendentesParaGuiche(ws, userId) {
+  for (const recusa of recusasPendentes.values()) {
+    if (recusa.ownerId === userId) enviarRecusa(recusa, ws);
+  }
+}
 
-  /*
-   * O status aguardando_mesa, sozinho, não caracteriza
-   * reenvio. O marcador explícito ou uma recusa anterior
-   * é que identifica o reenvio.
-   */
-  const ehReenvio = Boolean(
-    registro.reenvio === true ||
-    recusaAnterior
+async function criarHashSenha(senha) {
+  const salt = crypto.randomBytes(16);
+  const derivada = await scryptAsync(String(senha), salt, 64);
+  return `scrypt$${salt.toString('base64url')}$${Buffer.from(derivada).toString('base64url')}`;
+}
+async function verificarSenha(senha, armazenada) {
+  try {
+    const [algoritmo, saltTexto, hashTexto] = String(armazenada || '').split('$');
+    if (algoritmo !== 'scrypt' || !saltTexto || !hashTexto) return false;
+    const salt = Buffer.from(saltTexto, 'base64url');
+    const esperado = Buffer.from(hashTexto, 'base64url');
+    const atual = Buffer.from(await scryptAsync(String(senha), salt, esperado.length));
+    return atual.length === esperado.length && crypto.timingSafeEqual(atual, esperado);
+  } catch { return false; }
+}
+function exigirBanco(req, res, next) {
+  if (!pool) return res.status(503).json({ ok: false, message: 'O banco Neon ainda não está configurado no Render (variável DATABASE_URL).' });
+  if (!dbReady) return res.status(503).json({ ok: false, message: dbErrorMessage || 'O banco de dados está inicializando. Tente novamente em instantes.' });
+  next();
+}
+async function usuarioDaRequisicao(req) {
+  if (!pool || !dbReady) return null;
+  const token = extrairCookie(req, SESSION_COOKIE);
+  if (!token) return null;
+  const result = await pool.query(
+    `SELECT u.id, u.username, u.full_name, u.role, u.is_active, u.created_at, u.updated_at, u.last_login_at, u.deleted_at
+       FROM sessions s JOIN users u ON u.id = s.user_id
+      WHERE s.token_hash = $1 AND s.expires_at > NOW() AND u.is_active = TRUE AND u.deleted_at IS NULL`,
+    [hashToken(token)]
   );
+  return result.rows[0] || null;
+}
+function exigirAutenticacao(req, res, next) {
+  exigirBanco(req, res, () => {
+    usuarioDaRequisicao(req).then(user => {
+      if (!user) {
+        limparCookie(res, req);
+        return res.status(401).json({ ok: false, message: 'Sessão encerrada. Entre novamente.' });
+      }
+      req.user = user;
+      next();
+    }).catch(err => {
+      console.error('Falha na autenticação:', err.message);
+      res.status(500).json({ ok: false, message: 'Não foi possível validar a sessão.' });
+    });
+  });
+}
+function exigirAdmin(req, res, next) {
+  if (req.user?.role !== 'admin') return res.status(403).json({ ok: false, message: 'Acesso restrito ao administrador.' });
+  next();
+}
+async function registrarAuditoria(actorId, acao, alvoId = null, detalhes = {}) {
+  if (!pool || !dbReady) return;
+  await pool.query(
+    'INSERT INTO audit_log (actor_user_id, action, target_user_id, details) VALUES ($1, $2, $3, $4::jsonb)',
+    [actorId || null, acao, alvoId, JSON.stringify(detalhes || {})]
+  );
+}
+function encerrarConexoesUsuario(userId, motivo = 'Sessão encerrada pelo administrador') {
+  for (const [ws, cliente] of clientes.entries()) {
+    if (cliente.user && cliente.user.id === userId) {
+      try { ws.close(1008, motivo); } catch {}
+      clientes.delete(ws);
+    }
+  }
+}
+function dadosAtendimento(row) {
+  const record = normalizarRegistro(row.record);
+  record.recordId = row.record_id;
+  if (row.status) record.status = row.status;
+  if (row.received_at) record.recebidoEm = row.received_at;
+  if (row.refused_at) record.recusadoEm = row.refused_at;
+  if (row.refusal_reason) record.motivoRecusa = row.refusal_reason;
+  return {
+    recordId: row.record_id, record, ownerId: row.owner_id,
+    createdAt: row.created_at, updatedAt: row.updated_at,
+    receivedAt: row.received_at, refusedAt: row.refused_at,
+    refusalReason: row.refusal_reason, status: row.status,
+    refusalConfirmedAt: row.refusal_confirmed_at || null,
+    guicheArchivedAt: row.guiche_archived_at || null,
+    mesaArchivedAt: row.mesa_archived_at || null
+  };
+}
 
+async function inicializarBanco() {
+  if (!pool) return;
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT NOT NULL,
+      username_normalized TEXT NOT NULL UNIQUE,
+      full_name TEXT NOT NULL,
+      role TEXT NOT NULL CHECK (role IN ('admin','guiche','mesa')),
+      password_hash TEXT NOT NULL,
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      last_login_at TIMESTAMPTZ,
+      deleted_at TIMESTAMPTZ
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS users_single_active_mesa ON users(role) WHERE role = 'mesa' AND is_active = TRUE AND deleted_at IS NULL;
+    CREATE INDEX IF NOT EXISTS users_role_active_idx ON users(role, is_active);
+    CREATE TABLE IF NOT EXISTS sessions (
+      token_hash TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      expires_at TIMESTAMPTZ NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id);
+    CREATE TABLE IF NOT EXISTS attendances (
+      record_id TEXT PRIMARY KEY,
+      owner_id TEXT NOT NULL REFERENCES users(id),
+      record JSONB NOT NULL DEFAULT '{}'::jsonb,
+      status TEXT NOT NULL DEFAULT 'aguardando_mesa',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      received_at TIMESTAMPTZ,
+      refused_at TIMESTAMPTZ,
+      refusal_reason TEXT,
+      refusal_confirmed_at TIMESTAMPTZ,
+      guiche_archived_at TIMESTAMPTZ,
+      mesa_archived_at TIMESTAMPTZ
+    );
+    ALTER TABLE attendances ADD COLUMN IF NOT EXISTS refusal_confirmed_at TIMESTAMPTZ;
+    ALTER TABLE attendances ADD COLUMN IF NOT EXISTS guiche_archived_at TIMESTAMPTZ;
+    ALTER TABLE attendances ADD COLUMN IF NOT EXISTS mesa_archived_at TIMESTAMPTZ;
+    CREATE INDEX IF NOT EXISTS attendances_owner_created_idx ON attendances(owner_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS attendances_status_idx ON attendances(status, updated_at DESC);
+    CREATE TABLE IF NOT EXISTS internal_base (
+      singleton_id INTEGER PRIMARY KEY CHECK (singleton_id = 1),
+      items JSONB NOT NULL DEFAULT '[]'::jsonb,
+      updated_by TEXT REFERENCES users(id),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id BIGSERIAL PRIMARY KEY,
+      actor_user_id TEXT REFERENCES users(id),
+      action TEXT NOT NULL,
+      target_user_id TEXT REFERENCES users(id),
+      details JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS audit_log_created_idx ON audit_log(created_at DESC);
+  `);
+  await pool.query('DELETE FROM sessions WHERE expires_at <= NOW()');
+  await garantirAdministradorInicial();
+  await restaurarFilasDoBanco();
+}
+async function garantirAdministradorInicial() {
+  const username = textoSeguro(process.env.BOOTSTRAP_ADMIN_USERNAME, 80);
+  const password = String(process.env.BOOTSTRAP_ADMIN_PASSWORD || '');
+  if (!username || !password) {
+    console.warn('BOOTSTRAP_ADMIN_USERNAME/BOOTSTRAP_ADMIN_PASSWORD não configurados. Se não houver administrador no banco, configure-os no Render.');
+    return;
+  }
+  if (password.length < 10) {
+    console.warn('A senha inicial do administrador precisa ter pelo menos 10 caracteres; conta inicial não criada.');
+    return;
+  }
+  const normalizado = normalizarUsuario(username);
+  const atual = await pool.query('SELECT id FROM users WHERE username_normalized = $1', [normalizado]);
+  if (atual.rowCount) return;
+  const id = criarId();
+  const hash = await criarHashSenha(password);
+  await pool.query(
+    `INSERT INTO users (id, username, username_normalized, full_name, role, password_hash)
+     VALUES ($1, $2, $3, $4, 'admin', $5)`,
+    [id, username, normalizado, textoSeguro(process.env.BOOTSTRAP_ADMIN_FULL_NAME || 'Administrador do Sistema', 120), hash]
+  );
+  console.log('Conta inicial de administrador criada a partir das variáveis de ambiente.');
+}
+async function restaurarFilasDoBanco() {
+  const result = await pool.query('SELECT * FROM attendances');
+  pendentes.clear();
+  recusasPendentes.clear();
+  recebidos.clear();
+  for (const row of result.rows) {
+    const item = dadosAtendimento(row);
+    if (row.status === 'aguardando_mesa') {
+      pendentes.set(row.record_id, {
+        recordId: row.record_id, ownerId: row.owner_id,
+        record: item.record, createdAt: row.created_at, updatedAt: row.updated_at
+      });
+    } else if (row.status === 'recusado' && !row.refusal_confirmed_at) {
+      recusasPendentes.set(row.record_id, {
+        recordId: row.record_id, ownerId: row.owner_id, record: item.record,
+        reason: row.refusal_reason || item.record.motivoRecusa || 'Motivo não informado',
+        refusedAt: row.refused_at || row.updated_at
+      });
+    }
+    if (row.received_at) receivedosSet(row.record_id, row.owner_id, row.received_at);
+  }
+}
+function receivedosSet(recordId, ownerId, receivedAt) {
+  recebidos.set(recordId, { recordId, ownerId, receivedAt });
+}
+
+async function redirecionarParaAreaDoUsuario(req, res) {
+  try {
+    const user = await usuarioDaRequisicao(req);
+    if (!user) return res.redirect('/login.html');
+    if (user.role === 'admin') return res.redirect('/admin.html');
+    if (user.role === 'mesa') return res.redirect('/mesa.html');
+    return res.redirect('/index.html');
+  } catch {
+    return res.redirect('/login.html');
+  }
+}
+app.get('/', redirecionarParaAreaDoUsuario);
+app.get('/login.html', async (req, res) => {
+  try {
+    const user = await usuarioDaRequisicao(req);
+    if (user) {
+      if (user.role === 'admin') return res.redirect('/admin.html');
+      if (user.role === 'mesa') return res.redirect('/mesa.html');
+      return res.redirect('/index.html');
+    }
+  } catch {}
+  res.sendFile(path.join(PUBLIC_DIR, 'login.html'));
+});
+app.get('/index.html', async (req, res) => {
+  try {
+    const user = await usuarioDaRequisicao(req);
+    if (!user) return res.redirect('/login.html');
+    if (!['guiche', 'admin'].includes(user.role)) return res.redirect('/mesa.html');
+    return res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+  } catch { return res.redirect('/login.html'); }
+});
+app.get('/mesa.html', async (req, res) => {
+  try {
+    const user = await usuarioDaRequisicao(req);
+    if (!user) return res.redirect('/login.html');
+    if (!['mesa', 'admin'].includes(user.role)) return res.redirect('/index.html');
+    return res.sendFile(path.join(PUBLIC_DIR, 'mesa.html'));
+  } catch { return res.redirect('/login.html'); }
+});
+app.get('/admin.html', async (req, res) => {
+  try {
+    const user = await usuarioDaRequisicao(req);
+    if (!user) return res.redirect('/login.html');
+    if (user.role !== 'admin') return res.redirect(user.role === 'mesa' ? '/mesa.html' : '/index.html');
+    return res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
+  } catch { return res.redirect('/login.html'); }
+});
+app.get('/health', (_req, res) => res.json({ ok: true, version: VERSAO, databaseConfigured: Boolean(pool), databaseReady: dbReady, clients: clientes.size, pendingRecords: pendentes.size, pendingRefusals: recusasPendentes.size, timestamp: agoraISO() }));
+app.get('/status', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
+  const result = await pool.query(`SELECT u.username, u.role, u.is_active, s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.expires_at > NOW() ORDER BY u.username`);
+  res.json({ ok: true, version: VERSAO, connectedSessions: result.rows, pendentes: pendentes.size, recusasPendentes: recusasPendentes.size });
+});
+
+app.post('/api/auth/login', exigirBanco, async (req, res) => {
+  const ip = String(req.ip || req.socket.remoteAddress || 'unknown');
+  const tent = tentativasLogin.get(ip) || { count: 0, until: 0 };
+  if (tent.until > Date.now()) return res.status(429).json({ ok: false, message: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' });
+  const username = textoSeguro(req.body?.username, 80);
+  const password = String(req.body?.password || '');
+  if (!username || !password) return res.status(400).json({ ok: false, message: 'Informe o usuário e a senha.' });
+  try {
+    const result = await pool.query(
+      `SELECT * FROM users WHERE username_normalized=$1 AND is_active=TRUE AND deleted_at IS NULL`,
+      [normalizarUsuario(username)]
+    );
+    const user = result.rows[0];
+    const valid = user && await verificarSenha(password, user.password_hash);
+    if (!valid) {
+      tent.count++;
+      if (tent.count >= 8) { tent.until = Date.now() + 5 * 60 * 1000; tent.count = 0; }
+      tentativasLogin.set(ip, tent);
+      await new Promise(resolve => setTimeout(resolve, 250));
+      return res.status(401).json({ ok: false, message: 'Usuário ou senha inválidos.' });
+    }
+    tentativasLogin.delete(ip);
+    const token = crypto.randomBytes(32).toString('base64url');
+    const expires = new Date(Date.now() + SESSION_HORAS * 60 * 60 * 1000);
+    await pool.query('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1,$2,$3)', [hashToken(token), user.id, expires]);
+    await pool.query('UPDATE users SET last_login_at=NOW(), updated_at=NOW() WHERE id=$1', [user.id]);
+    await registrarAuditoria(user.id, 'login', user.id, {});
+    definirCookie(res, token, req);
+    res.json({ ok: true, user: usuarioPublico({ ...user, last_login_at: new Date().toISOString() }) });
+  } catch (e) {
+    console.error('Erro no login:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível entrar. Verifique a configuração do banco.' });
+  }
+});
+app.get('/api/auth/me', exigirBanco, async (req, res) => {
+  try {
+    const user = await usuarioDaRequisicao(req);
+    if (!user) { limparCookie(res, req); return res.status(401).json({ ok: false, message: 'Sessão não encontrada.' }); }
+    res.json({ ok: true, user: usuarioPublico(user) });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Erro ao consultar a sessão.' }); }
+});
+app.post('/api/auth/logout', exigirBanco, async (req, res) => {
+  const token = extrairCookie(req, SESSION_COOKIE);
+  if (token) {
+    try {
+      const tokenHash = hashToken(token);
+      const sessao = await pool.query('SELECT user_id FROM sessions WHERE token_hash=$1', [tokenHash]);
+      await pool.query('DELETE FROM sessions WHERE token_hash=$1', [tokenHash]);
+      for (const [ws, cliente] of clientes.entries()) {
+        if (cliente.sessionHash === tokenHash) {
+          try { ws.close(1000, 'Sessão encerrada'); } catch {}
+          clientes.delete(ws);
+        }
+      }
+      if (sessao.rows[0]) await registrarAuditoria(sessao.rows[0].user_id, 'logout', sessao.rows[0].user_id, {});
+    } catch (e) { console.error('Erro ao encerrar sessão:', e.message); }
+  }
+  limparCookie(res, req);
+  res.json({ ok: true });
+});
+
+app.get('/api/internals/base', exigirBanco, exigirAutenticacao, async (_req, res) => {
+  try {
+    const result = await pool.query(`SELECT b.items, b.updated_at, u.username AS updated_by FROM internal_base b LEFT JOIN users u ON u.id=b.updated_by WHERE b.singleton_id=1`);
+    const row = result.rows[0];
+    res.json({ ok: true, items: row?.items || [], updatedAt: row?.updated_at || null, updatedBy: row?.updated_by || null });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível carregar a base de internos.' }); }
+});
+app.put('/api/internals/base', exigirBanco, exigirAutenticacao, async (req, res) => {
+  // Qualquer conta autenticada pode atualizar a base comum, conforme requisito do sistema.
+  const items = req.body?.items;
+  if (!Array.isArray(items)) return res.status(400).json({ ok: false, message: 'A lista de internos não tem formato válido.' });
+  if (items.length > 100000) return res.status(413).json({ ok: false, message: 'A planilha ultrapassa o limite de 100.000 registros.' });
+  const limpos = [];
+  const vistos = new Set();
+  for (const item of items) {
+    const nome = textoSeguro(item?.nome, 200);
+    if (!nome) continue;
+    const rgi = textoSeguro(item?.rgi, 80);
+    const chave = `${normalizarUsuario(nome)}|${rgi}`;
+    if (vistos.has(chave)) continue;
+    vistos.add(chave);
+    limpos.push({ nome, rgi, pavilhao: textoSeguro(item?.pavilhao, 100), cela: textoSeguro(item?.cela, 30) });
+  }
+  try {
+    const result = await pool.query(
+      `INSERT INTO internal_base(singleton_id, items, updated_by, updated_at) VALUES (1,$1::jsonb,$2,NOW())
+       ON CONFLICT(singleton_id) DO UPDATE SET items=EXCLUDED.items, updated_by=EXCLUDED.updated_by, updated_at=NOW()
+       RETURNING updated_at`,
+      [JSON.stringify(limpos), req.user.id]
+    );
+    await registrarAuditoria(req.user.id, 'base_internos_atualizada', null, { quantidade: limpos.length });
+    transmitirBaseAtualizada({ updatedAt: result.rows[0].updated_at, updatedBy: req.user.username, count: limpos.length });
+    res.json({ ok: true, items: limpos, count: limpos.length, updatedAt: result.rows[0].updated_at, updatedBy: req.user.username });
+  } catch (e) {
+    console.error('Erro salvando base:', e.message);
+    res.status(500).json({ ok: false, message: 'Falha ao salvar a base compartilhada no Neon.' });
+  }
+});
+function transmitirBaseAtualizada(info) {
+  const msg = { type: 'base_internos_atualizada', ...info };
+  for (const c of clientes.values()) if (c.user && c.ws.readyState === WebSocket.OPEN) enviar(c.ws, msg);
+}
+
+app.get('/api/me/attendances', exigirBanco, exigirAutenticacao, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM attendances WHERE owner_id=$1 ORDER BY created_at DESC LIMIT 5000', [req.user.id]);
+    res.json({ ok: true, attendances: result.rows.map(row => ({
+      ...dadosAtendimento(row),
+      status: row.guiche_archived_at ? 'guardado' : row.status,
+      record: normalizarRegistro(row.record), sentAt: row.created_at
+    })) });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível carregar o histórico desta conta.' }); }
+});
+app.post('/api/me/import-legacy', exigirBanco, exigirAutenticacao, async (req, res) => {
+  if (!['guiche', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Somente contas do Guichê podem importar o histórico local.' });
+  const lista = req.body?.attendances;
+  if (!Array.isArray(lista)) return res.status(400).json({ ok: false, message: 'Formato do histórico local inválido.' });
+  if (lista.length > 10000) return res.status(413).json({ ok: false, message: 'O histórico local ultrapassa 10.000 registros; faça a migração em partes.' });
+  try {
+    const count = await pool.query('SELECT COUNT(*)::int AS total FROM attendances WHERE owner_id=$1', [req.user.id]);
+    if (count.rows[0].total > 0) return res.json({ ok: true, skipped: true, imported: 0, message: 'Esta conta já tem histórico no servidor; a importação local foi ignorada para evitar misturar contas.' });
+    const client = await pool.connect();
+    let imported = 0;
+    try {
+      await client.query('BEGIN');
+      for (const raw of lista) {
+        const item = normalizarRegistro(raw);
+        const id = textoSeguro(item.recordId || item.id, 180);
+        if (!id) continue;
+        const registro = normalizarRegistro(item.registro || item.record || item);
+        const statusSolicitado = textoSeguro(item.status || registro.status || 'aguardando_mesa', 40);
+        const received = item.recebidoEm || item.receivedAt || registro.recebidoEm || null;
+        const refused = item.recusadoEm || item.refusedAt || registro.recusadoEm || null;
+        const reason = textoSeguro(item.motivoRecusa || item.reason || registro.motivoRecusa || '', 2000) || null;
+        let status = ['aguardando_mesa', 'recebido', 'recusado', 'guardado'].includes(statusSolicitado) ? statusSolicitado : 'aguardando_mesa';
+        const arquivado = status === 'guardado';
+        if (arquivado) status = (reason || refused) ? 'recusado' : (received ? 'recebido' : 'aguardando_mesa');
+        const enviado = item.enviadoEm || item.createdAt || registro.enviadoEm || agoraISO();
+        if (status === 'recusado') { registro.status = 'recusado'; if (reason) registro.motivoRecusa = reason; if (refused) registro.recusadoEm = refused; }
+        else { registro.status = status; }
+        if (arquivado && !registro.guardadoEm) registro.guardadoEm = item.guardadoEm || agoraISO();
+        const inserted = await client.query(
+          `INSERT INTO attendances (record_id,owner_id,record,status,created_at,updated_at,received_at,refused_at,refusal_reason,refusal_confirmed_at,guiche_archived_at,mesa_archived_at)
+           VALUES ($1,$2,$3::jsonb,$4,COALESCE($5::timestamptz,NOW()),NOW(),$6,$7,$8,CASE WHEN $4='recusado' THEN NOW() ELSE NULL END,CASE WHEN $9::boolean THEN COALESCE($10::timestamptz,NOW()) ELSE NULL END,NULL)
+           ON CONFLICT(record_id) DO NOTHING`,
+          [id, req.user.id, JSON.stringify(registro), status, enviado, received, refused, reason, arquivado, item.guardadoEm || null]
+        );
+        imported += inserted.rowCount;
+      }
+      await client.query('COMMIT');
+    } catch (e) { await client.query('ROLLBACK'); throw e; }
+    finally { client.release(); }
+    if (imported) await registrarAuditoria(req.user.id, 'historico_local_importado', req.user.id, { quantidade: imported });
+    await restaurarFilasDoBanco();
+    res.json({ ok: true, imported, message: `${imported} registro(s) local(is) importado(s).` });
+  } catch (e) {
+    console.error('Erro importando histórico local:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível migrar o histórico local para o Neon.' });
+  }
+});
+
+app.get('/api/mesa/attendances', exigirBanco, exigirAutenticacao, async (req, res) => {
+  if (!['mesa', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Acesso restrito à Mesa.' });
+  try {
+    const result = await pool.query("SELECT * FROM attendances WHERE status <> 'recusado' ORDER BY created_at DESC LIMIT 10000");
+    res.json({ ok: true, attendances: result.rows.map(row => ({
+      ...normalizarRegistro(row.record),
+      recordId: row.record_id,
+      status: row.mesa_archived_at ? 'guardado' : row.status,
+      enviadoEm: row.created_at,
+      recebidoEm: row.received_at,
+      motivoRecusa: row.refusal_reason,
+      recusadoEm: row.refused_at,
+      guardadoEm: normalizarRegistro(row.record).guardadoEm || null,
+      ownerId: row.owner_id
+    })) });
+  } catch (e) { console.error('Erro carregando histórico da Mesa:', e.message); res.status(500).json({ ok: false, message: 'Não foi possível carregar os atendimentos da Mesa.' }); }
+});
+
+app.get('/api/admin/overview', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
+  try {
+    const [users, records, base] = await Promise.all([
+      pool.query(`SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE is_active=TRUE AND deleted_at IS NULL)::int AS active FROM users`),
+      pool.query(`SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE status='aguardando_mesa')::int AS pending, COUNT(*) FILTER (WHERE status='recebido')::int AS received, COUNT(*) FILTER (WHERE status='recusado')::int AS refused FROM attendances`),
+      pool.query('SELECT jsonb_array_length(items) AS count, updated_at FROM internal_base WHERE singleton_id=1')
+    ]);
+    res.json({ ok: true, users: users.rows[0], attendances: records.rows[0], base: base.rows[0] || { count: 0, updated_at: null }, version: VERSAO });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível carregar o resumo administrativo.' }); }
+});
+app.get('/api/admin/users', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM users ORDER BY CASE role WHEN \'admin\' THEN 1 WHEN \'mesa\' THEN 2 ELSE 3 END, username_normalized');
+    res.json({ ok: true, users: result.rows.map(usuarioPublico) });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível listar as contas.' }); }
+});
+app.post('/api/admin/users', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
+  const username = textoSeguro(req.body?.username, 80);
+  const fullName = textoSeguro(req.body?.fullName, 120);
+  const password = String(req.body?.password || '');
+  const role = String(req.body?.role || 'guiche');
+  const normalized = normalizarUsuario(username);
+  if (!/^[\p{L}\p{N}._-]{3,80}$/u.test(username)) return res.status(400).json({ ok: false, message: 'O login deve ter de 3 a 80 caracteres, usando letras, números, ponto, hífen ou sublinhado.' });
+  if (!fullName) return res.status(400).json({ ok: false, message: 'Informe o nome do usuário.' });
+  if (password.length < 8) return res.status(400).json({ ok: false, message: 'A senha deve ter pelo menos 8 caracteres.' });
+  if (!['guiche', 'mesa', 'admin'].includes(role)) return res.status(400).json({ ok: false, message: 'Tipo de conta inválido.' });
+  try {
+    const id = criarId();
+    const passwordHash = await criarHashSenha(password);
+    await pool.query(`INSERT INTO users (id,username,username_normalized,full_name,role,password_hash) VALUES ($1,$2,$3,$4,$5,$6)`, [id, username, normalized, fullName, role, passwordHash]);
+    await registrarAuditoria(req.user.id, 'conta_criada', id, { username, role });
+    const user = (await pool.query('SELECT * FROM users WHERE id=$1', [id])).rows[0];
+    res.status(201).json({ ok: true, user: usuarioPublico(user) });
+  } catch (e) {
+    if (e.code === '23505' && String(e.constraint || '').includes('mesa')) return res.status(409).json({ ok: false, message: 'Já existe um login ativo da Mesa. Edite ou desative a conta existente antes de criar outra.' });
+    if (e.code === '23505') return res.status(409).json({ ok: false, message: 'Este nome de usuário já existe.' });
+    console.error('Erro criando conta:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível criar a conta.' });
+  }
+});
+app.patch('/api/admin/users/:id', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
+  const id = textoSeguro(req.params.id, 100);
+  const fullName = req.body?.fullName == null ? null : textoSeguro(req.body.fullName, 120);
+  const username = req.body?.username == null ? null : textoSeguro(req.body.username, 80);
+  const isActive = typeof req.body?.isActive === 'boolean' ? req.body.isActive : null;
+  if (fullName !== null && !fullName) return res.status(400).json({ ok: false, message: 'O nome não pode ficar vazio.' });
+  if (username !== null && !/^[\p{L}\p{N}._-]{3,80}$/u.test(username)) return res.status(400).json({ ok: false, message: 'Nome de usuário inválido.' });
+  if (isActive === false && id === req.user.id) return res.status(400).json({ ok: false, message: 'Não é possível bloquear a própria conta administrativa.' });
+  try {
+    const before = await pool.query('SELECT * FROM users WHERE id=$1', [id]);
+    if (!before.rowCount) return res.status(404).json({ ok: false, message: 'Conta não encontrada.' });
+    const old = before.rows[0];
+    if (isActive === false && old.role === 'admin' && old.is_active) {
+      const count = await pool.query(`SELECT COUNT(*)::int AS n FROM users WHERE role='admin' AND is_active=TRUE AND deleted_at IS NULL`);
+      if (count.rows[0].n <= 1) return res.status(400).json({ ok: false, message: 'Não é possível bloquear o último administrador ativo.' });
+    }
+    const updated = await pool.query(
+      `UPDATE users SET full_name=COALESCE($2,full_name), username=COALESCE($3,username), username_normalized=COALESCE($4,username_normalized), is_active=COALESCE($5,is_active), updated_at=NOW(), deleted_at=CASE WHEN $5=FALSE THEN COALESCE(deleted_at,NOW()) WHEN $5=TRUE THEN NULL ELSE deleted_at END WHERE id=$1 RETURNING *`,
+      [id, fullName, username, username === null ? null : normalizarUsuario(username), isActive]
+    );
+    if (isActive === false) { await pool.query('DELETE FROM sessions WHERE user_id=$1', [id]); encerrarConexoesUsuario(id, 'Conta desativada'); }
+    await registrarAuditoria(req.user.id, 'conta_atualizada', id, { username: updated.rows[0].username, isActive });
+    res.json({ ok: true, user: usuarioPublico(updated.rows[0]) });
+  } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ ok: false, message: 'Este nome de usuário já existe.' });
+    console.error('Erro atualizando conta:', e.message);
+    res.status(500).json({ ok: false, message: 'Não foi possível atualizar a conta.' });
+  }
+});
+app.post('/api/admin/users/:id/reset-password', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
+  const id = textoSeguro(req.params.id, 100);
+  const password = String(req.body?.password || '');
+  if (password.length < 8) return res.status(400).json({ ok: false, message: 'A nova senha deve ter pelo menos 8 caracteres.' });
+  try {
+    const user = await pool.query('SELECT id, username FROM users WHERE id=$1 AND deleted_at IS NULL', [id]);
+    if (!user.rowCount) return res.status(404).json({ ok: false, message: 'Conta não encontrada.' });
+    const hash = await criarHashSenha(password);
+    await pool.query('UPDATE users SET password_hash=$2, updated_at=NOW() WHERE id=$1', [id, hash]);
+    await pool.query('DELETE FROM sessions WHERE user_id=$1', [id]);
+    encerrarConexoesUsuario(id, 'Senha redefinida pelo administrador');
+    await registrarAuditoria(req.user.id, 'senha_redefinida', id, { username: user.rows[0].username });
+    res.json({ ok: true, message: 'Senha redefinida. O usuário deverá entrar novamente.' });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível redefinir a senha.' }); }
+});
+app.delete('/api/admin/users/:id', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
+  const id = textoSeguro(req.params.id, 100);
+  if (id === req.user.id) return res.status(400).json({ ok: false, message: 'Não é possível excluir a própria conta.' });
+  try {
+    const result = await pool.query('SELECT id, username, role, is_active FROM users WHERE id=$1 AND deleted_at IS NULL', [id]);
+    if (!result.rowCount) return res.status(404).json({ ok: false, message: 'Conta não encontrada.' });
+    const user = result.rows[0];
+    if (user.role === 'admin' && user.is_active) {
+      const count = await pool.query(`SELECT COUNT(*)::int AS n FROM users WHERE role='admin' AND is_active=TRUE AND deleted_at IS NULL`);
+      if (count.rows[0].n <= 1) return res.status(400).json({ ok: false, message: 'Não é possível excluir o último administrador ativo.' });
+    }
+    await pool.query('UPDATE users SET is_active=FALSE, deleted_at=NOW(), updated_at=NOW() WHERE id=$1', [id]);
+    await pool.query('DELETE FROM sessions WHERE user_id=$1', [id]);
+    encerrarConexoesUsuario(id, 'Conta excluída pelo administrador');
+    await registrarAuditoria(req.user.id, 'conta_excluida', id, { username: user.username, role: user.role });
+    res.json({ ok: true, message: 'Conta desativada e mantida no histórico para preservar os atendimentos anteriores.' });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível excluir a conta.' }); }
+});
+app.get('/api/admin/attendances', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT a.*, u.username AS owner_username, u.full_name AS owner_full_name
+         FROM attendances a LEFT JOIN users u ON u.id=a.owner_id
+        ORDER BY a.created_at DESC LIMIT 5000`
+    );
+    res.json({ ok: true, attendances: result.rows.map(row => ({
+      ...dadosAtendimento(row), ownerUsername: row.owner_username || '(conta excluída)', ownerFullName: row.owner_full_name || ''
+    })) });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível carregar os atendimentos.' }); }
+});
+app.get('/api/admin/events', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT a.id,a.action,a.details,a.created_at,u.username AS actor_username,t.username AS target_username
+         FROM audit_log a LEFT JOIN users u ON u.id=a.actor_user_id LEFT JOIN users t ON t.id=a.target_user_id
+        ORDER BY a.created_at DESC LIMIT 300`
+    );
+    res.json({ ok: true, events: result.rows });
+  } catch (e) { res.status(500).json({ ok: false, message: 'Não foi possível carregar o registro administrativo.' }); }
+});
+app.get('/api/admin/backup-data', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
+  try {
+    const [users, attendance, base, events] = await Promise.all([
+      pool.query('SELECT id,username,full_name,role,is_active,created_at,updated_at,last_login_at,deleted_at FROM users ORDER BY created_at'),
+      pool.query('SELECT * FROM attendances ORDER BY created_at'),
+      pool.query('SELECT items,updated_at,updated_by FROM internal_base WHERE singleton_id=1'),
+      pool.query('SELECT id,actor_user_id,action,target_user_id,details,created_at FROM audit_log ORDER BY id')
+    ]);
+    res.json({
+      format: 'sistema-atendimento-backup', version: VERSAO, generatedAt: agoraISO(),
+      notice: 'Cópia de dados sem hashes de senha e sem sessões ativas. Depois de uma restauração, redefina as senhas dos usuários.',
+      users: users.rows, attendances: attendance.rows,
+      internalBase: base.rows[0] || { items: [], updated_at: null, updated_by: null }, auditLog: events.rows
+    });
+  } catch (e) { console.error('Erro no backup:', e.message); res.status(500).json({ ok: false, message: 'Não foi possível gerar o backup.' }); }
+});
+
+async function registrarCliente(ws, dados) {
+  const cliente = clientes.get(ws);
+  if (!cliente || !cliente.user) return;
+  const canal = dados.role === 'receiver' ? 'receiver' : dados.role === 'sender' ? 'sender' : null;
+  if (!canal || !perfilValido(cliente.user.role, canal)) {
+    responderErro(ws, 'error', 'Esta conta não tem permissão para acessar esta área.');
+    ws.close(1008, 'Perfil não autorizado');
+    return;
+  }
+  cliente.canal = canal;
+  cliente.userId = cliente.user.id;
+  enviar(ws, { type: 'registered', role: canal, clientId: cliente.user.id, username: cliente.user.username, accountRole: cliente.user.role, version: VERSAO });
+  if (canal === 'receiver') enviarPendentesParaMesa(ws);
+  if (canal === 'sender') enviarRecusasPendentesParaGuiche(ws, cliente.user.id);
+}
+async function receberNovoAtendimento(ws, dados) {
+  const cliente = clientes.get(ws);
+  if (!cliente || cliente.canal !== 'sender') return responderErro(ws, 'send_result', 'Somente um login autorizado do GUICHÊ pode enviar atendimentos.', dados.recordId);
+  const recordId = textoSeguro(dados.recordId, 180);
+  if (!recordId) return responderErro(ws, 'send_result', 'recordId não informado.');
+  const result = await pool.query('SELECT * FROM attendances WHERE record_id=$1', [recordId]);
+  const row = result.rows[0] || null;
+  const refusal = recusasPendentes.get(recordId);
+  if (row && row.status !== 'recusado' && row.received_at) {
+    if (row.owner_id !== cliente.user.id) return responderErro(ws, 'send_result', 'Este atendimento pertence a outro login.', recordId);
+    enviar(ws, { type: 'record_received', recordId, receivedAt: row.received_at });
+    enviar(ws, { type: 'send_result', ok: true, recordId, alreadyReceived: true });
+    return;
+  }
+  const ownerId = row?.owner_id || refusal?.ownerId || cliente.user.id;
+  if (ownerId !== cliente.user.id) return responderErro(ws, 'send_result', 'Este atendimento pertence a outro login.', recordId);
+  const entrada = normalizarRegistro(dados.record);
+  const registro = { ...(row?.record || refusal?.record || {}), ...entrada, recordId };
+  const ehReenvio = Boolean(registro.reenvio === true || row?.status === 'recusado' || refusal);
   if (ehReenvio) {
     registro.reenvio = true;
-    registro.reenviadoEm =
-      registro.reenviadoEm || agora;
-    registro.status = "aguardando_mesa";
-    registro.motivoRecusa = "";
-    registro.recusadoEm = null;
+    registro.reenviadoEm = registro.reenviadoEm || agoraISO();
   } else {
-    registro.status =
-      registro.status || "aguardando_mesa";
+    registro.reenvio = false;
   }
-
+  registro.status = 'aguardando_mesa';
+  delete registro.motivoRecusa;
+  delete registro.recusadoEm;
+  const createdAt = row?.created_at || registro.createdAt || agoraISO();
+  const now = agoraISO();
+  await pool.query(
+    `INSERT INTO attendances (record_id,owner_id,record,status,created_at,updated_at,received_at,refused_at,refusal_reason,refusal_confirmed_at)
+     VALUES ($1,$2,$3::jsonb,'aguardando_mesa',$4,$5,NULL,NULL,NULL,NULL)
+     ON CONFLICT(record_id) DO UPDATE SET record=EXCLUDED.record,status='aguardando_mesa',updated_at=NOW(),received_at=NULL,refused_at=NULL,refusal_reason=NULL,refusal_confirmed_at=NULL,guiche_archived_at=NULL,mesa_archived_at=NULL`,
+    [recordId, ownerId, JSON.stringify(registro), createdAt, now]
+  );
   recusasPendentes.delete(recordId);
-
-  const pendente = {
-    recordId,
-    record: registro,
-    ownerId,
-    createdAt:
-      anterior?.createdAt ||
-      registro.createdAt ||
-      agora,
-    updatedAt: agora
-  };
-
+  recebidos.delete(recordId);
+  const pendente = { recordId, record: registro, ownerId, createdAt, updatedAt: now };
   pendentes.set(recordId, pendente);
-
-  console.log(
-    "Atendimento enviado:",
-    recordId,
-    "proprietário:",
-    ownerId,
-    "reenvio:",
-    ehReenvio
-  );
-
-  transmitirNovoAtendimento(pendente);
-
-  enviar(ws, {
-    type: "send_result",
-    ok: true,
-    recordId,
-    reenvio: ehReenvio
-  });
+  await registrarAuditoria(ownerId, ehReenvio ? 'atendimento_reenviado' : 'atendimento_enviado', null, { recordId });
+  enviarNovoAtendimento(pendente);
+  enviar(ws, { type: 'send_result', ok: true, recordId, reenvio: ehReenvio });
 }
-
-/* =========================================================
-   CONFIRMAÇÃO DE RECEBIMENTO PELA MESA
-========================================================= */
-
-function confirmarRecebimento(ws, dados) {
-  if (!clienteAutorizado(ws, "receiver")) {
-    responderErro(
-      ws,
-      "confirm_result",
-      "Somente a MESA pode confirmar recebimentos.",
-      dados.recordId
-    );
-    return;
-  }
-
-  const recordId = String(dados.recordId || "").trim();
-
-  if (!recordId) {
-    responderErro(
-      ws,
-      "confirm_result",
-      "recordId não informado."
-    );
-    return;
-  }
-
-  const pendente = pendentes.get(recordId);
-
-  if (!pendente) {
-    const recebidoAnterior = recebidos.get(recordId);
-
-    enviar(ws, {
-      type: "confirm_result",
-      ok: true,
-      recordId,
-      alreadyConfirmed: true,
-      receivedAt: recebidoAnterior?.receivedAt || null
-    });
-
-    return;
-  }
-
-  const receivedAt =
-    dados.receivedAt || agoraISO();
-
-  const confirmacao = {
-    type: "record_received",
-    recordId,
-    receivedAt
-  };
-
-  const proprietario = encontrarClientePorId(
-    pendente.ownerId
-  );
-
-  if (proprietario) {
-    enviar(proprietario.ws, confirmacao);
-  }
-
-  transmitirParaRole(
-    "receiver",
-    confirmacao
-  );
-
-  /*
-   * Mantém um marcador em memória para que mensagens
-   * atrasadas não recriem a pendência.
-   */
-  recebidos.set(recordId, {
-    recordId,
-    ownerId: pendente.ownerId,
-    receivedAt
-  });
-
-  pendentes.delete(recordId);
-
-  enviar(ws, {
-    type: "confirm_result",
-    ok: true,
-    recordId
-  });
-
-  console.log(
-    "Atendimento recebido pela MESA:",
-    recordId
-  );
-}
-
-/* =========================================================
-   RECUSA DE ATENDIMENTO PELA MESA
-========================================================= */
-
-function recusarAtendimento(ws, dados) {
-  if (!clienteAutorizado(ws, "receiver")) {
-    responderErro(
-      ws,
-      "refuse_result",
-      "Somente a MESA pode recusar atendimentos.",
-      dados.recordId
-    );
-    return;
-  }
-
-  const recordId = String(dados.recordId || "").trim();
-
-  if (!recordId) {
-    responderErro(
-      ws,
-      "refuse_result",
-      "recordId não informado."
-    );
-    return;
-  }
-
-  const pendente = pendentes.get(recordId);
-
-  if (!pendente) {
-    const recusaExistente =
-      recusasPendentes.get(recordId);
-
-    if (recusaExistente) {
-      const entregue = enviarRecusaAoGuiche(
-        recusaExistente
-      );
-
-      enviar(ws, {
-        type: "refuse_result",
-        ok: true,
-        recordId,
-        refusedAt: recusaExistente.refusedAt,
-        deliveredToGuiche: entregue
-      });
-
+async function confirmarRecebimento(ws, dados) {
+  const cliente = clientes.get(ws);
+  if (!cliente || cliente.canal !== 'receiver') return responderErro(ws, 'confirm_result', 'Somente a MESA pode confirmar recebimentos.', dados.recordId);
+  const recordId = textoSeguro(dados.recordId, 180);
+  if (!recordId) return responderErro(ws, 'confirm_result', 'recordId não informado.');
+  const pending = pendentes.get(recordId);
+  if (!pending) {
+    const row = await pool.query('SELECT owner_id,status,received_at FROM attendances WHERE record_id=$1', [recordId]);
+    const existing = row.rows[0];
+    if (existing && existing.received_at) {
+      enviar(ws, { type: 'confirm_result', ok: true, recordId, alreadyConfirmed: true, receivedAt: existing.received_at });
       return;
     }
-
-    responderErro(
-      ws,
-      "refuse_result",
-      "Atendimento não está mais pendente.",
-      recordId
-    );
-
-    return;
+    return responderErro(ws, 'confirm_result', 'Atendimento não está mais pendente.', recordId);
   }
-
-  const registro = {
-    ...pendente.record,
-    ...normalizarRegistro(dados.record),
-    recordId
-  };
-
-  const motivo = String(
-    dados.reason ??
-    dados.motivoRecusa ??
-    registro.motivoRecusa ??
-    ""
-  ).trim();
-
-  if (!motivo) {
-    responderErro(
-      ws,
-      "refuse_result",
-      "Informe o motivo da recusa.",
-      recordId
-    );
-    return;
-  }
-
-  const refusedAt =
-    dados.refusedAt || agoraISO();
-
-  registro.status = "recusado";
-  registro.motivoRecusa = motivo;
-  registro.recusadoEm = refusedAt;
-
-  const recusa = {
-    recordId,
-    record: registro,
-    ownerId: pendente.ownerId,
-    reason: motivo,
-    refusedAt
-  };
-
-  recusasPendentes.set(recordId, recusa);
+  const receivedAt = dados.receivedAt || agoraISO();
+  const registro = { ...pending.record, status: 'recebido', recebidoEm: receivedAt };
+  await pool.query('UPDATE attendances SET status=$2,record=$3::jsonb,received_at=$4,updated_at=NOW() WHERE record_id=$1', [recordId, 'recebido', JSON.stringify(registro), receivedAt]);
+  await registrarAuditoria(cliente.user.id, 'atendimento_recebido', pending.ownerId, { recordId });
+  const confirmacao = { type: 'record_received', recordId, receivedAt };
+  transmitirParaUsuario(pending.ownerId, confirmacao, 'sender');
+  transmitirParaCanal('receiver', confirmacao);
+  recebidos.set(recordId, { recordId, ownerId: pending.ownerId, receivedAt });
   pendentes.delete(recordId);
-
-  const entregue = enviarRecusaAoGuiche(recusa);
-
-  transmitirParaRole(
-    "receiver",
-    {
-      type: "record_removed",
-      recordId,
-      reason: motivo,
-      refusedAt
-    },
-    ws
-  );
-
-  enviar(ws, {
-    type: "refuse_result",
-    ok: true,
-    recordId,
-    refusedAt,
-    deliveredToGuiche: entregue
-  });
-
-  console.log(
-    "Atendimento recusado:",
-    recordId,
-    "motivo:",
-    motivo,
-    "entregue ao GUICHÊ:",
-    entregue
-  );
+  enviar(ws, { type: 'confirm_result', ok: true, recordId });
 }
-
-/* =========================================================
-   GUICHÊ CONFIRMA RECEBIMENTO DA RECUSA
-========================================================= */
-
-function confirmarRecebimentoRecusa(ws, dados) {
-  if (!clienteAutorizado(ws, "sender")) {
-    responderErro(
-      ws,
-      "confirm_refusal_result",
-      "Somente o GUICHÊ pode confirmar a recusa.",
-      dados.recordId
-    );
-    return;
-  }
-
+async function recusarAtendimento(ws, dados) {
   const cliente = clientes.get(ws);
-  const recordId = String(dados.recordId || "").trim();
-
-  if (!recordId) {
-    responderErro(
-      ws,
-      "confirm_refusal_result",
-      "recordId não informado."
-    );
+  if (!cliente || cliente.canal !== 'receiver') return responderErro(ws, 'refuse_result', 'Somente a MESA pode recusar atendimentos.', dados.recordId);
+  const recordId = textoSeguro(dados.recordId, 180);
+  if (!recordId) return responderErro(ws, 'refuse_result', 'recordId da recusa não informado.');
+  const pending = pendentes.get(recordId);
+  if (!pending) {
+    const old = recusasPendentes.get(recordId);
+    if (old) {
+      const delivered = enviarRecusa(old);
+      enviar(ws, { type: 'refuse_result', ok: true, recordId, refusedAt: old.refusedAt, deliveredToGuiche: delivered });
+      return;
+    }
+    return responderErro(ws, 'refuse_result', 'Atendimento não está mais pendente.', recordId);
+  }
+  const registro = { ...pending.record, ...normalizarRegistro(dados.record), recordId };
+  const reason = textoSeguro(dados.reason ?? dados.motivoRecusa ?? registro.motivoRecusa, 2000);
+  if (!reason) return responderErro(ws, 'refuse_result', 'Informe o motivo da recusa.', recordId);
+  const refusedAt = dados.refusedAt || agoraISO();
+  registro.status = 'recusado'; registro.motivoRecusa = reason; registro.recusadoEm = refusedAt;
+  const refusal = { recordId, record: registro, ownerId: pending.ownerId, reason, refusedAt };
+  await pool.query('UPDATE attendances SET status=$2,record=$3::jsonb,refused_at=$4,refusal_reason=$5,refusal_confirmed_at=NULL,guiche_archived_at=NULL,mesa_archived_at=NULL,updated_at=NOW() WHERE record_id=$1', [recordId, 'recusado', JSON.stringify(registro), refusedAt, reason]);
+  await registrarAuditoria(cliente.user.id, 'atendimento_recusado', pending.ownerId, { recordId, reason });
+  recusasPendentes.set(recordId, refusal);
+  pendentes.delete(recordId);
+  const delivered = enviarRecusa(refusal);
+  transmitirParaCanal('receiver', { type: 'record_removed', recordId, reason: 'Atendimento recusado.' }, ws);
+  enviar(ws, { type: 'refuse_result', ok: true, recordId, refusedAt, deliveredToGuiche: delivered });
+}
+async function confirmarRecebimentoRecusa(ws, dados) {
+  const cliente = clientes.get(ws);
+  if (!cliente || cliente.canal !== 'sender') return responderErro(ws, 'confirm_refusal_result', 'Somente o GUICHÊ pode confirmar o recebimento da recusa.', dados.recordId);
+  const recordId = textoSeguro(dados.recordId, 180);
+  const refusal = recusasPendentes.get(recordId);
+  if (!refusal) {
+    enviar(ws, { type: 'confirm_refusal_result', ok: true, recordId, alreadyConfirmed: true });
     return;
   }
-
-  const recusa = recusasPendentes.get(recordId);
-
-  if (!recusa) {
-    enviar(ws, {
-      type: "confirm_refusal_result",
-      ok: true,
-      recordId,
-      alreadyConfirmed: true
-    });
-
-    return;
-  }
-
-  if (
-    !recusa.ownerId ||
-    !cliente.clientId ||
-    recusa.ownerId !== cliente.clientId
-  ) {
-    responderErro(
-      ws,
-      "confirm_refusal_result",
-      "Este GUICHÊ não é o proprietário do atendimento.",
-      recordId
-    );
-
-    return;
-  }
-
+  if (refusal.ownerId !== cliente.user.id) return responderErro(ws, 'confirm_refusal_result', 'Este atendimento pertence a outro login.', recordId);
+  await pool.query('UPDATE attendances SET refusal_confirmed_at=NOW(),updated_at=NOW() WHERE record_id=$1', [recordId]);
+  await registrarAuditoria(cliente.user.id, 'recusa_recebida_pelo_guiche', null, { recordId });
   recusasPendentes.delete(recordId);
-
-  enviar(ws, {
-    type: "confirm_refusal_result",
-    ok: true,
-    recordId
-  });
-
-  console.log(
-    "GUICHÊ confirmou o recebimento da recusa:",
-    recordId
-  );
+  enviar(ws, { type: 'confirm_refusal_result', ok: true, recordId });
 }
-
-/* =========================================================
-   ATUALIZAÇÃO DE STATUS
-========================================================= */
-
-function atualizarStatusRegistro(ws, dados) {
+async function atualizarStatusRegistro(ws, dados) {
   const cliente = clientes.get(ws);
-
-  if (!cliente || cliente.role === "unknown") {
+  if (!cliente || !cliente.user) return;
+  const recordId = textoSeguro(dados.recordId, 180);
+  const status = textoSeguro(dados.status, 60);
+  if (!recordId || status !== 'guardado') return;
+  const result = await pool.query('SELECT * FROM attendances WHERE record_id=$1', [recordId]);
+  const row = result.rows[0];
+  if (!row) return;
+  const registro = { ...normalizarRegistro(row.record), ...normalizarRegistro(dados.record) };
+  const guardadoEm = textoSeguro(registro.guardadoEm, 60) || agoraISO();
+  if (cliente.canal === 'sender') {
+    if (row.owner_id !== cliente.user.id) return;
+    registro.guicheGuardadoEm = guardadoEm;
+    await pool.query('UPDATE attendances SET guiche_archived_at=COALESCE(guiche_archived_at,$2::timestamptz),record=$3::jsonb,updated_at=NOW() WHERE record_id=$1', [recordId, guardadoEm, JSON.stringify(registro)]);
+  } else if (cliente.canal === 'receiver') {
+    if (!['recebido', 'guardado'].includes(row.status)) return;
+    registro.mesaGuardadoEm = guardadoEm;
+    await pool.query('UPDATE attendances SET mesa_archived_at=COALESCE(mesa_archived_at,$2::timestamptz),record=$3::jsonb,updated_at=NOW() WHERE record_id=$1', [recordId, guardadoEm, JSON.stringify(registro)]);
+    transmitirParaCanal('receiver', { type: 'record_status_updated', recordId, status: 'guardado' });
+  } else {
     return;
   }
-
-  const recordId = String(dados.recordId || "").trim();
-  const status = String(dados.status || "").trim();
-
-  if (!recordId || !status) {
-    return;
-  }
-
-  const pendente = pendentes.get(recordId);
-
-  if (!pendente) {
-    return;
-  }
-
-  if (
-    cliente.role === "sender" &&
-    cliente.clientId !== pendente.ownerId
-  ) {
-    return;
-  }
-
-  pendente.record = {
-    ...pendente.record,
-    status
-  };
-
-  pendente.updatedAt = agoraISO();
-
-  console.log(
-    "Status atualizado:",
-    recordId,
-    status
-  );
+  await registrarAuditoria(cliente.user.id, 'status_atendimento_atualizado', row.owner_id, { recordId, status: 'guardado', canal: cliente.canal });
 }
 
-/* =========================================================
-   WEBSOCKET
-========================================================= */
-
-wss.on("connection", (ws) => {
-  const cliente = {
-    ws,
-    role: "unknown",
-    clientId: null,
-    ownerId: null
-  };
-
-  clientes.set(ws, cliente);
-
-  console.log("Novo cliente conectado.");
-
-  enviar(ws, {
-    type: "connected",
-    version: VERSAO
-  });
-
-  ws.on("message", (raw) => {
-    let dados;
-
-    try {
-      dados = JSON.parse(raw.toString());
-    } catch (erro) {
-      responderErro(
-        ws,
-        "error",
-        "Mensagem inválida. Envie um JSON válido."
-      );
-
-      return;
+async function tratarMensagem(ws, raw) {
+  let dados;
+  try { dados = JSON.parse(raw.toString()); }
+  catch { return responderErro(ws, 'error', 'Mensagem inválida. Envie um JSON válido.'); }
+  if (!dados || typeof dados !== 'object' || Array.isArray(dados)) return responderErro(ws, 'error', 'Formato de mensagem inválido.');
+  const cliente = clientes.get(ws);
+  if (!cliente) return;
+  if (dados.type === 'ping') return enviar(ws, { type: 'pong', time: agoraISO() });
+  if (dados.type === 'pong') return;
+  if (!cliente.user) return responderErro(ws, 'error', 'Sessão WebSocket não autenticada.');
+  try {
+    switch (dados.type) {
+      case 'register': return await registrarCliente(ws, dados);
+      case 'send_record': return await receberNovoAtendimento(ws, dados);
+      case 'confirm_received': return await confirmarRecebimento(ws, dados);
+      case 'refuse_record': return await recusarAtendimento(ws, dados);
+      case 'confirm_refusal_received': return await confirmarRecebimentoRecusa(ws, dados);
+      case 'record_status': return await atualizarStatusRegistro(ws, dados);
+      default: return responderErro(ws, 'error', 'Tipo de mensagem não reconhecido.');
     }
-
-    if (
-      !dados ||
-      typeof dados !== "object" ||
-      Array.isArray(dados)
-    ) {
-      responderErro(
-        ws,
-        "error",
-        "Formato de mensagem inválido."
-      );
-
-      return;
-    }
-
+  } catch (e) {
+    console.error('Erro processando WebSocket:', e.message);
+    responderErro(ws, `${dados.type || 'message'}_result`, 'Erro interno ao processar a mensagem.', dados.recordId);
+  }
+}
+wss.on('connection', (ws, req) => {
+  const origem = req.headers.origin;
+  if (origem) {
     try {
-      switch (dados.type) {
-        case "register":
-          registrarCliente(ws, dados);
-          return;
-
-        case "ping":
-          enviar(ws, {
-            type: "pong",
-            time: agoraISO()
-          });
-          return;
-
-        case "pong":
-          return;
-
-        case "send_record":
-          receberNovoAtendimento(ws, dados);
-          return;
-
-        case "confirm_received":
-          confirmarRecebimento(ws, dados);
-          return;
-
-        case "refuse_record":
-          recusarAtendimento(ws, dados);
-          return;
-
-        case "confirm_refusal_received":
-          confirmarRecebimentoRecusa(ws, dados);
-          return;
-
-        case "record_status":
-          atualizarStatusRegistro(ws, dados);
-          return;
-
-        default:
-          responderErro(
-            ws,
-            "error",
-            "Tipo de mensagem não reconhecido."
-          );
+      if (new URL(origem).host !== req.headers.host) {
+        ws.close(1008, 'Origem não autorizada');
+        return;
       }
-    } catch (erro) {
-      console.error(
-        "Erro ao processar mensagem:",
-        erro
-      );
-
-      responderErro(
-        ws,
-        "error",
-        "Erro interno ao processar a mensagem.",
-        dados.recordId
-      );
+    } catch {
+      ws.close(1008, 'Origem inválida');
+      return;
     }
-  });
-
-  ws.on("close", () => {
-    clientes.delete(ws);
-    console.log("Cliente desconectado.");
-  });
-
-  ws.on("error", (erro) => {
-    console.error("Erro WebSocket:", erro);
-  });
-});
-
-/* =========================================================
-   HEALTH CHECK
-========================================================= */
-
-app.get("/health", (_req, res) => {
-  res.json({
-    ok: true,
-    version: VERSAO,
-    clients: clientes.size,
-    pendingRecords: pendentes.size,
-    pendingRefusals: recusasPendentes.size,
-    timestamp: agoraISO()
-  });
-});
-
-/* =========================================================
-   STATUS COMPLETO
-========================================================= */
-
-app.get("/status", (_req, res) => {
-  const listaClientes = [];
-
-  for (const cliente of clientes.values()) {
-    listaClientes.push({
-      role: cliente.role,
-      clientId: cliente.clientId,
-      ownerId: cliente.ownerId,
-      conectado:
-        cliente.ws.readyState === WebSocket.OPEN
-    });
   }
-
-  res.json({
-    ok: true,
-    version: VERSAO,
-    clientes: listaClientes,
-
-    recebidos: Array.from(
-      recebidos.values()
-    ),
-
-    pendentes: Array.from(
-      pendentes.values()
-    ).map((item) => ({
-      recordId: item.recordId,
-      ownerId: item.ownerId,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
-      record: item.record
-    })),
-
-    recusasPendentes: Array.from(
-      recusasPendentes.values()
-    ).map((item) => ({
-      recordId: item.recordId,
-      ownerId: item.ownerId,
-      reason: item.reason,
-      refusedAt: item.refusedAt
-    }))
-  });
-});
-
-/* =========================================================
-   INICIALIZAÇÃO
-========================================================= */
-
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(
-    `Sistema Atendimento V${VERSAO} iniciado na porta ${PORT}`
-  );
-});
-
-/* =========================================================
-   ENCERRAMENTO
-========================================================= */
-
-function encerrarServidor(sinal) {
-  console.log(
-    `Sinal ${sinal} recebido. Encerrando servidor...`
-  );
-
-  for (const cliente of clientes.values()) {
+  const cliente = { ws, canal: null, user: null, userId: null, sessionHash: null, authExpiryTimer: null, authPromise: null };
+  clientes.set(ws, cliente);
+  cliente.authPromise = (async () => {
     try {
-      cliente.ws.close(1001, "Servidor encerrando");
-    } catch (erro) {
-      console.error(
-        "Erro ao fechar conexão:",
-        erro
+      const token = extrairCookie(req, SESSION_COOKIE);
+      if (!token || !pool || !dbReady) throw new Error('Sessão não disponível');
+      const result = await pool.query(
+        `SELECT u.id,u.username,u.full_name,u.role,u.is_active,u.deleted_at,s.expires_at AS session_expires_at
+           FROM sessions s JOIN users u ON u.id=s.user_id
+          WHERE s.token_hash=$1 AND s.expires_at>NOW() AND u.is_active=TRUE AND u.deleted_at IS NULL`,
+        [hashToken(token)]
       );
+      if (!result.rowCount || ws.readyState !== WebSocket.OPEN) throw new Error('Sessão inválida');
+      cliente.user = result.rows[0];
+      cliente.userId = cliente.user.id;
+      cliente.sessionHash = hashToken(token);
+      const restante = new Date(cliente.user.session_expires_at).getTime() - Date.now();
+      cliente.authExpiryTimer = setTimeout(() => {
+        try { ws.close(1008, 'Sessão expirada; entre novamente'); } catch {}
+      }, Math.max(1, restante));
+      enviar(ws, { type: 'connected', version: VERSAO });
+    } catch {
+      if (ws.readyState === WebSocket.OPEN) ws.close(1008, 'Autenticação necessária');
+    }
+  })();
+  ws.on('message', async raw => {
+    try { await cliente.authPromise; await tratarMensagem(ws, raw); }
+    catch (e) { console.error('Erro no canal WebSocket:', e.message); }
+  });
+  ws.on('close', () => { clearTimeout(cliente.authExpiryTimer); clientes.delete(ws); });
+  ws.on('error', e => console.error('Erro WebSocket:', e.message));
+});
+
+app.use(express.static(PUBLIC_DIR, { etag: true, lastModified: true }));
+app.use((err, _req, res, _next) => {
+  console.error('Erro HTTP:', err.message);
+  if (res.headersSent) return;
+  res.status(500).json({ ok: false, message: 'Erro interno do servidor.' });
+});
+
+async function iniciar() {
+  if (!pool) {
+    dbErrorMessage = 'O banco Neon ainda não está configurado no Render (variável DATABASE_URL).';
+    console.warn(dbErrorMessage);
+  } else {
+    try {
+      await inicializarBanco();
+      dbReady = true;
+      dbErrorMessage = null;
+      console.log('Banco Neon conectado; tabelas verificadas e filas restauradas.');
+    } catch (e) {
+      dbErrorMessage = 'Não foi possível inicializar o Neon. Confira DATABASE_URL e as permissões do banco.';
+      console.error(dbErrorMessage, e.message);
     }
   }
-
-  server.close(() => {
-    process.exit(0);
-  });
-
-  setTimeout(() => {
-    process.exit(1);
-  }, 10000).unref();
+  server.listen(PORT, '0.0.0.0', () => console.log(`Sistema Atendimento V${VERSAO} iniciado na porta ${PORT}`));
 }
+iniciar();
 
-process.on("SIGTERM", () => encerrarServidor("SIGTERM"));
-process.on("SIGINT", () => encerrarServidor("SIGINT"));
+async function encerrarServidor(sinal) {
+  console.log(`Sinal ${sinal} recebido. Encerrando servidor...`);
+  for (const cliente of clientes.values()) {
+    try { cliente.ws.close(1001, 'Servidor encerrando'); } catch {}
+  }
+  try { if (pool) await pool.end(); } catch {}
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 10000).unref();
+}
+process.on('SIGTERM', () => encerrarServidor('SIGTERM'));
+process.on('SIGINT', () => encerrarServidor('SIGINT'));
