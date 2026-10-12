@@ -470,6 +470,7 @@ CPAIG
 🔊 SOM: ATIVO
 </button>
 <button class="btn-yellow" onclick="abrirArquivoExcelMesa()">🔄 ATUALIZAR BASE DE INTERNOS</button>
+<button class="btn-gray" onclick="baixarBackupSemanalContaMesa()">📊 BACKUP SEMANAL EXCEL — TOTAL</button>
 </div>
 <section class="section">
 <div class="section-header">
@@ -1121,6 +1122,30 @@ if(user.role==="admin"){const link=document.createElement("a");link.href="/admin
 const button=document.createElement("button");button.className="logout";button.textContent="SAIR";button.onclick=sairDaContaMesa;bar.appendChild(button);
 }
 async function sairDaContaMesa(){try{await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});}catch{}location.replace("/login.html");}
+function formatarDataBackupMesa(d){
+return String(d.getFullYear())+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function periodoSemanaBackupAtualMesa(){
+const hoje=new Date();hoje.setHours(12,0,0,0);
+const deslocamento=(hoje.getDay()+6)%7;
+const inicio=new Date(hoje);inicio.setDate(hoje.getDate()-deslocamento);
+const fim=new Date(inicio);fim.setDate(inicio.getDate()+6);
+return {from:formatarDataBackupMesa(inicio),to:formatarDataBackupMesa(fim)};
+}
+async function baixarBackupSemanalContaMesa(){
+try{
+const periodo=periodoSemanaBackupAtualMesa();
+const resposta=await fetch("/api/me/backup-weekly.xlsx?from="+encodeURIComponent(periodo.from)+"&to="+encodeURIComponent(periodo.to),{credentials:"same-origin",cache:"no-store"});
+if(!resposta.ok){let detalhe="Não foi possível gerar o Excel semanal total.";try{const erro=await resposta.json();detalhe=erro.message||detalhe}catch{}throw new Error(detalhe)}
+const quantidade=resposta.headers.get("X-Backup-Count")||"0";
+const blob=await resposta.blob();
+const url=URL.createObjectURL(blob);const link=document.createElement("a");
+link.href=url;link.download="Backup_Mesa_Total_"+periodo.from+"_a_"+periodo.to+".xlsx";
+document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+alert("Excel semanal total baixado.\nPeríodo pela Data do Atendimento: "+periodo.from+" a "+periodo.to+".\nAtendimentos incluídos: "+quantidade+".\n\nEste relatório inclui os atendimentos de todos os Guichês e todas as situações, inclusive recusados. Guarde-o em local protegido.");
+}catch(erro){console.error(erro);alert("Não foi possível baixar o Excel semanal total.\n\n"+(erro.message||"Verifique sua conexão e tente novamente."));}
+}
+
 function abrirArquivoExcelMesa(){
 const input=$("arquivoExcelMesa");
 if(input)input.click();
