@@ -41,6 +41,10 @@ font-size:16px;
 font-weight:bold;
 color:#ffd83d
 }
+.account-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.account-bar span{font-size:13px;color:#f1f5f9}
+.account-bar button,.account-bar a{padding:8px 11px;font-size:12px;border-radius:6px;text-decoration:none;background:#174d3d;color:white;border:1px solid #417461}
+.account-bar .logout{background:#eab308;color:#111827;border-color:#eab308}
 .status{
 display:flex;
 align-items:center;
@@ -448,6 +452,7 @@ CPAIG
 <span id="statusDot" class="status-dot"></span>
 <span id="statusTexto">Conectando...</span>
 </div>
+<div id="accountBar" class="account-bar"></div>
 </div>
 </header>
 <div class="container">
@@ -464,6 +469,7 @@ CPAIG
 <button class="btn-gray" onclick="toggleSom()" id="btnSom">
 🔊 SOM: ATIVO
 </button>
+<button class="btn-yellow" onclick="abrirArquivoExcelMesa()">🔄 ATUALIZAR BASE DE INTERNOS</button>
 </div>
 <section class="section">
 <div class="section-header">
@@ -726,7 +732,7 @@ onclick="executarImpressao()">
 </div>
 </div>
 </div>
-<div id="areaImpressao" style="display:none;"></div><script>
+<div id="areaImpressao" style="display:none;"></div><input id="arquivoExcelMesa" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarBaseExcelMesa(event)"><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script>
 "use strict";
 const STORAGE_HISTORICO=
 "mesaAtendimentosV23";
@@ -1107,6 +1113,85 @@ $("statusDot")
 $("statusTexto").textContent=
 texto;
 }
+let usuarioLogadoMesa=null;
+function criarBarraContaMesa(user){
+const bar=$("accountBar");bar.replaceChildren();
+const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" · "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
+if(user.role==="admin"){const link=document.createElement("a");link.href="/admin.html";link.textContent="ADMINISTRAÇÃO";bar.appendChild(link);}
+const button=document.createElement("button");button.className="logout";button.textContent="SAIR";button.onclick=sairDaContaMesa;bar.appendChild(button);
+}
+async function sairDaContaMesa(){try{await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});}catch{}location.replace("/login.html");}
+function abrirArquivoExcelMesa(){
+const input=$("arquivoExcelMesa");
+if(input)input.click();
+}
+async function importarBaseExcelMesa(event){
+const file=event.target.files&&event.target.files[0];
+if(!file)return;
+if(typeof XLSX==="undefined"){mostrarToast("Não foi possível carregar o leitor de Excel.","error");event.target.value="";return;}
+try{
+const bytes=new Uint8Array(await file.arrayBuffer());
+const workbook=XLSX.read(bytes,{type:"array"});
+const sheet=workbook.Sheets[workbook.SheetNames[0]];
+const rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:""});
+let headerIndex=-1;
+for(let i=0;i<rows.length;i++){const h=rows[i].map(x=>normalizar(x));if(h.includes("nome do interno")&&h.includes("rgi")){headerIndex=i;break;}}
+if(headerIndex<0)throw new Error("Não encontrei os cabeçalhos NOME DO INTERNO e RGI.");
+const header=rows[headerIndex];
+const col=name=>header.findIndex(x=>normalizar(x)===normalizar(name));
+const cNome=col("NOME DO INTERNO"),cRgi=col("RGI"),cPav=col("PAVILHÃO"),cCela=col("CELA");
+if(cNome<0||cRgi<0)throw new Error("A planilha precisa ter as colunas Nome do Interno e RGI.");
+const items=[];
+for(let i=headerIndex+1;i<rows.length;i++){
+const row=rows[i];const nome=String(row[cNome]||"").trim();
+if(!nome||normalizar(nome)==="totais")continue;
+items.push({nome,rgi:String(row[cRgi]||"").trim(),pavilhao:String(cPav>=0?row[cPav]||"":"").trim(),cela:String(cCela>=0?row[cCela]||"":"").trim()});
+}
+if(!items.length)throw new Error("A planilha não contém internos para importar.");
+const response=await fetch("/api/internals/base",{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({items})});
+let result={};try{result=await response.json()}catch{}
+if(!response.ok||!result.ok)throw new Error(result.message||"O servidor não salvou a base.");
+await sincronizarBaseMesa();
+mostrarToast(`Base compartilhada atualizada: ${result.count||items.length} internos. Os outros logins serão avisados automaticamente.`,"success");
+}catch(error){mostrarToast("Falha ao importar Excel: "+(error.message||"verifique o arquivo e a conexão."),"error");}
+finally{event.target.value="";}
+}
+
+async function sincronizarBaseMesa(){
+try{
+const resp=await fetch("/api/internals/base",{credentials:"same-origin",cache:"no-store"});
+if(!resp.ok)return false;const data=await resp.json();
+const items=Array.isArray(data.items)?data.items:[];
+localStorage.setItem(STORAGE_BASE_EXCEL,JSON.stringify(items));
+preencherPavilhoesImpressao();
+return true;
+}catch(e){console.warn("Base compartilhada indisponível na Mesa:",e);return false;}
+}
+async function sincronizarAtendimentosMesa(){
+try{
+const resp=await fetch("/api/mesa/attendances",{credentials:"same-origin",cache:"no-store"});
+if(!resp.ok)return false;const data=await resp.json();
+const locais=new Map();[...pendentes,...historico,...arquivo].forEach(x=>{if(x&&x.recordId)locais.set(String(x.recordId),x)});
+const central=(data.attendances||[]).map(x=>({...locais.get(String(x.recordId)),...x,recordId:String(x.recordId)}));
+const ids=new Set(central.map(x=>String(x.recordId)));
+const apenasLocal=[...locais.values()].filter(x=>!ids.has(String(x.recordId)));
+pendentes=central.filter(x=>x.status==="aguardando_mesa").map(x=>({...x,status:"aguardando_recebimento"}));
+historico=central.filter(x=>["recebido"].includes(x.status));
+arquivo=central.filter(x=>x.status==="guardado");
+apenasLocal.forEach(x=>{
+if(x.status==="aguardando_recebimento"||x.status==="aguardando_mesa")pendentes.push(x);
+else if(x.status==="guardado")arquivo.push(x);
+else historico.push(x);
+});
+pendentes=pendentes.filter(x=>!estaRecusadoLocalmente(x.recordId));
+salvarTudo();renderPendentes();renderHistorico();renderGuardados();return true;
+}catch(e){console.warn("Histórico central da Mesa indisponível:",e);return false;}
+}
+function atualizarStatusCentralMesa(registro,status){
+if(!registro||!registro.recordId)return;
+enviarMensagem({type:"record_status",recordId:registro.recordId,status,record:{guardadoEm:registro.guardadoEm||null}});
+}
+
 function conectarServidor(){
 clearTimeout(reconnectTimer);
 if(
@@ -1252,6 +1337,14 @@ return false;
 return false;
 }
 function tratarMensagemServidor(mensagem){
+if(mensagem.type==="base_internos_atualizada"){
+sincronizarBaseMesa();
+return;
+}
+if(mensagem.type==="record_status_updated"){
+sincronizarAtendimentosMesa();
+return;
+}
 if(
 mensagem.type==="connected"||
 mensagem.type==="registered"||
@@ -2318,6 +2411,7 @@ registro.status=
 "guardado";
 registro.guardadoEm=
 new Date().toISOString();
+atualizarStatusCentralMesa(registro,"guardado");
 historico.splice(
 indice,
 1
@@ -3378,40 +3472,26 @@ reenviarConfirmacoesConhecidas();
 }
 }
 );
-function inicializar(){
+async function inicializar(){
+try{
+const auth=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
+if(!auth.ok){location.replace("/login.html");return;}
+const authData=await auth.json();
+usuarioLogadoMesa=authData.user;
+if(!usuarioLogadoMesa||!["mesa","admin"].includes(usuarioLogadoMesa.role)){location.replace(usuarioLogadoMesa&&usuarioLogadoMesa.role==="guiche"?"/index.html":"/login.html");return;}
+criarBarraContaMesa(usuarioLogadoMesa);
 carregarTudo();
+await sincronizarBaseMesa();
+await sincronizarAtendimentosMesa();
 preencherAtendimentosImpressao();
 preencherAtendimentosData();
 preencherPavilhoesImpressao();
 conectarServidor();
-window.addEventListener(
-"storage",
-event=>{
-if(
-event.key===
-STORAGE_BASE_EXCEL
-){
-preencherPavilhoesImpressao();
-}
-}
-);
-setInterval(
-preencherPavilhoesImpressao,
-10000
-);
-setInterval(
-()=>{
-if(
-socket&&
-socket.readyState===
-WebSocket.OPEN
-){
-reenviarRecusasPendentes();
-reenviarConfirmacoesConhecidas();
-}
-},
-5000
-);
+window.addEventListener("storage",event=>{if(event.key===STORAGE_BASE_EXCEL)preencherPavilhoesImpressao();});
+setInterval(preencherPavilhoesImpressao,10000);
+setInterval(()=>{if(socket&&socket.readyState===WebSocket.OPEN){reenviarRecusasPendentes();reenviarConfirmacoesConhecidas();}},5000);
+setInterval(()=>{sincronizarAtendimentosMesa();sincronizarBaseMesa();},60000);
+}catch(e){console.error("Falha na inicialização da Mesa:",e);location.replace("/login.html");}
 }
 window.addEventListener(
 "load",

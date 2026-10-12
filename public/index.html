@@ -13,6 +13,11 @@ header img{width:70px;height:70px;object-fit:contain;flex-shrink:0}
 .logo h1{margin:0;font-size:25px}
 .logo .sub{margin-top:5px;font-size:14px;font-weight:bold;color:#eee}
 .logo .cpaig{margin-top:3px;font-size:17px;font-weight:bold;color:#ffd83d}
+.account-bar{margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.account-bar span{font-size:13px;color:#f3f3f3}
+.account-bar button,.account-bar a{padding:8px 11px;font-size:12px;border-radius:6px;text-decoration:none;background:#333;color:#fff;border:1px solid #555}
+.account-bar .logout{background:#c7a84b;color:#151515;border-color:#c7a84b}
+@media(max-width:650px){header{flex-wrap:wrap}.account-bar{margin-left:0;width:100%;justify-content:flex-start}}
 .container{max-width:1150px;margin:20px auto;padding:0 15px}
 .card{background:#fff;border-radius:10px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .card h2{margin-top:0;border-bottom:2px solid #c7a84b;padding-bottom:10px}
@@ -117,6 +122,7 @@ header img{width:55px;height:55px}
 <div class="sub">POLÍCIA PENAL DE MATO GROSSO DO SUL</div>
 <div class="cpaig">CPAIG</div>
 </div>
+<div id="accountBar" class="account-bar"></div>
 </header>
 
 <div class="container">
@@ -377,14 +383,14 @@ header img{width:55px;height:55px}
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script>
-const STORAGE_PREPARACAO="guicheAtendimentosV23Preparacao";
-const STORAGE_HISTORICO="guicheAtendimentosV23Historico";
-const STORAGE_ARQUIVO="guicheAtendimentosV23Arquivo";
-const STORAGE_RECUSADOS="guicheAtendimentosV23Recusados";
+let STORAGE_PREPARACAO="guicheAtendimentosV23Preparacao";
+let STORAGE_HISTORICO="guicheAtendimentosV23Historico";
+let STORAGE_ARQUIVO="guicheAtendimentosV23Arquivo";
+let STORAGE_RECUSADOS="guicheAtendimentosV23Recusados";
 const STORAGE_BASE="atendimentoV23BaseInternos";
 const STORAGE_BASE_ATUALIZADA=STORAGE_BASE+"_atualizadaEm";
-const STORAGE_CLIENT_ID="guicheAtendimentoClientId";
-const STORAGE_ORDENACAO="guicheAtendimentoOrdenacao";
+let STORAGE_CLIENT_ID="guicheAtendimentoClientId";
+let STORAGE_ORDENACAO="guicheAtendimentoOrdenacao";
 
 let baseInternos=[];
 let preparacao=[];
@@ -397,7 +403,8 @@ let indiceSugestao=-1;
 let indiceSugestaoEdicao=-1;
 let registroRecusaAtual=null;
 
-const clientId=obterClientId();
+let clientId=null;
+let usuarioLogado=null;
 
 function obterClientId(){
 let id=localStorage.getItem(STORAGE_CLIENT_ID);
@@ -406,6 +413,121 @@ id=window.crypto&&crypto.randomUUID?crypto.randomUUID():"guiche-"+Date.now()+"-"
 localStorage.setItem(STORAGE_CLIENT_ID,id);
 }
 return id;
+}
+function aplicarEscopoLocal(user){
+const chaves={
+preparacao:"guicheAtendimentosV23Preparacao",
+historico:"guicheAtendimentosV23Historico",
+arquivo:"guicheAtendimentosV23Arquivo",
+recusados:"guicheAtendimentosV23Recusados",
+ordenacao:"guicheAtendimentoOrdenacao"
+};
+const marcador="sistemaAtendimentoMigracaoLocalV210";
+const sufixo="::conta::"+user.id;
+if(user.role==="guiche"&&localStorage.getItem(marcador)!=="1"){
+Object.values(chaves).forEach(chave=>{
+const destino=chave+sufixo;
+if(localStorage.getItem(destino)===null&&localStorage.getItem(chave)!==null){localStorage.setItem(destino,localStorage.getItem(chave));}
+});
+localStorage.setItem(marcador,"1");
+}
+STORAGE_PREPARACAO=chaves.preparacao+sufixo;
+STORAGE_HISTORICO=chaves.historico+sufixo;
+STORAGE_ARQUIVO=chaves.arquivo+sufixo;
+STORAGE_RECUSADOS=chaves.recusados+sufixo;
+STORAGE_ORDENACAO=chaves.ordenacao+sufixo;
+STORAGE_CLIENT_ID="guicheAtendimentoClientId"+sufixo;
+}
+function criarBarraConta(user){
+const bar=document.getElementById("accountBar");
+bar.replaceChildren();
+const texto=document.createElement("span");
+texto.textContent="Conectado: "+(user.fullName||user.username)+" · "+(user.role==="admin"?"ADMINISTRADOR":"GUICHÊ");
+bar.appendChild(texto);
+if(user.role==="admin"){
+const adm=document.createElement("a");adm.href="/admin.html";adm.textContent="ADMINISTRAÇÃO";bar.appendChild(adm);
+}
+const btn=document.createElement("button");btn.className="logout";btn.textContent="SAIR";btn.onclick=sairDaConta;bar.appendChild(btn);
+}
+async function sairDaConta(){
+try{await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});}catch{}
+location.replace("/login.html");
+}
+async function consultarSessao(){
+const resp=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
+if(!resp.ok){location.replace("/login.html");return null;}
+const dados=await resp.json();
+if(!dados.user||!["guiche","admin"].includes(dados.user.role)){
+location.replace(dados.user&&dados.user.role==="mesa"?"/mesa.html":"/login.html");return null;
+}
+usuarioLogado=dados.user;
+aplicarEscopoLocal(usuarioLogado);
+clientId=obterClientId();
+criarBarraConta(usuarioLogado);
+return usuarioLogado;
+}
+async function sincronizarBaseCompartilhada(semeiaCache=false){
+try{
+const resp=await fetch("/api/internals/base",{credentials:"same-origin",cache:"no-store"});
+if(!resp.ok)return false;
+const dados=await resp.json();
+let itens=Array.isArray(dados.items)?dados.items:[];
+if(!itens.length&&semeiaCache&&["guiche","admin"].includes(usuarioLogado?.role)){
+let cache=[];try{cache=JSON.parse(localStorage.getItem(STORAGE_BASE)||"[]")}catch{}
+if(cache.length){
+const envio=await fetch("/api/internals/base",{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:cache})});
+if(envio.ok){const resposta=await envio.json();itens=resposta.items||cache;localStorage.setItem(STORAGE_BASE_ATUALIZADA,resposta.updatedAt||new Date().toISOString());}
+}
+}
+baseInternos=itens;
+localStorage.setItem(STORAGE_BASE,JSON.stringify(baseInternos));
+if(dados.updatedAt)localStorage.setItem(STORAGE_BASE_ATUALIZADA,dados.updatedAt);
+else if(!itens.length)localStorage.removeItem(STORAGE_BASE_ATUALIZADA);
+atualizarStatusBase();
+limparSugestoes();limparSugestoesEdicao();
+return true;
+}catch(e){console.warn("Não foi possível sincronizar a base central:",e);return false;}
+}
+async function migrarHistoricoLocalUmaVez(){
+const marcador="sistemaAtendimentoHistoricoEnviadoV210::"+usuarioLogado.id;
+if(localStorage.getItem(marcador)==="1")return;
+const todos=[];
+const vistos=new Set();
+[...historico,...recusados,...arquivo].forEach(item=>{
+if(!item||!item.recordId||vistos.has(String(item.recordId)))return;
+vistos.add(String(item.recordId));todos.push(item);
+});
+if(!todos.length){localStorage.setItem(marcador,"1");return;}
+try{
+const resp=await fetch("/api/me/import-legacy",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({attendances:todos})});
+const dados=await resp.json();
+if(resp.ok&&dados.ok){localStorage.setItem(marcador,"1");if(dados.imported)console.info("Histórico local migrado para o servidor:",dados.imported);}
+else console.warn("O histórico local ainda não foi migrado:",dados.message);
+}catch(e){console.warn("Falha na migração do histórico local:",e);}
+}
+async function sincronizarHistoricoCentral(){
+try{
+const resp=await fetch("/api/me/attendances",{credentials:"same-origin",cache:"no-store"});
+if(!resp.ok)return;
+const dados=await resp.json();
+const locais=new Map();
+[...historico,...recusados,...arquivo].forEach(item=>{if(item?.recordId)locais.set(String(item.recordId),item)});
+const central=(dados.attendances||[]).map(a=>{
+const anterior=locais.get(String(a.recordId));
+return {...(anterior||{}),...a,recordId:String(a.recordId),registro:{...(anterior?.registro||{}),...(a.record||{}),recordId:String(a.recordId)},enviadoEm:a.sentAt||a.createdAt||anterior?.enviadoEm||new Date().toISOString(),recebidoEm:a.receivedAt||null,motivoRecusa:a.refusalReason||a.record?.motivoRecusa||anterior?.motivoRecusa||"",recusadoEm:a.refusedAt||a.record?.recusadoEm||anterior?.recusadoEm||null,status:a.status||a.record?.status||anterior?.status||"aguardando_mesa"};
+});
+const ids=new Set(central.map(x=>String(x.recordId)));
+const locaisNaoSincronizados=[...locais.values()].filter(x=>!ids.has(String(x.recordId)));
+historico=central.filter(x=>!["recusado","guardado"].includes(x.status));
+recusados=central.filter(x=>x.status==="recusado");
+arquivo=central.filter(x=>x.status==="guardado");
+locaisNaoSincronizados.forEach(item=>{
+if(item.status==="recusado")recusados.push(item);
+else if(item.status==="guardado")arquivo.push(item);
+else historico.push(item);
+});
+salvarTudo();renderHistorico();renderRecusados();renderGuardados();atualizarFiltroGuardados();atualizarResumoGuardados();
+}catch(e){console.warn("Histórico central indisponível:",e);}
 }
 
 function normalizarTexto(valor){
@@ -534,7 +656,7 @@ const arquivoExcel=event.target.files[0];
 if(!arquivoExcel)return;
 if(typeof XLSX==="undefined"){alert("Não foi possível carregar o sistema de Excel.");return}
 const leitor=new FileReader();
-leitor.onload=function(e){
+leitor.onload=async function(e){
 try{
 const dados=new Uint8Array(e.target.result);
 const workbook=XLSX.read(dados,{type:"array"});
@@ -568,16 +690,20 @@ pavilhao:String(colPavilhao>=0?linha[colPavilhao]||"":"").trim(),
 cela:String(colCela>=0?linha[colCela]||"":"").trim()
 });
 }
-baseInternos=novaBase;
-localStorage.setItem(STORAGE_BASE_ATUALIZADA,new Date().toISOString());
+const respostaEnvio=await fetch("/api/internals/base",{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:novaBase})});
+let dadosEnvio={};try{dadosEnvio=await respostaEnvio.json()}catch{}
+if(!respostaEnvio.ok||!dadosEnvio.ok)throw new Error(dadosEnvio.message||"A base não foi salva no servidor.");
+baseInternos=Array.isArray(dadosEnvio.items)?dadosEnvio.items:novaBase;
+localStorage.setItem(STORAGE_BASE,JSON.stringify(baseInternos));
+localStorage.setItem(STORAGE_BASE_ATUALIZADA,dadosEnvio.updatedAt||new Date().toISOString());
 salvarTudo();
 atualizarStatusBase();
-alert("Base atualizada com sucesso!\n\n"+novaBase.length+" internos encontrados.");
+alert("Base compartilhada atualizada com sucesso!\n\n"+baseInternos.length+" internos encontrados. Os outros logins receberão a atualização automaticamente.");
 limparSugestoes();
 limparSugestoesEdicao();
 }catch(erro){
 console.error(erro);
-alert("Erro ao importar a planilha.");
+alert("Erro ao importar a planilha ou salvar a base compartilhada.\n\n"+(erro&&erro.message?erro.message:"Confira a planilha e a conexão com o servidor."));
 }
 };
 leitor.readAsArrayBuffer(arquivoExcel);
@@ -587,7 +713,15 @@ event.target.value="";
 function buscarInternos(termo){
 const busca=normalizarTexto(termo);
 if(!busca)return[];
-return baseInternos.filter(item=>normalizarTexto(item.nome).includes(busca)).slice(0,12);
+const compararNomes=(a,b)=>{
+const pa=normalizarTexto(a.nome).split(/\s+/).filter(Boolean);
+const pb=normalizarTexto(b.nome).split(/\s+/).filter(Boolean);
+return (pa[0]||"").localeCompare(pb[0]||"","pt-BR")||
+(pa[1]||"").localeCompare(pb[1]||"","pt-BR")||
+pa.slice(2).join(" ").localeCompare(pb.slice(2).join(" "),"pt-BR")||
+a.nome.localeCompare(b.nome,"pt-BR");
+};
+return baseInternos.filter(item=>normalizarTexto(item.nome).includes(busca)).sort(compararNomes).slice(0,12);
 }
 
 function mostrarSugestoes(){
@@ -750,6 +884,11 @@ enviarRegistroWS(item.recordId,item.registro);
 });
 }
 
+function atualizarStatusAtendimentoCentral(item,status){
+if(!item||!item.recordId||!ws||ws.readyState!==WebSocket.OPEN)return;
+try{ws.send(JSON.stringify({type:"record_status",recordId:item.recordId,status,record:{guardadoEm:item.guardadoEm||null}}));}catch{}
+}
+
 function receberConfirmacaoMesa(recordId,receivedAt){
 const item=historico.find(x=>x.recordId===recordId);
 if(!item)return;
@@ -833,6 +972,7 @@ if(!confirm("Guardar este atendimento?"))return;
 item.guardadoEm=new Date().toISOString();
 item.status="guardado";
 if(item.registro)item.registro.status="guardado";
+atualizarStatusAtendimentoCentral(item,"guardado");
 arquivo.unshift(item);
 historico.splice(indice,1);
 salvarTudo();
@@ -852,6 +992,7 @@ recebidos.forEach(item=>{
 item.guardadoEm=agora;
 item.status="guardado";
 if(item.registro)item.registro.status="guardado";
+atualizarStatusAtendimentoCentral(item,"guardado");
 });
 arquivo.unshift(...recebidos);
 historico=historico.filter(item=>item.status!=="guardado");
@@ -982,6 +1123,7 @@ const item=recusados[indice];
 item.guardadoEm=new Date().toISOString();
 item.status="guardado";
 if(item.registro)item.registro.status="guardado";
+atualizarStatusAtendimentoCentral(item,"guardado");
 arquivo.unshift(item);
 recusados.splice(indice,1);
 salvarTudo();
@@ -1286,6 +1428,10 @@ conectar();
 }
 
 function processarMensagemWS(msg){
+if(msg.type==="base_internos_atualizada"){
+sincronizarBaseCompartilhada(false);
+return;
+}
 if(msg.type==="record_received"){
 receberConfirmacaoMesa(msg.recordId,msg.receivedAt);
 return;
@@ -1415,21 +1561,23 @@ fecharGuardados();
    INICIALIZAÇÃO
 ================================ */
 
+async function inicializarGuicheProtegido(){
+const user=await consultarSessao();
+if(!user)return;
 preencherCelas();
-
 document.getElementById("dataAtendimento").value=dataHojeISO();
 document.getElementById("editDataAtendimento").value=dataHojeISO();
-
 carregarTudo();
+await sincronizarBaseCompartilhada(true);
+await migrarHistoricoLocalUmaVez();
+await sincronizarHistoricoCentral();
 conectar();
-
-setInterval(function(){
-if(!ws||ws.readyState!==WebSocket.OPEN)conectar();
-},5000);
-
-setInterval(function(){
-reenviarAguardandoMesa();
-},15000);
+setInterval(function(){if(!ws||ws.readyState!==WebSocket.OPEN)conectar();},5000);
+setInterval(function(){reenviarAguardandoMesa();},15000);
+setInterval(function(){sincronizarBaseCompartilhada(false);},60000);
+setInterval(function(){sincronizarHistoricoCentral();},45000);
+}
+inicializarGuicheProtegido().catch(e=>{console.error(e);location.replace("/login.html")});
 
 </script>
 

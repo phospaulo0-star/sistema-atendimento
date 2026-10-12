@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Entrar — Sistema Atendimento CPAIG</title>
+<style>
+:root{--gold:#c7a84b;--ink:#141414;--paper:#f2f3f5;--muted:#626b76;--line:#dce0e5;--danger:#9e2020;--ok:#176b35}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(135deg,#e7e8ea,#f7f7f8);font-family:Arial,Helvetica,sans-serif;color:#20242a;display:grid;place-items:center;padding:24px}
+.layout{width:min(100%,980px);display:grid;grid-template-columns:1fr 420px;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 18px 55px #1112}
+.brand{background:#141414;color:#fff;padding:44px;display:flex;flex-direction:column;justify-content:space-between;min-height:500px;border-bottom:6px solid var(--gold)}.eyebrow{font-weight:bold;color:#f4d05b;letter-spacing:.12em;font-size:13px}.brand h1{font-size:clamp(28px,4vw,42px);line-height:1.08;margin:15px 0}.brand p{line-height:1.6;color:#e3e3e3;max-width:440px}.brand .cpaig{font-weight:bold;color:#f4d05b;font-size:22px;letter-spacing:.12em}.form-area{padding:42px 36px;display:flex;flex-direction:column;justify-content:center}.form-area h2{margin:0 0 8px;font-size:27px}.help{margin:0 0 28px;color:var(--muted);line-height:1.45}.field{margin-bottom:17px}.field label{display:block;font-weight:bold;margin-bottom:7px}.field input{display:block;width:100%;border:1px solid #b9c0c8;border-radius:8px;padding:13px 12px;font:inherit}.field input:focus{outline:2px solid #c7a84b66;border-color:var(--gold)}button{width:100%;padding:13px;border:0;border-radius:8px;background:#c7a84b;font-weight:bold;font-size:16px;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.message{margin-top:16px;padding:11px 12px;border-radius:8px;display:none;line-height:1.45}.message.error{display:block;background:#fff0f0;color:var(--danger);border:1px solid #edc4c4}.message.info{display:block;background:#f1f5fa;color:#334d68;border:1px solid #d5e0ec}.small{color:var(--muted);font-size:12px;line-height:1.5;margin-top:22px}@media(max-width:740px){body{padding:12px}.layout{grid-template-columns:1fr}.brand{min-height:200px;padding:28px}.brand h1{font-size:29px}.form-area{padding:28px 22px}}
+</style>
+</head>
+<body>
+<main class="layout">
+  <section class="brand">
+    <div><div class="eyebrow">POLÍCIA PENAL DE MATO GROSSO DO SUL</div><h1>Sistema de<br>Atendimento</h1><p>Ambiente de acesso do Guichê, da Mesa de Atendimento e da Administração do CPAIG.</p></div>
+    <div class="cpaig">CPAIG</div>
+  </section>
+  <section class="form-area">
+    <h2>Entrar no sistema</h2>
+    <p class="help">Informe o login e a senha fornecidos pelo administrador.</p>
+    <form id="loginForm" autocomplete="on">
+      <div class="field"><label for="username">Login</label><input id="username" name="username" autocomplete="username" required maxlength="80" autofocus></div>
+      <div class="field"><label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="200"></div>
+      <button id="submitButton" type="submit">ENTRAR</button>
+    </form>
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+    <p class="small">O acesso é individual, exceto a Mesa, que utilizará a conta única destinada a essa área. Em caso de esquecimento da senha, procure o administrador.</p>
+  </section>
+</main>
+<script>
+const form=document.getElementById('loginForm');
+const message=document.getElementById('message');
+const button=document.getElementById('submitButton');
+function aviso(texto,tipo='error'){message.textContent=texto;message.className='message '+tipo;}
+async function statusServidor(){try{const r=await fetch('/health',{cache:'no-store'});const j=await r.json();if(!j.databaseConfigured||!j.databaseReady){aviso('O servidor respondeu, mas o banco Neon ainda não está pronto. O administrador precisa conferir a variável DATABASE_URL e a inicialização do banco no Render.','info');}}catch{aviso('Não foi possível consultar o servidor. Confira sua conexão com a internet e tente novamente.','info');}}
+form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;button.textContent='VALIDANDO...';message.className='message';
+try{const r=await fetch('/api/auth/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('username').value,password:document.getElementById('password').value})});let j={};try{j=await r.json()}catch{}if(!r.ok||!j.ok)throw new Error(j.message||'Não foi possível entrar.');location.replace(j.user.role==='admin'?'/admin.html':j.user.role==='mesa'?'/mesa.html':'/index.html');}
+catch(err){aviso(err.message||'Falha ao entrar.');button.disabled=false;button.textContent='ENTRAR';}
+});
+statusServidor();
+</script>
+</body>
+</html>
