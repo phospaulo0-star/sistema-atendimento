@@ -721,7 +721,18 @@ return (pa[0]||"").localeCompare(pb[0]||"","pt-BR")||
 pa.slice(2).join(" ").localeCompare(pb.slice(2).join(" "),"pt-BR")||
 a.nome.localeCompare(b.nome,"pt-BR");
 };
-return baseInternos.filter(item=>normalizarTexto(item.nome).includes(busca)).sort(compararNomes).slice(0,12);
+
+// Prioriza nomes cujo primeiro nome começa pelas letras digitadas.
+// Se não houver correspondências, pesquisa em qualquer parte do nome completo.
+const porPrimeiroNome = baseInternos.filter(item=>{
+const partes=normalizarTexto(item.nome).split(/\s+/).filter(Boolean);
+return (partes[0]||"").startsWith(busca);
+});
+const resultados = porPrimeiroNome.length
+? porPrimeiroNome
+: baseInternos.filter(item=>normalizarTexto(item.nome).includes(busca));
+
+return resultados.sort(compararNomes).slice(0,12);
 }
 
 function mostrarSugestoes(){
