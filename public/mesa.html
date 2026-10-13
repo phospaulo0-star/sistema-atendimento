@@ -352,14 +352,19 @@ font-size:11px
 }
 .print-table{
 width:100%;
+max-width:100%;
+table-layout:fixed;
 border-collapse:collapse;
 min-width:0
 }
 .print-table th,
 .print-table td{
 border:1px solid #111;
-padding:5px;
-font-size:10px
+padding:3px;
+font-size:9px;
+line-height:1.2;
+overflow-wrap:anywhere;
+word-break:break-word
 }
 .print-table th{
 background:#eee;
@@ -367,7 +372,7 @@ position:static
 }
 .print-pavcela{
 text-align:center;
-white-space:nowrap;
+white-space:normal;
 font-weight:bold
 }
 .toast{
@@ -395,7 +400,7 @@ max-width:380px
 @media print{
 @page{
 size:A4 portrait;
-margin:5mm
+margin:10mm
 }
 body{
 background:#fff;
@@ -419,7 +424,9 @@ page-break-before:always!important;
 break-before:page!important
 }
 .print-table{
-width:100%;
+width:100%!important;
+max-width:100%!important;
+table-layout:fixed!important;
 page-break-inside:auto!important;
 break-inside:auto!important
 }
@@ -3288,21 +3295,6 @@ registro,
 "data_atendimento",
 "data"
 );
-let status=
-"AGUARDANDO";
-if(
-registro.status===
-"guardado"
-){
-status=
-"GUARDADO";
-}else if(
-registro.status===
-"recebido"
-){
-status=
-"RECEBIDO";
-}
 linhas+=`
         <tr>
 
@@ -3334,9 +3326,6 @@ linhas+=`
             )}
           </td>
 
-          <td>
-            ${escapeHtml(status)}
-          </td>
 
         </tr>
       `;
@@ -3374,6 +3363,15 @@ return`
 
       <table class="print-table">
 
+        <colgroup>
+          <col style="width:25%">
+          <col style="width:9%">
+          <col style="width:11%">
+          <col style="width:15%">
+          <col style="width:30%">
+          <col style="width:10%">
+        </colgroup>
+
         <thead>
 
           <tr>
@@ -3383,7 +3381,6 @@ return`
             <th>Atendimento</th>
             <th>Assunto</th>
             <th>Data</th>
-            <th>Status</th>
           </tr>
 
         </thead>
