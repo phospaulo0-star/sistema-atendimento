@@ -499,6 +499,10 @@ CPAIG
 </div>
 <div class="section-body">
 <div class="toolbar">
+<button class="btn-yellow"
+onclick="guardarTodosHistorico()">
+🗄️ GUARDAR TODOS
+</button>
 <button class="btn-gray"
 onclick="ordenarHistorico('envio')">
 ↕ ORDEM DE ENVIO
@@ -2416,6 +2420,45 @@ mostrarToast(
 "warning"
 );
 }
+}
+function guardarTodosHistorico(){
+const elegiveis = historico.filter(registro =>
+registro &&
+registro.status === "recebido" &&
+registro.recordId
+);
+if(!elegiveis.length){
+mostrarToast(
+"Não há atendimentos recebidos no histórico para guardar.",
+"warning"
+);
+return;
+}
+if(!confirm(
+"Deseja guardar todos os " + elegiveis.length +
+" atendimentos recebidos do histórico da Mesa? Eles serão movidos para Atendimentos Guardados."
+)){
+return;
+}
+const agora = new Date().toISOString();
+const idsGuardados = new Set();
+elegiveis.forEach(registro=>{
+registro.status = "guardado";
+registro.guardadoEm = agora;
+atualizarStatusCentralMesa(registro,"guardado");
+if(!arquivo.some(item=>String(item.recordId)===String(registro.recordId))){
+arquivo.push(registro);
+}
+idsGuardados.add(String(registro.recordId));
+});
+historico = historico.filter(registro=>!idsGuardados.has(String(registro.recordId)));
+salvarTudo();
+renderHistorico();
+renderGuardados();
+mostrarToast(
+elegiveis.length + " atendimentos guardados.",
+"success"
+);
 }
 function guardarAtendimento(recordId){
 const indice=
