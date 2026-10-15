@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Mesa de Atendimento - CPAIG</title>
-<style>
+style
 *{box-sizing:border-box}
 body{
 margin:0;
@@ -478,7 +478,26 @@ CPAIG
 </button>
 <button class="btn-yellow" onclick="abrirArquivoExcelMesa()">&#x1F504; ATUALIZAR BASE DE INTERNOS</button>
 <button class="btn-gray" onclick="baixarBackupSemanalContaMesa()">&#x1F4CA; BACKUP SEMANAL EXCEL &#x2014; TOTAL</button>
+<button class="btn-orange" id="btnVisitasMesa" type="button" onclick="togglePainelVisitasMesa()">&#x1F465; VISITAS / VISITANTES</button>
 </div>
+<section class="section" id="painelVisitasMesa" hidden>
+<div class="section-header">
+<h2>&#x1F4CB; VISITAS / VISITANTES</h2>
+<span class="counter" id="visitasMesaContador">0 listas</span>
+</div>
+<div class="section-body">
+<p style="margin:0 0 12px;color:#475569;line-height:1.45">Consulta das listas do mÃ³dulo Pertences e Visitas. As informaÃ§Ãµes sÃ£o atualizadas automaticamente a cada 5 segundos enquanto este painel estiver aberto. A Mesa pode consultar e imprimir; somente o mÃ³dulo Pertences e Visitas pode incluir internos ou fechar listas.</p>
+<div class="toolbar" style="align-items:center">
+<label for="visitasMesaListaSelecionada" style="font-weight:bold">Lista para imprimir:</label>
+<select id="visitasMesaListaSelecionada" style="padding:10px;border:1px solid #cbd5e1;border-radius:7px;min-width:150px;max-width:100%"><option value="">Carregando listas...</option></select>
+<button class="btn-gray" type="button" onclick="carregarListasVisitasMesa()">&#x1F504; ATUALIZAR AGORA</button>
+<button class="btn-blue" type="button" onclick="imprimirListaVisitasMesaSelecionada()">&#x1F5A8;&#xFE0F; IMPRIMIR LISTA SELECIONADA</button>
+<button class="btn-dark" type="button" onclick="imprimirTodasListasVisitasMesa()">&#x1F5A8;&#xFE0F; IMPRIMIR TODAS AS LISTAS</button>
+</div>
+<div id="visitasMesaAtualizadoEm" style="font-size:12px;color:#64748b;margin:0 0 12px" role="status" aria-live="polite">Abra o painel para carregar as listas.</div>
+<div id="listasVisitasMesaContainer"><div class="section-body">Abra este painel para consultar as listas.</div></div>
+</div>
+</section>
 <section class="section">
 <div class="section-header">
 <h2>&#x1F4E5; ATENDIMENTOS PENDENTES</h2>
@@ -1030,7 +1049,7 @@ const btn=$("btnSom");
 if(!btn){
 return;
 }
-btn.innerHTML=
+btn.textContent=
 somAtivo
 ?"&#x1F50A; SOM: ATIVO"
 :"&#x1F507; SOM: DESATIVADO";
@@ -1089,7 +1108,7 @@ return;
 tocarSom();
 },INTERVALO_ALARME_PENDENTES);
 }
-async function tocarSom(){
+function tocarSom(){
 if(!somAtivo){
 return;
 }
@@ -1098,11 +1117,8 @@ const ctx=obterContextoAudioMesa();
 if(!ctx){
 return;
 }
-if(ctx.state!=="running"&&typeof ctx.resume==="function"){
-await ctx.resume();
-}
-if(!somAtivo||ctx.state!=="running"){
-return;
+if(ctx.state==="suspended"&&typeof ctx.resume==="function"){
+ctx.resume().catch(function(){});
 }
 const inicio=ctx.currentTime;
 const osc=ctx.createOscillator();
@@ -1178,7 +1194,7 @@ texto;
 let usuarioLogadoMesa=null;
 function criarBarraContaMesa(user){
 const bar=$("accountBar");bar.replaceChildren();
-const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" \u00B7 "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
+const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" &#xB7; "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
 if(user.role==="admin"){const link=document.createElement("a");link.href="/admin.html";link.textContent="ADMINISTRA&#xC7;&#xC3;O";bar.appendChild(link);}
 const button=document.createElement("button");button.className="logout";button.textContent="SAIR";button.onclick=sairDaContaMesa;bar.appendChild(button);
 }
@@ -3659,6 +3675,176 @@ fecharGuardados();
 fecharImpressao();
 }
 );
+
+
+// VISITAS / VISITANTES: painel somente para consulta na Mesa.
+let listasVisitasMesaCache = [];
+let entradasVisitasMesaCache = [];
+let intervaloVisitasMesa = null;
+let carregandoVisitasMesa = false;
+let erroVisitasMesa = '';
+
+function togglePainelVisitasMesa() {
+  const painel = $('painelVisitasMesa');
+  if (!painel) return;
+  painel.hidden = !painel.hidden;
+  if (!painel.hidden) {
+    carregarListasVisitasMesa();
+    if (!intervaloVisitasMesa) {
+      intervaloVisitasMesa = setInterval(() => {
+        if ($('painelVisitasMesa') && !$('painelVisitasMesa').hidden) {
+          carregarListasVisitasMesa({silencioso: true});
+        }
+      }, 5000);
+    }
+    painel.scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+}
+
+async function obterDadosListasVisitasMesa() {
+  const resposta = await fetch('/api/pertences-visitas/visits', {
+    credentials: 'same-origin',
+    cache: 'no-store'
+  });
+  if (resposta.status === 401) {
+    location.replace('/login.html');
+    throw new Error('SessÃ£o encerrada. Entre novamente no sistema.');
+  }
+  let dados = {};
+  try { dados = await resposta.json(); } catch (_) {}
+  if (!resposta.ok || dados.ok === false) {
+    throw new Error(dados.message || 'NÃ£o foi possÃ­vel carregar as listas de visitas.');
+  }
+  return dados;
+}
+
+async function carregarListasVisitasMesa(opcoes = {}) {
+  if (carregandoVisitasMesa) return;
+  carregandoVisitasMesa = true;
+  try {
+    const dados = await obterDadosListasVisitasMesa();
+    listasVisitasMesaCache = Array.isArray(dados.lists) ? dados.lists : [];
+    entradasVisitasMesaCache = Array.isArray(dados.entries) ? dados.entries : [];
+    erroVisitasMesa = '';
+    renderizarListasVisitasMesa();
+    const atualizado = $('visitasMesaAtualizadoEm');
+    if (atualizado) {
+      atualizado.textContent = 'Atualizado em ' + new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Campo_Grande', hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).format(new Date()) + '. AtualizaÃ§Ã£o automÃ¡tica a cada 5 segundos.';
+    }
+  } catch (e) {
+    erroVisitasMesa = e.message || 'Falha ao carregar as listas de visitas.';
+    const atualizado = $('visitasMesaAtualizadoEm');
+    if (atualizado) atualizado.textContent = erroVisitasMesa;
+    const container = $('listasVisitasMesaContainer');
+    if (container && (!opcoes.silencioso || !listasVisitasMesaCache.length)) {
+      container.innerHTML = '<div style="padding:14px;border:1px solid #fecaca;border-radius:8px;background:#fff1f2;color:#991b1b">' + escapeHtml(erroVisitasMesa) + '</div>';
+    }
+  } finally {
+    carregandoVisitasMesa = false;
+  }
+}
+
+function renderizarListasVisitasMesa() {
+  const select = $('visitasMesaListaSelecionada');
+  const container = $('listasVisitasMesaContainer');
+  const contador = $('visitasMesaContador');
+  if (!select || !container) return;
+  const valorAnterior = select.value;
+  const listasOrdenadas = [...listasVisitasMesaCache].sort((a, b) => Number(b.listNumber) - Number(a.listNumber));
+  select.innerHTML = listasOrdenadas.map(lista =>
+    '<option value="' + escapeHtml(lista.listNumber) + '">Lista ' + escapeHtml(lista.listNumber) +
+    (lista.status === 'open' ? ' (ABERTA)' : ' (FECHADA)') + '</option>'
+  ).join('');
+  if (listasOrdenadas.some(lista => String(lista.listNumber) === String(valorAnterior))) {
+    select.value = String(valorAnterior);
+  } else {
+    const aberta = listasOrdenadas.find(lista => lista.status === 'open');
+    if (aberta) select.value = String(aberta.listNumber);
+    else if (listasOrdenadas.length) select.value = String(listasOrdenadas[0].listNumber);
+  }
+  if (contador) contador.textContent = listasOrdenadas.length + (listasOrdenadas.length === 1 ? ' lista' : ' listas');
+  if (!listasOrdenadas.length) {
+    select.innerHTML = '<option value="">Nenhuma lista disponÃ­vel</option>';
+    container.innerHTML = '<div style="padding:15px;color:#64748b">Ainda nÃ£o hÃ¡ listas de visitas cadastradas.</div>';
+    return;
+  }
+  container.innerHTML = listasOrdenadas.map(lista => {
+    const registros = entradasVisitasMesaCache.filter(registro => String(registro.listNumber) === String(lista.listNumber));
+    const linhas = registros.length ? registros.map(registro =>
+      '<tr><td>Lista ' + escapeHtml(lista.listNumber) + '</td>' +
+      '<td>' + escapeHtml(registro.internalName || '') + '</td>' +
+      '<td>' + escapeHtml(registro.rgi || '') + '</td>' +
+      '<td style="text-align:center;font-size:15px;font-weight:bold">' + escapeHtml(registro.pavilion || 'â') + '</td>' +
+      '<td style="text-align:center;font-size:15px;font-weight:bold">' + escapeHtml(registro.cell || 'â') + '</td></tr>'
+    ).join('') : '<tr><td colspan="5" style="text-align:center;color:#64748b">Esta lista ainda nÃ£o tem internos.</td></tr>';
+    const status = lista.status === 'open' ? 'ABERTA' : 'FECHADA';
+    const cor = lista.status === 'open' ? '#166534' : '#475569';
+    const encerramento = lista.closedAt ? 'Fechada em ' + escapeHtml(formatarDataHora(lista.closedAt)) : '';
+    return '<section style="border:1px solid #e2e8f0;border-radius:9px;margin:0 0 14px;overflow:hidden">' +
+      '<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0">' +
+      '<h3 style="margin:0;font-size:17px">LISTA ' + escapeHtml(lista.listNumber) + '</h3>' +
+      '<span style="font-size:12px;font-weight:bold;color:' + cor + ';background:#e2e8f0;padding:5px 9px;border-radius:20px">' + status + '</span>' +
+      '<span style="font-size:12px;color:#64748b">' + encerramento + '</span></div>' +
+      '<div class="table-wrap"><table style="min-width:720px"><thead><tr><th>Lista</th><th>Nome do interno</th><th>RGI</th><th style="text-align:center">PAVILHÃO</th><th style="text-align:center">CELA</th></tr></thead><tbody>' + linhas + '</tbody></table></div></section>';
+  }).join('');
+}
+
+function htmlImpressaoListaVisitasMesa(lista, entradas) {
+  const registros = entradas.filter(registro => String(registro.listNumber) === String(lista.listNumber));
+  const linhas = registros.length ? registros.map(registro =>
+    '<tr><td>' + escapeHtml(registro.internalName || '') + '</td>' +
+    '<td>' + escapeHtml(registro.rgi || '') + '</td>' +
+    '<td class="pavcela">' + escapeHtml(registro.pavilion || 'â') + '</td>' +
+    '<td class="pavcela">' + escapeHtml(registro.cell || 'â') + '</td></tr>'
+  ).join('') : '<tr><td colspan="4" style="text-align:center">Nenhum interno cadastrado nesta lista.</td></tr>';
+  const data = new Intl.DateTimeFormat('pt-BR', {timeZone:'America/Campo_Grande'}).format(new Date());
+  return '<div class="print-page"><header class="print-head"><strong>POLÃCIA PENAL DE MATO GROSSO DO SUL Â· CPAIG</strong><p>Data da impressÃ£o: ' + escapeHtml(data) + '</p><h2>LISTA ' + escapeHtml(lista.listNumber) + '</h2><p class="status-print">SituaÃ§Ã£o: ' + (lista.status === 'open' ? 'ABERTA' : 'FECHADA') + '</p></header>' +
+    '<table><thead><tr><th>Nome do interno</th><th>RGI</th><th>PavilhÃ£o</th><th>Cela</th></tr></thead><tbody>' + linhas + '</tbody></table></div>';
+}
+
+async function abrirImpressaoListasVisitasMesa(todas) {
+  // Abre a janela durante o clique para reduzir o bloqueio de pop-ups em celulares.
+  const janela = window.open('', '_blank');
+  if (!janela) {
+    alert('O navegador bloqueou a janela de impressÃ£o. Permita janelas pop-up para este site e tente novamente.');
+    return;
+  }
+  try {
+    const dados = await obterDadosListasVisitasMesa();
+    const listas = Array.isArray(dados.lists) ? dados.lists : [];
+    const entradas = Array.isArray(dados.entries) ? dados.entries : [];
+    let escolhidas = listas;
+    let titulo = 'Todas as Listas de Visitas';
+    if (!todas) {
+      const numero = $('visitasMesaListaSelecionada')?.value;
+      const escolhida = listas.find(lista => String(lista.listNumber) === String(numero));
+      if (!escolhida) throw new Error('Selecione uma lista vÃ¡lida para imprimir.');
+      escolhidas = [escolhida];
+      titulo = 'Lista de Visitas ' + escolhida.listNumber;
+    }
+    if (!escolhidas.length) throw new Error('NÃ£o hÃ¡ listas de visitas para imprimir.');
+    const conteudo = [...escolhidas].sort((a, b) => Number(a.listNumber) - Number(b.listNumber))
+      .map(lista => htmlImpressaoListaVisitasMesa(lista, entradas)).join('');
+    janela.document.open();
+    janela.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + escapeHtml(titulo) + '</title><style>' +
+      'body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0} .print-page{margin:0 0 18px;page-break-after:always;break-after:page}.print-page:last-child{page-break-after:auto;break-after:auto}.print-head{text-align:center;margin:0 0 12px}.print-head strong{font-size:11pt}.print-head p{font-size:10pt;margin:5px 0}.print-head h2{font-size:17pt;margin:8px 0}.status-print{font-weight:bold}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #444;padding:7px 6px;text-align:left;vertical-align:top;font-size:10pt;overflow-wrap:anywhere}th{background:#eee}th:nth-child(1){width:45%}th:nth-child(2){width:20%}th:nth-child(3){width:18%}th:nth-child(4){width:17%}.pavcela{text-align:center;font-size:13pt;font-weight:bold}@page{size:A4 portrait;margin:10mm}@media screen{body{padding:12px}}' +
+      '</style></head><body>' + conteudo + '<script>window.onload=function(){setTimeout(function(){window.focus();window.print()},300)}<\/script></body></html>');
+    janela.document.close();
+  } catch (e) {
+    try { janela.close(); } catch (_) {}
+    alert(e.message || 'NÃ£o foi possÃ­vel preparar a impressÃ£o das listas.');
+  }
+}
+
+function imprimirListaVisitasMesaSelecionada() {
+  abrirImpressaoListasVisitasMesa(false);
+}
+function imprimirTodasListasVisitasMesa() {
+  abrirImpressaoListasVisitasMesa(true);
+}
+
 </script>
 </body>
 </html>
