@@ -1051,8 +1051,8 @@ return;
 }
 btn.textContent=
 somAtivo
-?"ð SOM: ATIVO"
-:"ð SOM: DESATIVADO";
+?"\u{1F50A} SOM: ATIVO"
+:"\u{1F507} SOM: DESATIVADO";
 }
 function toggleSom(){
 somAtivo=!somAtivo;
@@ -1194,8 +1194,8 @@ texto;
 let usuarioLogadoMesa=null;
 function criarBarraContaMesa(user){
 const bar=$("accountBar");bar.replaceChildren();
-const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" Â· "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
-if(user.role==="admin"){const link=document.createElement("a");link.href="/admin.html";link.textContent="ADMINISTRAÃÃO";bar.appendChild(link);}
+const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" - "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
+if(user.role==="admin"){const link=document.createElement("a");link.href="/admin.html";link.textContent="ADMINISTRA\u00C7\u00C3O";bar.appendChild(link);}
 const button=document.createElement("button");button.className="logout";button.textContent="SAIR";button.onclick=sairDaContaMesa;bar.appendChild(button);
 }
 async function sairDaContaMesa(){try{await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});}catch{}location.replace("/login.html");}
