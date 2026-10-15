@@ -17,12 +17,13 @@ main{max-width:1450px;margin:22px auto;padding:0 15px 44px}.toolbar{display:flex
 <body>
 <header><div class="head"><div class="brand"><h1>PERTENCES E VISITAS</h1><div class="sub">POLÍCIA PENAL DE MATO GROSSO DO SUL</div><div class="cpaig">CPAIG</div></div><div class="account"><span id="usuarioAtual">Validando sessão...</span><button class="dark" onclick="sair()">SAIR</button></div></div></header>
 <main>
+<input id="arquivoExcelBase" type="file" accept=".xlsx,.xls,.csv" hidden onchange="importarExcelBase(event)">
 <div id="msgGeral" class="status" role="status" aria-live="polite"></div>
 <section id="menuPrincipal" class="panel"><h2>Menu principal</h2><p class="subtext">Base de internos compartilhada com Guichê e Mesa. As atualizações feitas em qualquer uma das áreas aparecem aqui automaticamente.</p>
 <div class="menu-grid">
 <button class="menu-card" onclick="abrirArea('pertences')"><span class="symbol">📦</span><span>PERTENCES<small>Registrar recebimento, consultar o dia e imprimir lista ou etiquetas.</small></span></button>
 <button class="menu-card" onclick="abrirArea('visitas')"><span class="symbol">📋</span><span>VISITAS<small>Incluir internos nas listas, fechar a lista e imprimir.</small></span></button>
-<button class="menu-card" onclick="atualizarBaseManual()"><span class="symbol">🔄</span><span>ATUALIZAR LISTAGEM DE INTERNOS<small>Sincronizar com a base central do Excel.</small></span></button>
+<button class="menu-card" id="btnAtualizarBaseInternos" onclick="atualizarBaseManual()"><span class="symbol">🔄</span><span>ATUALIZAR LISTAGEM DE INTERNOS<small>Selecionar um Excel e atualizar a base compartilhada para Guichê, Mesa e Pertences e Visitas.</small></span></button>
 <button class="menu-card" onclick="baixarExcelAtendimentos()"><span class="symbol">📊</span><span>BAIXAR EXCEL DOS ATENDIMENTOS<small>Exportação dos atendimentos cadastrados no sistema.</small></span></button>
 <button class="menu-card" onclick="baixarBackupModulo()"><span class="symbol">💾</span><span>BACKUP<small>Baixar uma cópia dos registros de Pertences e Visitas.</small></span></button>
 </div><div id="baseInfo" class="status info show">Carregando a base compartilhada...</div></section>
@@ -45,6 +46,7 @@ main{max-width:1450px;margin:22px auto;padding:0 15px 44px}.toolbar{display:flex
 </section>
 <footer class="footer">Sistema Atendimento CPAIG · Pertences e Visitas</footer></main>
 <div id="modalAlertaPertences" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="tituloAlertaPertences"><div class="modal"><div class="modal-head" id="tituloAlertaPertences">⚠️ Atenção: pertences recebidos neste mês</div><div class="modal-body"><p>Este interno já tem um recebimento de pertences registrado no mês atual.</p><div id="detalhesAlertaPertences"></div><p><strong>Deseja continuar com o novo cadastro?</strong></p></div><div class="modal-foot"><button class="gray" type="button" onclick="cancelarAlertaPertences()">VOLTAR</button><button class="green" type="button" onclick="continuarCadastroPertences()">CONTINUAR CADASTRO</button></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -60,9 +62,111 @@ async function api(url,opcoes){const r=await fetch(url,{credentials:'same-origin
 async function validarSessao(){const j=await api('/api/auth/me');usuarioAtual=j.user;if(!['pertences','admin'].includes(usuarioAtual.role)){location.replace(usuarioAtual.role==='mesa'?'/mesa.html':'/index.html');return false}$('usuarioAtual').textContent='Conectado: '+(usuarioAtual.fullName||usuarioAtual.username);return true}
 function abrirArea(nome){$('menuPrincipal').hidden=true;$('areaPertences').hidden=nome!=='pertences';$('areaVisitas').hidden=nome!=='visitas';if(nome==='pertences'){$('dataListaPertences').value=dataHoje();carregarPertencesDia()}if(nome==='visitas')carregarListasVisitas()}
 function voltarMenu(){$('areaPertences').hidden=true;$('areaVisitas').hidden=true;$('menuPrincipal').hidden=false}
-async function carregarBaseInternos(silencioso){try{const j=await api('/api/internals/base');const itens=Array.isArray(j.items)?j.items:[];const assinatura=JSON.stringify(itens)+'|'+String(j.updatedAt||'');if(assinatura!==assinaturaBase){baseInternos=itens.slice().sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR',{sensitivity:'base'}));assinaturaBase=assinatura;renderSugestoes('P',$('nomeInternoP').value);renderSugestoes('V',$('nomeInternoV').value)}const meta=j.updatedAt?'Base com '+baseInternos.length+' internos · atualizada em '+dataExibicao(j.updatedAt)+(j.updatedBy?' por '+j.updatedBy:''):'Base central ainda não foi carregada';$('baseInfo').textContent=meta;$('baseInfo').className='status info show';return true}catch(e){if(!silencioso)mensagemGeral(e.message,'error');return false}}
-async function atualizarBaseManual(){const botao=document.activeElement; if(botao)botao.disabled=true;try{await carregarBaseInternos(false);mensagemGeral('Listagem sincronizada com a base central. O Guichê, a Mesa e esta página usam a mesma base.','success')}finally{if(botao)botao.disabled=false}}
-function mostrarSugestoes(tipo,valor){const id=tipo==='P'?'nomeInternoP':'nomeInternoV';if($(id).value!==valor)$(id).value=valor;const q=normalizar(valor);const lista=(q?baseInternos.filter(x=>normalizar(x.nome).includes(q)):[]).slice(0,70);sugestoesAtuais[tipo]=lista;const box=$('sugestoes'+tipo);if(!q||!lista.length){box.hidden=true;box.innerHTML='';return}box.innerHTML=lista.map((x,i)=>'<button type="button" data-sugestao="'+i+'" onclick="selecionarInterno(\''+tipo+'\','+i+')"><strong>'+esc(x.nome)+'</strong><small>RGI: '+esc(x.rgi||'—')+' · Pavilhão: '+esc(x.pavilhao||'—')+' · Cela: '+esc(x.cela||'—')+'</small></button>').join('');box.hidden=false}
+function compararInternosPorPrimeiroNome(a,b){
+const pa=normalizar(a&&a.nome).split(/\s+/).filter(Boolean);
+const pb=normalizar(b&&b.nome).split(/\s+/).filter(Boolean);
+return (pa[0]||'').localeCompare(pb[0]||'','pt-BR')||
+(pa[1]||'').localeCompare(pb[1]||'','pt-BR')||
+pa.slice(2).join(' ').localeCompare(pb.slice(2).join(' '),'pt-BR')||
+String(a&&a.nome||'').localeCompare(String(b&&b.nome||''),'pt-BR',{sensitivity:'base'});
+}
+async function carregarBaseInternos(silencioso){
+try{
+const j=await api('/api/internals/base');
+const itens=Array.isArray(j.items)?j.items:[];
+const assinatura=JSON.stringify(itens)+'|'+String(j.updatedAt||'');
+if(assinatura!==assinaturaBase){
+baseInternos=itens.slice().sort(compararInternosPorPrimeiroNome);
+assinaturaBase=assinatura;
+renderSugestoes('P',$('nomeInternoP').value);
+renderSugestoes('V',$('nomeInternoV').value);
+}
+const meta=j.updatedAt?'Base com '+baseInternos.length+' internos · atualizada em '+dataExibicao(j.updatedAt)+(j.updatedBy?' por '+j.updatedBy:''):'Base central ainda não foi carregada';
+$('baseInfo').textContent=meta;
+$('baseInfo').className='status info show';
+return true;
+}catch(e){if(!silencioso)mensagemGeral(e.message,'error');return false}
+}
+function atualizarBaseManual(){
+const input=$('arquivoExcelBase');
+if(!input){mensagemGeral('O seletor de arquivo Excel não está disponível nesta página.','error');return}
+input.value='';
+input.click();
+}
+async function importarExcelBase(event){
+const input=event&&event.target;
+const arquivo=input&&input.files&&input.files[0];
+if(!arquivo)return;
+const botao=$('btnAtualizarBaseInternos');
+if(botao)botao.disabled=true;
+try{
+if(typeof XLSX==='undefined')throw new Error('A ferramenta de leitura do Excel não carregou. Verifique a conexão com a internet e tente novamente.');
+mensagemGeral('Lendo a planilha '+arquivo.name+'…','info');
+const conteudo=await arquivo.arrayBuffer();
+const workbook=XLSX.read(new Uint8Array(conteudo),{type:'array'});
+if(!workbook.SheetNames||!workbook.SheetNames.length)throw new Error('O arquivo não contém uma planilha para importar.');
+const sheet=workbook.Sheets[workbook.SheetNames[0]];
+const linhas=XLSX.utils.sheet_to_json(sheet,{header:1,defval:''});
+let indiceCabecalho=-1;
+let cabecalhoNormalizado=[];
+const nomesAceitos=['nome do interno','nome interno','nome','interno'];
+for(let i=0;i<linhas.length;i++){
+const tentativa=linhas[i].map(v=>normalizar(v));
+if(tentativa.includes('rgi')&&tentativa.some(v=>nomesAceitos.includes(v))){indiceCabecalho=i;cabecalhoNormalizado=tentativa;break}
+}
+if(indiceCabecalho<0)throw new Error('Não encontrei o cabeçalho. A planilha precisa ter as colunas NOME DO INTERNO e RGI.');
+function coluna(aliases){return cabecalhoNormalizado.findIndex(v=>aliases.includes(v))}
+const colNome=coluna(nomesAceitos);
+const colRGI=coluna(['rgi']);
+const colPavilhao=coluna(['pavilhão','pavilhao','pav','pav.']);
+const colCela=coluna(['cela','célula','celula']);
+if(colNome<0||colRGI<0)throw new Error('A planilha não possui as colunas obrigatórias NOME DO INTERNO e RGI.');
+const novaBase=[];
+for(let i=indiceCabecalho+1;i<linhas.length;i++){
+const linha=linhas[i];
+const nome=String(linha[colNome]??'').trim();
+if(!nome||normalizar(nome)==='totais')continue;
+novaBase.push({
+ nome,
+ rgi:String(linha[colRGI]??'').trim(),
+ pavilhao:String(colPavilhao>=0?(linha[colPavilhao]??''):'').trim(),
+ cela:String(colCela>=0?(linha[colCela]??''):'').trim()
+});
+}
+if(!novaBase.length)throw new Error('Não encontrei nenhum interno abaixo do cabeçalho. A base existente foi mantida.');
+if(!confirm('A planilha contém '+novaBase.length+' internos. Ao continuar, ela substituirá a base central compartilhada por Guichê, Mesa, Administração e Pertences e Visitas. Deseja continuar?')){mensagemGeral('Importação cancelada. A base central existente foi mantida.','info');return}
+const j=await api('/api/internals/base',{method:'PUT',body:JSON.stringify({items:novaBase})});
+const itensSalvos=Array.isArray(j.items)?j.items:novaBase;
+baseInternos=itensSalvos.slice().sort(compararInternosPorPrimeiroNome);
+assinaturaBase=JSON.stringify(itensSalvos)+'|'+String(j.updatedAt||'');
+renderSugestoes('P',$('nomeInternoP').value);
+renderSugestoes('V',$('nomeInternoV').value);
+const meta=j.updatedAt?'Base com '+baseInternos.length+' internos · atualizada em '+dataExibicao(j.updatedAt)+(j.updatedBy?' por '+j.updatedBy:''):'Base atualizada com '+baseInternos.length+' internos';
+$('baseInfo').textContent=meta;
+$('baseInfo').className='status info show';
+mensagemGeral('Excel importado com sucesso. '+baseInternos.length+' internos foram enviados para a base central compartilhada. Guichê, Mesa e Pertences e Visitas usam essa mesma base.','success');
+}catch(e){mensagemGeral(e.message||'Não foi possível importar a planilha Excel. A base compartilhada anterior foi mantida.','error')}
+finally{if(input)input.value='';if(botao)botao.disabled=false}
+}
+function mostrarSugestoes(tipo,valor){
+const id=tipo==='P'?'nomeInternoP':'nomeInternoV';
+if($(id).value!==valor)$(id).value=valor;
+const q=normalizar(valor);
+let lista=[];
+if(q){
+const porPrimeiroNome=baseInternos.filter(x=>{
+const partes=normalizar(x.nome).split(/\s+/).filter(Boolean);
+return (partes[0]||'').startsWith(q);
+});
+const resultados=porPrimeiroNome.length?porPrimeiroNome:baseInternos.filter(x=>normalizar(x.nome).includes(q));
+lista=resultados.slice().sort(compararInternosPorPrimeiroNome).slice(0,70);
+}
+sugestoesAtuais[tipo]=lista;
+const box=$('sugestoes'+tipo);
+if(!q||!lista.length){box.hidden=true;box.innerHTML='';return}
+box.innerHTML=lista.map((x,i)=>'<button type="button" data-sugestao="'+i+'" onclick="selecionarInterno(\''+tipo+'\','+i+')"><strong>'+esc(x.nome)+'</strong><small>RGI: '+esc(x.rgi||'—')+' · Pavilhão: '+esc(x.pavilhao||'—')+' · Cela: '+esc(x.cela||'—')+'</small></button>').join('');
+box.hidden=false;
+}
 function limparSelecao(tipo){if(tipo==='P'){selecionadoP=null;$('rgiP').value='';$('pavilhaoP').value='';$('celaP').value=''}else{selecionadoV=null;$('rgiV').value='';$('pavilhaoV').value='';$('celaV').value=''}}
 function configurarBusca(tipo){const id=tipo==='P'?'nomeInternoP':'nomeInternoV';$(id).addEventListener('input',()=>{limparSelecao(tipo);mostrarSugestoes(tipo,$(id).value)});$(id).addEventListener('focus',()=>mostrarSugestoes(tipo,$(id).value));$(id).addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('sugestoes'+tipo).hidden&&sugestoesAtuais[tipo].length){e.preventDefault();selecionarInterno(tipo,0)}else if(e.key==='Escape')$('sugestoes'+tipo).hidden=true})}
 function renderSugestoes(tipo,valor){const id=tipo==='P'?'nomeInternoP':'nomeInternoV';if($(id))mostrarSugestoes(tipo,valor||'')}
