@@ -1089,7 +1089,7 @@ return;
 tocarSom();
 },INTERVALO_ALARME_PENDENTES);
 }
-function tocarSom(){
+async function tocarSom(){
 if(!somAtivo){
 return;
 }
@@ -1098,8 +1098,11 @@ const ctx=obterContextoAudioMesa();
 if(!ctx){
 return;
 }
-if(ctx.state==="suspended"&&typeof ctx.resume==="function"){
-ctx.resume().catch(function(){});
+if(ctx.state!=="running"&&typeof ctx.resume==="function"){
+await ctx.resume();
+}
+if(!somAtivo||ctx.state!=="running"){
+return;
 }
 const inicio=ctx.currentTime;
 const osc=ctx.createOscillator();
