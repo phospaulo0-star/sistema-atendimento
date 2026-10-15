@@ -449,7 +449,7 @@ break-inside:avoid
 <div class="logo-area">
 <h1>MESA DE ATENDIMENTO</h1>
 <div class="sub">
-POLÍCIA PENAL DE MATO GROSSO DO SUL
+POLÃCIA PENAL DE MATO GROSSO DO SUL
 </div>
 <div class="cpaig">
 CPAIG
@@ -465,23 +465,23 @@ CPAIG
 <div class="container">
 <div class="toolbar">
 <button class="btn-green" onclick="receberTodos()">
-✅ RECEBER TODOS
+â RECEBER TODOS
 </button>
 <button class="btn-blue" onclick="abrirImpressao()">
-🖨️ IMPRIMIR
+ð¨ï¸ IMPRIMIR
 </button>
 <button class="btn-dark" onclick="abrirGuardados()">
-📁 ATENDIMENTOS GUARDADOS
+ð ATENDIMENTOS GUARDADOS
 </button>
 <button class="btn-gray" onclick="toggleSom()" id="btnSom">
-🔊 SOM: ATIVO
+ð SOM: ATIVO
 </button>
-<button class="btn-yellow" onclick="abrirArquivoExcelMesa()">🔄 ATUALIZAR BASE DE INTERNOS</button>
-<button class="btn-gray" onclick="baixarBackupSemanalContaMesa()">📊 BACKUP SEMANAL EXCEL — TOTAL</button>
+<button class="btn-yellow" onclick="abrirArquivoExcelMesa()">ð ATUALIZAR BASE DE INTERNOS</button>
+<button class="btn-gray" onclick="baixarBackupSemanalContaMesa()">ð BACKUP SEMANAL EXCEL â TOTAL</button>
 </div>
 <section class="section">
 <div class="section-header">
-<h2>📥 ATENDIMENTOS PENDENTES</h2>
+<h2>ð¥ ATENDIMENTOS PENDENTES</h2>
 <span class="counter" id="contadorPendentes">
 0
 </span>
@@ -492,7 +492,7 @@ CPAIG
 </section>
 <section class="section">
 <div class="section-header">
-<h2>📋 HISTÓRICO DE ATENDIMENTOS</h2>
+<h2>ð HISTÃRICO DE ATENDIMENTOS</h2>
 <span class="counter" id="contadorHistorico">
 0
 </span>
@@ -501,15 +501,15 @@ CPAIG
 <div class="toolbar">
 <button class="btn-yellow"
 onclick="guardarTodosHistorico()">
-🗄️ GUARDAR TODOS
+ðï¸ GUARDAR TODOS
 </button>
 <button class="btn-gray"
 onclick="ordenarHistorico('envio')">
-↕ ORDEM DE ENVIO
+â ORDEM DE ENVIO
 </button>
 <button class="btn-gray"
 onclick="ordenarHistorico('atendimento')">
-↕ POR ATENDIMENTO
+â POR ATENDIMENTO
 </button>
 </div>
 <div id="historicoContainer"></div>
@@ -521,8 +521,8 @@ onclick="ordenarHistorico('atendimento')">
 <div id="modalRecusa" class="modal-overlay">
 <div class="modal">
 <div class="modal-header">
-<h3>❌ RECUSAR ATENDIMENTO</h3>
-<button class="close" onclick="fecharRecusa()">×</button>
+<h3>â RECUSAR ATENDIMENTO</h3>
+<button class="close" onclick="fecharRecusa()">Ã</button>
 </div>
 <div class="modal-body">
 <div id="dadosRecusa"
@@ -534,7 +534,7 @@ Motivo da recusa
 </label>
 <textarea
 id="recusaMotivo"
-placeholder="Digite o motivo que deverá ser visualizado no GUICHÊ..."
+placeholder="Digite o motivo que deverÃ¡ ser visualizado no GUICHÃ..."
 ></textarea>
 </div>
 </div>
@@ -545,7 +545,7 @@ CANCELAR
 </button>
 <button class="btn-red"
 onclick="confirmarRecusa()">
-❌ CONFIRMAR RECUSA
+â CONFIRMAR RECUSA
 </button>
 </div>
 </div>
@@ -554,9 +554,9 @@ onclick="confirmarRecusa()">
 <div id="modalGuardados" class="modal-overlay">
 <div class="modal">
 <div class="modal-header">
-<h3>📁 ATENDIMENTOS GUARDADOS</h3>
+<h3>ð ATENDIMENTOS GUARDADOS</h3>
 <button class="close"
-onclick="fecharGuardados()">×</button>
+onclick="fecharGuardados()">Ã</button>
 </div>
 <div class="modal-body">
 <div class="toolbar">
@@ -576,17 +576,17 @@ FECHAR
 </div>
 </div>
 </div>
-<!-- MODAL IMPRESSÃO -->
+<!-- MODAL IMPRESSÃO -->
 <div id="modalImpressao" class="modal-overlay">
 <div class="modal">
 <div class="modal-header">
-<h3>🖨️ IMPRESSÃO</h3>
+<h3>ð¨ï¸ IMPRESSÃO</h3>
 <button class="close"
-onclick="fecharImpressao()">×</button>
+onclick="fecharImpressao()">Ã</button>
 </div>
 <div class="modal-body">
 <div class="form-group">
-<label>Tipo de impressão</label>
+<label>Tipo de impressÃ£o</label>
 <div class="radio-group">
 <label class="radio-option">
 <input
@@ -623,8 +623,8 @@ Por data
 <div class="form-group">
 <label>Atendimentos</label>
 <div class="acoes-opcoes">
-<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosImpressao',true)">☑️ SELECIONAR TODOS</button>
-<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosImpressao',false)">⬜ LIMPAR</button>
+<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosImpressao',true)">âï¸ SELECIONAR TODOS</button>
+<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosImpressao',false)">â¬ LIMPAR</button>
 </div>
 <div
 id="listaAtendimentosImpressao"
@@ -632,34 +632,34 @@ class="checkbox-list">
 </div>
 </div>
 <div class="form-group">
-<label>Pavilhão — filtro opcional</label>
+<label>PavilhÃ£o â filtro opcional</label>
 <div
 id="listaPavilhoesAtendimento"
 class="checkbox-list">
 </div>
 <div class="small"
 style="margin-top:6px;">
-Os pavilhões são carregados da base Excel de internos.
+Os pavilhÃµes sÃ£o carregados da base Excel de internos.
 </div>
 </div>
 </div>
 <div class="opcoes-pagina">
-<label><input type="checkbox" id="atendimentoPorPagina"> <strong>Atendimento por página</strong></label>
-<div class="small">Cada tipo de atendimento selecionado começará em uma nova página.</div>
+<label><input type="checkbox" id="atendimentoPorPagina"> <strong>Atendimento por pÃ¡gina</strong></label>
+<div class="small">Cada tipo de atendimento selecionado comeÃ§arÃ¡ em uma nova pÃ¡gina.</div>
 </div>
 </div>
 <div id="grupoPrintGeral"
 style="display:none;">
 <div class="form-group">
-<label>Pavilhão — filtro opcional</label>
+<label>PavilhÃ£o â filtro opcional</label>
 <div
 id="listaPavilhoesGeral"
 class="checkbox-list">
 </div>
 </div>
 <div class="opcoes-pagina">
-<label><input type="checkbox" id="geralPorPagina"> <strong>Atendimento por página</strong></label>
-<div class="small">Cada tipo de atendimento selecionado começará em uma nova página.</div>
+<label><input type="checkbox" id="geralPorPagina"> <strong>Atendimento por pÃ¡gina</strong></label>
+<div class="small">Cada tipo de atendimento selecionado comeÃ§arÃ¡ em uma nova pÃ¡gina.</div>
 </div>
 </div>
 <div id="grupoPrintData"
@@ -704,8 +704,8 @@ class="form-group"
 style="display:none;">
 <label>Atendimentos</label>
 <div class="acoes-opcoes">
-<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosData',true)">☑️ SELECIONAR TODOS</button>
-<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosData',false)">⬜ LIMPAR</button>
+<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosData',true)">âï¸ SELECIONAR TODOS</button>
+<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosData',false)">â¬ LIMPAR</button>
 </div>
 <div
 id="listaAtendimentosData"
@@ -713,7 +713,7 @@ class="checkbox-list">
 </div>
 </div>
 <div class="form-group">
-<label>Pavilhão — filtro opcional</label>
+<label>PavilhÃ£o â filtro opcional</label>
 <div
 id="listaPavilhoesData"
 class="checkbox-list">
@@ -722,8 +722,8 @@ class="checkbox-list">
 </div>
 </div>
 <div class="opcoes-pagina">
-<label><input type="checkbox" id="dataPorPagina"> <strong>Atendimento por página</strong></label>
-<div class="small">Cada tipo de atendimento encontrado nessa data começará em uma nova página.</div>
+<label><input type="checkbox" id="dataPorPagina"> <strong>Atendimento por pÃ¡gina</strong></label>
+<div class="small">Cada tipo de atendimento encontrado nessa data comeÃ§arÃ¡ em uma nova pÃ¡gina.</div>
 </div>
 </div>
 <div
@@ -739,7 +739,7 @@ CANCELAR
 </button>
 <button class="btn-blue"
 onclick="executarImpressao()">
-🖨️ IMPRIMIR
+ð¨ï¸ IMPRIMIR
 </button>
 </div>
 </div>
@@ -761,30 +761,30 @@ const STORAGE_SOM=
 const STORAGE_BASE_EXCEL=
 "atendimentoV23BaseInternos";
 const ATENDIMENTOS=[
-"Jurídico",
+"JurÃ­dico",
 "Psicossocial",
-"Médico",
+"MÃ©dico",
 "Odontologia",
 "Trabalho",
 "Chefia",
 "Chefe de equipe",
 "Portaria II",
-"Identificação",
+"IdentificaÃ§Ã£o",
 "Limpeza",
 "Advogado(a)",
 "Visita Assistida",
-"Autorização de Saída",
-"Licença Judicial",
+"AutorizaÃ§Ã£o de SaÃ­da",
+"LicenÃ§a Judicial",
 "7 dias",
 "7 dias monitorado",
-"Alvará",
+"AlvarÃ¡",
 "Salvo conduto",
 "Domiciliar",
-"Evasão",
+"EvasÃ£o",
 "Desvio de Rota",
 "Falta",
-"Regressão",
-"Mudança de Cela",
+"RegressÃ£o",
+"MudanÃ§a de Cela",
 "Hospitalizado",
 "Outros"
 ];
@@ -797,6 +797,10 @@ let historico=[];
 let arquivo=[];
 let recusasEnvio=[];
 let somAtivo=true;
+let alarmePendentesTimer=null;
+let contextoAudioMesa=null;
+let osciladorAlarmeAtual=null;
+const INTERVALO_ALARME_PENDENTES=2000;
 let recordIdRecusaAtual=null;
 let ordemHistorico="envio";
 let recusasLocais=new Set();
@@ -1028,51 +1032,94 @@ return;
 }
 btn.textContent=
 somAtivo
-?"🔊 SOM: ATIVO"
-:"🔇 SOM: DESATIVADO";
+?"ð SOM: ATIVO"
+:"ð SOM: DESATIVADO";
 }
 function toggleSom(){
 somAtivo=!somAtivo;
 salvarTudo();
 atualizarBotaoSom();
-if(somAtivo){
+if(!somAtivo){
+pararAlarmePendentes();
+return;
+}
+if(pendentes.length){
+atualizarAlarmePendentes();
+}else{
 tocarSom();
 }
+}
+function obterContextoAudioMesa(){
+if(contextoAudioMesa&&contextoAudioMesa.state!=="closed"){
+return contextoAudioMesa;
+}
+const AudioContext=
+window.AudioContext||
+window.webkitAudioContext;
+if(!AudioContext){
+return null;
+}
+contextoAudioMesa=new AudioContext();
+return contextoAudioMesa;
+}
+function pararAlarmePendentes(){
+if(alarmePendentesTimer!==null){
+window.clearInterval(alarmePendentesTimer);
+alarmePendentesTimer=null;
+}
+if(osciladorAlarmeAtual){
+try{osciladorAlarmeAtual.stop();}catch(e){}
+osciladorAlarmeAtual=null;
+}
+}
+function atualizarAlarmePendentes(){
+if(!somAtivo||!pendentes.length){
+pararAlarmePendentes();
+return;
+}
+if(alarmePendentesTimer!==null){
+return;
+}
+tocarSom();
+alarmePendentesTimer=window.setInterval(function(){
+if(!somAtivo||!pendentes.length){
+pararAlarmePendentes();
+return;
+}
+tocarSom();
+},INTERVALO_ALARME_PENDENTES);
 }
 function tocarSom(){
 if(!somAtivo){
 return;
 }
 try{
-const AudioContext=
-window.AudioContext||
-window.webkitAudioContext;
-if(!AudioContext){
+const ctx=obterContextoAudioMesa();
+if(!ctx){
 return;
 }
-const ctx=new AudioContext();
-const osc=
-ctx.createOscillator();
-const gain=
-ctx.createGain();
+if(ctx.state==="suspended"&&typeof ctx.resume==="function"){
+ctx.resume().catch(function(){});
+}
+const inicio=ctx.currentTime;
+const osc=ctx.createOscillator();
+const gain=ctx.createGain();
 osc.frequency.value=880;
 osc.type="sine";
-gain.gain.setValueAtTime(
-0.0001,
-ctx.currentTime
-);
-gain.gain.exponentialRampToValueAtTime(
-0.25,
-ctx.currentTime+0.02
-);
-gain.gain.exponentialRampToValueAtTime(
-0.0001,
-ctx.currentTime+0.35
-);
+gain.gain.setValueAtTime(0.0001,inicio);
+gain.gain.exponentialRampToValueAtTime(0.38,inicio+0.025);
+gain.gain.exponentialRampToValueAtTime(0.0001,inicio+0.62);
 osc.connect(gain);
 gain.connect(ctx.destination);
-osc.start();
-osc.stop(ctx.currentTime+0.4);
+osciladorAlarmeAtual=osc;
+osc.onended=function(){
+if(osciladorAlarmeAtual===osc){
+osciladorAlarmeAtual=null;
+}
+try{osc.disconnect();gain.disconnect();}catch(e){}
+};
+osc.start(inicio);
+osc.stop(inicio+0.65);
 }catch(e){}
 }
 function tocarRecusa(){
@@ -1128,8 +1175,8 @@ texto;
 let usuarioLogadoMesa=null;
 function criarBarraContaMesa(user){
 const bar=$("accountBar");bar.replaceChildren();
-const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" · "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
-if(user.role==="admin"){const link=document.createElement("a");link.href="/admin.html";link.textContent="ADMINISTRAÇÃO";bar.appendChild(link);}
+const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" Â· "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
+if(user.role==="admin"){const link=document.createElement("a");link.href="/admin.html";link.textContent="ADMINISTRAÃÃO";bar.appendChild(link);}
 const button=document.createElement("button");button.className="logout";button.textContent="SAIR";button.onclick=sairDaContaMesa;bar.appendChild(button);
 }
 async function sairDaContaMesa(){try{await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});}catch{}location.replace("/login.html");}
@@ -1147,14 +1194,14 @@ async function baixarBackupSemanalContaMesa(){
 try{
 const periodo=periodoSemanaBackupAtualMesa();
 const resposta=await fetch("/api/me/backup-weekly.xlsx?from="+encodeURIComponent(periodo.from)+"&to="+encodeURIComponent(periodo.to),{credentials:"same-origin",cache:"no-store"});
-if(!resposta.ok){let detalhe="Não foi possível gerar o Excel semanal total.";try{const erro=await resposta.json();detalhe=erro.message||detalhe}catch{}throw new Error(detalhe)}
+if(!resposta.ok){let detalhe="NÃ£o foi possÃ­vel gerar o Excel semanal total.";try{const erro=await resposta.json();detalhe=erro.message||detalhe}catch{}throw new Error(detalhe)}
 const quantidade=resposta.headers.get("X-Backup-Count")||"0";
 const blob=await resposta.blob();
 const url=URL.createObjectURL(blob);const link=document.createElement("a");
 link.href=url;link.download="Backup_Mesa_Total_"+periodo.from+"_a_"+periodo.to+".xlsx";
 document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-alert("Excel semanal total baixado.\nPeríodo pela Data do Atendimento: "+periodo.from+" a "+periodo.to+".\nAtendimentos incluídos: "+quantidade+".\n\nEste relatório inclui os atendimentos de todos os Guichês e todas as situações, inclusive recusados. Guarde-o em local protegido.");
-}catch(erro){console.error(erro);alert("Não foi possível baixar o Excel semanal total.\n\n"+(erro.message||"Verifique sua conexão e tente novamente."));}
+alert("Excel semanal total baixado.\nPerÃ­odo pela Data do Atendimento: "+periodo.from+" a "+periodo.to+".\nAtendimentos incluÃ­dos: "+quantidade+".\n\nEste relatÃ³rio inclui os atendimentos de todos os GuichÃªs e todas as situaÃ§Ãµes, inclusive recusados. Guarde-o em local protegido.");
+}catch(erro){console.error(erro);alert("NÃ£o foi possÃ­vel baixar o Excel semanal total.\n\n"+(erro.message||"Verifique sua conexÃ£o e tente novamente."));}
 }
 
 function abrirArquivoExcelMesa(){
@@ -1164,7 +1211,7 @@ if(input)input.click();
 async function importarBaseExcelMesa(event){
 const file=event.target.files&&event.target.files[0];
 if(!file)return;
-if(typeof XLSX==="undefined"){mostrarToast("Não foi possível carregar o leitor de Excel.","error");event.target.value="";return;}
+if(typeof XLSX==="undefined"){mostrarToast("NÃ£o foi possÃ­vel carregar o leitor de Excel.","error");event.target.value="";return;}
 try{
 const bytes=new Uint8Array(await file.arrayBuffer());
 const workbook=XLSX.read(bytes,{type:"array"});
@@ -1172,10 +1219,10 @@ const sheet=workbook.Sheets[workbook.SheetNames[0]];
 const rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:""});
 let headerIndex=-1;
 for(let i=0;i<rows.length;i++){const h=rows[i].map(x=>normalizar(x));if(h.includes("nome do interno")&&h.includes("rgi")){headerIndex=i;break;}}
-if(headerIndex<0)throw new Error("Não encontrei os cabeçalhos NOME DO INTERNO e RGI.");
+if(headerIndex<0)throw new Error("NÃ£o encontrei os cabeÃ§alhos NOME DO INTERNO e RGI.");
 const header=rows[headerIndex];
 const col=name=>header.findIndex(x=>normalizar(x)===normalizar(name));
-const cNome=col("NOME DO INTERNO"),cRgi=col("RGI"),cPav=col("PAVILHÃO"),cCela=col("CELA");
+const cNome=col("NOME DO INTERNO"),cRgi=col("RGI"),cPav=col("PAVILHÃO"),cCela=col("CELA");
 if(cNome<0||cRgi<0)throw new Error("A planilha precisa ter as colunas Nome do Interno e RGI.");
 const items=[];
 for(let i=headerIndex+1;i<rows.length;i++){
@@ -1183,13 +1230,13 @@ const row=rows[i];const nome=String(row[cNome]||"").trim();
 if(!nome||normalizar(nome)==="totais")continue;
 items.push({nome,rgi:String(row[cRgi]||"").trim(),pavilhao:String(cPav>=0?row[cPav]||"":"").trim(),cela:String(cCela>=0?row[cCela]||"":"").trim()});
 }
-if(!items.length)throw new Error("A planilha não contém internos para importar.");
+if(!items.length)throw new Error("A planilha nÃ£o contÃ©m internos para importar.");
 const response=await fetch("/api/internals/base",{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({items})});
 let result={};try{result=await response.json()}catch{}
-if(!response.ok||!result.ok)throw new Error(result.message||"O servidor não salvou a base.");
+if(!response.ok||!result.ok)throw new Error(result.message||"O servidor nÃ£o salvou a base.");
 await sincronizarBaseMesa();
-mostrarToast(`Base compartilhada atualizada: ${result.count||items.length} internos. Os outros logins serão avisados automaticamente.`,"success");
-}catch(error){mostrarToast("Falha ao importar Excel: "+(error.message||"verifique o arquivo e a conexão."),"error");}
+mostrarToast(`Base compartilhada atualizada: ${result.count||items.length} internos. Os outros logins serÃ£o avisados automaticamente.`,"success");
+}catch(error){mostrarToast("Falha ao importar Excel: "+(error.message||"verifique o arquivo e a conexÃ£o."),"error");}
 finally{event.target.value="";}
 }
 
@@ -1201,7 +1248,7 @@ const items=Array.isArray(data.items)?data.items:[];
 localStorage.setItem(STORAGE_BASE_EXCEL,JSON.stringify(items));
 preencherPavilhoesImpressao();
 return true;
-}catch(e){console.warn("Base compartilhada indisponível na Mesa:",e);return false;}
+}catch(e){console.warn("Base compartilhada indisponÃ­vel na Mesa:",e);return false;}
 }
 async function sincronizarAtendimentosMesa(){
 try{
@@ -1221,7 +1268,7 @@ else historico.push(x);
 });
 pendentes=pendentes.filter(x=>!estaRecusadoLocalmente(x.recordId));
 salvarTudo();renderPendentes();renderHistorico();renderGuardados();return true;
-}catch(e){console.warn("Histórico central da Mesa indisponível:",e);return false;}
+}catch(e){console.warn("HistÃ³rico central da Mesa indisponÃ­vel:",e);return false;}
 }
 function atualizarStatusCentralMesa(registro,status){
 if(!registro||!registro.recordId)return;
@@ -1299,7 +1346,7 @@ socket.addEventListener(
 pararHeartbeat();
 definirStatus(
 false,
-"Desconectada — reconectando..."
+"Desconectada â reconectando..."
 );
 agendarReconexao();
 }
@@ -1607,11 +1654,10 @@ pendente
 salvarTudo();
 renderPendentes();
 renderHistorico();
-tocarSom();
 mostrarToast(
 ehReenvio
-?"🔄 Atendimento reenviado pelo GUICHÊ e voltou para os pendentes."
-:"Novo atendimento recebido do GUICHÊ.",
+?"ð Atendimento reenviado pelo GUICHÃ e voltou para os pendentes."
+:"Novo atendimento recebido do GUICHÃ.",
 "success"
 );
 }
@@ -1669,7 +1715,7 @@ mostrarToast(
 function receberTodos(){
 if(!pendentes.length){
 mostrarToast(
-"Não há atendimentos pendentes.",
+"NÃ£o hÃ¡ atendimentos pendentes.",
 "warning"
 );
 return;
@@ -1870,6 +1916,7 @@ $("pendentesContainer");
 $("contadorPendentes")
 .textContent=
 pendentes.length;
+atualizarAlarmePendentes();
 if(!pendentes.length){
 container.innerHTML=`
       <div class="empty">
@@ -1898,7 +1945,7 @@ let html=`
             <th>Assunto</th>
             <th>Data do atendimento</th>
             <th>Enviado em</th>
-            <th>Ação</th>
+            <th>AÃ§Ã£o</th>
           </tr>
         </thead>
 
@@ -1923,7 +1970,7 @@ const pavilhao=
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO",
+"PAVILHÃO",
 "PAVILHAO"
 );
 const cela=
@@ -2005,13 +2052,13 @@ html+=`
               <button
                 class="btn-green"
                 onclick="receberUm('${escapeHtml(recordIdSeguro(registro.recordId))}')">
-                ✅ RECEBIDO
+                â RECEBIDO
               </button>
 
               <button
                 class="btn-red"
                 onclick="abrirRecusa('${escapeHtml(recordIdSeguro(registro.recordId))}')">
-                ❌ RECUSAR
+                â RECUSAR
               </button>
 
             </div>
@@ -2043,7 +2090,7 @@ historico.length;
 if(!historico.length){
 container.innerHTML=`
       <div class="empty">
-        Nenhum atendimento no histórico.
+        Nenhum atendimento no histÃ³rico.
       </div>
     `;
 return;
@@ -2094,8 +2141,8 @@ let html=`
             <th>Assunto</th>
             <th>Data</th>
             <th>Status</th>
-            <th>Informação</th>
-            <th>Ação</th>
+            <th>InformaÃ§Ã£o</th>
+            <th>AÃ§Ã£o</th>
           </tr>
         </thead>
 
@@ -2120,7 +2167,7 @@ const pavilhao=
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO",
+"PAVILHÃO",
 "PAVILHAO"
 );
 const cela=
@@ -2158,7 +2205,7 @@ registro.status===
 ){
 statusHtml=`
           <span class="badge badge-guarded">
-            🗄️ GUARDADO
+            ðï¸ GUARDADO
           </span>
         `;
 infoHtml=`
@@ -2177,7 +2224,7 @@ acaoHtml=`
 }else{
 statusHtml=`
           <span class="badge badge-received">
-            ✅ RECEBIDO
+            â RECEBIDO
           </span>
         `;
 infoHtml=`
@@ -2194,13 +2241,13 @@ acaoHtml=`
             <button
               class="btn-yellow"
               onclick="guardarAtendimento('${escapeHtml(recordIdSeguro(registro.recordId))}')">
-              🗄️ GUARDAR
+              ðï¸ GUARDAR
             </button>
 
             <button
               class="btn-red"
               onclick="excluirHistorico('${escapeHtml(recordIdSeguro(registro.recordId))}')">
-              🗑️ EXCLUIR
+              ðï¸ EXCLUIR
             </button>
 
           </div>
@@ -2294,7 +2341,7 @@ const pavilhao=
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO"
+"PAVILHÃO"
 );
 const cela=
 valorRegistro(
@@ -2411,12 +2458,12 @@ recusado
 );
 if(enviado){
 mostrarToast(
-"❌ Atendimento recusado. Removido da MESA e enviado ao GUICHÊ.",
+"â Atendimento recusado. Removido da MESA e enviado ao GUICHÃ.",
 "success"
 );
 }else{
 mostrarToast(
-"❌ Atendimento recusado. Será enviado ao GUICHÊ quando a conexão voltar.",
+"â Atendimento recusado. SerÃ¡ enviado ao GUICHÃ quando a conexÃ£o voltar.",
 "warning"
 );
 }
@@ -2429,14 +2476,14 @@ registro.recordId
 );
 if(!elegiveis.length){
 mostrarToast(
-"Não há atendimentos recebidos no histórico para guardar.",
+"NÃ£o hÃ¡ atendimentos recebidos no histÃ³rico para guardar.",
 "warning"
 );
 return;
 }
 if(!confirm(
 "Deseja guardar todos os " + elegiveis.length +
-" atendimentos recebidos do histórico da Mesa? Eles serão movidos para Atendimentos Guardados."
+" atendimentos recebidos do histÃ³rico da Mesa? Eles serÃ£o movidos para Atendimentos Guardados."
 )){
 return;
 }
@@ -2514,7 +2561,7 @@ return;
 }
 if(
 !confirm(
-"Deseja realmente excluir este atendimento do histórico?"
+"Deseja realmente excluir este atendimento do histÃ³rico?"
 )
 ){
 return;
@@ -2526,7 +2573,7 @@ indice,
 salvarTudo();
 renderHistorico();
 mostrarToast(
-"Atendimento excluído do histórico.",
+"Atendimento excluÃ­do do histÃ³rico.",
 "success"
 );
 }
@@ -2637,7 +2684,7 @@ let html=`
 lista.forEach(
 registro=>{
 let statusHtml=
-`<span class="badge badge-guarded">🗄️ GUARDADO</span>`;
+`<span class="badge badge-guarded">ðï¸ GUARDADO</span>`;
 let info="";
 if(
 registro.motivoRecusa||
@@ -2645,7 +2692,7 @@ registro.historicoRecusas?.length
 ){
 statusHtml=
 `<span class="badge badge-refused">
-            ❌ RECUSADO / GUARDADO
+            â RECUSADO / GUARDADO
           </span>`;
 info=`
           <div class="refusal-box">
@@ -2896,7 +2943,7 @@ const pavilhao=
 valorRegistro(
 item,
 "pavilhao",
-"PAVILHÃO",
+"PAVILHÃO",
 "PAVILHAO"
 );
 if(
@@ -2948,7 +2995,7 @@ if(!pavilhoes.length){
 mensagem.style.display=
 "block";
 mensagem.textContent=
-"Nenhum pavilhão foi encontrado na base Excel de internos.";
+"Nenhum pavilhÃ£o foi encontrado na base Excel de internos.";
 }else{
 mensagem.style.display=
 "none";
@@ -2970,7 +3017,7 @@ return;
 if(!pavilhoes.length){
 container.innerHTML=`
       <div class="small">
-        Base Excel não carregada.
+        Base Excel nÃ£o carregada.
       </div>
     `;
 return;
@@ -3085,7 +3132,7 @@ normalizar(
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO"
+"PAVILHÃO"
 )
 )
 )
@@ -3174,7 +3221,7 @@ const data=
 $("printData").value;
 if(!data){
 throw new Error(
-"Selecione a data da impressão."
+"Selecione a data da impressÃ£o."
 );
 }
 const tipo=
@@ -3309,7 +3356,7 @@ const pavilhao=
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO",
+"PAVILHÃO",
 "PAVILHAO"
 );
 const cela=
@@ -3394,7 +3441,7 @@ return`
         }
 
         <p>
-          Impressão:
+          ImpressÃ£o:
           ${escapeHtml(
             formatarDataHora(
               new Date().toISOString()
@@ -3500,7 +3547,7 @@ window.addEventListener(
 "online",
 ()=>{
 mostrarToast(
-"Conexão de rede restabelecida. Reconectando...",
+"ConexÃ£o de rede restabelecida. Reconectando...",
 "success"
 );
 retryDelay=1000;
@@ -3512,7 +3559,7 @@ window.addEventListener(
 ()=>{
 definirStatus(
 false,
-"Sem conexão de rede"
+"Sem conexÃ£o de rede"
 );
 }
 );
@@ -3556,7 +3603,7 @@ window.addEventListener("storage",event=>{if(event.key===STORAGE_BASE_EXCEL)pree
 setInterval(preencherPavilhoesImpressao,10000);
 setInterval(()=>{if(socket&&socket.readyState===WebSocket.OPEN){reenviarRecusasPendentes();reenviarConfirmacoesConhecidas();}},5000);
 setInterval(()=>{sincronizarAtendimentosMesa();sincronizarBaseMesa();},60000);
-}catch(e){console.error("Falha na inicialização da Mesa:",e);location.replace("/login.html");}
+}catch(e){console.error("Falha na inicializaÃ§Ã£o da Mesa:",e);location.replace("/login.html");}
 }
 window.addEventListener(
 "load",
