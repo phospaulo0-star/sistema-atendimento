@@ -12,7 +12,8 @@
 <header><div class="brand"><h1>PAINEL DO ADMINISTRADOR</h1><div>POLÍCIA PENAL DE MATO GROSSO DO SUL</div><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div class="account"><span id="currentUser">Validando sessão...</span><button class="light" onclick="sair()">SAIR</button></div></header>
 <main class="container">
 <div id="message" class="status-msg" role="status" aria-live="polite"></div>
-<nav class="toolbar"><a class="button primary" href="/index.html">ABRIR GUICHÊ</a><a class="button blue" href="/mesa.html">ABRIR MESA</a><a class="button dark" href="/pertences.html">PERTENCES E VISITAS</a><button class="dark" onclick="carregarTudo()">ATUALIZAR PAINEL</button><button class="primary" onclick="baixarBackupExcelSemanal()">📊 BAIXAR EXCEL SEMANAL TOTAL</button><button class="primary" onclick="baixarBackupSemanal()">BAIXAR BACKUP DA SEMANA JSON</button><button class="primary" onclick="baixarBackup()">BAIXAR BACKUP COMPLETO JSON</button></nav>
+<input id="arquivoExcelBaseAdmin" type="file" accept=".xlsx,.xls,.csv" hidden onchange="importarExcelBaseAdmin(event)">
+<nav class="toolbar"><a class="button primary" href="/index.html">ABRIR GUICHÊ</a><a class="button blue" href="/mesa.html">ABRIR MESA</a><a class="button dark" href="/pertences.html">PERTENCES E VISITAS</a><button class="primary" id="btnAtualizarBaseExcelAdmin" type="button" onclick="selecionarExcelBaseAdmin()">🔄 ATUALIZAR BASE DE INTERNOS (EXCEL)</button><button class="dark" onclick="carregarTudo()">ATUALIZAR PAINEL</button><button class="primary" onclick="baixarBackupExcelSemanal()">📊 BAIXAR EXCEL SEMANAL TOTAL</button><button class="primary" onclick="baixarBackupSemanal()">BAIXAR BACKUP DA SEMANA JSON</button><button class="primary" onclick="baixarBackup()">BAIXAR BACKUP COMPLETO JSON</button></nav>
 <section class="stats">
 <div class="stat"><span>Contas cadastradas</span><strong id="statUsers">—</strong><small id="statActive">— ativas</small></div>
 <div class="stat"><span>Atendimentos</span><strong id="statAttendances">—</strong><small>Registros persistidos no Neon</small></div>
@@ -34,6 +35,7 @@
 <section class="panel"><div class="panel-title"><div><h2>Backup e manutenção</h2></div></div><p>O backup JSON contém contas sem hashes de senha, atendimentos, base de internos e auditoria. Os botões permitem baixar o Excel semanal total e cópias JSON. O agendamento automático semanal ainda precisa ser configurado e testado separadamente no computador escolhido para guardar os arquivos.</p><p class="muted">Recomendação: guarde cópias em local restrito e mantenha uma cópia adicional protegida. Não compartilhe backups por e-mail ou mensageiros sem autorização.</p><p class="muted">Os arquivos JSON e Excel baixados por estes botões não são criptografados. Eles contêm dados operacionais sensíveis; guarde-os em uma pasta com acesso restrito. Não considere a rotina semanal automática ativa até que o agendamento seja configurado e testado.</p><button class="primary" onclick="baixarBackup()">GERAR E BAIXAR CÓPIA</button></section></div>
 <footer class="footer">Sistema Atendimento CPAIG · Administração · <span id="version">—</span></footer>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 let me=null, users=[], attendances=[], events=[];
 const $=id=>document.getElementById(id);
@@ -41,6 +43,35 @@ function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt
 function dt(v){if(!v)return '—';const d=new Date(v);return isNaN(d)?'—':d.toLocaleString('pt-BR')}
 function statusMsg(text,type='info'){const m=$('message');m.textContent=text;m.className='status-msg show '+type;window.scrollTo({top:0,behavior:'smooth'})}
 async function api(url,options={}){const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...options,headers:{...(options.headers||{}),...(options.body?{'Content-Type':'application/json'}:{})}});let j={};try{j=await r.json()}catch{}if(r.status===401){location.replace('/login.html');throw new Error('Sessão encerrada.');}if(!r.ok||j.ok===false)throw new Error(j.message||'Falha na solicitação.');return j}
+function normalizarCabecalhoExcelAdmin(valor){return String(valor??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
+function selecionarExcelBaseAdmin(){const input=$('arquivoExcelBaseAdmin');if(!input){statusMsg('Não foi possível abrir a seleção de arquivo.','error');return}input.value='';input.click()}
+async function importarExcelBaseAdmin(event){
+const input=event&&event.target;const arquivo=input&&input.files&&input.files[0];if(!arquivo)return;
+const botao=$('btnAtualizarBaseExcelAdmin');if(botao)botao.disabled=true;
+try{
+if(typeof XLSX==='undefined')throw new Error('A ferramenta de leitura do Excel não carregou. Verifique a conexão com a internet e tente novamente.');
+statusMsg('Lendo a planilha '+arquivo.name+'…','info');
+const workbook=XLSX.read(new Uint8Array(await arquivo.arrayBuffer()),{type:'array'});
+if(!workbook.SheetNames||!workbook.SheetNames.length)throw new Error('O arquivo não contém uma planilha para importar.');
+const linhas=XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{header:1,defval:''});
+const nomesAceitos=['nome do interno','nome interno','nome','interno'];let indiceCabecalho=-1,cabecalho=[];
+for(let i=0;i<linhas.length;i++){const linha=linhas[i].map(normalizarCabecalhoExcelAdmin);if(linha.includes('rgi')&&linha.some(x=>nomesAceitos.includes(x))){indiceCabecalho=i;cabecalho=linha;break}}
+if(indiceCabecalho<0)throw new Error('Não encontrei o cabeçalho. A planilha precisa ter as colunas NOME DO INTERNO e RGI.');
+function coluna(aliases){return cabecalho.findIndex(x=>aliases.includes(x))}
+const colNome=coluna(nomesAceitos),colRGI=coluna(['rgi']),colPavilhao=coluna(['pavilhao','pav','pav.']),colCela=coluna(['cela','celula']);
+if(colNome<0||colRGI<0||colPavilhao<0||colCela<0)throw new Error('A planilha precisa ter as quatro colunas: NOME DO INTERNO, RGI, PAVILHÃO e CELA. A base existente foi mantida.');
+const novaBase=[];
+for(let i=indiceCabecalho+1;i<linhas.length;i++){const linha=linhas[i],nome=String(linha[colNome]??'').trim();if(!nome||normalizarCabecalhoExcelAdmin(nome)==='totais')continue;novaBase.push({nome,rgi:String(linha[colRGI]??'').trim(),pavilhao:String(colPavilhao>=0?(linha[colPavilhao]??''):'').trim(),cela:String(colCela>=0?(linha[colCela]??''):'').trim()})}
+if(!novaBase.length)throw new Error('Não encontrei nenhum interno abaixo do cabeçalho. A base existente foi mantida.');
+if(!confirm('A planilha contém '+novaBase.length+' internos. Ao continuar, ela substituirá a base central compartilhada por Guichê, Mesa, Administração e Pertences e Visitas. Deseja continuar?')){statusMsg('Importação cancelada. A base central existente foi mantida.','info');return}
+const j=await api('/api/internals/base',{method:'PUT',body:JSON.stringify({items:novaBase})});
+const total=Number.isFinite(j.count)?j.count:(Array.isArray(j.items)?j.items.length:novaBase.length);
+$('statBase').textContent=String(total);
+$('statBaseDate').textContent=j.updatedAt?'Atualizada em '+dt(j.updatedAt)+(j.updatedBy?' por '+j.updatedBy:''):'Atualizada agora';
+statusMsg('Excel importado com sucesso. '+total+' internos foram enviados para a base central compartilhada. Guichê, Mesa e Pertences e Visitas usam essa mesma listagem.','success');
+}catch(e){statusMsg(e.message||'Não foi possível importar a planilha Excel. A base compartilhada anterior foi mantida.','error')}
+finally{if(input)input.value='';if(botao)botao.disabled=false}
+}
 async function validar(){try{const r=await api('/api/auth/me');me=r.user;if(me.role!=='admin'){location.replace(me.role==='mesa'?'/mesa.html':me.role==='pertences'?'/pertences.html':'/index.html');return false}$('currentUser').textContent=me.fullName+' ('+me.username+')';return true}catch(e){if(e.message!=='Sessão encerrada.')statusMsg(e.message);return false}}
 async function carregarTudo(){try{await Promise.all([carregarResumo(),carregarUsuarios(),carregarAtendimentos(),carregarEventos()]);}catch(e){statusMsg(e.message)}}
 async function carregarResumo(){const j=await api('/api/admin/overview');$('statUsers').textContent=j.users.total;$('statActive').textContent=j.users.active+' ativas';$('statAttendances').textContent=j.attendances.total;$('statPending').textContent=j.attendances.pending;$('statBase').textContent=j.base.count??0;$('statBaseDate').textContent=j.base.updated_at?'Atualizada em '+dt(j.base.updated_at):'Ainda não atualizada';$('version').textContent='Versão '+j.version}
