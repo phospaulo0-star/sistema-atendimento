@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Mesa de Atendimento - CPAIG</title>
-<style>
+style
 *{box-sizing:border-box}
 body{
 margin:0;
@@ -449,7 +449,7 @@ break-inside:avoid
 <div class="logo-area">
 <h1>MESA DE ATENDIMENTO</h1>
 <div class="sub">
-POLÃCIA PENAL DE MATO GROSSO DO SUL
+POL&#xCD;CIA PENAL DE MATO GROSSO DO SUL
 </div>
 <div class="cpaig">
 CPAIG
@@ -465,23 +465,23 @@ CPAIG
 <div class="container">
 <div class="toolbar">
 <button class="btn-green" onclick="receberTodos()">
-â RECEBER TODOS
+&#x2705; RECEBER TODOS
 </button>
 <button class="btn-blue" onclick="abrirImpressao()">
-ð¨ï¸ IMPRIMIR
+&#x1F5A8;&#xFE0F; IMPRIMIR
 </button>
 <button class="btn-dark" onclick="abrirGuardados()">
-ð ATENDIMENTOS GUARDADOS
+&#x1F4C1; ATENDIMENTOS GUARDADOS
 </button>
 <button class="btn-gray" onclick="toggleSom()" id="btnSom">
-ð SOM: ATIVO
+&#x1F50A; SOM: ATIVO
 </button>
-<button class="btn-yellow" onclick="abrirArquivoExcelMesa()">ð ATUALIZAR BASE DE INTERNOS</button>
-<button class="btn-gray" onclick="baixarBackupSemanalContaMesa()">ð BACKUP SEMANAL EXCEL â TOTAL</button>
+<button class="btn-yellow" onclick="abrirArquivoExcelMesa()">&#x1F504; ATUALIZAR BASE DE INTERNOS</button>
+<button class="btn-gray" onclick="baixarBackupSemanalContaMesa()">&#x1F4CA; BACKUP SEMANAL EXCEL &#x2014; TOTAL</button>
 </div>
 <section class="section">
 <div class="section-header">
-<h2>ð¥ ATENDIMENTOS PENDENTES</h2>
+<h2>&#x1F4E5; ATENDIMENTOS PENDENTES</h2>
 <span class="counter" id="contadorPendentes">
 0
 </span>
@@ -492,7 +492,7 @@ CPAIG
 </section>
 <section class="section">
 <div class="section-header">
-<h2>ð HISTÃRICO DE ATENDIMENTOS</h2>
+<h2>&#x1F4CB; HIST&#xD3;RICO DE ATENDIMENTOS</h2>
 <span class="counter" id="contadorHistorico">
 0
 </span>
@@ -501,15 +501,15 @@ CPAIG
 <div class="toolbar">
 <button class="btn-yellow"
 onclick="guardarTodosHistorico()">
-ðï¸ GUARDAR TODOS
+&#x1F5C4;&#xFE0F; GUARDAR TODOS
 </button>
 <button class="btn-gray"
 onclick="ordenarHistorico('envio')">
-â ORDEM DE ENVIO
+&#x2195; ORDEM DE ENVIO
 </button>
 <button class="btn-gray"
 onclick="ordenarHistorico('atendimento')">
-â POR ATENDIMENTO
+&#x2195; POR ATENDIMENTO
 </button>
 </div>
 <div id="historicoContainer"></div>
@@ -521,8 +521,8 @@ onclick="ordenarHistorico('atendimento')">
 <div id="modalRecusa" class="modal-overlay">
 <div class="modal">
 <div class="modal-header">
-<h3>â RECUSAR ATENDIMENTO</h3>
-<button class="close" onclick="fecharRecusa()">Ã</button>
+<h3>&#x274C; RECUSAR ATENDIMENTO</h3>
+<button class="close" onclick="fecharRecusa()">&#xD7;</button>
 </div>
 <div class="modal-body">
 <div id="dadosRecusa"
@@ -534,7 +534,7 @@ Motivo da recusa
 </label>
 <textarea
 id="recusaMotivo"
-placeholder="Digite o motivo que deverÃ¡ ser visualizado no GUICHÃ..."
+placeholder="Digite o motivo que dever&#xE1; ser visualizado no GUICH&#xCA;..."
 ></textarea>
 </div>
 </div>
@@ -545,7 +545,7 @@ CANCELAR
 </button>
 <button class="btn-red"
 onclick="confirmarRecusa()">
-â CONFIRMAR RECUSA
+&#x274C; CONFIRMAR RECUSA
 </button>
 </div>
 </div>
@@ -554,9 +554,9 @@ onclick="confirmarRecusa()">
 <div id="modalGuardados" class="modal-overlay">
 <div class="modal">
 <div class="modal-header">
-<h3>ð ATENDIMENTOS GUARDADOS</h3>
+<h3>&#x1F4C1; ATENDIMENTOS GUARDADOS</h3>
 <button class="close"
-onclick="fecharGuardados()">Ã</button>
+onclick="fecharGuardados()">&#xD7;</button>
 </div>
 <div class="modal-body">
 <div class="toolbar">
@@ -576,17 +576,17 @@ FECHAR
 </div>
 </div>
 </div>
-<!-- MODAL IMPRESSÃO -->
+<!-- MODAL IMPRESS&#xC3;O -->
 <div id="modalImpressao" class="modal-overlay">
 <div class="modal">
 <div class="modal-header">
-<h3>ð¨ï¸ IMPRESSÃO</h3>
+<h3>&#x1F5A8;&#xFE0F; IMPRESS&#xC3;O</h3>
 <button class="close"
-onclick="fecharImpressao()">Ã</button>
+onclick="fecharImpressao()">&#xD7;</button>
 </div>
 <div class="modal-body">
 <div class="form-group">
-<label>Tipo de impressÃ£o</label>
+<label>Tipo de impress&#xE3;o</label>
 <div class="radio-group">
 <label class="radio-option">
 <input
@@ -623,8 +623,8 @@ Por data
 <div class="form-group">
 <label>Atendimentos</label>
 <div class="acoes-opcoes">
-<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosImpressao',true)">âï¸ SELECIONAR TODOS</button>
-<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosImpressao',false)">â¬ LIMPAR</button>
+<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosImpressao',true)">&#x2611;&#xFE0F; SELECIONAR TODOS</button>
+<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosImpressao',false)">&#x2B1C; LIMPAR</button>
 </div>
 <div
 id="listaAtendimentosImpressao"
@@ -632,34 +632,34 @@ class="checkbox-list">
 </div>
 </div>
 <div class="form-group">
-<label>PavilhÃ£o â filtro opcional</label>
+<label>Pavilh&#xE3;o &#x2014; filtro opcional</label>
 <div
 id="listaPavilhoesAtendimento"
 class="checkbox-list">
 </div>
 <div class="small"
 style="margin-top:6px;">
-Os pavilhÃµes sÃ£o carregados da base Excel de internos.
+Os pavilh&#xF5;es s&#xE3;o carregados da base Excel de internos.
 </div>
 </div>
 </div>
 <div class="opcoes-pagina">
-<label><input type="checkbox" id="atendimentoPorPagina"> <strong>Atendimento por pÃ¡gina</strong></label>
-<div class="small">Cada tipo de atendimento selecionado comeÃ§arÃ¡ em uma nova pÃ¡gina.</div>
+<label><input type="checkbox" id="atendimentoPorPagina"> <strong>Atendimento por p&#xE1;gina</strong></label>
+<div class="small">Cada tipo de atendimento selecionado come&#xE7;ar&#xE1; em uma nova p&#xE1;gina.</div>
 </div>
 </div>
 <div id="grupoPrintGeral"
 style="display:none;">
 <div class="form-group">
-<label>PavilhÃ£o â filtro opcional</label>
+<label>Pavilh&#xE3;o &#x2014; filtro opcional</label>
 <div
 id="listaPavilhoesGeral"
 class="checkbox-list">
 </div>
 </div>
 <div class="opcoes-pagina">
-<label><input type="checkbox" id="geralPorPagina"> <strong>Atendimento por pÃ¡gina</strong></label>
-<div class="small">Cada tipo de atendimento selecionado comeÃ§arÃ¡ em uma nova pÃ¡gina.</div>
+<label><input type="checkbox" id="geralPorPagina"> <strong>Atendimento por p&#xE1;gina</strong></label>
+<div class="small">Cada tipo de atendimento selecionado come&#xE7;ar&#xE1; em uma nova p&#xE1;gina.</div>
 </div>
 </div>
 <div id="grupoPrintData"
@@ -704,8 +704,8 @@ class="form-group"
 style="display:none;">
 <label>Atendimentos</label>
 <div class="acoes-opcoes">
-<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosData',true)">âï¸ SELECIONAR TODOS</button>
-<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosData',false)">â¬ LIMPAR</button>
+<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosData',true)">&#x2611;&#xFE0F; SELECIONAR TODOS</button>
+<button type="button" class="btn-gray" onclick="marcarAtendimentosImpressao('listaAtendimentosData',false)">&#x2B1C; LIMPAR</button>
 </div>
 <div
 id="listaAtendimentosData"
@@ -713,7 +713,7 @@ class="checkbox-list">
 </div>
 </div>
 <div class="form-group">
-<label>PavilhÃ£o â filtro opcional</label>
+<label>Pavilh&#xE3;o &#x2014; filtro opcional</label>
 <div
 id="listaPavilhoesData"
 class="checkbox-list">
@@ -722,8 +722,8 @@ class="checkbox-list">
 </div>
 </div>
 <div class="opcoes-pagina">
-<label><input type="checkbox" id="dataPorPagina"> <strong>Atendimento por pÃ¡gina</strong></label>
-<div class="small">Cada tipo de atendimento encontrado nessa data comeÃ§arÃ¡ em uma nova pÃ¡gina.</div>
+<label><input type="checkbox" id="dataPorPagina"> <strong>Atendimento por p&#xE1;gina</strong></label>
+<div class="small">Cada tipo de atendimento encontrado nessa data come&#xE7;ar&#xE1; em uma nova p&#xE1;gina.</div>
 </div>
 </div>
 <div
@@ -739,12 +739,12 @@ CANCELAR
 </button>
 <button class="btn-blue"
 onclick="executarImpressao()">
-ð¨ï¸ IMPRIMIR
+&#x1F5A8;&#xFE0F; IMPRIMIR
 </button>
 </div>
 </div>
 </div>
-<div id="areaImpressao" style="display:none;"></div><input id="arquivoExcelMesa" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarBaseExcelMesa(event)"><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script>
+<div id="areaImpressao" style="display:none;"></div><input id="arquivoExcelMesa" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarBaseExcelMesa(event)">script</script>script
 "use strict";
 const STORAGE_HISTORICO=
 "mesaAtendimentosV23";
@@ -761,30 +761,30 @@ const STORAGE_SOM=
 const STORAGE_BASE_EXCEL=
 "atendimentoV23BaseInternos";
 const ATENDIMENTOS=[
-"JurÃ­dico",
+"Jur&#xED;dico",
 "Psicossocial",
-"MÃ©dico",
+"M&#xE9;dico",
 "Odontologia",
 "Trabalho",
 "Chefia",
 "Chefe de equipe",
 "Portaria II",
-"IdentificaÃ§Ã£o",
+"Identifica&#xE7;&#xE3;o",
 "Limpeza",
 "Advogado(a)",
 "Visita Assistida",
-"AutorizaÃ§Ã£o de SaÃ­da",
-"LicenÃ§a Judicial",
+"Autoriza&#xE7;&#xE3;o de Sa&#xED;da",
+"Licen&#xE7;a Judicial",
 "7 dias",
 "7 dias monitorado",
-"AlvarÃ¡",
+"Alvar&#xE1;",
 "Salvo conduto",
 "Domiciliar",
-"EvasÃ£o",
+"Evas&#xE3;o",
 "Desvio de Rota",
 "Falta",
-"RegressÃ£o",
-"MudanÃ§a de Cela",
+"Regress&#xE3;o",
+"Mudan&#xE7;a de Cela",
 "Hospitalizado",
 "Outros"
 ];
@@ -1032,8 +1032,8 @@ return;
 }
 btn.textContent=
 somAtivo
-?"ð SOM: ATIVO"
-:"ð SOM: DESATIVADO";
+?"&#x1F50A; SOM: ATIVO"
+:"&#x1F507; SOM: DESATIVADO";
 }
 function toggleSom(){
 somAtivo=!somAtivo;
@@ -1175,8 +1175,8 @@ texto;
 let usuarioLogadoMesa=null;
 function criarBarraContaMesa(user){
 const bar=$("accountBar");bar.replaceChildren();
-const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" Â· "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
-if(user.role==="admin"){const link=document.createElement("a");link.href="/admin.html";link.textContent="ADMINISTRAÃÃO";bar.appendChild(link);}
+const span=document.createElement("span");span.textContent="Conectado: "+(user.fullName||user.username)+" &#xB7; "+(user.role==="admin"?"ADMINISTRADOR":"MESA");bar.appendChild(span);
+if(user.role==="admin"){const link=document.createElement("a");link.href="/admin.html";link.textContent="ADMINISTRA&#xC7;&#xC3;O";bar.appendChild(link);}
 const button=document.createElement("button");button.className="logout";button.textContent="SAIR";button.onclick=sairDaContaMesa;bar.appendChild(button);
 }
 async function sairDaContaMesa(){try{await fetch("/api/auth/logout",{method:"POST",credentials:"same-origin"});}catch{}location.replace("/login.html");}
@@ -1194,14 +1194,14 @@ async function baixarBackupSemanalContaMesa(){
 try{
 const periodo=periodoSemanaBackupAtualMesa();
 const resposta=await fetch("/api/me/backup-weekly.xlsx?from="+encodeURIComponent(periodo.from)+"&to="+encodeURIComponent(periodo.to),{credentials:"same-origin",cache:"no-store"});
-if(!resposta.ok){let detalhe="NÃ£o foi possÃ­vel gerar o Excel semanal total.";try{const erro=await resposta.json();detalhe=erro.message||detalhe}catch{}throw new Error(detalhe)}
+if(!resposta.ok){let detalhe="N&#xE3;o foi poss&#xED;vel gerar o Excel semanal total.";try{const erro=await resposta.json();detalhe=erro.message||detalhe}catch{}throw new Error(detalhe)}
 const quantidade=resposta.headers.get("X-Backup-Count")||"0";
 const blob=await resposta.blob();
 const url=URL.createObjectURL(blob);const link=document.createElement("a");
 link.href=url;link.download="Backup_Mesa_Total_"+periodo.from+"_a_"+periodo.to+".xlsx";
 document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-alert("Excel semanal total baixado.\nPerÃ­odo pela Data do Atendimento: "+periodo.from+" a "+periodo.to+".\nAtendimentos incluÃ­dos: "+quantidade+".\n\nEste relatÃ³rio inclui os atendimentos de todos os GuichÃªs e todas as situaÃ§Ãµes, inclusive recusados. Guarde-o em local protegido.");
-}catch(erro){console.error(erro);alert("NÃ£o foi possÃ­vel baixar o Excel semanal total.\n\n"+(erro.message||"Verifique sua conexÃ£o e tente novamente."));}
+alert("Excel semanal total baixado.\nPer&#xED;odo pela Data do Atendimento: "+periodo.from+" a "+periodo.to+".\nAtendimentos inclu&#xED;dos: "+quantidade+".\n\nEste relat&#xF3;rio inclui os atendimentos de todos os Guich&#xEA;s e todas as situa&#xE7;&#xF5;es, inclusive recusados. Guarde-o em local protegido.");
+}catch(erro){console.error(erro);alert("N&#xE3;o foi poss&#xED;vel baixar o Excel semanal total.\n\n"+(erro.message||"Verifique sua conex&#xE3;o e tente novamente."));}
 }
 
 function abrirArquivoExcelMesa(){
@@ -1211,7 +1211,7 @@ if(input)input.click();
 async function importarBaseExcelMesa(event){
 const file=event.target.files&&event.target.files[0];
 if(!file)return;
-if(typeof XLSX==="undefined"){mostrarToast("NÃ£o foi possÃ­vel carregar o leitor de Excel.","error");event.target.value="";return;}
+if(typeof XLSX==="undefined"){mostrarToast("N&#xE3;o foi poss&#xED;vel carregar o leitor de Excel.","error");event.target.value="";return;}
 try{
 const bytes=new Uint8Array(await file.arrayBuffer());
 const workbook=XLSX.read(bytes,{type:"array"});
@@ -1219,10 +1219,10 @@ const sheet=workbook.Sheets[workbook.SheetNames[0]];
 const rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:""});
 let headerIndex=-1;
 for(let i=0;i<rows.length;i++){const h=rows[i].map(x=>normalizar(x));if(h.includes("nome do interno")&&h.includes("rgi")){headerIndex=i;break;}}
-if(headerIndex<0)throw new Error("NÃ£o encontrei os cabeÃ§alhos NOME DO INTERNO e RGI.");
+if(headerIndex<0)throw new Error("N&#xE3;o encontrei os cabe&#xE7;alhos NOME DO INTERNO e RGI.");
 const header=rows[headerIndex];
 const col=name=>header.findIndex(x=>normalizar(x)===normalizar(name));
-const cNome=col("NOME DO INTERNO"),cRgi=col("RGI"),cPav=col("PAVILHÃO"),cCela=col("CELA");
+const cNome=col("NOME DO INTERNO"),cRgi=col("RGI"),cPav=col("PAVILH&#xC3;O"),cCela=col("CELA");
 if(cNome<0||cRgi<0)throw new Error("A planilha precisa ter as colunas Nome do Interno e RGI.");
 const items=[];
 for(let i=headerIndex+1;i<rows.length;i++){
@@ -1230,13 +1230,13 @@ const row=rows[i];const nome=String(row[cNome]||"").trim();
 if(!nome||normalizar(nome)==="totais")continue;
 items.push({nome,rgi:String(row[cRgi]||"").trim(),pavilhao:String(cPav>=0?row[cPav]||"":"").trim(),cela:String(cCela>=0?row[cCela]||"":"").trim()});
 }
-if(!items.length)throw new Error("A planilha nÃ£o contÃ©m internos para importar.");
+if(!items.length)throw new Error("A planilha n&#xE3;o cont&#xE9;m internos para importar.");
 const response=await fetch("/api/internals/base",{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({items})});
 let result={};try{result=await response.json()}catch{}
-if(!response.ok||!result.ok)throw new Error(result.message||"O servidor nÃ£o salvou a base.");
+if(!response.ok||!result.ok)throw new Error(result.message||"O servidor n&#xE3;o salvou a base.");
 await sincronizarBaseMesa();
-mostrarToast(`Base compartilhada atualizada: ${result.count||items.length} internos. Os outros logins serÃ£o avisados automaticamente.`,"success");
-}catch(error){mostrarToast("Falha ao importar Excel: "+(error.message||"verifique o arquivo e a conexÃ£o."),"error");}
+mostrarToast(`Base compartilhada atualizada: ${result.count||items.length} internos. Os outros logins ser&#xE3;o avisados automaticamente.`,"success");
+}catch(error){mostrarToast("Falha ao importar Excel: "+(error.message||"verifique o arquivo e a conex&#xE3;o."),"error");}
 finally{event.target.value="";}
 }
 
@@ -1248,7 +1248,7 @@ const items=Array.isArray(data.items)?data.items:[];
 localStorage.setItem(STORAGE_BASE_EXCEL,JSON.stringify(items));
 preencherPavilhoesImpressao();
 return true;
-}catch(e){console.warn("Base compartilhada indisponÃ­vel na Mesa:",e);return false;}
+}catch(e){console.warn("Base compartilhada indispon&#xED;vel na Mesa:",e);return false;}
 }
 async function sincronizarAtendimentosMesa(){
 try{
@@ -1268,7 +1268,7 @@ else historico.push(x);
 });
 pendentes=pendentes.filter(x=>!estaRecusadoLocalmente(x.recordId));
 salvarTudo();renderPendentes();renderHistorico();renderGuardados();return true;
-}catch(e){console.warn("HistÃ³rico central da Mesa indisponÃ­vel:",e);return false;}
+}catch(e){console.warn("Hist&#xF3;rico central da Mesa indispon&#xED;vel:",e);return false;}
 }
 function atualizarStatusCentralMesa(registro,status){
 if(!registro||!registro.recordId)return;
@@ -1346,7 +1346,7 @@ socket.addEventListener(
 pararHeartbeat();
 definirStatus(
 false,
-"Desconectada â reconectando..."
+"Desconectada &#x2014; reconectando..."
 );
 agendarReconexao();
 }
@@ -1656,8 +1656,8 @@ renderPendentes();
 renderHistorico();
 mostrarToast(
 ehReenvio
-?"ð Atendimento reenviado pelo GUICHÃ e voltou para os pendentes."
-:"Novo atendimento recebido do GUICHÃ.",
+?"&#x1F504; Atendimento reenviado pelo GUICH&#xCA; e voltou para os pendentes."
+:"Novo atendimento recebido do GUICH&#xCA;.",
 "success"
 );
 }
@@ -1715,7 +1715,7 @@ mostrarToast(
 function receberTodos(){
 if(!pendentes.length){
 mostrarToast(
-"NÃ£o hÃ¡ atendimentos pendentes.",
+"N&#xE3;o h&#xE1; atendimentos pendentes.",
 "warning"
 );
 return;
@@ -1945,7 +1945,7 @@ let html=`
             <th>Assunto</th>
             <th>Data do atendimento</th>
             <th>Enviado em</th>
-            <th>AÃ§Ã£o</th>
+            <th>A&#xE7;&#xE3;o</th>
           </tr>
         </thead>
 
@@ -1970,7 +1970,7 @@ const pavilhao=
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO",
+"PAVILH&#xC3;O",
 "PAVILHAO"
 );
 const cela=
@@ -2052,13 +2052,13 @@ html+=`
               <button
                 class="btn-green"
                 onclick="receberUm('${escapeHtml(recordIdSeguro(registro.recordId))}')">
-                â RECEBIDO
+                &#x2705; RECEBIDO
               </button>
 
               <button
                 class="btn-red"
                 onclick="abrirRecusa('${escapeHtml(recordIdSeguro(registro.recordId))}')">
-                â RECUSAR
+                &#x274C; RECUSAR
               </button>
 
             </div>
@@ -2090,7 +2090,7 @@ historico.length;
 if(!historico.length){
 container.innerHTML=`
       <div class="empty">
-        Nenhum atendimento no histÃ³rico.
+        Nenhum atendimento no hist&#xF3;rico.
       </div>
     `;
 return;
@@ -2141,8 +2141,8 @@ let html=`
             <th>Assunto</th>
             <th>Data</th>
             <th>Status</th>
-            <th>InformaÃ§Ã£o</th>
-            <th>AÃ§Ã£o</th>
+            <th>Informa&#xE7;&#xE3;o</th>
+            <th>A&#xE7;&#xE3;o</th>
           </tr>
         </thead>
 
@@ -2167,7 +2167,7 @@ const pavilhao=
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO",
+"PAVILH&#xC3;O",
 "PAVILHAO"
 );
 const cela=
@@ -2205,7 +2205,7 @@ registro.status===
 ){
 statusHtml=`
           <span class="badge badge-guarded">
-            ðï¸ GUARDADO
+            &#x1F5C4;&#xFE0F; GUARDADO
           </span>
         `;
 infoHtml=`
@@ -2224,7 +2224,7 @@ acaoHtml=`
 }else{
 statusHtml=`
           <span class="badge badge-received">
-            â RECEBIDO
+            &#x2705; RECEBIDO
           </span>
         `;
 infoHtml=`
@@ -2241,13 +2241,13 @@ acaoHtml=`
             <button
               class="btn-yellow"
               onclick="guardarAtendimento('${escapeHtml(recordIdSeguro(registro.recordId))}')">
-              ðï¸ GUARDAR
+              &#x1F5C4;&#xFE0F; GUARDAR
             </button>
 
             <button
               class="btn-red"
               onclick="excluirHistorico('${escapeHtml(recordIdSeguro(registro.recordId))}')">
-              ðï¸ EXCLUIR
+              &#x1F5D1;&#xFE0F; EXCLUIR
             </button>
 
           </div>
@@ -2341,7 +2341,7 @@ const pavilhao=
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO"
+"PAVILH&#xC3;O"
 );
 const cela=
 valorRegistro(
@@ -2458,12 +2458,12 @@ recusado
 );
 if(enviado){
 mostrarToast(
-"â Atendimento recusado. Removido da MESA e enviado ao GUICHÃ.",
+"&#x274C; Atendimento recusado. Removido da MESA e enviado ao GUICH&#xCA;.",
 "success"
 );
 }else{
 mostrarToast(
-"â Atendimento recusado. SerÃ¡ enviado ao GUICHÃ quando a conexÃ£o voltar.",
+"&#x274C; Atendimento recusado. Ser&#xE1; enviado ao GUICH&#xCA; quando a conex&#xE3;o voltar.",
 "warning"
 );
 }
@@ -2476,14 +2476,14 @@ registro.recordId
 );
 if(!elegiveis.length){
 mostrarToast(
-"NÃ£o hÃ¡ atendimentos recebidos no histÃ³rico para guardar.",
+"N&#xE3;o h&#xE1; atendimentos recebidos no hist&#xF3;rico para guardar.",
 "warning"
 );
 return;
 }
 if(!confirm(
 "Deseja guardar todos os " + elegiveis.length +
-" atendimentos recebidos do histÃ³rico da Mesa? Eles serÃ£o movidos para Atendimentos Guardados."
+" atendimentos recebidos do hist&#xF3;rico da Mesa? Eles ser&#xE3;o movidos para Atendimentos Guardados."
 )){
 return;
 }
@@ -2561,7 +2561,7 @@ return;
 }
 if(
 !confirm(
-"Deseja realmente excluir este atendimento do histÃ³rico?"
+"Deseja realmente excluir este atendimento do hist&#xF3;rico?"
 )
 ){
 return;
@@ -2573,7 +2573,7 @@ indice,
 salvarTudo();
 renderHistorico();
 mostrarToast(
-"Atendimento excluÃ­do do histÃ³rico.",
+"Atendimento exclu&#xED;do do hist&#xF3;rico.",
 "success"
 );
 }
@@ -2684,7 +2684,7 @@ let html=`
 lista.forEach(
 registro=>{
 let statusHtml=
-`<span class="badge badge-guarded">ðï¸ GUARDADO</span>`;
+`<span class="badge badge-guarded">&#x1F5C4;&#xFE0F; GUARDADO</span>`;
 let info="";
 if(
 registro.motivoRecusa||
@@ -2692,7 +2692,7 @@ registro.historicoRecusas?.length
 ){
 statusHtml=
 `<span class="badge badge-refused">
-            â RECUSADO / GUARDADO
+            &#x274C; RECUSADO / GUARDADO
           </span>`;
 info=`
           <div class="refusal-box">
@@ -2943,7 +2943,7 @@ const pavilhao=
 valorRegistro(
 item,
 "pavilhao",
-"PAVILHÃO",
+"PAVILH&#xC3;O",
 "PAVILHAO"
 );
 if(
@@ -2995,7 +2995,7 @@ if(!pavilhoes.length){
 mensagem.style.display=
 "block";
 mensagem.textContent=
-"Nenhum pavilhÃ£o foi encontrado na base Excel de internos.";
+"Nenhum pavilh&#xE3;o foi encontrado na base Excel de internos.";
 }else{
 mensagem.style.display=
 "none";
@@ -3017,7 +3017,7 @@ return;
 if(!pavilhoes.length){
 container.innerHTML=`
       <div class="small">
-        Base Excel nÃ£o carregada.
+        Base Excel n&#xE3;o carregada.
       </div>
     `;
 return;
@@ -3132,7 +3132,7 @@ normalizar(
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO"
+"PAVILH&#xC3;O"
 )
 )
 )
@@ -3221,7 +3221,7 @@ const data=
 $("printData").value;
 if(!data){
 throw new Error(
-"Selecione a data da impressÃ£o."
+"Selecione a data da impress&#xE3;o."
 );
 }
 const tipo=
@@ -3356,7 +3356,7 @@ const pavilhao=
 valorRegistro(
 registro,
 "pavilhao",
-"PAVILHÃO",
+"PAVILH&#xC3;O",
 "PAVILHAO"
 );
 const cela=
@@ -3441,7 +3441,7 @@ return`
         }
 
         <p>
-          ImpressÃ£o:
+          Impress&#xE3;o:
           ${escapeHtml(
             formatarDataHora(
               new Date().toISOString()
@@ -3547,7 +3547,7 @@ window.addEventListener(
 "online",
 ()=>{
 mostrarToast(
-"ConexÃ£o de rede restabelecida. Reconectando...",
+"Conex&#xE3;o de rede restabelecida. Reconectando...",
 "success"
 );
 retryDelay=1000;
@@ -3559,7 +3559,7 @@ window.addEventListener(
 ()=>{
 definirStatus(
 false,
-"Sem conexÃ£o de rede"
+"Sem conex&#xE3;o de rede"
 );
 }
 );
@@ -3603,7 +3603,7 @@ window.addEventListener("storage",event=>{if(event.key===STORAGE_BASE_EXCEL)pree
 setInterval(preencherPavilhoesImpressao,10000);
 setInterval(()=>{if(socket&&socket.readyState===WebSocket.OPEN){reenviarRecusasPendentes();reenviarConfirmacoesConhecidas();}},5000);
 setInterval(()=>{sincronizarAtendimentosMesa();sincronizarBaseMesa();},60000);
-}catch(e){console.error("Falha na inicializaÃ§Ã£o da Mesa:",e);location.replace("/login.html");}
+}catch(e){console.error("Falha na inicializa&#xE7;&#xE3;o da Mesa:",e);location.replace("/login.html");}
 }
 window.addEventListener(
 "load",
