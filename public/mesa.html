@@ -486,7 +486,7 @@ CPAIG
 <span class="counter" id="visitasMesaContador">0 listas</span>
 </div>
 <div class="section-body">
-<p style="margin:0 0 12px;color:#475569;line-height:1.45">Consulta das listas do mÃ³dulo Pertences e Visitas. As informaÃ§Ãµes sÃ£o atualizadas automaticamente a cada 5 segundos enquanto este painel estiver aberto. A Mesa pode consultar e imprimir; somente o mÃ³dulo Pertences e Visitas pode incluir internos ou fechar listas.</p>
+<p style="margin:0 0 12px;color:#475569;line-height:1.45">Consulta das listas do m&#243;dulo Pertences e Visitas. As informa&#231;&#245;es s&#227;o atualizadas automaticamente a cada 5 segundos enquanto este painel estiver aberto. A Mesa pode consultar e imprimir; somente o m&#243;dulo Pertences e Visitas pode incluir internos ou fechar listas.</p>
 <div class="toolbar" style="align-items:center">
 <label for="visitasMesaListaSelecionada" style="font-weight:bold">Lista para imprimir:</label>
 <select id="visitasMesaListaSelecionada" style="padding:10px;border:1px solid #cbd5e1;border-radius:7px;min-width:150px;max-width:100%"><option value="">Carregando listas...</option></select>
@@ -3731,7 +3731,7 @@ async function carregarListasVisitasMesa(opcoes = {}) {
     if (atualizado) {
       atualizado.textContent = 'Atualizado em ' + new Intl.DateTimeFormat('pt-BR', {
         timeZone: 'America/Campo_Grande', hour: '2-digit', minute: '2-digit', second: '2-digit'
-      }).format(new Date()) + '. AtualizaÃ§Ã£o automÃ¡tica a cada 5 segundos.';
+      }).format(new Date()) + '. Atualiza\u00E7\u00E3o autom\u00E1tica a cada 5 segundos.';
     }
   } catch (e) {
     erroVisitasMesa = e.message || 'Falha ao carregar as listas de visitas.';
