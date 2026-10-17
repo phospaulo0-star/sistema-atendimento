@@ -92,7 +92,21 @@
   </div>
 </section>
 <section class="field"><label for="s5">06 – FALTA / DISPENSA / ATESTADO MÉDICO</label><textarea id="s5" data-section="06 – FALTA / DISPENSA / ATESTADO MÉDICO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s6">07 – FÉRIAS</label><textarea id="s6" data-section="07 – FÉRIAS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field">
+  <label for="feriasSearch">07 – FÉRIAS</label>
+  <textarea id="s6" data-section="07 – FÉRIAS" rows="3" placeholder="N/C" style="display:none" aria-hidden="true"></textarea>
+  <div class="he-manager">
+    <p class="small">Selecione os servidores em férias. A lista deste item é independente do item 05; os nomes incluídos aqui só ficam registrados neste relatório.</p>
+    <input id="feriasSearch" type="search" placeholder="Pesquisar servidor pelo nome..." autocomplete="off">
+    <select id="feriasNames" aria-label="Lista de servidores para férias" size="6" style="width:100%;margin-top:8px"></select>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button type="button" id="feriasSelectBtn">Incluir nas férias</button>
+      <button type="button" id="feriasAddBtn">Adicionar nome somente a este relatório</button>
+      <button type="button" id="feriasDeleteBtn">Retirar das férias</button>
+    </div>
+    <p id="feriasStatus" class="small">A lista de servidores será carregada junto com o item 05.</p>
+  </div>
+</section>
 <section class="field"><label for="s7">08 – TROCA DE PLANTÃO</label><textarea id="s7" data-section="08 – TROCA DE PLANTÃO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s8">09 – REFORÇO</label><textarea id="s8" data-section="09 – REFORÇO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s9">10 – ESCALA DIURNA</label><textarea id="s9" data-section="10 – ESCALA DIURNA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -144,6 +158,8 @@ function adicionarLinhaEquipe02(){equipe02Linhas.push({funcao:'',nome:''});rende
 function excluirLinhaEquipe02(i){if(equipe02Linhas.length<=1){alert('Mantenha pelo menos uma linha no item 02.');return}equipe02Linhas.splice(i,1);renderEquipe02();sincronizarEquipe02()}
 function formContent(){const out={};document.querySelectorAll('[data-section]').forEach(el=>out[el.dataset.section]=el.value);return out}
 const PADROES_RELATORIO={
+  '05 – PLANTÃO EXTRAORDINÁRIO (HE)':'N/C',
+  '07 – FÉRIAS':'N/C',
   '03 – TRANSPORTE DE SERVIDORES':'SEM ALTERAÇÃO.',
   '04 – ATRASO':'N/C.',
   '06 – FALTA / DISPENSA / ATESTADO MÉDICO':'N/C.',
@@ -252,6 +268,7 @@ async function carregarNomesHE() {
     );
 
     heNamesCache = result.names || [];
+    renderListaFerias($('feriasSearch')?.value || '');
 
     // Reutiliza a lista padrão do item 05 para os dois campos do item 01.
     for (const id of ['recebePlantao', 'entregaPlantao']) {
@@ -521,6 +538,47 @@ function selecionarNomeHE() {
     '" foi incluído somente neste relatório.'
   );
 }
+
+function nomesDoRelatorioFerias(){
+  const texto=String($('s6').value||'').trim();
+  if(!texto||/^N\/C$/i.test(texto))return [];
+  return texto.split(/\r?\n/).map(x=>x.replace(/^\s*\d+[.)]\s*/, '').trim()).filter(Boolean);
+}
+function atualizarRelatorioFerias(nomes){
+  const limpos=[...new Set((nomes||[]).map(n=>String(n||'').trim()).filter(Boolean))];
+  $('s6').value=limpos.length?limpos.map((n,i)=>(i+1)+'. '+n).join('\n'):'N/C';
+  changed();
+}
+function feriasStatus(t){const el=$('feriasStatus');if(el)el.textContent=t;}
+function renderListaFerias(filtro=''){
+  const sel=$('feriasNames');if(!sel)return;const f=normalizarNomeHE(filtro);sel.innerHTML='';
+  heNamesCache.filter(n=>normalizarNomeHE(n.name).includes(f)).forEach(n=>{const o=document.createElement('option');o.value=n.id;o.textContent=n.name;sel.appendChild(o)});
+}
+function selecionarNomeFerias(){
+  if(readOnly||!current||current.status==='encerrado'){feriasStatus('Abra um relatório em edição antes de incluir nomes.');return;}
+  const item=heNamesCache.find(n=>String(n.id)===$('feriasNames').value);
+  if(!item){feriasStatus('Selecione um servidor na lista.');return;}
+  const nomes=nomesDoRelatorioFerias();
+  if(nomes.some(n=>normalizarNomeHE(n)===normalizarNomeHE(item.name))){feriasStatus('Esse servidor já está na lista de férias.');return;}
+  nomes.push(item.name);atualizarRelatorioFerias(nomes);feriasStatus('Servidor incluído somente neste relatório.');
+}
+function adicionarNomeFerias(){
+  if(readOnly||!current||current.status==='encerrado'){feriasStatus('Abra um relatório em edição antes de adicionar nomes.');return;}
+  const nome=prompt('Digite o nome do servidor que deseja registrar em férias neste relatório:');if(!nome||!nome.trim())return;
+  const nomes=nomesDoRelatorioFerias();if(nomes.some(n=>normalizarNomeHE(n)===normalizarNomeHE(nome))){feriasStatus('Esse servidor já está na lista.');return;}
+  nomes.push(nome.trim());atualizarRelatorioFerias(nomes);feriasStatus('Nome adicionado somente a este relatório.');
+}
+function excluirNomeFerias(){
+  if(readOnly||!current||current.status==='encerrado'){feriasStatus('Abra um relatório em edição antes de retirar nomes.');return;}
+  const item=heNamesCache.find(n=>String(n.id)===$('feriasNames').value);if(!item){feriasStatus('Selecione na lista o servidor que deseja retirar.');return;}
+  const nomes=nomesDoRelatorioFerias();const restantes=nomes.filter(n=>normalizarNomeHE(n)!==normalizarNomeHE(item.name));
+  if(restantes.length===nomes.length){feriasStatus('O servidor selecionado não consta nesta lista de férias.');return;}
+  atualizarRelatorioFerias(restantes);feriasStatus(restantes.length?'Servidor retirado das férias deste relatório.':'Nenhum servidor na lista: será impresso N/C.');
+}
+$('feriasSearch').addEventListener('input',()=>renderListaFerias($('feriasSearch').value));
+$('feriasSelectBtn').addEventListener('click',selecionarNomeFerias);
+$('feriasAddBtn').addEventListener('click',adicionarNomeFerias);
+$('feriasDeleteBtn').addEventListener('click',excluirNomeFerias);
 
 $('heSearch').addEventListener('input', () => {
   const filtro = normalizarNomeHE($('heSearch').value);
