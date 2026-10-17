@@ -18,7 +18,7 @@ const VERSAO = '2.11.0';
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PORT = process.env.PORT || 3000;
 const SESSION_COOKIE = 'sa_session';
-const SESSION_HORAS = 12;
+const SESSION_HORAS = 24;
 
 const pool = process.env.DATABASE_URL
   ? new Pool({
@@ -38,7 +38,6 @@ const clientes = new Map();
 const pendentes = new Map();
 const recusasPendentes = new Map();
 const recebidos = new Map();
-const tentativasLogin = new Map();
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
@@ -207,7 +206,14 @@ async function usuarioDaRequisicao(req) {
       WHERE s.token_hash = $1 AND s.expires_at > NOW() AND u.is_active = TRUE AND u.deleted_at IS NULL`,
     [hashToken(token)]
   );
-  return result.rows[0] || null;
+  const user = result.rows[0] || null;
+  if (user) {
+    await pool.query(
+      "UPDATE sessions SET expires_at = NOW() + ($2 * INTERVAL '1 hour') WHERE token_hash = $1",
+      [hashToken(token), SESSION_HORAS]
+    );
+  }
+  return user;
 }
 function exigirAutenticacao(req, res, next) {
   exigirBanco(req, res, () => {
@@ -597,8 +603,6 @@ app.get('/status', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, re
 
 app.post('/api/auth/login', exigirBanco, async (req, res) => {
   const ip = String(req.ip || req.socket.remoteAddress || 'unknown');
-  const tent = tentativasLogin.get(ip) || { count: 0, until: 0 };
-  if (tent.until > Date.now()) return res.status(429).json({ ok: false, message: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' });
   const username = textoSeguro(req.body?.username, 80);
   const password = String(req.body?.password || '');
   if (!username || !password) return res.status(400).json({ ok: false, message: 'Informe o usuÃ¡rio e a senha.' });
@@ -610,13 +614,14 @@ app.post('/api/auth/login', exigirBanco, async (req, res) => {
     const user = result.rows[0];
     const valid = user && await verificarSenha(password, user.password_hash);
     if (!valid) {
-      tent.count++;
-      if (tent.count >= 8) { tent.until = Date.now() + 5 * 60 * 1000; tent.count = 0; }
-      tentativasLogin.set(ip, tent);
+      await registrarAuditoria(null, 'login_falha', null, {
+        username: normalizarUsuario(username),
+        ip,
+        motivo: user ? 'senha_invalida' : 'usuario_inexistente'
+      });
       await new Promise(resolve => setTimeout(resolve, 250));
       return res.status(401).json({ ok: false, message: 'UsuÃ¡rio ou senha invÃ¡lidos.' });
     }
-    tentativasLogin.delete(ip);
     const token = crypto.randomBytes(32).toString('base64url');
     const expires = new Date(Date.now() + SESSION_HORAS * 60 * 60 * 1000);
     await pool.query('INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1,$2,$3)', [hashToken(token), user.id, expires]);
@@ -743,7 +748,7 @@ app.get('/api/me/backup-data', exigirBanco, exigirAutenticacao, async (req, res)
       scope: req.user.role === 'guiche'
         ? 'Somente atendimentos pertencentes a esta conta do GuichÃª.'
         : req.user.role === 'mesa'
-          ? 'Atendimentos nÃ£o recusados visÃ­veis Ã  Mesa.'
+          ? 'Atendimentos nÃ£o recusados visÃ­veis Ã  Mesa.'
           : 'Atendimentos de todas as contas, conforme acesso administrativo.',
       period: periodo,
       count: attendances.length,
@@ -804,7 +809,7 @@ app.post('/api/me/import-legacy', exigirBanco, exigirAutenticacao, async (req, r
 });
 
 app.get('/api/mesa/attendances', exigirBanco, exigirAutenticacao, async (req, res) => {
-  if (!['mesa', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Acesso restrito Ã  Mesa.' });
+  if (!['mesa', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Acesso restrito Ã  Mesa.' });
   try {
     const result = await pool.query("SELECT * FROM attendances WHERE status <> 'recusado' ORDER BY created_at DESC LIMIT 10000");
     res.json({ ok: true, attendances: result.rows.map(row => ({
@@ -1325,13 +1330,13 @@ function hojeCampoGrande() {
 }
 function acessoModulo(req, res, next) {
   if (!req.user || !['admin', 'pertences'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã  Ã¡rea Pertences e Visitas.' });
+    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã  Ã¡rea Pertences e Visitas.' });
   }
   next();
 }
 function acessoListasMesa(req, res, next) {
   if (!req.user || !['admin', 'pertences', 'mesa'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã s listas de visitas.' });
+    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã s listas de visitas.' });
   }
   next();
 }
