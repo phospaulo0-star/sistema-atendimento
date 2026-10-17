@@ -12,7 +12,22 @@
 <section class="field"><label for="s1">02 – EQUIPE DE PLANTÃO (24x72h)</label><textarea id="s1" data-section="02 – EQUIPE DE PLANTÃO (24x72h)" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s2">03 – TRANSPORTE DE SERVIDORES</label><textarea id="s2" data-section="03 – TRANSPORTE DE SERVIDORES" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s3">04 – ATRASO</label><textarea id="s3" data-section="04 – ATRASO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s4">05 – PLANTÃO EXTRAORDINÁRIO (HE)</label><textarea id="s4" data-section="05 – PLANTÃO EXTRAORDINÁRIO (HE)" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+
+<section class="field">
+  <label for="heSearch">05 – PLANTÃO EXTRAORDINÁRIO (HE)</label>
+  <textarea id="s4" data-section="05 – PLANTÃO EXTRAORDINÁRIO (HE)" rows="3" placeholder="Nomes selecionados para o HE..." style="display:none"></textarea>
+  <div class="he-manager">
+    <input id="heSearch" type="search" placeholder="Pesquisar nome na lista compartilhada..." autocomplete="off">
+    <select id="heNames" aria-label="Nomes de HE" size="5" style="width:100%;margin-top:8px"></select>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      <button type="button" id="heAddBtn">Adicionar nome</button>
+      <button type="button" id="heEditBtn">Editar selecionado</button>
+      <button type="button" id="heDeleteBtn">Excluir selecionado</button>
+      <button type="button" id="heSelectBtn">Usar no relatório</button>
+    </div>
+    <p id="heStatus" class="small">Carregando lista compartilhada...</p>
+  </div>
+</section>
 <section class="field"><label for="s5">06 – FALTA / DISPENSA / ATESTADO MÉDICO</label><textarea id="s5" data-section="06 – FALTA / DISPENSA / ATESTADO MÉDICO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s6">07 – FÉRIAS</label><textarea id="s6" data-section="07 – FÉRIAS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s7">08 – TROCA DE PLANTÃO</label><textarea id="s7" data-section="08 – TROCA DE PLANTÃO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -62,6 +77,155 @@ function localKey(){return current?'cpaig_shift_report_'+current.id:'cpaig_shift
 function localSave(){try{localStorage.setItem(localKey(),JSON.stringify({id:current?.id||null,revision,title:$('title').value,reportDate:$('reportDate').value,shiftName:$('shiftName').value,content:formContent(),savedAt:new Date().toISOString()}))}catch{}}
 function loadLocal(){try{return JSON.parse(localStorage.getItem(localKey())||'null')}catch{return null}}
 function inputsDisabled(disabled){document.querySelectorAll('#editor textarea,#title,#reportDate,#shiftName').forEach(el=>el.disabled=disabled);$('saveBtn').disabled=disabled||!current;$('closeBtn').disabled=disabled||!current||current.status==='encerrado';$('reopenBtn').disabled=readOnly||!current||current.status!=='encerrado'||me?.role!=='chefe';$('newBtn').disabled=disabled}
+
+let heNamesCache = [];
+
+function heStatus(text) {
+  const el = document.getElementById('heStatus');
+  if (el) el.textContent = text;
+}
+
+async function carregarNomesHE() {
+  const select = document.getElementById('heNames');
+  const search = document.getElementById('heSearch');
+  if (!select || !me) return;
+
+  try {
+    const team = me.role === 'admin' ? (me.team || 'A') : me.team;
+    const url = '/api/relatorios/he-nomes?team=' + encodeURIComponent(team);
+    const result = await api(url);
+
+    heNamesCache = result.names || [];
+    const filtro = (search.value || '').normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+
+    select.innerHTML = '';
+    heNamesCache
+      .filter(item => item.name.normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('pt-BR').includes(filtro))
+      .forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.textContent = item.name;
+        select.appendChild(option);
+      });
+
+    const somenteLeitura = readOnly || !['chefe', 'auxiliar'].includes(me.role);
+    document.getElementById('heAddBtn').disabled = somenteLeitura;
+    document.getElementById('heEditBtn').disabled = somenteLeitura;
+    document.getElementById('heDeleteBtn').disabled = somenteLeitura;
+
+    heStatus(heNamesCache.length + ' nome(s) na lista compartilhada da equipe.');
+  } catch (e) {
+    heStatus('Não foi possível carregar a lista. Confira a conexão e tente novamente.');
+  }
+}
+
+async function adicionarNomeHE() {
+  if (!['chefe', 'auxiliar'].includes(me?.role) || readOnly) return;
+
+  const name = prompt('Digite o nome completo do policial penal:');
+  if (!name || !name.trim()) return;
+
+  try {
+    await api('/api/relatorios/he-nomes', {
+      method: 'POST',
+      body: JSON.stringify({ name: name.trim() })
+    });
+    await carregarNomesHE();
+    heStatus('Nome adicionado à lista compartilhada.');
+  } catch (e) {
+    heStatus(e.message || 'Não foi possível adicionar. O nome pode já existir.');
+  }
+}
+
+async function editarNomeHE() {
+  if (!['chefe', 'auxiliar'].includes(me?.role) || readOnly) return;
+
+  const select = document.getElementById('heNames');
+  const item = heNamesCache.find(n => String(n.id) === select.value);
+  if (!item) {
+    heStatus('Selecione um nome para editar.');
+    return;
+  }
+
+  const name = prompt('Editar nome:', item.name);
+  if (!name || !name.trim()) return;
+
+  try {
+    await api('/api/relatorios/he-nomes/' + encodeURIComponent(item.id), {
+      method: 'PATCH',
+      body: JSON.stringify({ name: name.trim() })
+    });
+    await carregarNomesHE();
+    heStatus('Nome atualizado.');
+  } catch (e) {
+    heStatus(e.message || 'Não foi possível editar o nome.');
+  }
+}
+
+async function excluirNomeHE() {
+  if (!['chefe', 'auxiliar'].includes(me?.role) || readOnly) return;
+
+  const select = document.getElementById('heNames');
+  const item = heNamesCache.find(n => String(n.id) === select.value);
+  if (!item) {
+    heStatus('Selecione um nome para excluir.');
+    return;
+  }
+
+  if (!confirm('Excluir "' + item.name + '" da lista compartilhada da equipe?')) return;
+
+  try {
+    await api('/api/relatorios/he-nomes/' + encodeURIComponent(item.id), {
+      method: 'DELETE'
+    });
+    await carregarNomesHE();
+    heStatus('Nome excluído da lista compartilhada.');
+  } catch (e) {
+    heStatus(e.message || 'Não foi possível excluir o nome.');
+  }
+}
+
+function selecionarNomeHE() {
+  const select = document.getElementById('heNames');
+  const item = heNamesCache.find(n => String(n.id) === select.value);
+  if (!item) {
+    heStatus('Selecione um nome na lista.');
+    return;
+  }
+
+  const campo = document.getElementById('s4');
+  const nomes = campo.value.split('\n').map(n => n.trim()).filter(Boolean);
+  if (!nomes.includes(item.name)) nomes.push(item.name);
+  campo.value = nomes.join('\n');
+  changed();
+  heStatus('Nome incluído no relatório. Repita para incluir outros nomes.');
+}
+
+document.getElementById('heSearch').addEventListener('input', () => {
+  const select = document.getElementById('heNames');
+  const filtro = document.getElementById('heSearch').value
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('pt-BR');
+
+  select.innerHTML = '';
+  heNamesCache.filter(item => item.name.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('pt-BR').includes(filtro))
+    .forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = item.name;
+      select.appendChild(option);
+    });
+});
+
+document.getElementById('heAddBtn').addEventListener('click', adicionarNomeHE);
+document.getElementById('heEditBtn').addEventListener('click', editarNomeHE);
+document.getElementById('heDeleteBtn').addEventListener('click', excluirNomeHE);
+document.getElementById('heSelectBtn').addEventListener('click', selecionarNomeHE);
 function renderList(){const root=$('reportsList');if(!reports.length){root.innerHTML='<p class="small">Nenhum relatório cadastrado para esta equipe.</p>';return}root.innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="abrir('${esc(r.id)}')">${r.id===current?.id?'ABERTO':'ABRIR'}</button></div>`).join('')}
 async function api(url,options={}){const res=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let j={};try{j=await res.json()}catch{}if(!res.ok){const e=new Error(j.message||'Falha na comunicação com o servidor.');e.status=res.status;e.data=j;throw e}return j}
 async function iniciar(){try{const j=await api('/api/auth/me');me=j.user;if(!['chefe','auxiliar','admin'].includes(me.role)){location.replace(me.role==='mesa'?'/mesa.html':me.role==='pertences'?'/pertences.html':'/index.html');return}readOnly=me.role==='admin';$('who').textContent=me.fullName+' · '+(readOnly?'ADMINISTRADOR (CONSULTA)':(me.role==='chefe'?'CHEFE':'AUXILIAR')+' · EQUIPE '+me.team);$('team').value=me.team||'Todas';$('newBtn').classList.toggle('hidden',readOnly);$('editor').classList.toggle('hidden',readOnly);$('saveBtn').classList.toggle('hidden',readOnly);$('closeBtn').classList.toggle('hidden',readOnly);$('reopenBtn').classList.toggle('hidden',readOnly);document.querySelectorAll('#reportDate,#shiftName,#title').forEach(el=>el.addEventListener('change',changed));document.querySelectorAll('#editor textarea').forEach(el=>el.addEventListener('input',changed));if(readOnly){$('status').textContent='Modo consulta: o administrador não pode editar relatórios.';$('reportsPanel').querySelector('p').textContent='Consulta de relatórios de todas as equipes A, B, C e D.'}await carregarLista();if(!readOnly){const first=reports.find(r=>r.status==='aberto')||reports[0];if(first)abrir(first.id);else novoRelatorio()}refreshTimer=setInterval(poll,5000)}catch(e){msg(e.message,'bad')}}
@@ -77,5 +241,5 @@ async function poll(){if(!navigator.onLine)return;try{const old=current&&reports
 async function mostrarHistorico(){if(!current)return;try{const url=readOnly?'/api/admin/shift-reports/'+encodeURIComponent(current.id)+'/history':'/api/relatorios/'+encodeURIComponent(current.id)+'/historico';const j=await api(url);$('historyList').innerHTML=(j.history||[]).map(h=>`<div class="report-item"><div><strong>${esc(h.action)} · revisão ${h.revision}</strong><div class="small">${esc(h.full_name||h.username||'Usuário')} · ${esc(new Date(h.created_at).toLocaleString('pt-BR'))}</div><details><summary>Ver conteúdo anterior e corrigido</summary><pre>${esc(JSON.stringify({anterior:h.previous_content,novo:h.new_content,detalhes:h.details},null,2))}</pre></details></div></div>`).join('')||'<p>Sem histórico.</p>';$('historyPanel').classList.remove('hidden')}catch(e){msg(e.message,'bad')}}
 window.addEventListener('online',async()=>{state('Conexão retornou · sincronizando…');if(dirty)await salvar('salvar');await carregarLista()});window.addEventListener('beforeunload',e=>{if(dirty){localSave();e.preventDefault();e.returnValue=''}});
 async function sair(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}finally{location.replace('/login.html')}}
-iniciar();
+iniciar().then(() => carregarNomesHE());
 </script></body></html>
