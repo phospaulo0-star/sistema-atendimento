@@ -15,17 +15,47 @@
 
 <section class="field">
   <label for="heSearch">05 – PLANTÃO EXTRAORDINÁRIO (HE)</label>
-  <textarea id="s4" data-section="05 – PLANTÃO EXTRAORDINÁRIO (HE)" rows="3" placeholder="Nomes selecionados para o HE..." style="display:none"></textarea>
+
+  <textarea
+    id="s4"
+    data-section="05 – PLANTÃO EXTRAORDINÁRIO (HE)"
+    rows="3"
+    placeholder="Nomes selecionados para o HE..."
+    style="display:none"
+  ></textarea>
+
   <div class="he-manager">
-    <input id="heSearch" type="search" placeholder="Pesquisar nome na lista compartilhada..." autocomplete="off">
-    <select id="heNames" aria-label="Nomes de HE" size="5" style="width:100%;margin-top:8px"></select>
+    <p class="small">
+      A lista abaixo é a lista padrão da equipe. As alterações no relatório
+      atual não modificam os outros plantões.
+    </p>
+
+    <input
+      id="heSearch"
+      type="search"
+      placeholder="Pesquisar nome na lista compartilhada..."
+      autocomplete="off"
+    >
+
+    <select
+      id="heNames"
+      aria-label="Nomes de HE"
+      size="6"
+      style="width:100%;margin-top:8px"
+    ></select>
+
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-      <button type="button" id="heAddBtn">Adicionar nome</button>
-      <button type="button" id="heEditBtn">Editar selecionado</button>
-      <button type="button" id="heDeleteBtn">Excluir selecionado</button>
-      <button type="button" id="heSelectBtn">Usar no relatório</button>
+      <button type="button" id="heSelectBtn">Incluir no plantão</button>
+      <button type="button" id="heAddBtn">Adicionar nome ao plantão</button>
+      <button type="button" id="heDeleteBtn">Retirar do plantão</button>
+      <button type="button" id="heSeedBtn">
+        Cadastrar lista padrão da equipe C
+      </button>
     </div>
-    <p id="heStatus" class="small">Carregando lista compartilhada...</p>
+
+    <p id="heStatus" class="small">
+      Carregando lista compartilhada...
+    </p>
   </div>
 </section>
 <section class="field"><label for="s5">06 – FALTA / DISPENSA / ATESTADO MÉDICO</label><textarea id="s5" data-section="06 – FALTA / DISPENSA / ATESTADO MÉDICO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -80,30 +110,99 @@ function inputsDisabled(disabled){document.querySelectorAll('#editor textarea,#t
 
 let heNamesCache = [];
 
+const NOMES_PADRAO_EQUIPE_C = [
+  'PP Agnelo',
+  'PP Bueno',
+  'PP Carlos',
+  'PP De Souza',
+  'PP Dias',
+  'PP Diego',
+  'PP Éder',
+  'PP Eliane',
+  'PP Elisangela M.',
+  'PP Elizangela',
+  'PP Elvio',
+  'PP Fleximene',
+  'PP Fúlvio',
+  'PP Gauna',
+  'PP Giorgio',
+  'PP Gracilda',
+  'PP Henrique',
+  'PP J. Gonçalves',
+  'PP Janaina',
+  'PP João Paulo',
+  'PP Josiane',
+  'PP Lafrank',
+  'PP Marcelo',
+  'PP Militão',
+  'PP Monteiro',
+  'PP Nascimento',
+  'PP Nobre',
+  'PP Orlan',
+  'PP Rabelo',
+  'PP Rogerio',
+  'PP Rosilene',
+  'PP Samuel',
+  'PP Sebastião',
+  'PP Sérgio',
+  'PP Tobias',
+  'PP Torres',
+  'PP Vieira',
+  'PP Wesley',
+  'PP Wilson'
+];
+
 function heStatus(text) {
   const el = document.getElementById('heStatus');
   if (el) el.textContent = text;
 }
 
+function normalizarNomeHE(nome) {
+  return String(nome || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLocaleLowerCase('pt-BR');
+}
+
+function nomesDoRelatorioHE() {
+  return $('s4').value
+    .split('\n')
+    .map(nome => nome.trim())
+    .filter(Boolean);
+}
+
+function atualizarRelatorioHE(nomes) {
+  $('s4').value = nomes.join('\n');
+  changed();
+}
+
 async function carregarNomesHE() {
-  const select = document.getElementById('heNames');
-  const search = document.getElementById('heSearch');
-  if (!select || !me) return;
+  if (!me) return;
+
+  const select = $('heNames');
+  const search = $('heSearch');
 
   try {
-    const team = me.role === 'admin' ? (me.team || 'A') : me.team;
-    const url = '/api/relatorios/he-nomes?team=' + encodeURIComponent(team);
-    const result = await api(url);
+    const team = me.role === 'admin'
+      ? (me.team || 'C')
+      : me.team;
+
+    const result = await api(
+      '/api/relatorios/he-nomes?team=' +
+      encodeURIComponent(team)
+    );
 
     heNamesCache = result.names || [];
-    const filtro = (search.value || '').normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+
+    const filtro = normalizarNomeHE(search.value);
 
     select.innerHTML = '';
+
     heNamesCache
-      .filter(item => item.name.normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLocaleLowerCase('pt-BR').includes(filtro))
+      .filter(item =>
+        normalizarNomeHE(item.name).includes(filtro)
+      )
       .forEach(item => {
         const option = document.createElement('option');
         option.value = item.id;
@@ -111,109 +210,253 @@ async function carregarNomesHE() {
         select.appendChild(option);
       });
 
-    const somenteLeitura = readOnly || !['chefe', 'auxiliar'].includes(me.role);
-    document.getElementById('heAddBtn').disabled = somenteLeitura;
-    document.getElementById('heEditBtn').disabled = somenteLeitura;
-    document.getElementById('heDeleteBtn').disabled = somenteLeitura;
+    const podeEditar =
+      !readOnly &&
+      ['chefe', 'auxiliar'].includes(me.role) &&
+      current &&
+      current.status !== 'encerrado';
 
-    heStatus(heNamesCache.length + ' nome(s) na lista compartilhada da equipe.');
+    $('heSelectBtn').disabled = !podeEditar;
+    $('heAddBtn').disabled = !podeEditar;
+    $('heDeleteBtn').disabled = !podeEditar;
+
+    $('heSeedBtn').disabled =
+      !podeEditar ||
+      me.team !== 'C';
+
+    heStatus(
+      heNamesCache.length +
+      ' nome(s) na lista padrão da equipe ' + team +
+      '. Os nomes incluídos ou retirados aqui no relatório atual ' +
+      'não alteram os outros plantões.'
+    );
   } catch (e) {
-    heStatus('Não foi possível carregar a lista. Confira a conexão e tente novamente.');
+    heStatus(
+      'Não foi possível carregar a lista. Confira a conexão e tente novamente.'
+    );
   }
 }
 
-async function adicionarNomeHE() {
-  if (!['chefe', 'auxiliar'].includes(me?.role) || readOnly) return;
-
-  const name = prompt('Digite o nome completo do policial penal:');
-  if (!name || !name.trim()) return;
-
-  try {
-    await api('/api/relatorios/he-nomes', {
-      method: 'POST',
-      body: JSON.stringify({ name: name.trim() })
-    });
-    await carregarNomesHE();
-    heStatus('Nome adicionado à lista compartilhada.');
-  } catch (e) {
-    heStatus(e.message || 'Não foi possível adicionar. O nome pode já existir.');
-  }
-}
-
-async function editarNomeHE() {
-  if (!['chefe', 'auxiliar'].includes(me?.role) || readOnly) return;
-
-  const select = document.getElementById('heNames');
-  const item = heNamesCache.find(n => String(n.id) === select.value);
-  if (!item) {
-    heStatus('Selecione um nome para editar.');
+/*
+ * Cadastra os nomes padrão da equipe C.
+ * Se um nome já existir, ele não será duplicado.
+ */
+async function cadastrarListaPadraoEquipeC() {
+  if (
+    readOnly ||
+    !['chefe', 'auxiliar'].includes(me?.role) ||
+    me.team !== 'C' ||
+    !current ||
+    current.status === 'encerrado'
+  ) {
+    heStatus(
+      'Esta operação está disponível para chefe ou auxiliar da equipe C, ' +
+      'em um relatório aberto.'
+    );
     return;
   }
 
-  const name = prompt('Editar nome:', item.name);
-  if (!name || !name.trim()) return;
+  const confirmar = confirm(
+    'Cadastrar os 39 nomes padrão da equipe C? ' +
+    'Os nomes que já existirem serão mantidos sem duplicação.'
+  );
+
+  if (!confirmar) return;
+
+  const botao = $('heSeedBtn');
+  botao.disabled = true;
+
+  let adicionados = 0;
+  let existentes = 0;
+  let falhas = 0;
 
   try {
-    await api('/api/relatorios/he-nomes/' + encodeURIComponent(item.id), {
-      method: 'PATCH',
-      body: JSON.stringify({ name: name.trim() })
-    });
+    for (const name of NOMES_PADRAO_EQUIPE_C) {
+      try {
+        await api('/api/relatorios/he-nomes', {
+          method: 'POST',
+          body: JSON.stringify({ name })
+        });
+
+        adicionados++;
+      } catch (e) {
+        if (e.status === 409) {
+          existentes++;
+        } else {
+          falhas++;
+        }
+      }
+    }
+
     await carregarNomesHE();
-    heStatus('Nome atualizado.');
-  } catch (e) {
-    heStatus(e.message || 'Não foi possível editar o nome.');
+
+    heStatus(
+      'Cadastro finalizado. Novos nomes: ' + adicionados +
+      ' · Já existentes: ' + existentes +
+      ' · Falhas: ' + falhas + '.'
+    );
+
+    if (falhas > 0) {
+      alert(
+        'A lista foi processada, mas ' + falhas +
+        ' nome(s) não puderam ser cadastrados. Confira a conexão e tente novamente.'
+      );
+    } else {
+      alert(
+        'Lista padrão da equipe C processada com sucesso!\n\n' +
+        'Novos nomes: ' + adicionados +
+        '\nJá existentes: ' + existentes
+      );
+    }
+  } finally {
+    botao.disabled = false;
+    await carregarNomesHE();
   }
 }
 
-async function excluirNomeHE() {
-  if (!['chefe', 'auxiliar'].includes(me?.role) || readOnly) return;
-
-  const select = document.getElementById('heNames');
-  const item = heNamesCache.find(n => String(n.id) === select.value);
-  if (!item) {
-    heStatus('Selecione um nome para excluir.');
+/*
+ * Adiciona um nome digitado somente ao relatório aberto.
+ * Não grava esse nome na lista compartilhada.
+ */
+function adicionarNomeHE() {
+  if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) {
     return;
   }
 
-  if (!confirm('Excluir "' + item.name + '" da lista compartilhada da equipe?')) return;
-
-  try {
-    await api('/api/relatorios/he-nomes/' + encodeURIComponent(item.id), {
-      method: 'DELETE'
-    });
-    await carregarNomesHE();
-    heStatus('Nome excluído da lista compartilhada.');
-  } catch (e) {
-    heStatus(e.message || 'Não foi possível excluir o nome.');
+  if (!current || current.status === 'encerrado') {
+    heStatus('Abra um relatório em edição antes de adicionar nomes.');
+    return;
   }
+
+  const name = prompt(
+    'Digite o nome que deseja adicionar somente a este plantão:'
+  );
+
+  if (!name || !name.trim()) return;
+
+  const nome = name.trim();
+  const nomes = nomesDoRelatorioHE();
+
+  if (
+    nomes.some(n => normalizarNomeHE(n) === normalizarNomeHE(nome))
+  ) {
+    heStatus('Esse nome já está no relatório atual.');
+    return;
+  }
+
+  nomes.push(nome);
+  atualizarRelatorioHE(nomes);
+
+  heStatus(
+    'Nome adicionado somente ao relatório atual.'
+  );
 }
 
+/*
+ * Retira um nome apenas do relatório aberto.
+ * Não exclui o nome da lista compartilhada.
+ */
+function excluirNomeHE() {
+  if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) {
+    return;
+  }
+
+  if (!current || current.status === 'encerrado') {
+    heStatus('Abra um relatório em edição antes de retirar nomes.');
+    return;
+  }
+
+  const select = $('heNames');
+  const item = heNamesCache.find(
+    n => String(n.id) === select.value
+  );
+
+  if (!item) {
+    heStatus(
+      'Selecione na lista o nome que deseja retirar deste plantão.'
+    );
+    return;
+  }
+
+  const nomes = nomesDoRelatorioHE();
+  const existe = nomes.some(
+    n => normalizarNomeHE(n) === normalizarNomeHE(item.name)
+  );
+
+  if (!existe) {
+    heStatus(
+      'O nome selecionado não está incluído no relatório atual.'
+    );
+    return;
+  }
+
+  if (!confirm(
+    'Retirar "' + item.name +
+    '" somente deste plantão? O nome continuará na lista padrão.'
+  )) {
+    return;
+  }
+
+  const restantes = nomes.filter(
+    n => normalizarNomeHE(n) !== normalizarNomeHE(item.name)
+  );
+
+  atualizarRelatorioHE(restantes);
+
+  heStatus(
+    'Nome retirado somente deste plantão. A lista padrão foi preservada.'
+  );
+}
+
+/*
+ * Inclui o nome selecionado da lista padrão no relatório aberto.
+ */
 function selecionarNomeHE() {
-  const select = document.getElementById('heNames');
-  const item = heNamesCache.find(n => String(n.id) === select.value);
-  if (!item) {
-    heStatus('Selecione um nome na lista.');
+  if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) {
     return;
   }
 
-  const campo = document.getElementById('s4');
-  const nomes = campo.value.split('\n').map(n => n.trim()).filter(Boolean);
-  if (!nomes.includes(item.name)) nomes.push(item.name);
-  campo.value = nomes.join('\n');
-  changed();
-  heStatus('Nome incluído no relatório. Repita para incluir outros nomes.');
+  if (!current || current.status === 'encerrado') {
+    heStatus('Abra um relatório em edição antes de incluir nomes.');
+    return;
+  }
+
+  const select = $('heNames');
+  const item = heNamesCache.find(
+    n => String(n.id) === select.value
+  );
+
+  if (!item) {
+    heStatus('Selecione um nome na lista padrão.');
+    return;
+  }
+
+  const nomes = nomesDoRelatorioHE();
+
+  if (
+    nomes.some(n => normalizarNomeHE(n) === normalizarNomeHE(item.name))
+  ) {
+    heStatus('Esse nome já está no relatório atual.');
+    return;
+  }
+
+  nomes.push(item.name);
+  atualizarRelatorioHE(nomes);
+
+  heStatus(
+    '"' + item.name +
+    '" foi incluído somente neste relatório.'
+  );
 }
 
-document.getElementById('heSearch').addEventListener('input', () => {
-  const select = document.getElementById('heNames');
-  const filtro = document.getElementById('heSearch').value
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase('pt-BR');
+$('heSearch').addEventListener('input', () => {
+  const filtro = normalizarNomeHE($('heSearch').value);
+  const select = $('heNames');
 
   select.innerHTML = '';
-  heNamesCache.filter(item => item.name.normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase('pt-BR').includes(filtro))
+
+  heNamesCache
+    .filter(item => normalizarNomeHE(item.name).includes(filtro))
     .forEach(item => {
       const option = document.createElement('option');
       option.value = item.id;
@@ -222,11 +465,10 @@ document.getElementById('heSearch').addEventListener('input', () => {
     });
 });
 
-document.getElementById('heAddBtn').addEventListener('click', adicionarNomeHE);
-document.getElementById('heEditBtn').addEventListener('click', editarNomeHE);
-document.getElementById('heDeleteBtn').addEventListener('click', excluirNomeHE);
-document.getElementById('heSelectBtn').addEventListener('click', selecionarNomeHE);
-function renderList(){const root=$('reportsList');if(!reports.length){root.innerHTML='<p class="small">Nenhum relatório cadastrado para esta equipe.</p>';return}root.innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="abrir('${esc(r.id)}')">${r.id===current?.id?'ABERTO':'ABRIR'}</button></div>`).join('')}
+$('heAddBtn').addEventListener('click', adicionarNomeHE);
+$('heDeleteBtn').addEventListener('click', excluirNomeHE);
+$('heSelectBtn').addEventListener('click', selecionarNomeHE);
+$('heSeedBtn').addEventListener('click', cadastrarListaPadraoEquipeC);function renderList(){const root=$('reportsList');if(!reports.length){root.innerHTML='<p class="small">Nenhum relatório cadastrado para esta equipe.</p>';return}root.innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="abrir('${esc(r.id)}')">${r.id===current?.id?'ABERTO':'ABRIR'}</button></div>`).join('')}
 async function api(url,options={}){const res=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let j={};try{j=await res.json()}catch{}if(!res.ok){const e=new Error(j.message||'Falha na comunicação com o servidor.');e.status=res.status;e.data=j;throw e}return j}
 async function iniciar(){try{const j=await api('/api/auth/me');me=j.user;if(!['chefe','auxiliar','admin'].includes(me.role)){location.replace(me.role==='mesa'?'/mesa.html':me.role==='pertences'?'/pertences.html':'/index.html');return}readOnly=me.role==='admin';$('who').textContent=me.fullName+' · '+(readOnly?'ADMINISTRADOR (CONSULTA)':(me.role==='chefe'?'CHEFE':'AUXILIAR')+' · EQUIPE '+me.team);$('team').value=me.team||'Todas';$('newBtn').classList.toggle('hidden',readOnly);$('editor').classList.toggle('hidden',readOnly);$('saveBtn').classList.toggle('hidden',readOnly);$('closeBtn').classList.toggle('hidden',readOnly);$('reopenBtn').classList.toggle('hidden',readOnly);document.querySelectorAll('#reportDate,#shiftName,#title').forEach(el=>el.addEventListener('change',changed));document.querySelectorAll('#editor textarea').forEach(el=>el.addEventListener('input',changed));if(readOnly){$('status').textContent='Modo consulta: o administrador não pode editar relatórios.';$('reportsPanel').querySelector('p').textContent='Consulta de relatórios de todas as equipes A, B, C e D.'}await carregarLista();if(!readOnly){const first=reports.find(r=>r.status==='aberto')||reports[0];if(first)abrir(first.id);else novoRelatorio()}refreshTimer=setInterval(poll,5000)}catch(e){msg(e.message,'bad')}}
 async function carregarLista(){try{const j=await api('/api/relatorios');reports=j.reports||[];renderList();if(readOnly){$('reportsList').innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="verAdmin('${esc(r.id)}')">CONSULTAR</button></div>`).join('')||'<p class="small">Nenhum relatório cadastrado.</p>'}return reports}catch(e){msg(e.message,'bad');return []}}
