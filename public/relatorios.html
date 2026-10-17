@@ -102,7 +102,17 @@ function msg(t,type=''){const el=$('status');el.textContent=t;el.className='stat
 function state(t){$('saveState').textContent=t}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function formContent(){const out={};document.querySelectorAll('[data-section]').forEach(el=>out[el.dataset.section]=el.value);return out}
-function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>el.value=(obj||{})[el.dataset.section]||'')}
+const PADROES_RELATORIO={
+  '03 – TRANSPORTE DE SERVIDORES':'SEM ALTERAÇÃO.',
+  '04 – ATRASO':'N/C.',
+  '06 – FALTA / DISPENSA / ATESTADO MÉDICO':'N/C.',
+  '09 – REFORÇO':'N/C.',
+  '13 – CUSTÓDIA HOSPITALAR':'N/C.',
+  '14 – ESCOLTA / PROGRESSÃO / REGRESSÃO / FLAGRANTE':'N/C.',
+  '15 – ATIVIDADES':'Rotinas Diárias internas e externas executadas sem alteração.',
+  '37 – MATERIAL RECEBIDO DA CHEFIA':'N/C.'
+};
+function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const valor=(obj||{})[el.dataset.section];el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[el.dataset.section]||'')})}
 function localKey(){return current?'cpaig_shift_report_'+current.id:'cpaig_shift_report_new_'+(me?.team||'')}
 function localSave(){try{localStorage.setItem(localKey(),JSON.stringify({id:current?.id||null,revision,title:$('title').value,reportDate:$('reportDate').value,shiftName:$('shiftName').value,content:formContent(),savedAt:new Date().toISOString()}))}catch{}}
 function loadLocal(){try{return JSON.parse(localStorage.getItem(localKey())||'null')}catch{return null}}
@@ -488,7 +498,7 @@ function visualizarRelatorio(){
   const team=$('team').value||me?.team||'Não informada';
   const title=$('title').value.trim()||'RELATÓRIO DE PLANTÃO';
   const campos=[...document.querySelectorAll('#editor [data-section]')];
-  const secoes=campos.map(el=>({titulo:el.dataset.section,texto:(el.value||'').trim()})).filter(item=>item.texto);
+  const secoes=campos.map(el=>({titulo:el.dataset.section,texto:((el.value||'').trim()||PADROES_RELATORIO[el.dataset.section]||'')}));
   const cabecalho=`<div class="preview-title"><h2>POLÍCIA PENAL DE MATO GROSSO DO SUL</h2><p><strong>CPAIG</strong></p><p>SISTEMA ATENDIMENTO</p><h2 style="margin-top:16px">${esc(title)}</h2></div>`;
   const meta=`<div class="preview-meta"><div><strong>Data:</strong> ${esc(dataFormatada)}</div><div><strong>Turno / Plantão:</strong> ${esc(shift)}</div><div><strong>Equipe:</strong> ${esc(team)}</div><div><strong>Situação:</strong> ${esc(current?.status==='encerrado'?'ENCERRADO':'EM EDIÇÃO')}</div></div>`;
   const corpo=secoes.length?secoes.map(item=>`<section class="preview-section"><h3>${esc(item.titulo)}</h3><div class="preview-text">${esc(item.texto)}</div></section>`).join(''):'<p>Nenhuma seção foi preenchida ainda.</p>';
