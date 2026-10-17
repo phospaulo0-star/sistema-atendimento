@@ -14,7 +14,7 @@ const scryptAsync = promisify(crypto.scrypt);
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-const VERSAO = '2.11.0';
+const VERSAO = '2.12.0-relatorios';
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PORT = process.env.PORT || 3000;
 const SESSION_COOKIE = 'sa_session';
@@ -103,6 +103,7 @@ function usuarioPublico(row) {
     username: row.username,
     fullName: row.full_name,
     role: row.role,
+    team: row.team || null,
     isActive: row.is_active,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -114,7 +115,7 @@ function perfilValido(role, canal) {
   if (role === 'admin') return canal === 'sender' || canal === 'receiver';
   if (role === 'guiche') return canal === 'sender';
   if (role === 'mesa') return canal === 'receiver';
-  return false;
+  return false; // chefe/auxiliar acessam somente os relatórios, não o WebSocket de atendimentos.
 }
 function enviar(ws, dados) {
   if (!ws || ws.readyState !== WebSocket.OPEN) return false;
@@ -201,7 +202,7 @@ async function usuarioDaRequisicao(req) {
   const token = extrairCookie(req, SESSION_COOKIE);
   if (!token) return null;
   const result = await pool.query(
-    `SELECT u.id, u.username, u.full_name, u.role, u.is_active, u.created_at, u.updated_at, u.last_login_at, u.deleted_at
+    `SELECT u.id, u.username, u.full_name, u.role, u.team, u.is_active, u.created_at, u.updated_at, u.last_login_at, u.deleted_at
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND s.expires_at > NOW() AND u.is_active = TRUE AND u.deleted_at IS NULL`,
     [hashToken(token)]
@@ -438,7 +439,8 @@ async function inicializarBanco() {
       username TEXT NOT NULL,
       username_normalized TEXT NOT NULL UNIQUE,
       full_name TEXT NOT NULL,
-      role TEXT NOT NULL CHECK (role IN ('admin','guiche','mesa','pertences')),
+      role TEXT NOT NULL CHECK (role IN ('admin','guiche','mesa','pertences','chefe','auxiliar')),
+      team TEXT CHECK (team IN ('A','B','C','D')),
       password_hash TEXT NOT NULL,
       is_active BOOLEAN NOT NULL DEFAULT TRUE,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -488,6 +490,32 @@ async function inicializarBanco() {
       details JSONB NOT NULL DEFAULT '{}'::jsonb,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS team TEXT;
+    ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
+    ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin','guiche','mesa','pertences','chefe','auxiliar'));
+    ALTER TABLE users DROP CONSTRAINT IF EXISTS users_team_check;
+    ALTER TABLE users ADD CONSTRAINT users_team_check CHECK (team IS NULL OR team IN ('A','B','C','D'));
+    CREATE INDEX IF NOT EXISTS users_team_role_idx ON users(team, role) WHERE is_active=TRUE AND deleted_at IS NULL;
+    CREATE UNIQUE INDEX IF NOT EXISTS users_one_report_role_per_team_idx ON users(team, role) WHERE role IN ('chefe','auxiliar') AND is_active=TRUE AND deleted_at IS NULL;
+    CREATE TABLE IF NOT EXISTS shift_reports (
+      id TEXT PRIMARY KEY, team TEXT NOT NULL CHECK (team IN ('A','B','C','D')),
+      report_date DATE NOT NULL, shift_name TEXT NOT NULL DEFAULT 'Plantão',
+      title TEXT NOT NULL DEFAULT '', content JSONB NOT NULL DEFAULT '{}'::jsonb,
+      status TEXT NOT NULL DEFAULT 'aberto' CHECK (status IN ('aberto','encerrado')),
+      revision INTEGER NOT NULL DEFAULT 1, created_by TEXT REFERENCES users(id),
+      updated_by TEXT REFERENCES users(id), created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), closed_at TIMESTAMPTZ, closed_by TEXT REFERENCES users(id),
+      reopened_at TIMESTAMPTZ, reopened_by TEXT REFERENCES users(id)
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS shift_reports_team_date_shift_idx ON shift_reports(team, report_date, shift_name);
+    CREATE INDEX IF NOT EXISTS shift_reports_date_idx ON shift_reports(report_date DESC, team);
+    CREATE TABLE IF NOT EXISTS shift_report_history (
+      id BIGSERIAL PRIMARY KEY, report_id TEXT NOT NULL REFERENCES shift_reports(id) ON DELETE CASCADE,
+      actor_user_id TEXT REFERENCES users(id), action TEXT NOT NULL, revision INTEGER NOT NULL,
+      previous_content JSONB, new_content JSONB, details JSONB NOT NULL DEFAULT '{}'::jsonb,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS shift_report_history_report_idx ON shift_report_history(report_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS audit_log_created_idx ON audit_log(created_at DESC);
   `);
   await inicializarPertencesVisitas(pool);
@@ -551,6 +579,7 @@ async function redirecionarParaAreaDoUsuario(req, res) {
     if (user.role === 'admin') return res.redirect('/admin.html');
     if (user.role === 'mesa') return res.redirect('/mesa.html');
     if (user.role === 'pertences') return res.redirect('/pertences.html');
+    if (['chefe','auxiliar'].includes(user.role)) return res.redirect('/relatorios.html');
     return res.redirect('/index.html');
   } catch {
     return res.redirect('/login.html');
@@ -564,6 +593,7 @@ app.get('/login.html', async (req, res) => {
       if (user.role === 'admin') return res.redirect('/admin.html');
       if (user.role === 'mesa') return res.redirect('/mesa.html');
       if (user.role === 'pertences') return res.redirect('/pertences.html');
+      if (['chefe','auxiliar'].includes(user.role)) return res.redirect('/relatorios.html');
       return res.redirect('/index.html');
     }
   } catch {}
@@ -574,6 +604,7 @@ app.get('/index.html', async (req, res) => {
     const user = await usuarioDaRequisicao(req);
     if (!user) return res.redirect('/login.html');
     if (user.role === 'pertences') return res.redirect('/pertences.html');
+    if (['chefe','auxiliar'].includes(user.role)) return res.redirect('/relatorios.html');
     if (!['guiche', 'admin'].includes(user.role)) return res.redirect('/mesa.html');
     return res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
   } catch { return res.redirect('/login.html'); }
@@ -583,6 +614,7 @@ app.get('/mesa.html', async (req, res) => {
     const user = await usuarioDaRequisicao(req);
     if (!user) return res.redirect('/login.html');
     if (user.role === 'pertences') return res.redirect('/pertences.html');
+    if (['chefe','auxiliar'].includes(user.role)) return res.redirect('/relatorios.html');
     if (!['mesa', 'admin'].includes(user.role)) return res.redirect('/index.html');
     return res.sendFile(path.join(PUBLIC_DIR, 'mesa.html'));
   } catch { return res.redirect('/login.html'); }
@@ -591,7 +623,7 @@ app.get('/admin.html', async (req, res) => {
   try {
     const user = await usuarioDaRequisicao(req);
     if (!user) return res.redirect('/login.html');
-    if (user.role !== 'admin') return res.redirect(user.role === 'mesa' ? '/mesa.html' : user.role === 'pertences' ? '/pertences.html' : '/index.html');
+    if (user.role !== 'admin') return res.redirect(user.role === 'mesa' ? '/mesa.html' : user.role === 'pertences' ? '/pertences.html' : ['chefe','auxiliar'].includes(user.role) ? '/relatorios.html' : '/index.html');
     return res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
   } catch { return res.redirect('/login.html'); }
 });
@@ -838,7 +870,7 @@ app.get('/api/admin/overview', exigirBanco, exigirAutenticacao, exigirAdmin, asy
 });
 app.get('/api/admin/users', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM users ORDER BY CASE role WHEN \'admin\' THEN 1 WHEN \'mesa\' THEN 2 ELSE 3 END, username_normalized');
+    const result = await pool.query('SELECT * FROM users ORDER BY CASE role WHEN \'admin\' THEN 1 WHEN \'chefe\' THEN 2 WHEN \'auxiliar\' THEN 3 WHEN \'mesa\' THEN 4 ELSE 5 END, username_normalized');
     res.json({ ok: true, users: result.rows.map(usuarioPublico) });
   } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel listar as contas.' }); }
 });
@@ -847,19 +879,22 @@ app.post('/api/admin/users', exigirBanco, exigirAutenticacao, exigirAdmin, async
   const fullName = textoSeguro(req.body?.fullName, 120);
   const password = String(req.body?.password || '');
   const role = String(req.body?.role || 'guiche');
+  const team = ['chefe','auxiliar'].includes(role) ? String(req.body?.team || '').toUpperCase() : null;
   const normalized = normalizarUsuario(username);
   if (!/^[\p{L}\p{N}._-]{3,80}$/u.test(username)) return res.status(400).json({ ok: false, message: 'O login deve ter de 3 a 80 caracteres, usando letras, nÃºmeros, ponto, hÃ­fen ou sublinhado.' });
   if (!fullName) return res.status(400).json({ ok: false, message: 'Informe o nome do usuÃ¡rio.' });
   if (password.length < 8) return res.status(400).json({ ok: false, message: 'A senha deve ter pelo menos 8 caracteres.' });
-  if (!['guiche', 'mesa', 'admin', 'pertences'].includes(role)) return res.status(400).json({ ok: false, message: 'Tipo de conta invÃ¡lido.' });
+  if (!['guiche', 'mesa', 'admin', 'pertences', 'chefe', 'auxiliar'].includes(role)) return res.status(400).json({ ok: false, message: 'Tipo de conta invÃ¡lido.' });
+  if (['chefe','auxiliar'].includes(role) && !['A','B','C','D'].includes(team)) return res.status(400).json({ ok: false, message: 'Selecione a equipe A, B, C ou D.' });
   try {
     const id = criarId();
     const passwordHash = await criarHashSenha(password);
-    await pool.query(`INSERT INTO users (id,username,username_normalized,full_name,role,password_hash) VALUES ($1,$2,$3,$4,$5,$6)`, [id, username, normalized, fullName, role, passwordHash]);
-    await registrarAuditoria(req.user.id, 'conta_criada', id, { username, role });
+    await pool.query(`INSERT INTO users (id,username,username_normalized,full_name,role,team,password_hash) VALUES ($1,$2,$3,$4,$5,$6,$7)`, [id, username, normalized, fullName, role, team, passwordHash]);
+    await registrarAuditoria(req.user.id, 'conta_criada', id, { username, role, team });
     const user = (await pool.query('SELECT * FROM users WHERE id=$1', [id])).rows[0];
     res.status(201).json({ ok: true, user: usuarioPublico(user) });
   } catch (e) {
+    if (e.code === '23505' && String(e.constraint || '').includes('users_one_report_role_per_team_idx')) return res.status(409).json({ ok: false, message: 'Já existe uma conta ativa desse perfil nesta equipe. Cada equipe pode ter um chefe e um auxiliar ativos.' });
     if (e.code === '23505' && String(e.constraint || '').includes('pertences')) return res.status(409).json({ ok: false, message: 'JÃ¡ existe um login ativo de Pertences e Visitas. Desative a conta existente antes de criar outra.' });
     if (e.code === '23505' && String(e.constraint || '').includes('mesa')) return res.status(409).json({ ok: false, message: 'JÃ¡ existe um login ativo da Mesa. Edite ou desative a conta existente antes de criar outra.' });
     if (e.code === '23505') return res.status(409).json({ ok: false, message: 'Este nome de usuÃ¡rio jÃ¡ existe.' });
@@ -872,6 +907,7 @@ app.patch('/api/admin/users/:id', exigirBanco, exigirAutenticacao, exigirAdmin, 
   const fullName = req.body?.fullName == null ? null : textoSeguro(req.body.fullName, 120);
   const username = req.body?.username == null ? null : textoSeguro(req.body.username, 80);
   const isActive = typeof req.body?.isActive === 'boolean' ? req.body.isActive : null;
+  const team = req.body?.team == null ? null : String(req.body.team).toUpperCase();
   if (fullName !== null && !fullName) return res.status(400).json({ ok: false, message: 'O nome nÃ£o pode ficar vazio.' });
   if (username !== null && !/^[\p{L}\p{N}._-]{3,80}$/u.test(username)) return res.status(400).json({ ok: false, message: 'Nome de usuÃ¡rio invÃ¡lido.' });
   if (isActive === false && id === req.user.id) return res.status(400).json({ ok: false, message: 'NÃ£o Ã© possÃ­vel bloquear a prÃ³pria conta administrativa.' });
@@ -884,8 +920,8 @@ app.patch('/api/admin/users/:id', exigirBanco, exigirAutenticacao, exigirAdmin, 
       if (count.rows[0].n <= 1) return res.status(400).json({ ok: false, message: 'NÃ£o Ã© possÃ­vel bloquear o Ãºltimo administrador ativo.' });
     }
     const updated = await pool.query(
-      `UPDATE users SET full_name=COALESCE($2,full_name), username=COALESCE($3,username), username_normalized=COALESCE($4,username_normalized), is_active=COALESCE($5,is_active), updated_at=NOW(), deleted_at=CASE WHEN $5=FALSE THEN COALESCE(deleted_at,NOW()) WHEN $5=TRUE THEN NULL ELSE deleted_at END WHERE id=$1 RETURNING *`,
-      [id, fullName, username, username === null ? null : normalizarUsuario(username), isActive]
+      `UPDATE users SET full_name=COALESCE($2,full_name), username=COALESCE($3,username), username_normalized=COALESCE($4,username_normalized), is_active=COALESCE($5,is_active), team=CASE WHEN $6::text IS NULL THEN team ELSE $6 END, updated_at=NOW(), deleted_at=CASE WHEN $5=FALSE THEN COALESCE(deleted_at,NOW()) WHEN $5=TRUE THEN NULL ELSE deleted_at END WHERE id=$1 RETURNING *`,
+      [id, fullName, username, username === null ? null : normalizarUsuario(username), isActive, team]
     );
     if (isActive === false) { await pool.query('DELETE FROM sessions WHERE user_id=$1', [id]); encerrarConexoesUsuario(id, 'Conta desativada'); }
     await registrarAuditoria(req.user.id, 'conta_atualizada', id, { username: updated.rows[0].username, isActive });
@@ -941,6 +977,102 @@ app.get('/api/admin/attendances', exigirBanco, exigirAutenticacao, exigirAdmin, 
     })) });
   } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel carregar os atendimentos.' }); }
 });
+
+function exigirPerfilRelatorio(req, res, next) {
+  if (!req.user || !['chefe','auxiliar','admin'].includes(req.user.role)) {
+    return res.status(403).json({ ok: false, message: 'Acesso restrito às contas de relatório.' });
+  }
+  if (req.user.role !== 'admin' && !['A','B','C','D'].includes(req.user.team)) {
+    return res.status(403).json({ ok: false, message: 'Esta conta não possui equipe A, B, C ou D configurada.' });
+  }
+  next();
+}
+function relatorioPublico(row) {
+  return { id: row.id, team: row.team, reportDate: row.report_date, shiftName: row.shift_name,
+    title: row.title, content: row.content || {}, status: row.status, revision: row.revision,
+    createdBy: row.created_by, updatedBy: row.updated_by, createdAt: row.created_at,
+    updatedAt: row.updated_at, closedAt: row.closed_at, closedBy: row.closed_by,
+    reopenedAt: row.reopened_at, reopenedBy: row.reopened_by };
+}
+app.get('/relatorios.html', async (req, res) => {
+  try {
+    const user = await usuarioDaRequisicao(req);
+    if (!user) return res.redirect('/login.html');
+    if (!['chefe','auxiliar','admin'].includes(user.role)) return res.redirect(user.role === 'mesa' ? '/mesa.html' : user.role === 'pertences' ? '/pertences.html' : ['chefe','auxiliar'].includes(user.role) ? '/relatorios.html' : '/index.html');
+    return res.sendFile(path.join(PUBLIC_DIR, 'relatorios.html'));
+  } catch { return res.redirect('/login.html'); }
+});
+app.get('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
+  try {
+    const params = []; let where = '';
+    if (req.user.role !== 'admin') { params.push(req.user.team); where = 'WHERE r.team=$1'; }
+    const q = await pool.query(`SELECT r.*, c.username AS created_username, u.username AS updated_username, cl.username AS closed_username FROM shift_reports r LEFT JOIN users c ON c.id=r.created_by LEFT JOIN users u ON u.id=r.updated_by LEFT JOIN users cl ON cl.id=r.closed_by ${where} ORDER BY r.report_date DESC, r.team, r.shift_name`, params);
+    res.json({ ok: true, reports: q.rows.map(r => ({ ...relatorioPublico(r), createdUsername:r.created_username, updatedUsername:r.updated_username, closedUsername:r.closed_username })), readOnly: req.user.role === 'admin', team: req.user.team || null });
+  } catch (e) { console.error('Falha ao listar relatórios:', e.message); res.status(500).json({ ok:false, message:'Não foi possível carregar os relatórios.' }); }
+});
+app.post('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
+  if (req.user.role === 'admin') return res.status(403).json({ok:false,message:'O administrador possui acesso somente para consulta.'});
+  const reportDate = String(req.body?.reportDate || '').slice(0,10);
+  const shiftName = textoSeguro(req.body?.shiftName || 'Plantão', 80);
+  const title = textoSeguro(req.body?.title || '', 180);
+  const content = req.body?.content && typeof req.body.content === 'object' && !Array.isArray(req.body.content) ? req.body.content : {};
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return res.status(400).json({ok:false,message:'Informe uma data válida para o relatório.'});
+  const id = criarId();
+  try {
+    const q = await pool.query(`INSERT INTO shift_reports(id,team,report_date,shift_name,title,content,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7,$7) RETURNING *`, [id, req.user.team, reportDate, shiftName, title, JSON.stringify(content), req.user.id]);
+    await pool.query(`INSERT INTO shift_report_history(report_id,actor_user_id,action,revision,new_content,details) VALUES($1,$2,'criado',1,$3::jsonb,$4::jsonb)`, [id,req.user.id,JSON.stringify(content),JSON.stringify({title,reportDate,shiftName,team:req.user.team})]);
+    await registrarAuditoria(req.user.id,'relatorio_criado',id,{team:req.user.team,reportDate,shiftName});
+    res.status(201).json({ok:true,report:relatorioPublico(q.rows[0])});
+  } catch(e) { if(e.code==='23505') return res.status(409).json({ok:false,message:'Já existe um relatório dessa equipe para essa data e turno.'}); console.error('Falha ao criar relatório:',e.message); res.status(500).json({ok:false,message:'Não foi possível criar o relatório.'}); }
+});
+app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req,res) => {
+  if(req.user.role==='admin') return res.status(403).json({ok:false,message:'O administrador possui acesso somente para consulta.'});
+  const id=textoSeguro(req.params.id,100); const expected=Number(req.body?.revision);
+  const title=textoSeguro(req.body?.title ?? '',180);
+  const reportDate=String(req.body?.reportDate || '').slice(0,10);
+  const shiftName=textoSeguro(req.body?.shiftName || 'Plantão',80);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return res.status(400).json({ok:false,message:'Informe uma data válida para o relatório.'});
+  const content=req.body?.content && typeof req.body.content==='object' && !Array.isArray(req.body.content)?req.body.content:{};
+  const action=String(req.body?.action||'salvar');
+  if(!Number.isInteger(expected)||expected<1) return res.status(400).json({ok:false,message:'Versão do relatório ausente. Atualize a lista antes de salvar.'});
+  if(!['salvar','encerrar','reabrir'].includes(action)) return res.status(400).json({ok:false,message:'Ação inválida.'});
+  const client=await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const current=await client.query('SELECT * FROM shift_reports WHERE id=$1 FOR UPDATE',[id]);
+    if(!current.rowCount){await client.query('ROLLBACK');return res.status(404).json({ok:false,message:'Relatório não encontrado.'});}
+    const old=current.rows[0];
+    if(old.team!==req.user.team){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Este relatório pertence a outra equipe.'});}
+    if(old.revision!==expected){await client.query('ROLLBACK');return res.status(409).json({ok:false,conflict:true, message:'Este relatório foi alterado por outra pessoa. Os dados do servidor foram preservados; atualize e compare antes de continuar.', report:relatorioPublico(old)});}
+    if(old.status==='encerrado' && action!=='reabrir'){await client.query('ROLLBACK');return res.status(409).json({ok:false,message:'O relatório está encerrado. Reabra-o para fazer alterações.'});}
+    if(action==='reabrir' && req.user.role!=='chefe'){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Somente o chefe da equipe pode reabrir um relatório encerrado.'});}
+    const status=action==='encerrar'?'encerrado':action==='reabrir'?'aberto':old.status;
+    const revision=old.revision+1;
+    const updated=await client.query(`UPDATE shift_reports SET report_date=$2,shift_name=$3,title=$4,content=$5::jsonb,status=$6,revision=$7,updated_by=$8,updated_at=NOW(),closed_at=CASE WHEN $6='encerrado' THEN NOW() WHEN $6='aberto' THEN NULL ELSE closed_at END,closed_by=CASE WHEN $6='encerrado' THEN $8 WHEN $6='aberto' THEN NULL ELSE closed_by END,reopened_at=CASE WHEN $9 THEN NOW() ELSE reopened_at END,reopened_by=CASE WHEN $9 THEN $8 ELSE reopened_by END WHERE id=$1 RETURNING *`,[id,reportDate,shiftName,title,JSON.stringify(content),status,revision,req.user.id,action==='reabrir']);
+    await client.query(`INSERT INTO shift_report_history(report_id,actor_user_id,action,revision,previous_content,new_content,details) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb)`,[id,req.user.id,action,revision,JSON.stringify(old.content||{}),JSON.stringify(content),JSON.stringify({previousTitle:old.title,title,previousDate:old.report_date,reportDate,previousShiftName:old.shift_name,shiftName,previousStatus:old.status,status,team:old.team})]);
+    await client.query('COMMIT');
+    await registrarAuditoria(req.user.id,'relatorio_'+action,id,{team:old.team,revision,previousStatus:old.status,status});
+    res.json({ok:true,report:relatorioPublico(updated.rows[0])});
+  } catch(e){try{await client.query('ROLLBACK')}catch{} console.error('Falha ao salvar relatório:',e.message);res.status(500).json({ok:false,message:'Não foi possível salvar o relatório.'});} finally{client.release();}
+});
+app.get('/api/relatorios/:id/historico', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async(req,res)=>{
+  try{
+    const id=textoSeguro(req.params.id,100); const report=await pool.query('SELECT id,team FROM shift_reports WHERE id=$1',[id]);
+    if(!report.rowCount)return res.status(404).json({ok:false,message:'Relatório não encontrado.'});
+    if(req.user.role!=='admin'&&report.rows[0].team!==req.user.team)return res.status(403).json({ok:false,message:'Acesso restrito à equipe do relatório.'});
+    const q=await pool.query(`SELECT h.id,h.action,h.revision,h.previous_content,h.new_content,h.details,h.created_at,u.username,u.full_name FROM shift_report_history h LEFT JOIN users u ON u.id=h.actor_user_id WHERE h.report_id=$1 ORDER BY h.created_at DESC LIMIT 300`,[id]);
+    res.json({ok:true,history:q.rows,readOnly:true});
+  }catch(e){console.error('Falha no histórico de relatório:',e.message);res.status(500).json({ok:false,message:'Não foi possível carregar o histórico.'});}
+});
+app.get('/api/admin/shift-reports', exigirBanco, exigirAutenticacao, exigirAdmin, async(_req,res)=>{
+  try{const q=await pool.query(`SELECT r.*,u.username AS updated_username,u.full_name AS updated_full_name FROM shift_reports r LEFT JOIN users u ON u.id=r.updated_by ORDER BY r.report_date DESC,r.team,r.shift_name`);res.json({ok:true,reports:q.rows.map(r=>({...relatorioPublico(r),updatedUsername:r.updated_username,updatedFullName:r.updated_full_name}))});}
+  catch(e){console.error('Falha no painel de relatórios:',e.message);res.status(500).json({ok:false,message:'Não foi possível consultar os relatórios de plantão.'});}
+});
+app.get('/api/admin/shift-reports/:id/history', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
+  try{const q=await pool.query(`SELECT h.id,h.action,h.revision,h.previous_content,h.new_content,h.details,h.created_at,u.username,u.full_name FROM shift_report_history h LEFT JOIN users u ON u.id=h.actor_user_id WHERE h.report_id=$1 ORDER BY h.created_at DESC LIMIT 500`,[textoSeguro(req.params.id,100)]);res.json({ok:true,history:q.rows});}
+  catch(e){res.status(500).json({ok:false,message:'Não foi possível carregar o histórico do relatório.'});}
+});
+
 app.get('/api/admin/events', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
   try {
     const result = await pool.query(
@@ -1349,7 +1481,11 @@ async function inicializarPertencesVisitas(pool) {
   if (!pool) return;
   await pool.query([
     "ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;",
-    "ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin','guiche','mesa','pertences'));",
+    "ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('admin','guiche','mesa','pertences','chefe','auxiliar'));",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS team TEXT;",
+    "ALTER TABLE users DROP CONSTRAINT IF EXISTS users_team_check;",
+    "ALTER TABLE users ADD CONSTRAINT users_team_check CHECK (team IS NULL OR team IN ('A','B','C','D'));",
+    "CREATE UNIQUE INDEX IF NOT EXISTS users_one_report_role_per_team_idx ON users(team, role) WHERE role IN ('chefe','auxiliar') AND is_active=TRUE AND deleted_at IS NULL;",
     "CREATE UNIQUE INDEX IF NOT EXISTS users_single_active_pertences ON users(role) WHERE role='pertences' AND is_active=TRUE AND deleted_at IS NULL;",
     "CREATE TABLE IF NOT EXISTS pv_belongings (",
     "  record_id TEXT PRIMARY KEY, internal_name TEXT NOT NULL, rgi TEXT NOT NULL DEFAULT '',",
