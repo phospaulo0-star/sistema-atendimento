@@ -517,6 +517,18 @@ async function inicializarBanco() {
     );
     CREATE INDEX IF NOT EXISTS shift_report_history_report_idx ON shift_report_history(report_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS audit_log_created_idx ON audit_log(created_at DESC);
+    
+CREATE TABLE IF NOT EXISTS shift_he_names (
+  id BIGSERIAL PRIMARY KEY,
+  team TEXT NOT NULL CHECK (team IN ('A','B','C','D')),
+  name TEXT NOT NULL,
+  normalized_name TEXT NOT NULL,
+  created_by TEXT REFERENCES users(id),
+  updated_by TEXT REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (team, normalized_name)
+);
   `);
   await inicializarPertencesVisitas(pool);
   await pool.query('DELETE FROM sessions WHERE expires_at <= NOW()');
@@ -1002,6 +1014,204 @@ app.get('/relatorios.html', async (req, res) => {
     return res.sendFile(path.join(PUBLIC_DIR, 'relatorios.html'));
   } catch { return res.redirect('/login.html'); }
 });
+
+/* LISTA COMPARTILHADA DE NOMES — PLANTÃO EXTRAORDINÁRIO (HE) */
+
+app.get('/api/relatorios/he-nomes',
+  exigirBanco, exigirAutenticacao, exigirPerfilRelatorio,
+  async (req, res) => {
+    try {
+      const team = req.user.role === 'admin'
+        ? String(req.query.team || '')
+        : req.user.team;
+
+      if (!['A', 'B', 'C', 'D'].includes(team)) {
+        return res.status(400).json({
+          ok: false,
+          message: 'Informe uma equipe válida.'
+        });
+      }
+
+      const result = await pool.query(
+        `SELECT id, name
+         FROM shift_he_names
+         WHERE team = $1
+         ORDER BY name ASC`,
+        [team]
+      );
+
+      return res.json({ ok: true, names: result.rows });
+    } catch (e) {
+      console.error('Erro ao consultar nomes de HE:', e.message);
+      return res.status(500).json({
+        ok: false,
+        message: 'Não foi possível carregar os nomes de HE.'
+      });
+    }
+  }
+);
+
+app.post('/api/relatorios/he-nomes',
+  exigirBanco, exigirAutenticacao, exigirPerfilRelatorio,
+  async (req, res) => {
+    if (!['chefe', 'auxiliar'].includes(req.user.role)) {
+      return res.status(403).json({
+        ok: false,
+        message: 'Somente chefe ou auxiliar podem alterar a lista.'
+      });
+    }
+
+    const name = textoSeguro(req.body?.name, 120).trim();
+    if (!name) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Informe o nome.'
+      });
+    }
+
+    const normalizedName = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('pt-BR');
+
+    try {
+      const result = await pool.query(
+        `INSERT INTO shift_he_names
+          (team, name, normalized_name, created_by, updated_by)
+         VALUES ($1, $2, $3, $4, $4)
+         ON CONFLICT (team, normalized_name) DO NOTHING
+         RETURNING id, name`,
+        [req.user.team, name, normalizedName, req.user.id]
+      );
+
+      if (!result.rowCount) {
+        return res.status(409).json({
+          ok: false,
+          message: 'Esse nome já existe na lista da equipe.'
+        });
+      }
+
+      return res.status(201).json({
+        ok: true,
+        name: result.rows[0]
+      });
+    } catch (e) {
+      console.error('Erro ao adicionar nome de HE:', e.message);
+      return res.status(500).json({
+        ok: false,
+        message: 'Não foi possível adicionar o nome.'
+      });
+    }
+  }
+);
+
+app.patch('/api/relatorios/he-nomes/:id',
+  exigirBanco, exigirAutenticacao, exigirPerfilRelatorio,
+  async (req, res) => {
+    if (!['chefe', 'auxiliar'].includes(req.user.role)) {
+      return res.status(403).json({
+        ok: false,
+        message: 'Somente chefe ou auxiliar podem alterar a lista.'
+      });
+    }
+
+    const id = Number(req.params.id);
+    const name = textoSeguro(req.body?.name, 120).trim();
+
+    if (!Number.isSafeInteger(id) || id < 1 || !name) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Informe um nome válido.'
+      });
+    }
+
+    const normalizedName = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('pt-BR');
+
+    try {
+      const result = await pool.query(
+        `UPDATE shift_he_names
+         SET name = $3, normalized_name = $4,
+             updated_by = $5, updated_at = NOW()
+         WHERE id = $1 AND team = $2
+         RETURNING id, name`,
+        [id, req.user.team, name, normalizedName, req.user.id]
+      );
+
+      if (!result.rowCount) {
+        return res.status(404).json({
+          ok: false,
+          message: 'Nome não encontrado nesta equipe.'
+        });
+      }
+
+      return res.json({ ok: true, name: result.rows[0] });
+    } catch (e) {
+      if (e.code === '23505') {
+        return res.status(409).json({
+          ok: false,
+          message: 'Esse nome já existe na lista da equipe.'
+        });
+      }
+
+      console.error('Erro ao editar nome de HE:', e.message);
+      return res.status(500).json({
+        ok: false,
+        message: 'Não foi possível editar o nome.'
+      });
+    }
+  }
+);
+
+app.delete('/api/relatorios/he-nomes/:id',
+  exigirBanco, exigirAutenticacao, exigirPerfilRelatorio,
+  async (req, res) => {
+    if (!['chefe', 'auxiliar'].includes(req.user.role)) {
+      return res.status(403).json({
+        ok: false,
+        message: 'Somente chefe ou auxiliar podem alterar a lista.'
+      });
+    }
+
+    const id = Number(req.params.id);
+
+    if (!Number.isSafeInteger(id) || id < 1) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Identificador inválido.'
+      });
+    }
+
+    try {
+      const result = await pool.query(
+        `DELETE FROM shift_he_names
+         WHERE id = $1 AND team = $2
+         RETURNING id`,
+        [id, req.user.team]
+      );
+
+      if (!result.rowCount) {
+        return res.status(404).json({
+          ok: false,
+          message: 'Nome não encontrado nesta equipe.'
+        });
+      }
+
+      return res.json({ ok: true });
+    } catch (e) {
+      console.error('Erro ao excluir nome de HE:', e.message);
+      return res.status(500).json({
+        ok: false,
+        message: 'Não foi possível excluir o nome.'
+      });
+    }
+  }
+);
+
+/* FIM DA LISTA COMPARTILHADA DE HE */
+
 app.get('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
   try {
     const params = []; let where = '';
