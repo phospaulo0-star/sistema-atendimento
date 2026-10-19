@@ -94,7 +94,7 @@
 <section class="field"><label for="s5">06 – FALTA / DISPENSA / ATESTADO MÉDICO</label><textarea id="s5" data-section="06 – FALTA / DISPENSA / ATESTADO MÉDICO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field">
   <label for="feriasSearch">07 – FÉRIAS</label>
-  <textarea id="s6" data-section="07 – FÉRIAS" rows="3" placeholder="N/C" style="display:none" aria-hidden="true"></textarea>
+  <textarea id="s6" data-section="07 – FÉRIAS" rows="3" placeholder="N/C." style="display:none" aria-hidden="true"></textarea>
   <div class="he-manager">
     <p class="small">Selecione os servidores em férias. A lista deste item é independente do item 05; os nomes incluídos aqui só ficam registrados neste relatório.</p>
     <input id="feriasSearch" type="search" placeholder="Pesquisar servidor pelo nome..." autocomplete="off">
@@ -158,8 +158,8 @@ function adicionarLinhaEquipe02(){equipe02Linhas.push({funcao:'',nome:''});rende
 function excluirLinhaEquipe02(i){if(equipe02Linhas.length<=1){alert('Mantenha pelo menos uma linha no item 02.');return}equipe02Linhas.splice(i,1);renderEquipe02();sincronizarEquipe02()}
 function formContent(){const out={};document.querySelectorAll('[data-section]').forEach(el=>out[el.dataset.section]=el.value);return out}
 const PADROES_RELATORIO={
-  '05 – PLANTÃO EXTRAORDINÁRIO (HE)':'N/C',
-  '07 – FÉRIAS':'N/C',
+  '05 – PLANTÃO EXTRAORDINÁRIO (HE)':'N/C.',
+  '07 – FÉRIAS':'N/C.',
   '03 – TRANSPORTE DE SERVIDORES':'SEM ALTERAÇÃO.',
   '04 – ATRASO':'N/C.',
   '06 – FALTA / DISPENSA / ATESTADO MÉDICO':'N/C.',
@@ -243,7 +243,7 @@ function nomesDoRelatorioHE() {
   return $('s4').value
     .split('\n')
     .map(nome => nome.trim())
-    .filter(Boolean);
+    .filter(nome => Boolean(nome) && !/^N\/C\.?$/i.test(nome));
 }
 
 function atualizarRelatorioHE(nomes) {
@@ -541,12 +541,12 @@ function selecionarNomeHE() {
 
 function nomesDoRelatorioFerias(){
   const texto=String($('s6').value||'').trim();
-  if(!texto||/^N\/C$/i.test(texto))return [];
+  if(!texto||/^N\/C\.?$/i.test(texto))return [];
   return texto.split(/\r?\n/).map(x=>x.replace(/^\s*\d+[.)]\s*/, '').trim()).filter(Boolean);
 }
 function atualizarRelatorioFerias(nomes){
   const limpos=[...new Set((nomes||[]).map(n=>String(n||'').trim()).filter(Boolean))];
-  $('s6').value=limpos.length?limpos.map((n,i)=>(i+1)+'. '+n).join('\n'):'N/C';
+  $('s6').value=limpos.length?limpos.map((n,i)=>(i+1)+'. '+n).join('\n'):'N/C.';
   changed();
 }
 function feriasStatus(t){const el=$('feriasStatus');if(el)el.textContent=t;}
