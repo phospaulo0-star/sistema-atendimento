@@ -79,7 +79,7 @@
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
       <button type="button" id="heSelectBtn">Incluir no plantão</button>
-      <button type="button" id="heAddBtn">Adicionar nome ao plantão</button>
+      <button type="button" id="heAddBtn">＋ Adicionar nome à lista compartilhada</button>
       <button type="button" id="heDeleteBtn">Retirar do plantão</button>
       <button type="button" id="heSeedBtn">
         Cadastrar lista padrão da equipe C
@@ -342,9 +342,8 @@ async function carregarNomesHE() {
 
     heStatus(
       heNamesCache.length +
-      ' nome(s) na lista padrão da equipe ' + team +
-      '. Os nomes incluídos ou retirados aqui no relatório atual ' +
-      'não alteram os outros plantões.'
+      ' nome(s) na lista compartilhada da equipe ' + team +
+      '. Novos nomes ficam disponíveis nos demais itens que usam esta lista.'
     );
   } catch (e) {
     heStatus(
@@ -431,41 +430,52 @@ async function cadastrarListaPadraoEquipeC() {
 }
 
 /*
- * Adiciona um nome digitado somente ao relatório aberto.
- * Não grava esse nome na lista compartilhada.
+ * Adiciona um nome à lista compartilhada da equipe.
+ * Após o cadastro, recarrega os campos dependentes (item 01, férias e troca de plantão).
  */
-function adicionarNomeHE() {
+async function adicionarNomeHE() {
   if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) {
     return;
   }
 
   if (!current || current.status === 'encerrado') {
-    heStatus('Abra um relatório em edição antes de adicionar nomes.');
+    heStatus('Abra um relatório em edição antes de adicionar nomes à lista compartilhada.');
     return;
   }
 
-  const name = prompt(
-    'Digite o nome que deseja adicionar somente a este plantão:'
+  const resposta = prompt(
+    'Digite o nome que deseja acrescentar à lista compartilhada da equipe:'
   );
+  if (!resposta || !resposta.trim()) return;
 
-  if (!name || !name.trim()) return;
-
-  const nome = name.trim();
-  const nomes = nomesDoRelatorioHE();
-
-  if (
-    nomes.some(n => normalizarNomeHE(n) === normalizarNomeHE(nome))
-  ) {
-    heStatus('Esse nome já está no relatório atual.');
+  const nome = resposta.trim();
+  const existente = heNamesCache.find(
+    item => normalizarNomeHE(item.name) === normalizarNomeHE(nome)
+  );
+  if (existente) {
+    heStatus('Esse nome já existe na lista compartilhada e já está disponível nos demais itens.');
     return;
   }
 
-  nomes.push(nome);
-  atualizarRelatorioHE(nomes);
-
-  heStatus(
-    'Nome adicionado somente ao relatório atual.'
-  );
+  const botao = $('heAddBtn');
+  botao.disabled = true;
+  try {
+    await api('/api/relatorios/he-nomes', {
+      method: 'POST',
+      body: JSON.stringify({ name: nome })
+    });
+    await carregarNomesHE();
+    heStatus('Nome adicionado à lista compartilhada. Já está disponível nos itens que usam essa lista.');
+  } catch (e) {
+    if (e.status === 409) {
+      await carregarNomesHE();
+      heStatus('Esse nome já consta na lista compartilhada. A lista foi atualizada.');
+    } else {
+      heStatus(e.message || 'Não foi possível adicionar o nome. Confira a conexão e tente novamente.');
+    }
+  } finally {
+    botao.disabled = false;
+  }
 }
 
 /*
