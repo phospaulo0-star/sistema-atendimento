@@ -1033,7 +1033,42 @@ async function salvar(action='salvar',automatic=false){if(readOnly||saving)retur
 try{saving=true;state('Salvando…');const j=await api('/api/relatorios/'+encodeURIComponent(current.id),{method:'PATCH',body:JSON.stringify({revision,reportDate:$('reportDate').value,shiftName:$('shiftName').value,title:$('title').value,content:formContent(),action})});current=j.report;revision=current.revision;dirty=false;serverChanged=false;localSave();await carregarLista();abrir(current.id);state((action==='encerrar'?'Encerrado às ':action==='reabrir'?'Reaberto às ':'Salvo às ')+hora(current.updatedAt));msg(action==='encerrar'?'Relatório encerrado.':action==='reabrir'?'Relatório reaberto com registro de auditoria.':'Alterações salvas no servidor.','good')}catch(e){if(e.status===409){serverChanged=true;msg('CONFLITO: outra pessoa alterou este relatório. Nada foi sobrescrito. Copie suas alterações locais antes de recarregar ou compare com a versão do servidor.','bad');state('Conflito de revisão');if(e.data?.report){const r=e.data.report;const btn=document.createElement('button');btn.textContent='CARREGAR VERSÃO DO SERVIDOR';btn.onclick=()=>{current=r;revision=r.revision;$('title').value=r.title||'';preencherContent(r.content);dirty=false;serverChanged=false;msg('Versão do servidor carregada.','good');};$('status').appendChild(btn)}}else{localSave();msg(e.message,'bad');state('Falha ao salvar · cópia local preservada')}}finally{saving=false}}
 async function poll(){if(!navigator.onLine)return;try{const old=current&&reports.find(x=>x.id===current.id);const j=await api('/api/relatorios');const incoming=j.reports||[];if(current&&dirty){const newer=incoming.find(x=>x.id===current.id);if(newer&&newer.revision!==revision){serverChanged=true;msg('Outra pessoa modificou este relatório. Suas alterações locais não foram substituídas; revise o conflito antes de salvar.','bad');state('Conflito detectado')}reports=incoming;renderList();return}reports=incoming;renderList();if(current){const newer=reports.find(x=>x.id===current.id);if(newer&&newer.revision!==revision){abrir(newer.id);msg('Relatório atualizado com alterações da outra pessoa.','good')}}}catch{state('Sem conexão · alterações locais preservadas')}}
 async function mostrarHistorico(){if(!current)return;try{const url=readOnly?'/api/admin/shift-reports/'+encodeURIComponent(current.id)+'/history':'/api/relatorios/'+encodeURIComponent(current.id)+'/historico';const j=await api(url);$('historyList').innerHTML=(j.history||[]).map(h=>`<div class="report-item"><div><strong>${esc(h.action)} · revisão ${h.revision}</strong><div class="small">${esc(h.full_name||h.username||'Usuário')} · ${esc(new Date(h.created_at).toLocaleString('pt-BR'))}</div><details><summary>Ver conteúdo anterior e corrigido</summary><pre>${esc(JSON.stringify({anterior:h.previous_content,novo:h.new_content,detalhes:h.details},null,2))}</pre></details></div></div>`).join('')||'<p>Sem histórico.</p>';$('historyPanel').classList.remove('hidden')}catch(e){msg(e.message,'bad')}}
-function visualizarRelatorio(){
+let ultimoCampoFocadoId='';
+document.addEventListener('focusin',e=>{
+  if(e.target && e.target.closest && e.target.closest('#editor') && e.target.id){
+    ultimoCampoFocadoId=e.target.id;
+  }
+});
+function instalarBotoesVisualizarItens(){
+  document.querySelectorAll('#editor section.field').forEach(sec=>{
+    const campo=sec.querySelector('[data-section]');
+    const label=sec.querySelector('label');
+    if(!campo||!label||sec.querySelector('.btn-visualizar-item'))return;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='btn-visualizar-item';
+    btn.title='Visualizar somente este item';
+    btn.setAttribute('aria-label','Visualizar '+(campo.dataset.section||'este item'));
+    btn.textContent='👁';
+    btn.style.cssText='display:inline-flex;align-items:center;justify-content:center;width:28px;height:25px;margin-left:7px;padding:0;border:1px solid #aab3bd;border-radius:5px;background:#f3f4f6;color:#20252b;font-size:14px;cursor:pointer;vertical-align:middle';
+    btn.addEventListener('click',()=>{ultimoCampoFocadoId=campo.id;visualizarRelatorio(campo.id)});
+    label.insertAdjacentElement('afterend',btn);
+  });
+}
+function voltarEdicaoItem(id){
+  document.body.classList.remove('preview-mode');
+  $('previewPanel').classList.add('hidden');
+  $('editor').classList.remove('hidden');
+  const sec=document.querySelector('#editor [data-section="'+id+'"]')?.closest('section.field');
+  if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+  const foco=document.getElementById(ultimoCampoFocadoId);
+  if(foco && foco.closest('#editor')){setTimeout(()=>foco.focus({preventScroll:true}),150)}
+  else {
+    const campo=sec?.querySelector('input:not([type=hidden]),textarea,select,button');
+    if(campo)setTimeout(()=>campo.focus({preventScroll:true}),150);
+  }
+}
+function visualizarRelatorio(targetId=null){
   const data=$('reportDate').value;
   const dataObj=data?new Date(data+'T12:00:00'):null;
   const dataFormatada=dataObj?dataObj.toLocaleDateString('pt-BR'):'Não informada';
@@ -1042,7 +1077,8 @@ function visualizarRelatorio(){
   const shift=$('shiftName').value||'Não informado';
   const team=$('team').value||me?.team||'Não informada';
   const title=$('title').value.trim()||'RELATÓRIO DE PLANTÃO';
-  const campos=[...document.querySelectorAll('#editor [data-section]')];
+  const todosCampos=[...document.querySelectorAll('#editor [data-section]')];
+  const campos=targetId?todosCampos.filter(el=>el.id===targetId):todosCampos;
   const secoes=campos.map(el=>({titulo:el.dataset.section.replace(/\s*:\s*$/,''),texto:el.id==='s0'?textoFormalItem01():((el.value||'').trim()||PADROES_RELATORIO[el.dataset.section]||'')}));
   const diaAno=dataObj?Math.floor((Date.UTC(dataObj.getFullYear(),dataObj.getMonth(),dataObj.getDate())-Date.UTC(dataObj.getFullYear(),0,0))/86400000):null;
   const diaMes=dataObj?dataObj.getDate():null;
@@ -1077,7 +1113,8 @@ function visualizarRelatorio(){
     return `<section class="preview-section${titulo.startsWith('01')?' item01-justified':''}"><h3>${esc(item.titulo)}:</h3><div class="preview-text${is02?' team02-print':''}">${esc(textoFinal)}</div></section>`
   }).join(''):'<p>Nenhuma seção foi preenchida ainda.</p>';
   const rodape=`<div class="preview-footer">Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS<br>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</div></div>`;
-  $('previewContent').innerHTML=cabecalho+corpo+rodape;
+  const botaoRetorno=targetId?`<div class="preview-return-wrap" style="margin:12px 0;text-align:center"><button type="button" class="primary" onclick="voltarEdicaoItem('${targetId}')">✏️ VOLTAR À EDIÇÃO DESTE ITEM</button></div>`:'';
+  $('previewContent').innerHTML=cabecalho+corpo+botaoRetorno+rodape;
   $('editor').classList.add('hidden');
   $('previewPanel').classList.remove('hidden');
   document.body.classList.add('preview-mode');
@@ -1091,5 +1128,6 @@ function voltarEdicao(){
 }
 window.addEventListener('online',async()=>{state('Conexão retornou · sincronizando…');if(dirty)await salvar('salvar');await carregarLista()});window.addEventListener('beforeunload',e=>{if(dirty){localSave();e.preventDefault();e.returnValue=''}});
 async function sair(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}finally{location.replace('/login.html')}}
-iniciar().then(() => carregarNomesHE());
+instalarBotoesVisualizarItens();
+iniciar().then(() => { instalarBotoesVisualizarItens(); return carregarNomesHE(); });
 </script></body></html>
