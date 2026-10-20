@@ -228,12 +228,12 @@
   </div>
   <textarea id="s16" data-section="17 – VIATURAS" rows="3" placeholder="N/C." style="display:none" aria-hidden="true"></textarea>
 </section>
-<section class="field"><label for="s17">18 – ALIMENTAÇÃO</label><textarea id="s17" data-section="18 – ALIMENTAÇÃO" rows="3" placeholder="Preencha esta seção do relatório...">• Café da manhã, almoço e jantar, sem alteração.</textarea></section>
-<section class="field"><label for="s18">19 – ROTINA DIÁRIA</label><textarea id="s18" data-section="19 – ROTINA DIÁRIA" rows="3" placeholder="Preencha esta seção do relatório...">• Foi cumprida, a rotina diária, conforme Portaria Nº 01/2025/D/CPAIG/AGEPEN/MS.</textarea></section>
-<section class="field"><label for="s19">20 – MOTOR ESTACIONÁRIO</label><textarea id="s19" data-section="20 – MOTOR ESTACIONÁRIO" rows="3" placeholder="Preencha esta seção do relatório...">• N/C.</textarea></section>
-<section class="field"><label for="s20">21 – SIAPEN</label><textarea id="s20" data-section="21 – SIAPEN" rows="3" placeholder="Preencha esta seção do relatório...">• N/C.</textarea></section>
-<section class="field"><label for="s21">22 – SIGO</label><textarea id="s21" data-section="22 – SIGO" rows="3" placeholder="Preencha esta seção do relatório...">• N/C.</textarea></section>
-<section class="field"><label for="s22">23 – SISTEMA DE MONITORAMENTO</label><textarea id="s22" data-section="23 – SISTEMA DE MONITORAMENTO" rows="3" placeholder="Preencha esta seção do relatório...">• N/C.</textarea></section>
+<section class="field"><label for="s17">18 – ALIMENTAÇÃO</label><textarea id="s17" data-section="18 – ALIMENTAÇÃO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field"><label for="s18">19 – ROTINA DIÁRIA</label><textarea id="s18" data-section="19 – ROTINA DIÁRIA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field"><label for="s19">20 – MOTOR ESTACIONÁRIO</label><textarea id="s19" data-section="20 – MOTOR ESTACIONÁRIO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field"><label for="s20">21 – SIAPEN</label><textarea id="s20" data-section="21 – SIAPEN" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field"><label for="s21">22 – SIGO</label><textarea id="s21" data-section="22 – SIGO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field"><label for="s22">23 – SISTEMA DE MONITORAMENTO</label><textarea id="s22" data-section="23 – SISTEMA DE MONITORAMENTO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s23">24 – VISTORIA EM CELA</label><textarea id="s23" data-section="24 – VISTORIA EM CELA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s24">25 – HOSPITALIZADO</label><textarea id="s24" data-section="25 – HOSPITALIZADO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s25">26 – RETORNO DE HOSPITALIZADO</label><textarea id="s25" data-section="26 – RETORNO DE HOSPITALIZADO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -388,6 +388,12 @@ const PADROES_RELATORIO={
   '13 – CUSTÓDIA HOSPITALAR':'N/C.',
   '14 – ESCOLTA / PROGRESSÃO / REGRESSÃO / FLAGRANTE':'N/C.',
   '15 – ATIVIDADES':'Rotinas Diárias internas e externas executadas sem alteração.',
+  '18 – ALIMENTAÇÃO':'• Café da manhã, almoço e jantar, sem alteração.',
+  '19 – ROTINA DIÁRIA':'• Foi cumprida, a rotina diária, conforme Portaria Nº 01/2025/D/CPAIG/AGEPEN/MS.',
+  '20 – MOTOR ESTACIONÁRIO':'• N/C.',
+  '21 – SIAPEN':'• N/C.',
+  '22 – SIGO':'• N/C.',
+  '23 – SISTEMA DE MONITORAMENTO':'• N/C.',
   '37 – MATERIAL RECEBIDO DA CHEFIA':'N/C.'
 };
 let reforcoLinhas=[];
@@ -455,15 +461,35 @@ function sincronizarMaterialCarga(){
   changed();
 }
 function renderMaterialCarga(){
-  const box=$('materialCargaTabela');if(!box)return;
-  let tabela='<table class="material-carga-table" style="width:100%;border-collapse:collapse;table-layout:fixed" style="border-collapse:collapse;width:100%;border:1px solid #222"><thead><tr><th style="background:#ccc;border:1px solid #222;padding:5px;background-color:#d6d6d6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact" style="border:1px solid #222;padding:3px 6px" style="background-color:#d6d6d6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact"ITENS</th><th style="background:#ccc;border:1px solid #222;padding:5px;width:23%" style="border:1px solid #222;padding:3px 6px" style="background-color:#d6d6d6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact"QUANT.</th><th class="no-print" style="border:1px solid #222;padding:5px;width:90px" style="border:1px solid #222;padding:3px 6px" style="background-color:#d6d6d6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact"SELEÇÃO</th></tr></thead><tbody>';
+  const box=$('materialCargaTabela');
+  if(!box)return;
+  let tabela='<table class="material-carga-table" style="width:100%;border-collapse:collapse;table-layout:fixed;border:1px solid #222"><thead><tr><th style="background:#ccc;border:1px solid #222;padding:5px">ITENS</th><th style="background:#ccc;border:1px solid #222;padding:5px;width:23%">QUANT.</th><th class="no-print" style="border:1px solid #222;padding:5px;width:90px">SELEÇÃO</th></tr></thead><tbody>';
   materiaisCarga.forEach((r,i)=>{
     const selecionado=i===materialCargaSelecionado;
-    tabela+=`<tr style="background:${selecionado?'#fff6d6':'#fff'}"><td style="border:1px solid #222;padding:0;background-color:#d6d6d6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact" style="border:1px solid #222;padding:3px 6px" style="background-color:#d6d6d6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact"<input aria-label="Material ${i+1}" value="${escaparMaterialCarga(r.item)}" placeholder="Descrição do material" style="width:100%;border:0;border-radius:0;padding:7px;box-sizing:border-box" onfocus="selecionarMaterialCarga(${i})" oninput="alterarMaterialCarga(${i},'item',this.value)"></td><td style="border:1px solid #222;padding:0" style="border:1px solid #222;padding:3px 6px" style="background-color:#d6d6d6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact"<input aria-label="Quantidade ${i+1}" value="${escaparMaterialCarga(r.quant)}" placeholder="Quantidade" style="width:100%;border:0;border-radius:0;padding:7px;box-sizing:border-box;text-align:center" onfocus="selecionarMaterialCarga(${i})" oninput="alterarMaterialCarga(${i},'quant',this.value)"></td><td class="no-print" style="border:1px solid #222;text-align:center;padding:3px" style="border:1px solid #222;padding:3px 6px" style="background-color:#d6d6d6 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact"<button type="button" onclick="selecionarMaterialCarga(${i});excluirMaterialCarga()">Excluir</button></td></tr>`;
+    tabela+=`<tr style="background:${selecionado?'#fff6d6':'#fff'}">
+      <td style="border:1px solid #222;padding:0;background:#d6d6d6">
+        <input aria-label="Material ${i+1}" value="${escaparMaterialCarga(r.item)}" placeholder="Descrição do material" style="width:100%;border:0;border-radius:0;padding:7px;box-sizing:border-box;background:#d6d6d6" onfocus="selecionarMaterialCarga(${i})" oninput="alterarMaterialCarga(${i},'item',this.value)">
+      </td>
+      <td style="border:1px solid #222;padding:0">
+        <input aria-label="Quantidade ${i+1}" value="${escaparMaterialCarga(r.quant)}" placeholder="Quantidade" style="width:100%;border:0;border-radius:0;padding:7px;box-sizing:border-box;text-align:center" onfocus="selecionarMaterialCarga(${i})" oninput="alterarMaterialCarga(${i},'quant',this.value)">
+      </td>
+      <td class="no-print" style="border:1px solid #222;padding:3px;text-align:center">
+        <button type="button" onclick="excluirMaterialCargaLinha(${i})">Excluir</button>
+      </td>
+    </tr>`;
   });
-  tabela+='</tbody></table>';box.innerHTML=tabela;
+  tabela+='</tbody></table>';
+  box.innerHTML=tabela;
 }
-function selecionarMaterialCarga(i){materialCargaSelecionado=i}
+function excluirMaterialCargaLinha(i){
+  if(i<0||i>=materiaisCarga.length)return;
+  materiaisCarga.splice(i,1);
+  materialCargaSelecionado=-1;
+  if(!materiaisCarga.length)materiaisCarga.push({item:'',quant:''});
+  renderMaterialCarga();
+  sincronizarMaterialCarga();
+}
+
 function alterarMaterialCarga(i,campo,valor){if(!materiaisCarga[i])return;materiaisCarga[i][campo]=valor;sincronizarMaterialCarga()}
 function adicionarMaterialCarga(item='',quant=''){materiaisCarga.push({item,quant});materialCargaSelecionado=materiaisCarga.length-1;renderMaterialCarga();sincronizarMaterialCarga();const inputs=$('materialCargaTabela')?.querySelectorAll('tbody tr:last-child input');if(inputs&&inputs[0])inputs[0].focus()}
 function excluirMaterialCarga(){if(materialCargaSelecionado<0||!materiaisCarga[materialCargaSelecionado]){msg('Selecione uma linha da tabela para excluir.','bad');return}materiaisCarga.splice(materialCargaSelecionado,1);materialCargaSelecionado=-1;renderMaterialCarga();sincronizarMaterialCarga()}
