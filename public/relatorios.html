@@ -62,6 +62,22 @@
 .vistoria-print-row{margin:3px 0}
 @media print{.vistoria-row-actions,.vistoria-row input,.vistoria-row label{display:none!important}.vistoria-row{border:0;padding:0;margin:2px 0}.vistoria-row strong{display:none}}
 
+
+.hospitalizado-actions{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
+.hospitalizado-row{display:grid;grid-template-columns:42px minmax(180px,1fr) minmax(130px,28%) 84px;gap:0;border:1px solid #222;margin:0}
+.hospitalizado-row>div{padding:4px;border-right:1px solid #222;display:flex;align-items:center;min-width:0}
+.hospitalizado-row>div:last-child{border-right:0}
+.hospitalizado-row input{width:100%;min-width:0;box-sizing:border-box;padding:6px;border:1px solid #b9c3d0;border-radius:4px}.hospitalizado-row input[type="date"]{font-family:inherit;cursor:pointer}
+.hospitalizado-table-head{display:grid;grid-template-columns:42px minmax(180px,1fr) minmax(130px,28%) 84px;background:#c6c6c6;border:1px solid #222;font-weight:bold;text-align:center}
+.hospitalizado-table-head>div{padding:5px;border-right:1px solid #222}
+.hospitalizado-table-head>div:last-child{border-right:0}
+.hospitalizado-visual table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+.hospitalizado-visual th,.hospitalizado-visual td{border:1px solid #222;padding:3px;text-align:center;overflow-wrap:anywhere}
+.hospitalizado-visual th{background:#c6c6c6}
+.hospitalizado-visual td:first-child{width:34px}
+@media(max-width:700px){.hospitalizado-row,.hospitalizado-table-head{grid-template-columns:32px minmax(90px,1fr) minmax(90px,35%) 65px}.hospitalizado-row>div{padding:3px}}
+@media print{.hospitalizado-editor,.hospitalizado-actions,.hospitalizado-row,.hospitalizado-table-head{display:none!important}.hospitalizado-visual{display:block!important}}
+
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -255,7 +271,25 @@
 <div id="vistoriaCelasVisual"></div>
 <textarea id="s23" data-section="24 – VISTORIA EM CELA" rows="4" class="no-print" style="display:none">N/C.</textarea>
 </section>
-<section class="field"><label for="s24">25 – HOSPITALIZADO</label><textarea id="s24" data-section="25 – HOSPITALIZADO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field hospitalizado-field">
+<label for="s24">25 – HOSPITALIZADO</label>
+<datalist id="listaInternosCompartilhada"></datalist>
+<div id="hospitalizadosContainer"></div>
+<div class="no-print hospitalizado-actions">
+<button type="button" onclick="adicionarHospitalizado('hospitalizado')">＋ ADICIONAR HOSPITALIZADO</button>
+</div>
+<textarea id="s24" data-section="25 – HOSPITALIZADO" rows="3" class="no-print" style="display:none">N/C.</textarea>
+<div id="hospitalizadosVisual" class="hospitalizado-visual"></div>
+</section>
+<section class="field hospitalizado-field">
+<label for="s24a">25.1 – HOSPITALIZADO A CONFIRMAR</label>
+<div id="hospitalizadosConfirmarContainer"></div>
+<div class="no-print hospitalizado-actions">
+<button type="button" onclick="adicionarHospitalizado('confirmar')">＋ ADICIONAR HOSPITALIZADO A CONFIRMAR</button>
+</div>
+<textarea id="s24a" data-section="25.1 – HOSPITALIZADO A CONFIRMAR" rows="3" class="no-print" style="display:none">N/C.</textarea>
+<div id="hospitalizadosConfirmarVisual" class="hospitalizado-visual"></div>
+</section>
 <section class="field"><label for="s25">26 – RETORNO DE HOSPITALIZADO</label><textarea id="s25" data-section="26 – RETORNO DE HOSPITALIZADO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s26">27 – ÓBITO</label><textarea id="s26" data-section="27 – ÓBITO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s27">28 – LICENÇA JUDICIAL</label><textarea id="s27" data-section="28 – LICENÇA JUDICIAL" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -398,6 +432,8 @@ function adicionarLinhaEscalaNoturna(){const n=escalaNoturnaLinhas.length+1;esca
 function excluirLinhaEscalaNoturna(i){escalaNoturnaLinhas.splice(i,1);renderEscalaNoturna();sincronizarEscalaNoturna()}
 function formContent(){const out={};document.querySelectorAll('[data-section]').forEach(el=>out[el.dataset.section]=el.value);return out}
 const PADROES_RELATORIO={
+  '25 – HOSPITALIZADO':'N/C.',
+  '25.1 – HOSPITALIZADO A CONFIRMAR':'N/C.',
   '05 – PLANTÃO EXTRAORDINÁRIO (HE)':'N/C.',
   '07 – FÉRIAS':'N/C.',
   '08 – TROCA DE PLANTÃO':'N/C.',
@@ -1220,5 +1256,100 @@ function carregarVistoriasCela(texto){
  renderVistoriasCela();
 }
 document.addEventListener('DOMContentLoaded',()=>{const c=document.getElementById('s23');if(c)carregarVistoriasCela(c.value||'N/C.');});
+
+
+// Componente reutilizável: busca de internos pela base compartilhada do sistema.
+let baseInternosCompartilhada = [];
+function normalizarNomeInterno(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();}
+async function carregarBaseInternosCompartilhada(){
+ const lista=document.getElementById('listaInternosCompartilhada');
+ if(!lista)return;
+ try{
+  const resposta=await api('/api/internals/base');
+  baseInternosCompartilhada=Array.isArray(resposta.items)?resposta.items:[];
+  lista.innerHTML=baseInternosCompartilhada
+   .filter(x=>x&&x.nome)
+   .sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{sensitivity:'base'}))
+   .map(x=>`<option value="${escHosp(x.nome)}"></option>`).join('');
+ }catch(e){
+  // A edição manual continua disponível se a base não puder ser carregada.
+  console.warn('Não foi possível carregar a base compartilhada de internos:',e.message);
+ }
+}
+function formatarDataHosp(valor){
+ if(!valor)return '';
+ const s=String(valor);
+ const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+ return m?`${m[3]}/${m[2]}/${m[1]}`:s;
+}
+// Itens 25 e 25.1 — tabelas independentes de hospitalizados.
+let listaHospitalizados=[], listaHospitalizadosConfirmar=[], seqHospitalizado=0;
+function escHosp(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function itensHosp(tipo){return tipo==='confirmar'?listaHospitalizadosConfirmar:listaHospitalizados;}
+function campoHosp(tipo){return document.getElementById(tipo==='confirmar'?'s24a':'s24');}
+function containerHosp(tipo){return document.getElementById(tipo==='confirmar'?'hospitalizadosConfirmarContainer':'hospitalizadosContainer');}
+function visualHosp(tipo){return document.getElementById(tipo==='confirmar'?'hospitalizadosConfirmarVisual':'hospitalizadosVisual');}
+function adicionarHospitalizado(tipo){
+ const arr=itensHosp(tipo);
+ if(arr.length===1&&arr[0].nc)arr.length=0;
+ arr.push({id:++seqHospitalizado,nome:'',saida:''});
+ renderHospitalizados(tipo);sincronizarHospitalizados(tipo);
+}
+function alterarHospitalizado(tipo,id,campo,valor){
+ const row=itensHosp(tipo).find(x=>x.id===id);if(!row)return;
+ row[campo]=valor;sincronizarHospitalizados(tipo,false);renderVisualHospitalizados(tipo);
+}
+function excluirHospitalizado(tipo,id){
+ const arr=itensHosp(tipo),i=arr.findIndex(x=>x.id===id);if(i>=0)arr.splice(i,1);
+ if(!arr.length)arr.push({id:++seqHospitalizado,nc:true,nome:'',saida:''});
+ renderHospitalizados(tipo);sincronizarHospitalizados(tipo);
+}
+function textoHosp(arr){
+ if(!arr.length||arr.every(x=>x.nc))return 'N/C.';
+ return arr.filter(x=>!x.nc).map(x=>`${x.nome||''}\t${x.saida||''}`).join('\n');
+}
+function sincronizarHospitalizados(tipo,redesenhar=true){
+ const campo=campoHosp(tipo);if(campo){
+  campo.value=textoHosp(itensHosp(tipo));
+  campo.dispatchEvent(new Event('input',{bubbles:true}));
+  campo.dispatchEvent(new Event('change',{bubbles:true}));
+ }
+ if(redesenhar)renderVisualHospitalizados(tipo);
+}
+function renderHospitalizados(tipo){
+ const box=containerHosp(tipo);if(!box)return;
+ const arr=itensHosp(tipo);
+ let s='<div class="hospitalizado-table-head"><div>Nº</div><div>NOME DO PRESO</div><div>SAÍDA</div><div class="no-print">AÇÃO</div></div>';
+ s+=arr.map((r,i)=>r.nc?`<div class="hospitalizado-row"><div>${String(i+1).padStart(2,'0')}.</div><div style="grid-column:span 2;justify-content:center">N/C.</div><div class="no-print"><button type="button" onclick="excluirHospitalizado('${tipo}',${r.id})">Excluir</button></div></div>`:
+ `<div class="hospitalizado-row"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do preso" list="listaInternosCompartilhada" value="${escHosp(r.nome)}" placeholder="Digite para buscar interno" autocomplete="off" oninput="alterarHospitalizado('${tipo}',${r.id},'nome',this.value)"></div><div><input aria-label="Data de saída" type="date" value="${escHosp(r.saida)}" oninput="alterarHospitalizado('${tipo}',${r.id},'saida',this.value)"></div><div class="no-print"><button type="button" onclick="excluirHospitalizado('${tipo}',${r.id})">Excluir</button></div></div>`).join('');
+ box.innerHTML=s;
+ renderVisualHospitalizados(tipo);
+}
+function renderVisualHospitalizados(tipo){
+ const box=visualHosp(tipo);if(!box)return;
+ const arr=itensHosp(tipo);
+ if(!arr.length||arr.every(x=>x.nc)){box.innerHTML='<p>N/C.</p>';return;}
+ box.innerHTML='<table><thead><tr><th style="width:34px"></th><th>NOME DO PRESO</th><th style="width:22%">SAÍDA</th></tr></thead><tbody>'+
+ arr.filter(x=>!x.nc).map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.saida))}</td></tr>`).join('')+
+ '</tbody></table>';
+}
+function carregarHospitalizados(tipo,valor){
+ const linhas=String(valor||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ const arr=itensHosp(tipo);arr.length=0;
+ if(!linhas.length||linhas.every(x=>/^N\/C\.?$/i.test(x))){arr.push({id:++seqHospitalizado,nc:true,nome:'',saida:''});}
+ else{
+  linhas.forEach(l=>{
+   const partes=l.split(/\t+|\s{2,}/);
+   arr.push({id:++seqHospitalizado,nome:partes[0]||'',saida:partes.slice(1).join(' ').trim()});
+  });
+ }
+ renderHospitalizados(tipo);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ carregarBaseInternosCompartilhada();
+ const a=document.getElementById('s24'),b=document.getElementById('s24a');
+ if(a)carregarHospitalizados('hospitalizado',a.value||'N/C.');
+ if(b)carregarHospitalizados('confirmar',b.value||'N/C.');
+});
 
 </script></body></html>
