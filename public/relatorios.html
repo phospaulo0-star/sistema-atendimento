@@ -160,12 +160,14 @@
 </section>
 <section class="field"><label for="s11">12 – EXPEDIENTE</label><p class="small">O conteúdo começa com o Item 12 do relatório anterior da mesma equipe. Edite, corrija, acrescente ou remova informações conforme necessário; o relatório anterior permanece preservado no histórico.</p><textarea id="s11" data-section="12 – EXPEDIENTE" rows="3" placeholder="Informações do expediente..."></textarea></section>
 <section class="field custodia-hospitalar-field">
-  <label for="custodiaNome">13 – CUSTÓDIA HOSPITALAR</label>
-  <p class="small">Sem cadastro, o relatório exibe N/C. Ao selecionar um servidor da lista compartilhada do Item 05, o N/C é substituído pelo nome, seguido de hífen e do complemento opcional.</p>
-  <div class="grid">
-    <div class="field"><label for="custodiaNome">Servidor (lista do Item 05)</label><select id="custodiaNome" onchange="atualizarTextoCustodia()"><option value="">Selecione um servidor</option></select></div>
-    <div class="field"><label for="custodiaDetalhe">Complemento (opcional)</label><input id="custodiaDetalhe" autocomplete="off" placeholder="Digite o complemento, se houver" oninput="atualizarTextoCustodia()"></div>
+  <label>13 – CUSTÓDIA HOSPITALAR</label>
+  <p class="small">Inclua quantos registros forem necessários. Selecione um servidor da lista do Item 05 ou digite manualmente; cada registro tem complemento próprio. Excluir aqui não remove o nome da lista compartilhada.</p>
+  <div id="custodiaRows"></div>
+  <div class="toolbar no-print" style="margin-top:8px">
+    <button type="button" class="primary" onclick="adicionarLinhaCustodia()">＋ INCLUIR NOME</button>
+    <button type="button" onclick="excluirLinhaCustodiaSelecionada()">❌ EXCLUIR NOME SELECIONADO</button>
   </div>
+  <datalist id="custodiaNomes"></datalist>
   <textarea id="s12" data-section="13 – CUSTÓDIA HOSPITALAR" rows="3" placeholder="N/C." style="display:none" aria-hidden="true"></textarea>
 </section>
 <section class="field"><label for="s13">14 – ESCOLTA / PROGRESSÃO / REGRESSÃO / FLAGRANTE</label><textarea id="s13" data-section="14 – ESCOLTA / PROGRESSÃO / REGRESSÃO / FLAGRANTE" rows="3" placeholder="N/C."></textarea></section>
@@ -377,35 +379,18 @@ function preencherCamposReforco(){
   });
   if(!reforcoLinhas.length)reforcoLinhas.push({nome:'',detalhe:''});atualizarOpcoesReforco();renderListaReforco();
 }
-let custodiaNomePendente='';
-function renderOpcoesCustodia(){
-  const select=$('custodiaNome');if(!select)return;
-  const atual=select.value||custodiaNomePendente||'';
-  select.innerHTML='<option value="">Selecione um servidor</option>';
-  heNamesCache.forEach(item=>{const option=document.createElement('option');option.value=item.name;option.textContent=item.name;select.appendChild(option);});
-  if(atual&&!Array.from(select.options).some(option=>option.value===atual)){
-    const option=document.createElement('option');option.value=atual;option.textContent=atual+' (nome salvo anteriormente)';select.appendChild(option);
-  }
-  select.value=atual;
-}
-function preencherCamposCustodia(){
-  const bruto=String($('s12')?.value||'').trim();
-  const select=$('custodiaNome');const detalhe=$('custodiaDetalhe');
-  if(!select||!detalhe)return;
-  if(!bruto||/^N\/C\.?$/i.test(bruto)){custodiaNomePendente='';select.value='';detalhe.value='';return;}
-  const partes=bruto.match(/^(.+?)\s+[-–—]\s*(.*)$/);
-  custodiaNomePendente=partes?(partes[1]||'').trim():bruto;
-  detalhe.value=partes?(partes[2]||'').trim():'';
-  renderOpcoesCustodia();
-  select.value=custodiaNomePendente;
-}
-function atualizarTextoCustodia(){
-  const nome=String($('custodiaNome')?.value||'').trim();
-  const detalhe=String($('custodiaDetalhe')?.value||'').trim();
-  custodiaNomePendente=nome;
-  $('s12').value=nome?(nome+' - '+detalhe):'N/C.';
-  changed();
-}
+let custodiaLinhas=[];
+let custodiaSelecionada=-1;
+function atualizarOpcoesCustodia(){const lista=$('custodiaNomes');if(!lista)return;lista.innerHTML='';heNamesCache.forEach(item=>{const option=document.createElement('option');option.value=item.name;lista.appendChild(option);});}
+function sincronizarCustodia(){const validas=custodiaLinhas.filter(r=>String(r.nome||'').trim());$('s12').value=validas.length?validas.map(r=>String(r.nome).trim()+(String(r.detalhe||'').trim()?' - '+String(r.detalhe).trim():'')).join('\n'):'N/C.';changed()}
+function renderCustodia(){const box=$('custodiaRows');if(!box)return;box.innerHTML=custodiaLinhas.map((r,i)=>`<div class="custodia-row" style="display:grid;grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) auto;gap:8px;align-items:center;margin:8px 0;padding:8px;border:1px solid ${i===custodiaSelecionada?'#d1b34f':'#d7dce2'};border-radius:7px" onclick="selecionarLinhaCustodia(${i})"><input aria-label="Servidor em custódia hospitalar" list="custodiaNomes" value="${escaparAttr(r.nome)}" placeholder="Servidor (selecione ou digite)" onfocus="selecionarLinhaCustodia(${i})" oninput="alterarLinhaCustodia(${i},'nome',this.value)"/><input aria-label="Complemento da custódia" value="${escaparAttr(r.detalhe)}" placeholder="Complemento / informação" onfocus="selecionarLinhaCustodia(${i})" oninput="alterarLinhaCustodia(${i},'detalhe',this.value)"/><button type="button" onclick="event.stopPropagation();selecionarLinhaCustodia(${i});excluirLinhaCustodiaSelecionada()">Excluir</button></div>`).join('');atualizarOpcoesCustodia()}
+function selecionarLinhaCustodia(index){custodiaSelecionada=index;renderCustodia()}
+function alterarLinhaCustodia(index,campo,valor){if(!custodiaLinhas[index])return;custodiaLinhas[index][campo]=valor;custodiaSelecionada=index;sincronizarCustodia()}
+function adicionarLinhaCustodia(nome='',detalhe=''){custodiaLinhas.push({nome,detalhe});custodiaSelecionada=custodiaLinhas.length-1;renderCustodia();changed()}
+function excluirLinhaCustodiaSelecionada(){if(custodiaSelecionada<0||!custodiaLinhas[custodiaSelecionada]){msg('Selecione primeiro a linha do nome que deseja excluir.','bad');return}custodiaLinhas.splice(custodiaSelecionada,1);custodiaSelecionada=-1;renderCustodia();sincronizarCustodia()}
+function preencherCamposCustodia(){const bruto=String($('s12')?.value||'').trim();custodiaLinhas=[];custodiaSelecionada=-1;if(bruto&&!/^N\/C\.?$/i.test(bruto)){bruto.split(/\r?\n/).forEach(l=>{const p=l.match(/^(.+?)\s+[-–—]\s*(.*)$/);custodiaLinhas.push({nome:(p?p[1]:l).trim(),detalhe:p?(p[2]||'').trim():''})})}if(!custodiaLinhas.length)custodiaLinhas.push({nome:'',detalhe:''});renderCustodia()}
+function renderOpcoesCustodia(){atualizarOpcoesCustodia()}
+function atualizarTextoCustodia(){sincronizarCustodia()}
 function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca()}
 function lerItem01DoTexto(){const texto=$('s0').value||'';let recebe='',entrega='',quantidade='';const extras=[];texto.split('\n').forEach(linha=>{const m1=linha.match(/^\s*QUEM RECEBE O PLANTÃO:\s*(.*)$/i);const m2=linha.match(/^\s*QUEM ENTREGA O PLANTÃO:\s*(.*)$/i);const mq=linha.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*(\d*)\s*$/i);if(m1)recebe=m1[1].trim();else if(m2)entrega=m2[1].trim();else if(mq)quantidade=mq[1];else if(linha.trim())extras.push(linha)});$('recebePlantao').dataset.pendingName=recebe;$('entregaPlantao').dataset.pendingName=entrega;$('quantidadeCustodiados').value=quantidade;$('s0Extra').value=extras.join('\n');atualizarQuantidadeExtenso();aplicarSelecoesItem01()}
 function aplicarSelecoesItem01(){for(const id of ['recebePlantao','entregaPlantao']){const el=$(id);const pending=el.dataset.pendingName||'';if(pending&&![...el.options].some(o=>o.value===pending)){const op=document.createElement('option');op.value=pending;op.textContent=pending+' (nome salvo anteriormente)';el.appendChild(op)}if(pending)el.value=pending;delete el.dataset.pendingName}}
