@@ -54,6 +54,14 @@
   }
 }
 
+
+.vistoria-row{border:1px solid #c5cbd3;border-radius:6px;padding:9px;margin:8px 0;background:#fff}
+.vistoria-row label{display:block;font-size:12px;font-weight:bold;margin:6px 0 3px}
+.vistoria-row input{width:100%;box-sizing:border-box;padding:8px;border:1px solid #b9c3d0;border-radius:5px}
+.vistoria-row-actions{text-align:right;margin-top:7px}
+.vistoria-print-row{margin:3px 0}
+@media print{.vistoria-row-actions,.vistoria-row input,.vistoria-row label{display:none!important}.vistoria-row{border:0;padding:0;margin:2px 0}.vistoria-row strong{display:none}}
+
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -234,7 +242,19 @@
 <section class="field"><label for="s20">21 – SIAPEN</label><textarea id="s20" data-section="21 – SIAPEN" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s21">22 – SIGO</label><textarea id="s21" data-section="22 – SIGO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s22">23 – SISTEMA DE MONITORAMENTO</label><textarea id="s22" data-section="23 – SISTEMA DE MONITORAMENTO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s23">24 – VISTORIA EM CELA</label><textarea id="s23" data-section="24 – VISTORIA EM CELA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field">
+<label>24 – VISTORIA EM CELA</label>
+<p class="hint">Adicione um ou mais registros. Preencha as celas e os pavilhões; cada registro pode ser excluído individualmente.</p>
+<div id="vistoriaCelasContainer"></div>
+<div class="no-print" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+<button type="button" onclick="adicionarVistoriaCela('uma')">＋ UMA CELA</button>
+<button type="button" onclick="adicionarVistoriaCela('mesmo')">＋ VÁRIAS CELAS DO MESMO PAVILHÃO</button>
+<button type="button" onclick="adicionarVistoriaCela('diferentes')">＋ PAVILHÕES DIFERENTES</button>
+<button type="button" onclick="adicionarVistoriaCela('nc')">＋ N/C</button>
+</div>
+<div id="vistoriaCelasVisual"></div>
+<textarea id="s23" data-section="24 – VISTORIA EM CELA" rows="4" class="no-print" style="display:none">N/C.</textarea>
+</section>
 <section class="field"><label for="s24">25 – HOSPITALIZADO</label><textarea id="s24" data-section="25 – HOSPITALIZADO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s25">26 – RETORNO DE HOSPITALIZADO</label><textarea id="s25" data-section="26 – RETORNO DE HOSPITALIZADO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s26">27 – ÓBITO</label><textarea id="s26" data-section="27 – ÓBITO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -1156,4 +1176,49 @@ window.addEventListener('online',async()=>{state('Conexão retornou · sincroniz
 async function sair(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}finally{location.replace('/login.html')}}
 instalarBotoesVisualizarItens();
 iniciar().then(() => { instalarBotoesVisualizarItens(); return carregarNomesHE(); });
+
+let vistoriasCela=[], vistoriaCelaSeq=0;
+function escVistoria(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function textoVistoria(v){
+ if(v.tipo==='nc')return 'N/C.';
+ const c=(v.celas||'').trim()||'[informar cela(s)]', p=(v.pavilhao||'').trim()||'[informar pavilhão(s)]';
+ if(v.tipo==='uma')return `Foi vistoriada a cela ${c} do pavilhão ${p}.`;
+ if(v.tipo==='mesmo')return `Foram vistoriadas as celas ${c} do pavilhão ${p}.`;
+ return `Foram vistoriadas as celas ${c} dos pavilhões ${p}.`;
+}
+function adicionarVistoriaCela(tipo){
+ if(tipo==='nc')vistoriasCela=[];
+ else vistoriasCela=vistoriasCela.filter(x=>x.tipo!=='nc');
+ vistoriasCela.push({id:++vistoriaCelaSeq,tipo,celas:'',pavilhao:''}); renderVistoriasCela(); sincronizarVistoriasCela();
+}
+function alterarVistoriaCela(id,k,val){const v=vistoriasCela.find(x=>x.id===id);if(!v)return;v[k]=val;renderTextoVistoriasCela();sincronizarVistoriasCela(false);}
+function excluirVistoriaCela(id){vistoriasCela=vistoriasCela.filter(x=>x.id!==id);if(!vistoriasCela.length)vistoriasCela=[{id:++vistoriaCelaSeq,tipo:'nc',celas:'',pavilhao:''}];renderVistoriasCela();sincronizarVistoriasCela();}
+function renderVistoriasCela(){
+ const box=document.getElementById('vistoriaCelasContainer');if(!box)return;
+ box.innerHTML=vistoriasCela.map(v=>{
+  if(v.tipo==='nc')return `<div class="vistoria-row"><strong>N/C.</strong><div class="vistoria-row-actions"><button type="button" onclick="excluirVistoriaCela(${v.id})">Excluir</button></div></div>`;
+  const t=v.tipo==='uma'?'Uma cela':v.tipo==='mesmo'?'Várias celas do mesmo pavilhão':'Celas de pavilhões diferentes';
+  const cl=v.tipo==='uma'?'Número da cela':'Números das celas', pl=v.tipo==='diferentes'?'Números dos pavilhões':'Número do pavilhão';
+  return `<div class="vistoria-row"><strong>${t}</strong><label>${cl}</label><input value="${escVistoria(v.celas)}" placeholder="${cl}" oninput="alterarVistoriaCela(${v.id},'celas',this.value)"><label>${pl}</label><input value="${escVistoria(v.pavilhao)}" placeholder="${pl}" oninput="alterarVistoriaCela(${v.id},'pavilhao',this.value)"><div class="vistoria-row-actions"><button type="button" onclick="excluirVistoriaCela(${v.id})">Excluir registro</button></div></div>`;
+ }).join('');
+ renderTextoVistoriasCela();
+}
+function renderTextoVistoriasCela(){const v=document.getElementById('vistoriaCelasVisual');if(v)v.innerHTML=vistoriasCela.map(x=>`<div class="vistoria-print-row">• ${escVistoria(textoVistoria(x))}</div>`).join('');}
+function sincronizarVistoriasCela(redesenhar=true){const c=document.getElementById('s23');if(c){c.value=vistoriasCela.map(textoVistoria).join('\n');c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}if(redesenhar)renderVistoriasCela();}
+function carregarVistoriasCela(texto){
+ vistoriasCela=[];const linhas=String(texto||'N/C.').split(/\n+/).map(x=>x.replace(/^\s*[•\-]\s*/,'').trim()).filter(Boolean);
+ for(const l of linhas){
+  if(/^N\/C\.?$/i.test(l)){vistoriasCela.push({id:++vistoriaCelaSeq,tipo:'nc',celas:'',pavilhao:''});continue;}
+  let m=l.match(/^Foi vistoriada a cela (.*?) do pavilhão (.*?)\.?$/i);
+  if(m){vistoriasCela.push({id:++vistoriaCelaSeq,tipo:'uma',celas:m[1],pavilhao:m[2]});continue;}
+  m=l.match(/^Foram vistoriadas as celas (.*?) do pavilhão (.*?)\.?$/i);
+  if(m){vistoriasCela.push({id:++vistoriaCelaSeq,tipo:'mesmo',celas:m[1],pavilhao:m[2]});continue;}
+  m=l.match(/^Foram vistoriadas as celas (.*?) dos pavilhões (.*?)\.?$/i);
+  if(m){vistoriasCela.push({id:++vistoriaCelaSeq,tipo:'diferentes',celas:m[1],pavilhao:m[2]});}
+ }
+ if(!vistoriasCela.length)vistoriasCela=[{id:++vistoriaCelaSeq,tipo:'nc',celas:'',pavilhao:''}];
+ renderVistoriasCela();
+}
+document.addEventListener('DOMContentLoaded',()=>{const c=document.getElementById('s23');if(c)carregarVistoriasCela(c.value||'N/C.');});
+
 </script></body></html>
