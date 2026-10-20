@@ -16,6 +16,7 @@
 @media(max-width:600px){.preview-letterhead{grid-template-columns:64px minmax(0,1fr) 64px;gap:2px;font-size:7.5pt}.preview-logo{width:54px;height:65px}.preview-archive{padding-right:2%}}
 @media print{.preview-letterhead{grid-template-columns:150px minmax(0,1fr) 150px;gap:0}.preview-logo{filter:grayscale(.35) saturate(.68)}.preview-title h2,.preview-section h3{text-decoration:underline}}
 
+.escala-noturna-row{display:grid;grid-template-columns:minmax(100px,1fr) minmax(155px,1.3fr) minmax(220px,2fr) auto;gap:8px;align-items:center;margin:7px 0}.escala-noturna-row input,.escala-noturna-row select{width:100%;min-width:0;font:inherit;border:1px solid #bbc3cc;border-radius:6px;padding:9px;background:white}.escala-noturna-row .noturna-nome-control{display:grid;grid-template-columns:1fr;gap:5px}.escala-noturna-row .noturna-nome-control select{font-size:13px;padding:7px}.escala-noturna-row button{padding:8px 9px}.escala-noturna-print{white-space:pre-wrap}@media(max-width:650px){.escala-noturna-row{grid-template-columns:1fr 1fr}.escala-noturna-row .noturna-nome-control{grid-column:1/-1}.escala-noturna-row button{grid-column:1/-1;justify-self:start}}
 .escala-diurna-row{display:grid;grid-template-columns:minmax(130px,1fr) 12px minmax(260px,2fr) 70px auto;gap:8px;align-items:center;margin:7px 0}.escala-diurna-row input,.escala-diurna-row select{width:100%;min-width:0;font:inherit;border:1px solid #bbc3cc;border-radius:6px;padding:9px;background:white}.escala-diurna-row .escala-nome-control{display:grid;grid-template-columns:1fr;gap:5px}.escala-diurna-row .escala-nome-control select{font-size:13px;padding:7px}.escala-diurna-row .escala-nome-control input{width:100%}.escala-diurna-row .escala-he{display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-weight:bold}.escala-diurna-row .escala-he input{width:auto;margin:0}.escala-diurna-row .escala-order{display:flex;gap:4px}.escala-diurna-row button{padding:8px 9px}.escala-diurna-row .escala-colon{font-weight:bold;text-align:center}.escala-diurna-print{white-space:pre-wrap}@media(max-width:650px){.escala-diurna-row{grid-template-columns:1fr 1fr}.escala-diurna-row .escala-colon{display:none}.escala-diurna-row .escala-nome-control{grid-column:1/-1}.escala-diurna-row .escala-order{grid-column:1/-1}.escala-diurna-row .escala-he{justify-content:flex-start}}
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
@@ -152,10 +153,24 @@
   <datalist id="escalaDiurnaNomes"></datalist>
   <textarea id="s9" data-section="10 – ESCALA DIURNA" rows="3" style="display:none" aria-hidden="true"></textarea>
 </section>
-<section class="field"><label for="s10">11 – ESCALA NOTURNA (MONITORAMENTO)</label><textarea id="s10" data-section="11 – ESCALA NOTURNA (MONITORAMENTO)" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s11">12 – EXPEDIENTE</label><textarea id="s11" data-section="12 – EXPEDIENTE" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s12">13 – CUSTÓDIA HOSPITALAR</label><textarea id="s12" data-section="13 – CUSTÓDIA HOSPITALAR" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s13">14 – ESCOLTA / PROGRESSÃO / REGRESSÃO / FLAGRANTE</label><textarea id="s13" data-section="14 – ESCOLTA / PROGRESSÃO / REGRESSÃO / FLAGRANTE" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field escala-noturna-field">
+  <label>11 – ESCALA NOTURNA (MONITORAMENTO)</label>
+  <p class="small">Os turnos e horários padrão já vêm preenchidos. Selecione o servidor da lista compartilhada do Item 05 ou digite o nome manualmente. Você pode editar, adicionar e excluir turnos.</p>
+  <div id="escalaNoturnaRows"></div>
+  <div class="toolbar" style="margin-top:8px"><button type="button" class="primary" onclick="adicionarLinhaEscalaNoturna()">＋ ADICIONAR TURNO</button></div>
+  <textarea id="s10" data-section="11 – ESCALA NOTURNA (MONITORAMENTO)" rows="3" style="display:none" aria-hidden="true"></textarea>
+</section>
+<section class="field"><label for="s11">12 – EXPEDIENTE</label><p class="small">O conteúdo começa com o Item 12 do relatório anterior da mesma equipe. Edite, corrija, acrescente ou remova informações conforme necessário; o relatório anterior permanece preservado no histórico.</p><textarea id="s11" data-section="12 – EXPEDIENTE" rows="3" placeholder="Informações do expediente..."></textarea></section>
+<section class="field custodia-hospitalar-field">
+  <label for="custodiaNome">13 – CUSTÓDIA HOSPITALAR</label>
+  <p class="small">Sem cadastro, o relatório exibe N/C. Ao selecionar um servidor da lista compartilhada do Item 05, o N/C é substituído pelo nome, seguido de hífen e do complemento opcional.</p>
+  <div class="grid">
+    <div class="field"><label for="custodiaNome">Servidor (lista do Item 05)</label><select id="custodiaNome" onchange="atualizarTextoCustodia()"><option value="">Selecione um servidor</option></select></div>
+    <div class="field"><label for="custodiaDetalhe">Complemento (opcional)</label><input id="custodiaDetalhe" autocomplete="off" placeholder="Digite o complemento, se houver" oninput="atualizarTextoCustodia()"></div>
+  </div>
+  <textarea id="s12" data-section="13 – CUSTÓDIA HOSPITALAR" rows="3" placeholder="N/C." style="display:none" aria-hidden="true"></textarea>
+</section>
+<section class="field"><label for="s13">14 – ESCOLTA / PROGRESSÃO / REGRESSÃO / FLAGRANTE</label><textarea id="s13" data-section="14 – ESCOLTA / PROGRESSÃO / REGRESSÃO / FLAGRANTE" rows="3" placeholder="N/C."></textarea></section>
 <section class="field"><label for="s14">15 – ATIVIDADES</label><textarea id="s14" data-section="15 – ATIVIDADES" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s15">16 – MATERIAL CARGA</label><textarea id="s15" data-section="16 – MATERIAL CARGA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s16">17 – VIATURAS</label><textarea id="s16" data-section="17 – VIATURAS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -250,6 +265,63 @@ function editarNomeEscalaDiurna(i,nome){if(!escalaDiurnaLinhas[i])return;escalaD
 function adicionarLinhaEscalaDiurna(){escalaDiurnaLinhas.push({posto:'',nome:'',he:false});renderEscalaDiurna();sincronizarEscalaDiurna()}
 function excluirLinhaEscalaDiurna(i){if(escalaDiurnaLinhas.length<=1){escalaDiurnaLinhas[0]={posto:'',nome:'',he:false};renderEscalaDiurna();sincronizarEscalaDiurna();return}escalaDiurnaLinhas.splice(i,1);renderEscalaDiurna();sincronizarEscalaDiurna()}
 function moverLinhaEscalaDiurna(i,delta){const destino=i+delta;if(destino<0||destino>=escalaDiurnaLinhas.length)return;[escalaDiurnaLinhas[i],escalaDiurnaLinhas[destino]]=[escalaDiurnaLinhas[destino],escalaDiurnaLinhas[i]];renderEscalaDiurna();sincronizarEscalaDiurna()}
+let escalaNoturnaLinhas=[];
+const TURNOS_NOTURNOS_PADRAO=[
+  {turno:'1º TURNO',horario:'21h00min às 22h30min',nome:''},
+  {turno:'2º TURNO',horario:'22h30min às 00h00min',nome:''},
+  {turno:'3º TURNO',horario:'00h00min às 01h30min',nome:''},
+  {turno:'4º TURNO',horario:'01h30min às 03h00min',nome:''},
+  {turno:'5º TURNO',horario:'03h00min às 04h30min',nome:''},
+  {turno:'6º TURNO',horario:'04h30min às 06h00min',nome:''},
+  {turno:'7º TURNO',horario:'06h00min às 07h30min',nome:''},
+  {turno:'8º TURNO',horario:'07h30min às 09h00min',nome:''}
+];
+function parseEscalaNoturna(texto){
+  const linhas=String(texto||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const result=[];
+  for(const linha of linhas){
+    if(/^N\/C\.?$/i.test(linha)) continue;
+    const m=linha.match(/^(.+?)\s*:\s*(.+?)\s*:\s*(.*)$/);
+    if(m) result.push({turno:m[1].trim(),horario:m[2].trim(),nome:/^N\/C\.?$/i.test(m[3].trim())?'':m[3].trim()});
+    else result.push({turno:(result.length+1)+'º TURNO',horario:'',nome:linha});
+  }
+  return result;
+}
+function sincronizarEscalaNoturna(){
+  const area=$('s10');if(!area)return;
+  area.value=escalaNoturnaLinhas.map((r,i)=>{
+    const turno=String(r.turno||'').trim()||((i+1)+'º TURNO');
+    const horario=String(r.horario||'').trim()||'HORÁRIO NÃO INFORMADO';
+    const nome=String(r.nome||'').trim()||'N/C.';
+    return `${turno}: ${horario}: ${nome}`;
+  }).join('\n')||'N/C.';
+  if(typeof changed==='function')changed();
+}
+function renderEscalaNoturna(){
+  const root=$('escalaNoturnaRows');if(!root)return;
+  root.innerHTML=escalaNoturnaLinhas.map((r,i)=>`<div class="escala-noturna-row">
+    <input aria-label="Turno da linha ${i+1}" placeholder="Ex.: 1º TURNO" value="${esc(r.turno)}" oninput="escalaNoturnaLinhas[${i}].turno=this.value;sincronizarEscalaNoturna()">
+    <input aria-label="Horário do turno ${i+1}" placeholder="21h00min às 22h30min" value="${esc(r.horario)}" oninput="escalaNoturnaLinhas[${i}].horario=this.value;sincronizarEscalaNoturna()">
+    <div class="noturna-nome-control">
+      <select aria-label="Selecionar servidor da lista compartilhada do Item 05, turno ${i+1}" onchange="selecionarNomeEscalaNoturna(${i},this.value)">
+        <option value="">Selecionar nome da lista do Item 05</option>
+        ${heNamesCache.map(item=>`<option value="${esc(item.name)}" ${String(item.name)===String(r.nome)?'selected':''}>${esc(item.name)}</option>`).join('')}
+      </select>
+      <input aria-label="Nome manual do servidor do turno ${i+1}" placeholder="Ou digite o nome do servidor" value="${esc(r.nome)}" oninput="editarNomeEscalaNoturna(${i},this.value)">
+    </div>
+    <button type="button" class="red" title="Excluir turno" onclick="excluirLinhaEscalaNoturna(${i})">Excluir turno</button>
+  </div>`).join('');
+}
+function carregarEscalaNoturna(texto){
+  const parsed=parseEscalaNoturna(texto);
+  escalaNoturnaLinhas=parsed.length?parsed.map(r=>({...r})):TURNOS_NOTURNOS_PADRAO.map(r=>({...r}));
+  renderEscalaNoturna();
+  const area=$('s10');if(area)area.value=escalaNoturnaLinhas.map((r,i)=>`${String(r.turno||((i+1)+'º TURNO')).trim()}: ${String(r.horario||'HORÁRIO NÃO INFORMADO').trim()}: ${String(r.nome||'').trim()||'N/C.'}`).join('\n');
+}
+function selecionarNomeEscalaNoturna(i,nome){if(!escalaNoturnaLinhas[i])return;escalaNoturnaLinhas[i].nome=nome;renderEscalaNoturna();sincronizarEscalaNoturna()}
+function editarNomeEscalaNoturna(i,nome){if(!escalaNoturnaLinhas[i])return;escalaNoturnaLinhas[i].nome=nome;sincronizarEscalaNoturna()}
+function adicionarLinhaEscalaNoturna(){const n=escalaNoturnaLinhas.length+1;escalaNoturnaLinhas.push({turno:n+'º TURNO',horario:'',nome:''});renderEscalaNoturna();sincronizarEscalaNoturna()}
+function excluirLinhaEscalaNoturna(i){escalaNoturnaLinhas.splice(i,1);renderEscalaNoturna();sincronizarEscalaNoturna()}
 function formContent(){const out={};document.querySelectorAll('[data-section]').forEach(el=>out[el.dataset.section]=el.value);return out}
 const PADROES_RELATORIO={
   '05 – PLANTÃO EXTRAORDINÁRIO (HE)':'N/C.',
@@ -285,7 +357,36 @@ function atualizarOpcoesReforco(){
   lista.innerHTML='';
   heNamesCache.forEach(item=>{const option=document.createElement('option');option.value=item.name;lista.appendChild(option);});
 }
-function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);preencherCamposReforco();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca()}
+let custodiaNomePendente='';
+function renderOpcoesCustodia(){
+  const select=$('custodiaNome');if(!select)return;
+  const atual=select.value||custodiaNomePendente||'';
+  select.innerHTML='<option value="">Selecione um servidor</option>';
+  heNamesCache.forEach(item=>{const option=document.createElement('option');option.value=item.name;option.textContent=item.name;select.appendChild(option);});
+  if(atual&&!Array.from(select.options).some(option=>option.value===atual)){
+    const option=document.createElement('option');option.value=atual;option.textContent=atual+' (nome salvo anteriormente)';select.appendChild(option);
+  }
+  select.value=atual;
+}
+function preencherCamposCustodia(){
+  const bruto=String($('s12')?.value||'').trim();
+  const select=$('custodiaNome');const detalhe=$('custodiaDetalhe');
+  if(!select||!detalhe)return;
+  if(!bruto||/^N\/C\.?$/i.test(bruto)){custodiaNomePendente='';select.value='';detalhe.value='';return;}
+  const partes=bruto.match(/^(.+?)\s+[-–—]\s*(.*)$/);
+  custodiaNomePendente=partes?(partes[1]||'').trim():bruto;
+  detalhe.value=partes?(partes[2]||'').trim():'';
+  renderOpcoesCustodia();
+  select.value=custodiaNomePendente;
+}
+function atualizarTextoCustodia(){
+  const nome=String($('custodiaNome')?.value||'').trim();
+  const detalhe=String($('custodiaDetalhe')?.value||'').trim();
+  custodiaNomePendente=nome;
+  $('s12').value=nome?(nome+' - '+detalhe):'N/C.';
+  changed();
+}
+function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca()}
 function lerItem01DoTexto(){const texto=$('s0').value||'';let recebe='',entrega='',quantidade='';const extras=[];texto.split('\n').forEach(linha=>{const m1=linha.match(/^\s*QUEM RECEBE O PLANTÃO:\s*(.*)$/i);const m2=linha.match(/^\s*QUEM ENTREGA O PLANTÃO:\s*(.*)$/i);const mq=linha.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*(\d*)\s*$/i);if(m1)recebe=m1[1].trim();else if(m2)entrega=m2[1].trim();else if(mq)quantidade=mq[1];else if(linha.trim())extras.push(linha)});$('recebePlantao').dataset.pendingName=recebe;$('entregaPlantao').dataset.pendingName=entrega;$('quantidadeCustodiados').value=quantidade;$('s0Extra').value=extras.join('\n');atualizarQuantidadeExtenso();aplicarSelecoesItem01()}
 function aplicarSelecoesItem01(){for(const id of ['recebePlantao','entregaPlantao']){const el=$(id);const pending=el.dataset.pendingName||'';if(pending&&![...el.options].some(o=>o.value===pending)){const op=document.createElement('option');op.value=pending;op.textContent=pending+' (nome salvo anteriormente)';el.appendChild(op)}if(pending)el.value=pending;delete el.dataset.pendingName}}
 function numeroPorExtenso(n){n=Number(n);if(!Number.isInteger(n)||n<0||n>999999999)return '';if(n===0)return 'zero';const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove'];const teen=['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];function a999(x){if(x===0)return '';if(x===100)return 'cem';if(x<10)return u[x];if(x<20)return teen[x-10];if(x<100)return d[Math.floor(x/10)]+(x%10?' e '+u[x%10]:'');return c[Math.floor(x/100)]+(x%100?' e '+a999(x%100):'')}const grupos=[];let x=n;while(x>0){grupos.unshift(x%1000);x=Math.floor(x/1000)}const partes=[];for(let i=0;i<grupos.length;i++){const g=grupos[i];if(!g)continue;const ordem=grupos.length-1-i;let parte=a999(g);if(ordem===1)parte=g===1?'mil':parte+' mil';else if(ordem===2)parte=g===1?'um milhão':parte+' milhões';else if(ordem===3)parte=g===1?'um bilhão':parte+' bilhões';partes.push(parte)}return partes.join(', ')}
@@ -296,7 +397,7 @@ function textoFormalItem01(){const recebe=$('recebePlantao').value||$('recebePla
 function localKey(){return current?'cpaig_shift_report_'+current.id:'cpaig_shift_report_new_'+(me?.team||'')}
 function localSave(){try{localStorage.setItem(localKey(),JSON.stringify({id:current?.id||null,revision,title:$('title').value,reportDate:$('reportDate').value,shiftName:$('shiftName').value,content:formContent(),savedAt:new Date().toISOString()}))}catch{}}
 function loadLocal(){try{return JSON.parse(localStorage.getItem(localKey())||'null')}catch{return null}}
-function inputsDisabled(disabled){document.querySelectorAll('#editor textarea,#editor select,#editor input,#title,#reportDate,#shiftName').forEach(el=>el.disabled=disabled);const escalaAdd=$('escalaDiurnaAddBtn');if(escalaAdd)escalaAdd.disabled=disabled;document.querySelectorAll('#escalaDiurnaRows button').forEach(el=>el.disabled=disabled||el.disabled);$('saveBtn').disabled=disabled||!current;$('closeBtn').disabled=disabled||!current||current.status==='encerrado';$('reopenBtn').disabled=readOnly||!current||current.status!=='encerrado'||me?.role!=='chefe';$('newBtn').disabled=disabled}
+function inputsDisabled(disabled){document.querySelectorAll('#editor textarea,#editor select,#editor input,#title,#reportDate,#shiftName').forEach(el=>el.disabled=disabled);const escalaAdd=$('escalaDiurnaAddBtn');if(escalaAdd)escalaAdd.disabled=disabled;document.querySelectorAll('#escalaDiurnaRows button,#escalaNoturnaRows button').forEach(el=>el.disabled=disabled||el.disabled);document.querySelectorAll('.escala-noturna-field .toolbar button').forEach(el=>el.disabled=disabled);$('saveBtn').disabled=disabled||!current;$('closeBtn').disabled=disabled||!current||current.status==='encerrado';$('reopenBtn').disabled=readOnly||!current||current.status!=='encerrado'||me?.role!=='chefe';$('newBtn').disabled=disabled}
 
 let heNamesCache = [];
 
@@ -388,7 +489,9 @@ async function carregarNomesHE() {
     if (escalaNomes) { escalaNomes.innerHTML = ''; heNamesCache.forEach(item => { const option = document.createElement('option'); option.value = item.name; escalaNomes.appendChild(option); }); }
     // Atualiza também os seletores visíveis do Item 10 depois que a lista compartilhada carregar.
     renderEscalaDiurna();
+    renderEscalaNoturna();
     atualizarOpcoesReforco();
+    renderOpcoesCustodia();
     renderListaFerias($('feriasSearch')?.value || '');
     renderNomesTroca();
 
@@ -785,7 +888,7 @@ $('heSeedBtn').addEventListener('click', cadastrarListaPadraoEquipeC);function r
 async function api(url,options={}){const res=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let j={};try{j=await res.json()}catch{}if(!res.ok){const e=new Error(j.message||'Falha na comunicação com o servidor.');e.status=res.status;e.data=j;throw e}return j}
 async function iniciar(){try{carregarEscalaDiurna('');const j=await api('/api/auth/me');me=j.user;if(!['chefe','auxiliar','admin'].includes(me.role)){location.replace(me.role==='mesa'?'/mesa.html':me.role==='pertences'?'/pertences.html':'/index.html');return}readOnly=me.role==='admin';$('who').textContent=me.fullName+' · '+(readOnly?'ADMINISTRADOR (CONSULTA)':(me.role==='chefe'?'CHEFE':'AUXILIAR')+' · EQUIPE '+me.team);$('team').value=me.team||'Todas';$('newBtn').classList.toggle('hidden',readOnly);$('editor').classList.toggle('hidden',readOnly);$('saveBtn').classList.toggle('hidden',readOnly);$('closeBtn').classList.toggle('hidden',readOnly);$('reopenBtn').classList.toggle('hidden',readOnly);document.querySelectorAll('#reportDate,#shiftName,#title').forEach(el=>el.addEventListener('change',changed));document.querySelectorAll('#editor textarea').forEach(el=>el.addEventListener('input',()=>{changed();if(el.id==='s7'&&typeof renderListaTroca==='function')renderListaTroca()}));$('reforcoNome').addEventListener('input',atualizarTextoReforco);$('reforcoDetalhe').addEventListener('input',atualizarTextoReforco);$('recebePlantao').addEventListener('change',atualizarTextoItem01);$('entregaPlantao').addEventListener('change',atualizarTextoItem01);$('quantidadeCustodiados').addEventListener('input',atualizarQuantidadeExtenso);$('s0Extra').addEventListener('input',atualizarTextoItem01);$('reportDate').addEventListener('change',()=>atualizarTextoItem01());if(readOnly){$('status').textContent='Modo consulta: o administrador não pode editar relatórios.';$('reportsPanel').querySelector('p').textContent='Consulta de relatórios de todas as equipes A, B, C e D.'}await carregarLista();if(!readOnly){const first=reports.find(r=>r.status==='aberto')||reports[0];if(first)abrir(first.id);else novoRelatorio()}refreshTimer=setInterval(poll,5000)}catch(e){msg(e.message,'bad')}}
 async function carregarLista(){try{const j=await api('/api/relatorios');reports=j.reports||[];renderList();if(readOnly){$('reportsList').innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="verAdmin('${esc(r.id)}')">CONSULTAR</button></div>`).join('')||'<p class="small">Nenhum relatório cadastrado.</p>'}return reports}catch(e){msg(e.message,'bad');return []}}
-function novoRelatorio(){if(readOnly)return;current=null;revision=0;dirty=false;const today=new Date();$('reportDate').value=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');$('shiftName').value='Plantão 24x72h';$('title').value='';preencherContent({});const anteriorEquipe=reports.filter(r=>String(r.team||'').toUpperCase()===String(me?.team||'').toUpperCase()).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||'')))[0];if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['02 – EQUIPE DE PLANTÃO (24x72h)']){const conteudoEquipe=anteriorEquipe.content['02 – EQUIPE DE PLANTÃO (24x72h)'];$('s1').value=conteudoEquipe;carregarEquipe02(conteudoEquipe)}if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['10 – ESCALA DIURNA']){$('s9').value=anteriorEquipe.content['10 – ESCALA DIURNA'];carregarEscalaDiurna($('s9').value)}const local=loadLocal();if(local&&!local.id){$('reportDate').value=local.reportDate||$('reportDate').value;$('shiftName').value=local.shiftName||$('shiftName').value;$('title').value=local.title||'';preencherContent(local.content||{});dirty=true;state('Rascunho local recuperado · pendente de sincronização');}$('historyBtn').disabled=true;$('revisionLabel').textContent='Novo relatório';inputsDisabled(false);$('saveBtn').disabled=true;$('closeBtn').disabled=true;msg('Novo relatório. Preencha os campos e salve para criar.');state(navigator.onLine?'Não salvo':'Offline — será guardado localmente');}
+function novoRelatorio(){if(readOnly)return;current=null;revision=0;dirty=false;const today=new Date();$('reportDate').value=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');$('shiftName').value='Plantão 24x72h';$('title').value='';preencherContent({});const anteriorEquipe=reports.filter(r=>String(r.team||'').toUpperCase()===String(me?.team||'').toUpperCase()).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||'')))[0];if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['02 – EQUIPE DE PLANTÃO (24x72h)']){const conteudoEquipe=anteriorEquipe.content['02 – EQUIPE DE PLANTÃO (24x72h)'];$('s1').value=conteudoEquipe;carregarEquipe02(conteudoEquipe)}if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['10 – ESCALA DIURNA']){$('s9').value=anteriorEquipe.content['10 – ESCALA DIURNA'];carregarEscalaDiurna($('s9').value)}if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['11 – ESCALA NOTURNA (MONITORAMENTO)']){$('s10').value=anteriorEquipe.content['11 – ESCALA NOTURNA (MONITORAMENTO)'];carregarEscalaNoturna($('s10').value)}if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['12 – EXPEDIENTE'])$('s11').value=anteriorEquipe.content['12 – EXPEDIENTE'];const local=loadLocal();if(local&&!local.id){$('reportDate').value=local.reportDate||$('reportDate').value;$('shiftName').value=local.shiftName||$('shiftName').value;$('title').value=local.title||'';preencherContent(local.content||{});dirty=true;state('Rascunho local recuperado · pendente de sincronização');}$('historyBtn').disabled=true;$('revisionLabel').textContent='Novo relatório';inputsDisabled(false);$('saveBtn').disabled=true;$('closeBtn').disabled=true;msg('Novo relatório. Preencha os campos e salve para criar.');state(navigator.onLine?'Não salvo':'Offline — será guardado localmente');}
 function abrir(id){const r=reports.find(x=>x.id===id);if(!r)return;current=r;revision=r.revision;dirty=false;serverChanged=false;$('reportDate').value=String(r.reportDate).slice(0,10);$('shiftName').value=r.shiftName;$('title').value=r.title||'';preencherContent(r.content);const local=loadLocal();if(local&&local.id===r.id&&local.savedAt){$('reportDate').value=local.reportDate||$('reportDate').value;$('shiftName').value=local.shiftName||$('shiftName').value;$('title').value=local.title||$('title').value;preencherContent(local.content||{});dirty=true;if(Number(local.revision)!==Number(r.revision)){serverChanged=true;msg('Conflito: existe uma cópia local e o servidor tem outra revisão. Compare antes de salvar; nenhuma versão foi descartada.','bad')}else msg('Rascunho local recuperado. Revise e salve para sincronizar.','');}$('historyBtn').disabled=false;$('revisionLabel').textContent='Revisão '+revision+' · '+(r.status==='encerrado'?'ENCERRADO':'ABERTO');inputsDisabled(readOnly||r.status==='encerrado');msg(r.status==='encerrado'?'Relatório encerrado. Para alterar, o chefe deve reabri-lo.':'Relatório aberto. Alterações sincronizadas com a equipe.','good');state('Servidor · atualizado '+hora(r.updatedAt));}
 async function verAdmin(id){const r=reports.find(x=>x.id===id);if(!r)return;current=r;revision=r.revision;$('reportDate').value=String(r.reportDate).slice(0,10);$('shiftName').value=r.shiftName;$('title').value=r.title||'';preencherContent(r.content);$('revisionLabel').textContent='Revisão '+revision+' · consulta';$('historyBtn').disabled=false;$('editor').classList.remove('hidden');document.querySelectorAll('#editor textarea,#title,#reportDate,#shiftName').forEach(el=>el.disabled=true);$('status').textContent='Consulta somente leitura — administrador.';$('historyBtn').disabled=false;}
 function changed(){if(readOnly||!current&&me?.role==='admin')return;dirty=true;localSave();state(navigator.onLine?'Alterações pendentes…':'Offline · salvo neste dispositivo');$('saveBtn').disabled=false;clearTimeout(timer);timer=setTimeout(()=>{if(current&&current.status!=='encerrado')salvar('salvar',true)},1200)}
