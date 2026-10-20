@@ -136,12 +136,10 @@
   <p id="trocaStatus" class="small">Sem trocas cadastradas: o relatório exibirá N/C.</p>
 </section>
 <section class="field">
-  <label for="reforcoNome">09 – REFORÇO</label>
-  <p class="small">Selecione ou digite o nome usando a lista do Item 05. O segundo campo é opcional; o hífen só aparece quando ele estiver preenchido.</p>
-  <div class="grid">
-    <div class="field"><label for="reforcoNome">Nome (lista do Item 05)</label><input id="reforcoNome" list="reforcoNomes" autocomplete="off" placeholder="Selecione ou digite um nome"></div>
-    <div class="field"><label for="reforcoDetalhe">Complemento (opcional)</label><input id="reforcoDetalhe" autocomplete="off" placeholder="Digite o complemento, se houver"></div>
-  </div>
+  <label>09 – REFORÇO</label>
+  <p class="small">Adicione um ou mais servidores. Os nomes usam a lista compartilhada do Item 05, mas também podem ser digitados. O complemento é opcional.</p>
+  <div id="reforcoRows"></div>
+  <div class="toolbar" style="margin-top:8px"><button type="button" class="primary" onclick="adicionarReforco()">＋ ADICIONAR REFORÇO</button></div>
   <datalist id="reforcoNomes"></datalist>
   <textarea id="s8" data-section="09 – REFORÇO" rows="3" placeholder="N/C." style="display:none" aria-hidden="true"></textarea>
 </section>
@@ -336,26 +334,48 @@ const PADROES_RELATORIO={
   '15 – ATIVIDADES':'Rotinas Diárias internas e externas executadas sem alteração.',
   '37 – MATERIAL RECEBIDO DA CHEFIA':'N/C.'
 };
-function preencherCamposReforco(){
-  const bruto=String($('s8')?.value||'').trim();
-  const nome=$('reforcoNome');
-  const detalhe=$('reforcoDetalhe');
-  if(!nome||!detalhe)return;
-  if(!bruto||/^N\/C\.?$/i.test(bruto)){nome.value='';detalhe.value='';return;}
-  const partes=bruto.split(/\s+[-–—]\s+/,2);
-  nome.value=(partes[0]||'').trim();
-  detalhe.value=(partes[1]||'').trim();
-}
-function atualizarTextoReforco(){
-  const nome=String($('reforcoNome')?.value||'').trim();
-  const detalhe=String($('reforcoDetalhe')?.value||'').trim();
-  $('s8').value=nome?(detalhe?nome+' - '+detalhe:nome):(detalhe?detalhe:'N/C.');
-  changed();
-}
+let reforcoLinhas=[];
 function atualizarOpcoesReforco(){
   const lista=$('reforcoNomes');if(!lista)return;
   lista.innerHTML='';
   heNamesCache.forEach(item=>{const option=document.createElement('option');option.value=item.name;lista.appendChild(option);});
+}
+function renderListaReforco(){
+  const container=$('reforcoRows');if(!container)return;
+  container.innerHTML='';
+  reforcoLinhas.forEach((linha,index)=>{
+    const bloco=document.createElement('div');bloco.className='grid';
+    bloco.style.cssText='margin:8px 0;padding:10px;border:1px solid #d1d5db;border-radius:8px';
+    const nomeWrap=document.createElement('div');nomeWrap.className='field';
+    const nomeLabel=document.createElement('label');nomeLabel.textContent='Servidor '+(index+1)+' (lista do Item 05)';
+    const nome=document.createElement('input');nome.type='text';nome.setAttribute('list','reforcoNomes');nome.autocomplete='off';nome.placeholder='Selecione ou digite um nome';nome.value=linha.nome||'';
+    nome.addEventListener('input',()=>alterarReforco(index,'nome',nome.value));nomeWrap.append(nomeLabel,nome);
+    const detalheWrap=document.createElement('div');detalheWrap.className='field';
+    const detalheLabel=document.createElement('label');detalheLabel.textContent='Complemento (opcional)';
+    const detalhe=document.createElement('input');detalhe.type='text';detalhe.autocomplete='off';detalhe.placeholder='Digite o complemento, se houver';detalhe.value=linha.detalhe||'';
+    detalhe.addEventListener('input',()=>alterarReforco(index,'detalhe',detalhe.value));detalheWrap.append(detalheLabel,detalhe);
+    const acoes=document.createElement('div');acoes.className='toolbar';acoes.style.cssText='grid-column:1/-1;justify-content:flex-end';
+    const excluir=document.createElement('button');excluir.type='button';excluir.className='red';excluir.textContent='Retirar este reforço';excluir.addEventListener('click',()=>excluirReforco(index));
+    acoes.appendChild(excluir);bloco.append(nomeWrap,detalheWrap,acoes);container.appendChild(bloco);
+  });
+}
+function sincronizarReforco(){
+  const preenchidas=reforcoLinhas.map(l=>{
+    const nome=String(l.nome||'').trim(),detalhe=String(l.detalhe||'').trim();
+    if(!nome&&!detalhe)return '';
+    return nome?(detalhe?nome+' - '+detalhe:nome):detalhe;
+  }).filter(Boolean);
+  $('s8').value=preenchidas.length?preenchidas.join('\n'):'N/C.';changed();
+}
+function alterarReforco(index,campo,valor){if(!reforcoLinhas[index])return;reforcoLinhas[index][campo]=valor;sincronizarReforco();}
+function adicionarReforco(nome='',detalhe=''){reforcoLinhas.push({nome,detalhe});renderListaReforco();sincronizarReforco();}
+function excluirReforco(index){reforcoLinhas.splice(index,1);renderListaReforco();sincronizarReforco();}
+function preencherCamposReforco(){
+  const bruto=String($('s8')?.value||'').trim();reforcoLinhas=[];
+  if(bruto&&!/^N\/C\.?$/i.test(bruto))bruto.split(/\n/).map(l=>l.trim()).filter(Boolean).forEach(l=>{
+    const partes=l.match(/^(.+?)\s+[-–—]\s*(.*)$/);reforcoLinhas.push(partes?{nome:partes[1].trim(),detalhe:partes[2].trim()}:{nome:l,detalhe:''});
+  });
+  if(!reforcoLinhas.length)reforcoLinhas.push({nome:'',detalhe:''});atualizarOpcoesReforco();renderListaReforco();
 }
 let custodiaNomePendente='';
 function renderOpcoesCustodia(){
