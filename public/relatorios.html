@@ -205,7 +205,16 @@
   </div>
   <textarea id="s15" data-section="16 – MATERIAL CARGA" rows="3" placeholder="N/C." style="display:none" aria-hidden="true"></textarea>
 </section>
-<section class="field"><label for="s16">17 – VIATURAS</label><textarea id="s16" data-section="17 – VIATURAS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field viaturas-field">
+  <label>17 – VIATURAS</label>
+  <p class="small">Edite a identificação da viatura e a situação correspondente. Use os botões para incluir ou excluir linhas.</p>
+  <div id="viaturasTabela"></div>
+  <div class="toolbar no-print" style="margin-top:8px">
+    <button type="button" class="primary" onclick="adicionarViatura()">＋ ADICIONAR VIATURA</button>
+    <button type="button" onclick="excluirViatura()">❌ EXCLUIR LINHA SELECIONADA</button>
+  </div>
+  <textarea id="s16" data-section="17 – VIATURAS" rows="3" placeholder="N/C." style="display:none" aria-hidden="true"></textarea>
+</section>
 <section class="field"><label for="s17">18 – ALIMENTAÇÃO</label><textarea id="s17" data-section="18 – ALIMENTAÇÃO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s18">19 – ROTINA DIÁRIA</label><textarea id="s18" data-section="19 – ROTINA DIÁRIA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s19">20 – MOTOR ESTACIONÁRIO</label><textarea id="s19" data-section="20 – MOTOR ESTACIONÁRIO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -457,7 +466,50 @@ function copiarMaterialCargaEquipeAnterior(){
   const rel=reports.filter(r=>String(r.team||'').toUpperCase()===anterior&&r.content&&String(r.content['16 – MATERIAL CARGA']||'').trim()&&!/^N\/C\.?$/i.test(String(r.content['16 – MATERIAL CARGA']).trim())).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||''))||Number(b.revision||0)-Number(a.revision||0))[0];
   if(rel){$('s15').value=rel.content['16 – MATERIAL CARGA'];preencherMaterialCarga();}
 }
-function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca()}
+let viaturas=[];
+let viaturaSelecionada=-1;
+const VIATURAS_PADRAO=[
+ {item:'CAMINHÃO CELA: F-4000 (QAB-5669)',situacao:'SEM AFERIMENTO (sem a chave do veículo)'},
+ {item:'MOTOCICLETA XRE 300 (PLACA: HTO-1447)',situacao:'SEM AFERIMENTO (marcador de quilometragem avariado)'},
+ {item:'TOYOTA BANDEIRANTE / PLACA HQY-6356',situacao:'SEM AFERIMENTO (marcador de quilometragem quebrado).'},
+ {item:'FIAT SIENA ELX 1.4 (PLACA: HTV-2123)',situacao:'SEM AFERIMENTO (sem a chave do veículo)'},
+ {item:'FORD RANGER XL 2.5 (PLACA: NRL-9527)',situacao:'KM (recebido): chave com setor ADM\nKM (repassado): chave com setor ADM'},
+ {item:'FORD/F4000 08/09 (PLACA: HSH-2319)',situacao:'SEM AFERIMENTO'},
+ {item:'FORD FOCUS (PLACA: HTO-3B84)',situacao:'SEM AFERIMENTO (sem a chave do veículo)'},
+ {item:'S-10 (PLACA: HFU...)',situacao:'SEM AFERIMENTO (sem a chave do veículo)'},
+ {item:'MOTO TORNADO',situacao:'CAUTELADO - PP AMORIM (manutenção escola)'},
+ {item:'SAVEIRO 1.6 FLEX/FIAT 12/12 (PLACA: HTO-2J64)',situacao:'SEM AFERIMENTO (sem a chave do veículo)'},
+ {item:'L-200 TRITON (PLACA: NRZ-4041)',situacao:'CAUTELADO - PP ÉDER (manutenção escola)'},
+ {item:'FORD RANGER FLASCH 2.2 – 2023 (PLACA: SLW7A39)',situacao:'SEM AFERIMENTO'}
+];
+function escaparViatura(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function sincronizarViaturas(){
+ const validas=viaturas.filter(r=>String(r.item||'').trim()||String(r.situacao||'').trim());
+ $('s16').value=validas.length?validas.map(r=>String(r.item||'').trim()+'\t'+String(r.situacao||'').trim()).join('\n'):'N/C.';
+ changed();
+}
+function renderViaturas(){
+ const box=$('viaturasTabela');if(!box)return;
+ let t='<table class="viaturas-table" style="width:100%;border-collapse:collapse;table-layout:fixed;border:1px solid #222"><thead><tr><th style="background:#ccc;border:1px solid #222;padding:5px;text-align:left;width:50%">VIATURA</th><th style="background:#ccc;border:1px solid #222;padding:5px;text-align:left">SITUAÇÃO / OBSERVAÇÃO</th><th class="no-print" style="border:1px solid #222;padding:5px;width:82px">SELEÇÃO</th></tr></thead><tbody>';
+ viaturas.forEach((r,i)=>{
+  const sel=i===viaturaSelecionada;
+  t+=`<tr style="background:${sel?'#fff6d6':'#fff'}"><td style="border:1px solid #222;padding:0;background:#d9d9d9"><textarea aria-label="Identificação da viatura ${i+1}" style="width:100%;min-height:38px;border:0;border-radius:0;padding:7px;box-sizing:border-box;background:#d9d9d9;resize:vertical" onfocus="selecionarViatura(${i})" oninput="alterarViatura(${i},'item',this.value)">${escaparViatura(r.item)}</textarea></td><td style="border:1px solid #222;padding:0"><textarea aria-label="Situação da viatura ${i+1}" style="width:100%;min-height:38px;border:0;border-radius:0;padding:7px;box-sizing:border-box;resize:vertical" onfocus="selecionarViatura(${i})" oninput="alterarViatura(${i},'situacao',this.value)">${escaparViatura(r.situacao)}</textarea></td><td class="no-print" style="border:1px solid #222;text-align:center;padding:3px"><button type="button" onclick="selecionarViatura(${i});excluirViatura()">Excluir</button></td></tr>`;
+ });
+ box.innerHTML=t+'</tbody></table>';
+}
+function selecionarViatura(i){viaturaSelecionada=i}
+function alterarViatura(i,campo,valor){if(!viaturas[i])return;viaturas[i][campo]=valor;sincronizarViaturas()}
+function adicionarViatura(item='',situacao=''){viaturas.push({item,situacao});viaturaSelecionada=viaturas.length-1;renderViaturas();sincronizarViaturas();const els=$('viaturasTabela')?.querySelectorAll('tbody tr:last-child textarea');if(els&&els[0])els[0].focus()}
+function excluirViatura(){if(viaturaSelecionada<0||!viaturas[viaturaSelecionada]){msg('Selecione uma linha da tabela para excluir.','bad');return}viaturas.splice(viaturaSelecionada,1);viaturaSelecionada=-1;renderViaturas();sincronizarViaturas()}
+function preencherViaturas(){
+ const bruto=String($('s16')?.value||'').trim();viaturas=[];
+ if(bruto&&!/^N\/C\.?$/i.test(bruto)){
+  bruto.split(/\r?\n/).forEach(l=>{if(!l.trim())return;const p=l.split('\t');viaturas.push({item:(p[0]||'').trim(),situacao:p.slice(1).join('\t').trim()})});
+ }
+ if(!viaturas.length)viaturas=VIATURAS_PADRAO.map(r=>({...r}));
+ renderViaturas();sincronizarViaturas();
+}
+function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca()}
 function lerItem01DoTexto(){const texto=$('s0').value||'';let recebe='',entrega='',quantidade='';const extras=[];texto.split('\n').forEach(linha=>{const m1=linha.match(/^\s*QUEM RECEBE O PLANTÃO:\s*(.*)$/i);const m2=linha.match(/^\s*QUEM ENTREGA O PLANTÃO:\s*(.*)$/i);const mq=linha.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*(\d*)\s*$/i);if(m1)recebe=m1[1].trim();else if(m2)entrega=m2[1].trim();else if(mq)quantidade=mq[1];else if(linha.trim())extras.push(linha)});$('recebePlantao').dataset.pendingName=recebe;$('entregaPlantao').dataset.pendingName=entrega;$('quantidadeCustodiados').value=quantidade;$('s0Extra').value=extras.join('\n');atualizarQuantidadeExtenso();aplicarSelecoesItem01()}
 function aplicarSelecoesItem01(){for(const id of ['recebePlantao','entregaPlantao']){const el=$(id);const pending=el.dataset.pendingName||'';if(pending&&![...el.options].some(o=>o.value===pending)){const op=document.createElement('option');op.value=pending;op.textContent=pending+' (nome salvo anteriormente)';el.appendChild(op)}if(pending)el.value=pending;delete el.dataset.pendingName}}
 function numeroPorExtenso(n){n=Number(n);if(!Number.isInteger(n)||n<0||n>999999999)return '';if(n===0)return 'zero';const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove'];const teen=['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];function a999(x){if(x===0)return '';if(x===100)return 'cem';if(x<10)return u[x];if(x<20)return teen[x-10];if(x<100)return d[Math.floor(x/10)]+(x%10?' e '+u[x%10]:'');return c[Math.floor(x/100)]+(x%100?' e '+a999(x%100):'')}const grupos=[];let x=n;while(x>0){grupos.unshift(x%1000);x=Math.floor(x/1000)}const partes=[];for(let i=0;i<grupos.length;i++){const g=grupos[i];if(!g)continue;const ordem=grupos.length-1-i;let parte=a999(g);if(ordem===1)parte=g===1?'mil':parte+' mil';else if(ordem===2)parte=g===1?'um milhão':parte+' milhões';else if(ordem===3)parte=g===1?'um bilhão':parte+' bilhões';partes.push(parte)}return partes.join(', ')}
@@ -999,6 +1051,11 @@ function visualizarRelatorio(){
     let textoFinal=item.texto;
     if(is02) textoFinal=parseEquipe02(item.texto).map((r,i)=>`${i+1}.  ${r.funcao?r.funcao+': ':''}${r.nome}`).join('\n');
     else if(numerar) textoFinal=textoComNumeracao(item.texto);
+    if(titulo.startsWith('17')){
+      const linhas=String(item.texto||'').split(/\r?\n/).filter(l=>l.trim()&&!/^N\/C\.?$/i.test(l.trim()));
+      const rows=linhas.map(l=>{const p=l.split('\t');return `<tr><td style="border:1px solid #222;padding:4px;background:#d9d9d9;vertical-align:middle;overflow-wrap:anywhere">${esc((p[0]||'').trim())}</td><td style="border:1px solid #222;padding:4px;vertical-align:middle;overflow-wrap:anywhere;white-space:pre-line">${esc(p.slice(1).join('\t').trim())}</td></tr>`}).join('');
+      return `<section class="preview-section viaturas-print"><h3>${esc(item.titulo)}:</h3><table class="viaturas-print-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;font-family:Arial,sans-serif;font-size:10pt;table-layout:fixed"><tbody>${rows||'<tr><td style="border:1px solid #222;padding:4px;background:#d9d9d9">N/C.</td><td style="border:1px solid #222;padding:4px"></td></tr>'}</tbody></table></section>`;
+    }
     if(titulo.startsWith('16')){
       const linhas=String(item.texto||'').split(/\r?\n/).filter(l=>l.trim()&&!/^N\/C\.?$/i.test(l.trim()));
       const linhasTabela=linhas.map(l=>{const p=l.split('\t');return `<tr><td style="border:1px solid #222;padding:4px;vertical-align:top;overflow-wrap:anywhere">${esc((p[0]||'').trim())}</td><td style="border:1px solid #222;padding:4px;text-align:center;vertical-align:top">${esc((p.slice(1).join('\t')||'').trim())}</td></tr>`}).join('');
