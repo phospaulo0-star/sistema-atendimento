@@ -81,6 +81,7 @@
       <button type="button" id="heSelectBtn">Incluir no plantão</button>
       <button type="button" id="heAddBtn">＋ Adicionar nome à lista compartilhada</button>
       <button type="button" id="heDeleteBtn">Retirar do plantão</button>
+      <button type="button" id="heDeleteSharedBtn" class="red">Excluir da lista compartilhada</button>
       <button type="button" id="heSeedBtn">
         Cadastrar lista padrão da equipe C
       </button>
@@ -366,6 +367,7 @@ async function carregarNomesHE() {
     $('heSelectBtn').disabled = !podeEditar;
     $('heAddBtn').disabled = !podeEditar;
     $('heDeleteBtn').disabled = !podeEditar;
+    $('heDeleteSharedBtn').disabled = !podeEditar;
 
     $('heSeedBtn').disabled =
       !podeEditar ||
@@ -566,6 +568,46 @@ function excluirNomeHE() {
 }
 
 /*
+ * Exclui um nome da lista compartilhada da equipe.
+ * A alteração fica salva no servidor e será refletida nos campos que usam essa lista.
+ */
+async function excluirNomeListaCompartilhadaHE() {
+  if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) return;
+
+  if (!current || current.status === 'encerrado') {
+    heStatus('Abra um relatório em edição antes de excluir nomes da lista compartilhada.');
+    return;
+  }
+
+  const select = $('heNames');
+  const item = heNamesCache.find(n => String(n.id) === select.value);
+  if (!item) {
+    heStatus('Selecione o nome que deseja excluir da lista compartilhada.');
+    return;
+  }
+
+  if (!confirm(
+    'Excluir "' + item.name + '" da lista compartilhada da equipe ' + me.team + '?\n\n' +
+    'Esse nome deixará de aparecer nas opções dos itens que usam essa lista para toda a equipe. ' +
+    'Textos já gravados em relatórios anteriores não serão apagados automaticamente.'
+  )) return;
+
+  const botao = $('heDeleteSharedBtn');
+  botao.disabled = true;
+  try {
+    await api('/api/relatorios/he-nomes/' + encodeURIComponent(item.id), {
+      method: 'DELETE'
+    });
+    await carregarNomesHE();
+    heStatus('Nome excluído da lista compartilhada da equipe ' + me.team + '. Os campos dependentes foram atualizados.');
+  } catch (e) {
+    heStatus(e.message || 'Não foi possível excluir o nome da lista compartilhada.');
+  } finally {
+    botao.disabled = false;
+  }
+}
+
+/*
  * Inclui o nome selecionado da lista padrão no relatório aberto.
  */
 function selecionarNomeHE() {
@@ -673,6 +715,7 @@ $('heSearch').addEventListener('input', () => {
 
 $('heAddBtn').addEventListener('click', adicionarNomeHE);
 $('heDeleteBtn').addEventListener('click', excluirNomeHE);
+$('heDeleteSharedBtn').addEventListener('click', excluirNomeListaCompartilhadaHE);
 $('heSelectBtn').addEventListener('click', selecionarNomeHE);
 $('heSeedBtn').addEventListener('click', cadastrarListaPadraoEquipeC);function renderList(){const root=$('reportsList');if(!reports.length){root.innerHTML='<p class="small">Nenhum relatório cadastrado para esta equipe.</p>';return}root.innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="abrir('${esc(r.id)}')">${r.id===current?.id?'ABERTO':'ABRIR'}</button></div>`).join('')}
 async function api(url,options={}){const res=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let j={};try{j=await res.json()}catch{}if(!res.ok){const e=new Error(j.message||'Falha na comunicação com o servidor.');e.status=res.status;e.data=j;throw e}return j}
