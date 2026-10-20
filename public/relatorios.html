@@ -23,6 +23,24 @@
 #materialCargaTabela, .material-carga-tabela, table[data-section*="MATERIAL CARGA"] { width:100%; border-collapse:collapse !important; border:1px solid #222 !important; }
 #materialCargaTabela th, #materialCargaTabela td, .material-carga-tabela th, .material-carga-tabela td, table[data-section*="MATERIAL CARGA"] th, table[data-section*="MATERIAL CARGA"] td { border:1px solid #222 !important; padding:3px 6px; }
 @media print { #materialCargaTabela, .material-carga-tabela, table[data-section*="MATERIAL CARGA"] { border-collapse:collapse !important; border:1px solid #222 !important; } #materialCargaTabela th, #materialCargaTabela td, .material-carga-tabela th, .material-carga-tabela td, table[data-section*="MATERIAL CARGA"] th, table[data-section*="MATERIAL CARGA"] td { border:1px solid #222 !important; } }
+
+/* Item 16: garantir as bordas na visualização e na impressão final */
+.material-carga-print table, .material-carga-print-table {
+  width:100% !important; border-collapse:collapse !important; border:1px solid #222 !important;
+}
+.material-carga-print table th, .material-carga-print table td,
+.material-carga-print-table th, .material-carga-print-table td {
+  border:1px solid #222 !important; padding:4px !important;
+}
+@media print {
+  .material-carga-print table, .material-carga-print-table {
+    display:table !important; width:100% !important; border-collapse:collapse !important; border:1px solid #222 !important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .material-carga-print table tr, .material-carga-print-table tr { break-inside:avoid; }
+  .material-carga-print table th, .material-carga-print table td,
+  .material-carga-print-table th, .material-carga-print-table td { border:1px solid #222 !important; }
+}
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -983,8 +1001,8 @@ function visualizarRelatorio(){
     else if(numerar) textoFinal=textoComNumeracao(item.texto);
     if(titulo.startsWith('16')){
       const linhas=String(item.texto||'').split(/\r?\n/).filter(l=>l.trim()&&!/^N\/C\.?$/i.test(l.trim()));
-      const linhasTabela=linhas.map(l=>{const p=l.split('\t');return `<tr><td>${esc((p[0]||'').trim())}</td><td>${esc((p.slice(1).join('\t')||'').trim())}</td></tr>`}).join('');
-      return `<section class="preview-section material-carga-print"><h3>${esc(item.titulo)}:</h3><table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:10pt;table-layout:fixed"><thead><tr><th style="background:#ccc;border:1px solid #222;padding:4px">ITENS</th><th style="background:#ccc;border:1px solid #222;padding:4px;width:23%">QUANT.</th></tr></thead><tbody>${linhasTabela||'<tr><td style="border:1px solid #222;padding:4px">N/C.</td><td style="border:1px solid #222;padding:4px"></td></tr>'}</tbody></table></section>`;
+      const linhasTabela=linhas.map(l=>{const p=l.split('\t');return `<tr><td style="border:1px solid #222;padding:4px;vertical-align:top;overflow-wrap:anywhere">${esc((p[0]||'').trim())}</td><td style="border:1px solid #222;padding:4px;text-align:center;vertical-align:top">${esc((p.slice(1).join('\t')||'').trim())}</td></tr>`}).join('');
+      return `<section class="preview-section material-carga-print"><h3>${esc(item.titulo)}:</h3><table class="material-carga-print-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;font-family:Arial,sans-serif;font-size:10pt;table-layout:fixed"><thead><tr><th style="background:#ccc;border:1px solid #222;padding:4px">ITENS</th><th style="background:#ccc;border:1px solid #222;padding:4px;width:23%">QUANT.</th></tr></thead><tbody>${linhasTabela||'<tr><td style=\"border:1px solid #222;padding:4px\">N/C.</td><td style=\"border:1px solid #222;padding:4px\"></td></tr>'}</tbody></table></section>`;
     }
     return `<section class="preview-section${titulo.startsWith('01')?' item01-justified':''}"><h3>${esc(item.titulo)}:</h3><div class="preview-text${is02?' team02-print':''}">${esc(textoFinal)}</div></section>`
   }).join(''):'<p>Nenhuma seção foi preenchida ainda.</p>';
