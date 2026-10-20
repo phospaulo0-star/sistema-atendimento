@@ -78,6 +78,12 @@
 @media(max-width:700px){.hospitalizado-row,.hospitalizado-table-head{grid-template-columns:32px minmax(90px,1fr) minmax(90px,35%) 65px}.hospitalizado-row>div{padding:3px}}
 @media print{.hospitalizado-editor,.hospitalizado-actions,.hospitalizado-row,.hospitalizado-table-head{display:none!important}.hospitalizado-visual{display:block!important}}
 
+
+.hospitalizado-preview-table{width:100%;border-collapse:collapse!important;border:1px solid #222!important;table-layout:fixed}
+.hospitalizado-preview-table th,.hospitalizado-preview-table td{border:1px solid #222!important;padding:4px!important}
+.hospitalizado-preview-table th{background:#c6c6c6!important}
+.hospitalizado-preview-nc{margin-left:0}
+@media print{.hospitalizado-preview-table{display:table!important;border-collapse:collapse!important}.hospitalizado-preview-table th,.hospitalizado-preview-table td{border:1px solid #222!important}}
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1186,6 +1192,15 @@ function visualizarRelatorio(targetId=null){
       const linhas=String(item.texto||'').split(/\r?\n/).filter(l=>l.trim()&&!/^N\/C\.?$/i.test(l.trim()));
       const rows=linhas.map(l=>{const p=l.split('\t');return `<tr><td style="border:1px solid #222;padding:4px;background:#d9d9d9;vertical-align:middle;overflow-wrap:anywhere">${esc((p[0]||'').trim())}</td><td style="border:1px solid #222;padding:4px;vertical-align:middle;overflow-wrap:anywhere;white-space:pre-line">${esc(p.slice(1).join('\t').trim())}</td></tr>`}).join('');
       return `<section class="preview-section viaturas-print"><h3>${esc(item.titulo)}:</h3><table class="viaturas-print-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;font-family:Arial,sans-serif;font-size:10pt;table-layout:fixed"><tbody>${rows||'<tr><td style="border:1px solid #222;padding:4px;background:#d9d9d9">N/C.</td><td style="border:1px solid #222;padding:4px"></td></tr>'}</tbody></table></section>`;
+    }
+    if(titulo.startsWith('25.1') || titulo.startsWith('25 –') || titulo.startsWith('25 -')){
+      const tipoHosp=titulo.startsWith('25.1')?'confirmar':'hospitalizado';
+      const arrHosp=itensHosp(tipoHosp).filter(r=>!r.nc);
+      if(!arrHosp.length){
+        return `<section class="preview-section hospitalizado-preview"><h3>${esc(item.titulo)}:</h3><div class="hospitalizado-preview-nc">N/C.</div></section>`;
+      }
+      const linhasHosp=arrHosp.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:34px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:center;overflow-wrap:anywhere">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:22%">${esc(formatarDataHosp(r.saida))}</td></tr>`).join('');
+      return `<section class="preview-section hospitalizado-preview"><h3>${esc(item.titulo)}:</h3><table class="hospitalizado-preview-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;font-family:Arial,sans-serif;font-size:10pt;table-layout:fixed"><thead><tr><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:34px"></th><th style="border:1px solid #222;background:#c6c6c6;padding:4px">NOME DO PRESO</th><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:22%">SAÍDA</th></tr></thead><tbody>${linhasHosp}</tbody></table></section>`;
     }
     if(titulo.startsWith('16')){
       const linhas=String(item.texto||'').split(/\r?\n/).filter(l=>l.trim()&&!/^N\/C\.?$/i.test(l.trim()));
