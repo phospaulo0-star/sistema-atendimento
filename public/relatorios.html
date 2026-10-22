@@ -95,6 +95,11 @@
 .lj-nome-autos input{display:block;width:100%;min-width:0;margin:2px 0;white-space:nowrap}
 #licencaJudicialVisual table{width:100%;border-collapse:collapse!important;table-layout:fixed;font-size:10pt}
 #licencaJudicialVisual th,#licencaJudicialVisual td{border:1px solid #222!important;padding:4px;vertical-align:middle}
+.licenca-judicial-preview-table{width:100%;border-collapse:collapse!important;table-layout:fixed;border:1px solid #222!important}
+.licenca-judicial-preview-table th,.licenca-judicial-preview-table td{border:1px solid #222!important;padding:4px;vertical-align:middle}
+.licenca-judicial-preview-table th{font-weight:bold;text-align:center}
+.licenca-judicial-preview-table th:nth-child(2),.licenca-judicial-preview-table td:nth-child(2){white-space:nowrap}
+@media print{.licenca-judicial-preview-table{border-collapse:collapse!important;border:1px solid #222!important}.licenca-judicial-preview-table th,.licenca-judicial-preview-table td{border:1px solid #222!important}}
 #licencaJudicialVisual th:nth-child(2),#licencaJudicialVisual td:nth-child(2){width:42%;white-space:nowrap}
 
 .hospitalizado-row .no-print{gap:3px;flex-wrap:wrap}
@@ -1269,8 +1274,8 @@ function visualizarRelatorio(targetId=null){
     if(titulo.startsWith('28 –') || titulo.startsWith('28 -')){
       const rows=listaLicencaJudicial.filter(r=>!r.nc);
       if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>N/C.</div></section>`;
-      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(r.nome||'')}${r.autos?'<br>Nº DOS AUTOS: '+esc(r.autos):''}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.saida))}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(r.dias||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.retorno))}</td></tr>`).join('');
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><thead><tr><th>Nº</th><th>NOME DO PRESO / AUTOS</th><th>SAÍDA</th><th>DIAS</th><th>RETORNO PREVISTO</th></tr></thead><tbody>${trs}</tbody></table></section>`;
+      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:center;white-space:nowrap;overflow:hidden"><div style="white-space:nowrap;overflow:hidden">${esc(r.nome||'')}</div><div style="white-space:nowrap;overflow:hidden">${r.autos?'Nº DOS AUTOS: '+esc(r.autos):'&nbsp;'}</div></td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.saida))}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.retorno))}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(r.dias||'')}</td></tr>`).join('');
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="licenca-judicial-preview-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><colgroup><col style="width:6%"><col style="width:42%"><col style="width:17%"><col style="width:19%"><col style="width:16%"></colgroup><thead><tr><th>Nº</th><th>NOME DO PRESO / AUTOS</th><th>SAÍDA</th><th>RETORNO PREVISTO</th><th>DIAS</th></tr></thead><tbody>${trs}</tbody></table></section>`;
     }
     if(titulo.startsWith('28.1 –') || titulo.startsWith('28.1 -')){
       const rows=listaRetornoLicencaJudicial.filter(r=>!r.nc);
