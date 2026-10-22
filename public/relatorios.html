@@ -98,6 +98,10 @@
 .licenca-judicial-preview-table{width:100%;border-collapse:collapse!important;table-layout:fixed;border:1px solid #222!important}
 .licenca-judicial-preview-table th,.licenca-judicial-preview-table td{border:1px solid #222!important;padding:4px;vertical-align:middle}
 .licenca-judicial-preview-table th{font-weight:bold;text-align:center}
+.retorno-licenca-judicial-preview-table{width:100%;border-collapse:collapse!important;table-layout:fixed;border:1px solid #222!important}
+.retorno-licenca-judicial-preview-table th,.retorno-licenca-judicial-preview-table td{border:1px solid #222!important;padding:4px;vertical-align:middle}
+.retorno-licenca-judicial-preview-table th:first-child,.retorno-licenca-judicial-preview-table td:first-child{width:6%;white-space:nowrap;text-align:center}
+@media print{.retorno-licenca-judicial-preview-table{border-collapse:collapse!important}.retorno-licenca-judicial-preview-table th,.retorno-licenca-judicial-preview-table td{border:1px solid #222!important}}
 .licenca-judicial-preview-table th:nth-child(2),.licenca-judicial-preview-table td:nth-child(2){white-space:nowrap}
 @media print{.licenca-judicial-preview-table{border-collapse:collapse!important;border:1px solid #222!important}.licenca-judicial-preview-table th,.licenca-judicial-preview-table td{border:1px solid #222!important}}
 #licencaJudicialVisual th:nth-child(2),#licencaJudicialVisual td:nth-child(2){width:42%;white-space:nowrap}
@@ -1280,8 +1284,8 @@ function visualizarRelatorio(targetId=null){
     if(titulo.startsWith('28.1 –') || titulo.startsWith('28.1 -')){
       const rows=listaRetornoLicencaJudicial.filter(r=>!r.nc);
       if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>N/C.</div></section>`;
-      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.saida))}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.retorno))}</td></tr>`).join('');
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><thead><tr><th>Nº</th><th>NOME DO PRESO</th><th>SAÍDA</th><th>RETORNO</th></tr></thead><tbody>${trs}</tbody></table></section>`;
+      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:6%;white-space:nowrap">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.saida))}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.retorno))}</td></tr>`).join('');
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="retorno-licenca-judicial-preview-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><colgroup><col style="width:6%"><col style="width:48%"><col style="width:23%"><col style="width:23%"></colgroup><thead><tr><th>Nº</th><th>NOME DO PRESO</th><th>SAÍDA</th><th>RETORNO</th></tr></thead><tbody>${trs}</tbody></table></section>`;
     }
     if(titulo.startsWith('27 –') || titulo.startsWith('27 -')){
       const rows=listaObitos.filter(r=>!r.nc);
