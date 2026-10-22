@@ -116,6 +116,19 @@
   body.preview-mode .preview-letterhead-text,
   body.preview-mode .preview-letterhead-text div{white-space:nowrap!important;font-size:7pt!important}
 }
+
+.obito-row{display:grid;grid-template-columns:42px minmax(180px,1fr) minmax(130px,28%) 84px;gap:0;border:1px solid #222;margin:0}
+.obito-row>div{padding:4px;border-right:1px solid #222;display:flex;align-items:center;min-width:0}
+.obito-row>div:last-child{border-right:0}
+.obito-row input{width:100%;min-width:0;box-sizing:border-box;padding:6px;border:1px solid #b9c3d0;border-radius:4px}
+.obito-head{display:grid;grid-template-columns:42px minmax(180px,1fr) minmax(130px,28%) 84px;background:#c6c6c6;border:1px solid #222;font-weight:bold;text-align:center}
+.obito-head>div{padding:5px;border-right:1px solid #222}
+.obito-head>div:last-child{border-right:0}
+.obito-visual table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+.obito-visual th,.obito-visual td{border:1px solid #222;padding:3px;text-align:center;overflow-wrap:anywhere}
+.obito-visual th{background:#c6c6c6}
+@media(max-width:700px){.obito-row,.obito-head{grid-template-columns:32px minmax(90px,1fr) minmax(90px,28%) 65px}}
+@media print{.obito-row,.obito-head{display:none!important}.obito-visual{display:block!important}}
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -333,7 +346,11 @@
 <div class="no-print hospitalizado-actions"><button type="button" onclick="adicionarRetornoHospitalizado()">＋ ADICIONAR RETORNO</button></div>
 <textarea id="s25" data-section="26 – RETORNO DE HOSPITALIZADO" rows="3" class="no-print" style="display:none">N/C.</textarea>
 <div id="retornoHospitalizadosVisual" class="hospitalizado-visual"></div></section>
-<section class="field"><label for="s26">27 – ÓBITO</label><textarea id="s26" data-section="27 – ÓBITO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field hospitalizado-field"><label for="s26">27 – ÓBITO</label>
+<div id="obitosContainer"></div>
+<div class="no-print hospitalizado-actions"><button type="button" onclick="adicionarObito()">＋ ADICIONAR LINHA</button></div>
+<textarea id="s26" data-section="27 – ÓBITO" rows="3" class="no-print" style="display:none">N/C.</textarea>
+<div id="obitosVisual" class="hospitalizado-visual"></div></section>
 <section class="field"><label for="s27">28 – LICENÇA JUDICIAL</label><textarea id="s27" data-section="28 – LICENÇA JUDICIAL" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s28a">28.1 – RETORNO DE LICENÇA JUDICIAL</label><textarea id="s28a" data-section="28.1 – RETORNO DE LICENÇA JUDICIAL" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s28">29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)</label><textarea id="s28" data-section="29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -1234,6 +1251,12 @@ function visualizarRelatorio(targetId=null){
       const rows=linhas.map(l=>{const p=l.split('\t');return `<tr><td style="border:1px solid #222;padding:4px;background:#d9d9d9;vertical-align:middle;overflow-wrap:anywhere">${esc((p[0]||'').trim())}</td><td style="border:1px solid #222;padding:4px;vertical-align:middle;overflow-wrap:anywhere;white-space:pre-line">${esc(p.slice(1).join('\t').trim())}</td></tr>`}).join('');
       return `<section class="preview-section viaturas-print"><h3>${esc(item.titulo)}:</h3><table class="viaturas-print-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;font-family:Arial,sans-serif;font-size:10pt;table-layout:fixed"><tbody>${rows||'<tr><td style="border:1px solid #222;padding:4px;background:#d9d9d9">N/C.</td><td style="border:1px solid #222;padding:4px"></td></tr>'}</tbody></table></section>`;
     }
+    if(titulo.startsWith('27 –') || titulo.startsWith('27 -')){
+      const rows=listaObitos.filter(r=>!r.nc);
+      if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>N/C.</div></section>`;
+      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:34px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:25%">${esc(formatarDataHosp(r.data))}</td></tr>`).join('');
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><thead><tr><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:34px"></th><th style="border:1px solid #222;background:#c6c6c6;padding:4px">NOME DO PRESO</th><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:25%">DATA</th></tr></thead><tbody>${trs}</tbody></table></section>`;
+    }
     if(titulo.startsWith('26 –') || titulo.startsWith('26 -')){
       const rows=listaRetornoHospitalizados;
       if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>N/C.</div></section>`;
@@ -1320,6 +1343,16 @@ function carregarVistoriasCela(texto){
 document.addEventListener('DOMContentLoaded',()=>{const c=document.getElementById('s23');if(c)carregarVistoriasCela(c.value||'N/C.');});
 
 
+// Ordena pelo primeiro nome; em caso de empate, compara o restante do nome.
+function partesNomeAlfabetico(nome){
+ const partes=String(nome||'').trim().split(/\s+/).filter(Boolean);
+ return {primeiro:partes[0]||'',restante:partes.slice(1).join(' ')};
+}
+function compararNomePrimeiroNome(a,b){
+ const x=partesNomeAlfabetico(a),y=partesNomeAlfabetico(b);
+ const p=x.primeiro.localeCompare(y.primeiro,'pt-BR',{sensitivity:'base'});
+ return p||x.restante.localeCompare(y.restante,'pt-BR',{sensitivity:'base'});
+}
 // Componente reutilizável: busca de internos pela base compartilhada do sistema.
 let baseInternosCompartilhada = [];
 function normalizarNomeInterno(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();}
@@ -1331,7 +1364,7 @@ async function carregarBaseInternosCompartilhada(){
   baseInternosCompartilhada=Array.isArray(resposta.items)?resposta.items:[];
   lista.innerHTML=baseInternosCompartilhada
    .filter(x=>x&&x.nome)
-   .sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{sensitivity:'base'}))
+   .sort((a,b)=>compararNomePrimeiroNome(a.nome,b.nome))
    .map(x=>`<option value="${escHosp(x.nome)}"></option>`).join('');
  }catch(e){
   // A edição manual continua disponível se a base não puder ser carregada.
@@ -1343,6 +1376,58 @@ function formatarDataHosp(valor){
  const s=String(valor);
  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
  return m?`${m[3]}/${m[2]}/${m[1]}`:s;
+}
+
+
+// Item 27 — ÓBITO: tabela editável com nome da base compartilhada e calendário.
+let listaObitos=[], seqObito=0;
+function adicionarObito(){
+ if(listaObitos.length===1&&listaObitos[0].nc)listaObitos=[];
+ listaObitos.push({id:++seqObito,nome:'',data:''});
+ renderObitos();sincronizarObitos();
+}
+function alterarObito(id,campo,valor){
+ const r=listaObitos.find(x=>x.id===id);if(!r)return;
+ r[campo]=valor;sincronizarObitos(false);renderVisualObitos();
+}
+function excluirObito(id){
+ listaObitos=listaObitos.filter(x=>x.id!==id);
+ if(!listaObitos.length)listaObitos.push({id:++seqObito,nc:true,nome:'',data:''});
+ renderObitos();sincronizarObitos();
+}
+function serializarObitos(){
+ if(!listaObitos.length||listaObitos.every(x=>x.nc))return 'N/C.';
+ return listaObitos.filter(x=>!x.nc).map(x=>`${x.nome||''}\t${x.data||''}`).join('\n');
+}
+function sincronizarObitos(redesenhar=true){
+ const c=document.getElementById('s26');if(c){
+  c.value=serializarObitos();
+  c.dispatchEvent(new Event('input',{bubbles:true}));
+  c.dispatchEvent(new Event('change',{bubbles:true}));
+ }
+ if(redesenhar)renderVisualObitos();
+}
+function renderObitos(){
+ const box=document.getElementById('obitosContainer');if(!box)return;
+ const rows=listaObitos;
+ box.innerHTML='<div class="obito-head"><div>Nº</div><div>NOME DO PRESO</div><div>DATA</div><div class="no-print">AÇÃO</div></div>'+
+ rows.map((r,i)=>r.nc?`<div class="obito-row"><div>${String(i+1).padStart(2,'0')}.</div><div style="grid-column:span 2;justify-content:center">N/C.</div><div class="no-print"><button type="button" onclick="excluirObito(${r.id})">Excluir</button></div></div>`:
+ `<div class="obito-row"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do preso" list="listaInternosCompartilhada" value="${escHosp(r.nome)}" placeholder="Digite para buscar interno" autocomplete="off" oninput="alterarObito(${r.id},'nome',this.value)"></div><div><input type="date" aria-label="Data" value="${escHosp(r.data)}" oninput="alterarObito(${r.id},'data',this.value)"></div><div class="no-print"><button type="button" onclick="excluirObito(${r.id})">Excluir</button></div></div>`).join('');
+ renderVisualObitos();
+}
+function renderVisualObitos(){
+ const box=document.getElementById('obitosVisual');if(!box)return;
+ const rows=listaObitos.filter(x=>!x.nc);
+ if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}
+ box.innerHTML='<table><thead><tr><th style="width:34px"></th><th>NOME DO PRESO</th><th style="width:25%">DATA</th></tr></thead><tbody>'+
+ rows.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.data))}</td></tr>`).join('')+
+ '</tbody></table>';
+}
+function carregarObitos(valor){
+ listaObitos=[];const linhas=String(valor||'N/C.').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ if(!linhas.length||linhas.every(x=>/^N\/C\.?$/i.test(x)))listaObitos.push({id:++seqObito,nc:true,nome:'',data:''});
+ else linhas.forEach(l=>{const p=l.split(/\t+/);listaObitos.push({id:++seqObito,nome:p[0]||'',data:p[1]||''});});
+ renderObitos();
 }
 
 // Item 26 — retorno de hospitalizados; reutiliza os dados dos itens 25 e 25.1.
@@ -1480,6 +1565,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  if(a)carregarHospitalizados('hospitalizado',a.value||'N/C.');
  if(b)carregarHospitalizados('confirmar',b.value||'N/C.');
  const c=document.getElementById('s25');if(c)carregarRetornosHosp(c.value||'N/C.');
+ const d=document.getElementById('s26');if(d)carregarObitos(d.value||'N/C.');
 });
 
 </script></body></html>
