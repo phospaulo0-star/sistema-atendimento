@@ -155,12 +155,19 @@
 @media(max-width:700px){.obito-row,.obito-head{grid-template-columns:32px minmax(90px,1fr) minmax(90px,28%) 65px}}
 @media print{.obito-row,.obito-head{display:none!important}.obito-visual{display:block!important}}
 
-/* Item 30: lista simples, sem tabela, com a ordem imediatamente antes do nome. */
+/* Item 30: o alinhamento é aplicado somente à visualização e impressão, nunca aos campos de edição. */
 .autorizacoes-lista{display:flex;flex-direction:column;gap:2px}
-.autorizacao-linha{display:grid;grid-template-columns:4ch minmax(0,1fr) auto;align-items:baseline;column-gap:0;row-gap:0;padding:1px 0}
-.autorizacao-numero{display:block;white-space:nowrap}
-.autorizacao-texto{white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
-@media print{.autorizacao-linha{display:grid;grid-template-columns:4ch minmax(0,1fr) auto;column-gap:0}.autorizacao-linha button{display:none!important}}
+.autorizacao-linha{display:flex;align-items:baseline;gap:0;padding:1px 0;min-width:0}
+.autorizacao-numero{display:inline-block;flex:0 0 4ch;width:4ch;white-space:pre; font:inherit;}
+.autorizacao-texto{display:block;flex:1 1 auto;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;}
+.autorizacao-linha button{flex:0 0 auto;margin-left:8px}
+@media print{
+ .autorizacoes-lista{display:flex!important;flex-direction:column!important;gap:2px!important}
+ .autorizacao-linha{display:flex!important;align-items:baseline!important;gap:0!important;padding:1px 0!important}
+ .autorizacao-numero{display:inline-block!important;flex:0 0 4ch!important;width:4ch!important;white-space:pre!important;font:inherit!important}
+ .autorizacao-texto{display:block!important;flex:1 1 auto!important;min-width:0!important;font:inherit!important}
+ .autorizacao-linha button{display:none!important}
+}
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1727,7 +1734,7 @@ function renderAutorizacoesCumpridas(){
   const nomes=Array.isArray(r.nomes)?r.nomes:[r.nome].filter(Boolean);
   nomes.forEach((nome,j)=>{
    const numero=j===0?String(++ordem).padStart(2,'0')+'. ':'';
-   html+=`<div class="autorizacao-linha"><span class="autorizacao-numero">${numero}</span><span class="autorizacao-texto">${escHosp(nome)} - ${escHosp(r.detalhe)}</span>${j===0?`<button class="no-print" type="button" onclick="excluirAutorizacaoCumprida(${r.id})">Excluir documento</button>`:`<button class="no-print" type="button" onclick="excluirNomeAutorizacaoCumprida(${r.id},${j})">Excluir nome</button>`}</div>`;
+   html+=`<div class="autorizacao-linha ${j===0?'autorizacao-principal':'autorizacao-continuacao'}"><span class="autorizacao-numero">${numero}</span><span class="autorizacao-texto">${escHosp(nome)} - ${escHosp(r.detalhe)}</span>${j===0?`<button class="no-print" type="button" onclick="excluirAutorizacaoCumprida(${r.id})">Excluir documento</button>`:`<button class="no-print" type="button" onclick="excluirNomeAutorizacaoCumprida(${r.id},${j})">Excluir nome</button>`}</div>`;
   });
  });
  box.innerHTML='<div class="autorizacoes-lista">'+html+'</div><p class="no-print"><strong>Total de documentos de autorização: '+rows.length+' | Total de internos: '+rows.reduce((n,r)=>n+(Array.isArray(r.nomes)?r.nomes.length:(r.nome?1:0)),0)+'</strong></p>';
