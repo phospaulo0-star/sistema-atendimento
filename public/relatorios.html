@@ -101,6 +101,15 @@
 .retorno-licenca-judicial-preview-table{width:100%;border-collapse:collapse!important;table-layout:fixed;border:1px solid #222!important}
 .retorno-licenca-judicial-preview-table th,.retorno-licenca-judicial-preview-table td{border:1px solid #222!important;padding:4px;vertical-align:middle}
 .retorno-licenca-judicial-preview-table th:first-child,.retorno-licenca-judicial-preview-table td:first-child{width:6%;white-space:nowrap;text-align:center}
+.lj29-grid{display:grid;grid-template-columns:34px minmax(180px,2fr) minmax(130px,1fr) minmax(150px,1fr) minmax(150px,auto);gap:8px;align-items:center}
+.lj291-grid{display:grid;grid-template-columns:34px minmax(180px,2fr) minmax(130px,1fr) minmax(130px,1fr) minmax(80px,auto);gap:8px;align-items:center}
+.lj29-grid input,.lj291-grid input{width:100%;min-width:0;box-sizing:border-box;padding:8px;border:1px solid #bbc3cc;border-radius:6px;font:inherit}
+.lj29-buttons{display:flex;gap:5px;flex-wrap:wrap}.lj29-buttons button{padding:7px 9px}
+.lj29-grid>div:first-child,.lj291-grid>div:first-child{text-align:center;white-space:nowrap}
+.licenca-judicial-preview-table,.retorno-licenca-judicial-preview-table{width:100%;border-collapse:collapse!important;table-layout:fixed;border:1px solid #222!important}
+.licenca-judicial-preview-table th,.licenca-judicial-preview-table td,.retorno-licenca-judicial-preview-table th,.retorno-licenca-judicial-preview-table td{border:1px solid #222!important;padding:4px;vertical-align:middle}
+@media(max-width:850px){.lj29-grid,.lj291-grid{grid-template-columns:34px minmax(150px,1fr)}.lj29-grid>div:nth-child(n+3),.lj291-grid>div:nth-child(n+3){grid-column:2}.lj29-buttons{grid-column:2}}
+@media print{.licenca-judicial-preview-table,.retorno-licenca-judicial-preview-table{border-collapse:collapse!important}.licenca-judicial-preview-table th,.licenca-judicial-preview-table td,.retorno-licenca-judicial-preview-table th,.retorno-licenca-judicial-preview-table td{border:1px solid #222!important}}
 @media print{.retorno-licenca-judicial-preview-table{border-collapse:collapse!important}.retorno-licenca-judicial-preview-table th,.retorno-licenca-judicial-preview-table td{border:1px solid #222!important}}
 .licenca-judicial-preview-table th:nth-child(2),.licenca-judicial-preview-table td:nth-child(2){white-space:nowrap}
 @media print{.licenca-judicial-preview-table{border-collapse:collapse!important;border:1px solid #222!important}.licenca-judicial-preview-table th,.licenca-judicial-preview-table td{border:1px solid #222!important}}
@@ -377,8 +386,8 @@
 <div class="no-print hospitalizado-actions"><button type="button" onclick="adicionarRetornoLicencaJudicial()">＋ ADICIONAR RETORNO</button></div>
 <textarea id="s28a" data-section="28.1 – RETORNO DE LICENÇA JUDICIAL" rows="3" class="no-print" style="display:none">N/C.</textarea>
 <div id="retornoLicencaJudicialVisual" class="hospitalizado-visual"></div></section>
-<section class="field"><label for="s28">29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)</label><textarea id="s28" data-section="29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s29a">29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)</label><textarea id="s29a" data-section="29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field"><label>29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)</label><div id="licencaTemporariaContainer"></div><div class="no-print lj29-actions"><button type="button" onclick="adicionarLicencaTemporaria()">＋ ADICIONAR CADASTRO</button></div><textarea id="s28" data-section="29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)" rows="3" class="no-print" style="display:none">N/C.</textarea><div id="licencaTemporariaVisual" class="hospitalizado-visual"></div></section>
+<section class="field"><label>29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)</label><div id="retornoTemporariaContainer"></div><textarea id="s29a" data-section="29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)" rows="3" class="no-print" style="display:none">N/C.</textarea><div id="retornoTemporariaVisual" class="hospitalizado-visual"></div></section>
 <section class="field"><label for="s29">30 – AUTORIZAÇÕES CUMPRIDAS</label><textarea id="s29" data-section="30 – AUTORIZAÇÕES CUMPRIDAS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s30">31 – ENTRADA DE CUSTODIADOS</label><textarea id="s30" data-section="31 – ENTRADA DE CUSTODIADOS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s31">32 – SAÍDA DE CUSTODIADOS</label><textarea id="s31" data-section="32 – SAÍDA DE CUSTODIADOS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -1287,6 +1296,18 @@ function visualizarRelatorio(targetId=null){
       const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:6%;white-space:nowrap">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.saida))}</td><td style="border:1px solid #222;padding:4px;text-align:center">${esc(formatarDataHosp(r.retorno))}</td></tr>`).join('');
       return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="retorno-licenca-judicial-preview-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><colgroup><col style="width:6%"><col style="width:48%"><col style="width:23%"><col style="width:23%"></colgroup><thead><tr><th>Nº</th><th>NOME DO PRESO</th><th>SAÍDA</th><th>RETORNO</th></tr></thead><tbody>${trs}</tbody></table></section>`;
     }
+    if(titulo.startsWith('29 – LICENÇA JUDICIAL 7 DIAS') || titulo.startsWith('29 - LICENÇA JUDICIAL 7 DIAS')){
+      const rows=listaLicencaTemporaria.filter(r=>!r.nc);
+      if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>N/C.</div></section>`;
+      const trs=rows.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${esc(r.nome||'')}</td><td>${esc(formatarDataHosp(r.saida))}</td><td>${esc(formatarDataHosp(r.retornoPrevisto))}</td></tr>`).join('');
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="licenca-judicial-preview-table"><colgroup><col style="width:6%"><col style="width:50%"><col style="width:22%"><col style="width:22%"></colgroup><thead><tr><th>Nº</th><th>NOME DO INTERNO</th><th>SAÍDA</th><th>RETORNO PREVISTO</th></tr></thead><tbody>${trs}</tbody></table></section>`;
+    }
+    if(titulo.startsWith('29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS') || titulo.startsWith('29.1 - RETORNO DE LICENÇA JUDICIAL 7 DIAS')){
+      const rows=listaRetornoTemporaria.filter(r=>!r.nc);
+      if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>N/C.</div></section>`;
+      const trs=rows.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${esc(r.nome||'')}</td><td>${esc(formatarDataHosp(r.saida))}</td><td>${esc(formatarDataHosp(r.retornoReal))}</td></tr>`).join('');
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="retorno-licenca-judicial-preview-table"><colgroup><col style="width:6%"><col style="width:50%"><col style="width:22%"><col style="width:22%"></colgroup><thead><tr><th>Nº</th><th>NOME DO INTERNO</th><th>SAÍDA</th><th>RETORNO</th></tr></thead><tbody>${trs}</tbody></table></section>`;
+    }
     if(titulo.startsWith('27 –') || titulo.startsWith('27 -')){
       const rows=listaObitos.filter(r=>!r.nc);
       if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>N/C.</div></section>`;
@@ -1466,6 +1487,23 @@ function carregarObitos(valor){
  renderObitos();
 }
 
+// Itens 29 e 29.1 — Licença judicial de 7 dias.
+let listaLicencaTemporaria=[], listaRetornoTemporaria=[], seqTemporaria=0;
+function dataHojeTemporaria(){const el=document.getElementById('reportDate');return el&&el.value?el.value:dataISOdeHojeLJ();}
+function serializarTemporaria(lista){const arr=lista.filter(r=>!r.nc);if(!arr.length)return 'N/C.';return arr.map(r=>[r.nome||'',r.saida||'',r.retornoPrevisto||'',r.retornoReal||''].join('\t')).join('\n');}
+function sincronizarTemporaria(){const a=document.getElementById('s28'),b=document.getElementById('s29a');if(a){a.value=serializarTemporaria(listaLicencaTemporaria);a.dispatchEvent(new Event('input',{bubbles:true}));a.dispatchEvent(new Event('change',{bubbles:true}));}if(b){b.value=serializarTemporaria(listaRetornoTemporaria);b.dispatchEvent(new Event('input',{bubbles:true}));b.dispatchEvent(new Event('change',{bubbles:true}));}renderVisualTemporaria();}
+function adicionarLicencaTemporaria(){listaLicencaTemporaria=listaLicencaTemporaria.filter(r=>!r.nc);listaLicencaTemporaria.push({id:++seqTemporaria,nome:'',saida:'',retornoPrevisto:'',retornoReal:''});renderLicencaTemporaria();sincronizarTemporaria();}
+function alterarLicencaTemporaria(id,campo,valor){const r=listaLicencaTemporaria.find(x=>x.id===id);if(!r)return;r[campo]=valor;sincronizarTemporaria();}
+function excluirLicencaTemporaria(id){listaLicencaTemporaria=listaLicencaTemporaria.filter(x=>x.id!==id);renderLicencaTemporaria();sincronizarTemporaria();}
+function transferirTemporaria(id,automatico=false){const r=listaLicencaTemporaria.find(x=>x.id===id);if(!r||r.nc||!String(r.nome||'').trim())return false;if(listaRetornoTemporaria.some(x=>normalizarNomeInterno(x.nome)===normalizarNomeInterno(r.nome)&&x.saida===r.saida)){if(!automatico)alert('Este cadastro já consta no item 29.1.');return false;}listaRetornoTemporaria.push({id:++seqTemporaria,nome:r.nome,saida:r.saida||'',retornoReal:dataHojeTemporaria(),retornoPrevisto:r.retornoPrevisto||''});listaLicencaTemporaria=listaLicencaTemporaria.filter(x=>x.id!==id);renderLicencaTemporaria();renderRetornoTemporaria();sincronizarTemporaria();return true;}
+function verificarRetornosTemporaria(){const data=dataHojeTemporaria();if(!data)return;listaLicencaTemporaria.slice().forEach(r=>{if(!r.nc&&r.retornoPrevisto&&r.retornoPrevisto<=data)transferirTemporaria(r.id,true);});}
+function renderLicencaTemporaria(){const box=document.getElementById('licencaTemporariaContainer');if(!box)return;const rows=listaLicencaTemporaria.filter(r=>!r.nc);if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}box.innerHTML='<div class="retorno-hosp-head lj29-grid"><div>Nº</div><div>NOME DO INTERNO</div><div>SAÍDA</div><div>RETORNO PREVISTO</div><div class="no-print">AÇÃO</div></div>'+rows.map((r,i)=>`<div class="retorno-hosp-row lj29-grid"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do interno" list="listaInternosCompartilhada" autocomplete="off" value="${escHosp(r.nome)}" placeholder="Digite para buscar interno" oninput="alterarLicencaTemporaria(${r.id},'nome',this.value)"></div><div><input type="date" aria-label="Data de saída" value="${escHosp(r.saida)}" oninput="alterarLicencaTemporaria(${r.id},'saida',this.value)"></div><div><input type="date" aria-label="Retorno previsto" value="${escHosp(r.retornoPrevisto)}" oninput="alterarLicencaTemporaria(${r.id},'retornoPrevisto',this.value)"></div><div class="no-print lj29-buttons"><button type="button" onclick="transferirTemporaria(${r.id})">↪ Retornou</button><button type="button" onclick="excluirLicencaTemporaria(${r.id})">Excluir</button></div></div>`).join('');}
+function renderRetornoTemporaria(){const box=document.getElementById('retornoTemporariaContainer');if(!box)return;const rows=listaRetornoTemporaria.filter(r=>!r.nc);if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}box.innerHTML='<div class="retorno-hosp-head lj291-grid"><div>Nº</div><div>NOME DO INTERNO</div><div>SAÍDA</div><div>RETORNO</div><div class="no-print">AÇÃO</div></div>'+rows.map((r,i)=>`<div class="retorno-hosp-row lj291-grid"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do interno retornado" list="listaInternosCompartilhada" autocomplete="off" value="${escHosp(r.nome)}" oninput="alterarRetornoTemporaria(${r.id},'nome',this.value)"></div><div><input type="date" aria-label="Data de saída" value="${escHosp(r.saida)}" oninput="alterarRetornoTemporaria(${r.id},'saida',this.value)"></div><div><input type="date" aria-label="Data efetiva do retorno" value="${escHosp(r.retornoReal)}" oninput="alterarRetornoTemporaria(${r.id},'retornoReal',this.value)"></div><div class="no-print"><button type="button" onclick="excluirRetornoTemporaria(${r.id})">Excluir</button></div></div>`).join('');}
+function alterarRetornoTemporaria(id,campo,valor){const r=listaRetornoTemporaria.find(x=>x.id===id);if(!r)return;r[campo]=valor;sincronizarTemporaria();}
+function excluirRetornoTemporaria(id){listaRetornoTemporaria=listaRetornoTemporaria.filter(x=>x.id!==id);renderRetornoTemporaria();sincronizarTemporaria();}
+function renderVisualTemporaria(){const a=document.getElementById('licencaTemporariaVisual'),b=document.getElementById('retornoTemporariaVisual');if(!a||!b)return;const x=listaLicencaTemporaria.filter(r=>!r.nc),y=listaRetornoTemporaria.filter(r=>!r.nc);a.innerHTML=x.length?'<table class="licenca-judicial-preview-table"><colgroup><col style="width:6%"><col style="width:50%"><col style="width:22%"><col style="width:22%"></colgroup><thead><tr><th>Nº</th><th>NOME DO INTERNO</th><th>SAÍDA</th><th>RETORNO PREVISTO</th></tr></thead><tbody>'+x.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.saida))}</td><td>${escHosp(formatarDataHosp(r.retornoPrevisto))}</td></tr>`).join('')+'</tbody></table>':'<p>N/C.</p>';b.innerHTML=y.length?'<table class="retorno-licenca-judicial-preview-table"><colgroup><col style="width:6%"><col style="width:50%"><col style="width:22%"><col style="width:22%"></colgroup><thead><tr><th>Nº</th><th>NOME DO INTERNO</th><th>SAÍDA</th><th>RETORNO</th></tr></thead><tbody>'+y.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.saida))}</td><td>${escHosp(formatarDataHosp(r.retornoReal))}</td></tr>`).join('')+'</tbody></table>':'<p>N/C.</p>';}
+function carregarTemporaria(valor,retorno=false){const arr=[];const linhas=String(valor||'N/C.').split(/\n+/).map(x=>x.trim()).filter(Boolean);if(linhas.length&&!linhas.every(x=>/^N\/C\.?$/i.test(x)))linhas.forEach(l=>{const p=l.split(/\t+/);arr.push({id:++seqTemporaria,nome:p[0]||'',saida:p[1]||'',retornoPrevisto:p[2]||'',retornoReal:p[3]||''});});if(retorno)listaRetornoTemporaria=arr;else listaLicencaTemporaria=arr;}
+
 // Itens 28 e 28.1 — Licença judicial e retorno interligados.
 let listaLicencaJudicial=[], listaRetornoLicencaJudicial=[], seqLicencaJudicial=0;
 function dataISOdeHojeLJ(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -1623,6 +1661,11 @@ document.addEventListener('DOMContentLoaded',()=>{
  if(b)carregarHospitalizados('confirmar',b.value||'N/C.');
  const c=document.getElementById('s25');if(c)carregarRetornosHosp(c.value||'N/C.');
  const d=document.getElementById('s26');if(d)carregarObitos(d.value||'N/C.');
+ const t29=document.getElementById('s28');if(t29)carregarTemporaria(t29.value,false);
+ const t291=document.getElementById('s29a');if(t291)carregarTemporaria(t291.value,true);
+ renderLicencaTemporaria();renderRetornoTemporaria();renderVisualTemporaria();verificarRetornosTemporaria();
+ const rd=document.getElementById('reportDate');if(rd)rd.addEventListener('change',verificarRetornosTemporaria);
+
 });
 
 </script></body></html>
