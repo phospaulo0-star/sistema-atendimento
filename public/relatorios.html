@@ -154,6 +154,12 @@
 .obito-visual th{background:#c6c6c6}
 @media(max-width:700px){.obito-row,.obito-head{grid-template-columns:32px minmax(90px,1fr) minmax(90px,28%) 65px}}
 @media print{.obito-row,.obito-head{display:none!important}.obito-visual{display:block!important}}
+
+/* Item 30: lista simples, sem tabela, com a ordem imediatamente antes do nome. */
+.autorizacoes-lista{display:flex;flex-direction:column;gap:2px}
+.autorizacao-linha{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:1px 0}
+.autorizacao-texto{white-space:pre-wrap;overflow-wrap:anywhere}
+@media print{.autorizacao-linha{display:block}.autorizacao-linha button{display:none!important}}
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -393,7 +399,10 @@
 <div class="no-print autorizacoes-form" style="display:grid;grid-template-columns:minmax(180px,1fr) minmax(150px,1fr) auto;gap:8px;align-items:end">
  <div><label for="autorizacaoNome" style="font-size:12px">NOME DO INTERNO</label><input id="autorizacaoNome" type="text" list="listaInternosCompartilhada" autocomplete="off" placeholder="Buscar no Excel ou digitar nome manualmente"></div>
  <div><label for="autorizacaoDetalhe" style="font-size:12px">AUTORIZAÇÃO / DETALHE</label><input id="autorizacaoDetalhe" type="text" placeholder="Digite a autorização"></div>
- <button type="button" onclick="adicionarAutorizacaoCumprida()">＋ ADICIONAR</button>
+ <div style="display:flex;flex-wrap:wrap;gap:6px">
+  <button type="button" onclick="adicionarAutorizacaoCumprida()">＋ NOVA AUTORIZAÇÃO</button>
+  <button type="button" onclick="adicionarNomeMesmoDocumento()">＋ OUTRO NOME NO MESMO DOCUMENTO</button>
+ </div>
 </div>
 <div id="autorizacoesCumpridasContainer" class="hospitalizado-visual"></div>
 <textarea id="s29" data-section="30 – AUTORIZAÇÕES CUMPRIDAS" rows="3" class="no-print" style="display:none">N/C.</textarea>
@@ -1678,37 +1687,78 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 
-// Item 30 — Autorizações cumpridas. O primeiro campo usa a base compartilhada
-// (datalist carregado do Excel), mas aceita nomes digitados manualmente.
+// Item 30 — Autorizações cumpridas. Cada registro representa um documento e pode conter vários internos.
+// O primeiro interno recebe número de ordem; os demais ficam abaixo, sem novo número, com o mesmo documento.
 let listaAutorizacoesCumpridas = [], seqAutorizacaoCumprida = 0;
+function limparNcAutorizacoes(){if(listaAutorizacoesCumpridas.length===1&&listaAutorizacoesCumpridas[0].nc)listaAutorizacoesCumpridas=[];}
 function adicionarAutorizacaoCumprida(){
  const nome=document.getElementById('autorizacaoNome'), detalhe=document.getElementById('autorizacaoDetalhe');
  const n=String(nome?.value||'').trim(), d=String(detalhe?.value||'').trim();
  if(!n&&!d){nome?.focus();return;}
  if(!n||!d){alert('Preencha o nome do interno e a autorização/detalhe.');(!n?nome:detalhe)?.focus();return;}
- if(listaAutorizacoesCumpridas.length===1&&listaAutorizacoesCumpridas[0].nc)listaAutorizacoesCumpridas=[];
- listaAutorizacoesCumpridas.push({id:++seqAutorizacaoCumprida,nome:n,detalhe:d});
+ limparNcAutorizacoes();
+ listaAutorizacoesCumpridas.push({id:++seqAutorizacaoCumprida, nomes:[n], detalhe:d});
  if(nome)nome.value='';if(detalhe)detalhe.value='';
  renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();nome?.focus();
 }
-function excluirAutorizacaoCumprida(id){listaAutorizacoesCumpridas=listaAutorizacoesCumpridas.filter(r=>r.id!==id);if(!listaAutorizacoesCumpridas.length)listaAutorizacoesCumpridas=[{id:++seqAutorizacaoCumprida,nc:true,nome:'',detalhe:''}];renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();}
+function adicionarNomeMesmoDocumento(){
+ const nome=document.getElementById('autorizacaoNome');
+ const n=String(nome?.value||'').trim();
+ const ultimo=[...listaAutorizacoesCumpridas].reverse().find(r=>!r.nc);
+ if(!n){alert('Digite ou selecione o nome do próximo interno.');nome?.focus();return;}
+ if(!ultimo){alert('Cadastre primeiro uma autorização usando “NOVA AUTORIZAÇÃO”.');nome?.focus();return;}
+ limparNcAutorizacoes();
+ const alvo=[...listaAutorizacoesCumpridas].reverse().find(r=>!r.nc);
+ alvo.nomes=Array.isArray(alvo.nomes)?alvo.nomes:[alvo.nome].filter(Boolean);
+ alvo.nomes.push(n);
+ if(nome)nome.value='';
+ // Mantém o mesmo detalhe/documento no campo para deixar claro a qual autorização pertence.
+ const detalhe=document.getElementById('autorizacaoDetalhe');if(detalhe)detalhe.value=alvo.detalhe||'';
+ renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();nome?.focus();
+}
+function excluirAutorizacaoCumprida(id){listaAutorizacoesCumpridas=listaAutorizacoesCumpridas.filter(r=>r.id!==id);if(!listaAutorizacoesCumpridas.length)listaAutorizacoesCumpridas=[{id:++seqAutorizacaoCumprida,nc:true,nomes:[],detalhe:''}];renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();}
 function renderAutorizacoesCumpridas(){
  const box=document.getElementById('autorizacoesCumpridasContainer');if(!box)return;
  const rows=listaAutorizacoesCumpridas.filter(r=>!r.nc);
  if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}
- box.innerHTML='<table><thead><tr><th style="width:42px">Nº</th><th>NOME DO INTERNO</th><th>AUTORIZAÇÃO / DETALHE</th><th class="no-print" style="width:85px">AÇÃO</th></tr></thead><tbody>'+rows.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(r.detalhe)}</td><td class="no-print"><button type="button" onclick="excluirAutorizacaoCumprida(${r.id})">Excluir</button></td></tr>`).join('')+'</tbody></table><p><strong>Total de autorizações cumpridas: '+rows.length+'</strong></p>';
+ let ordem=0, html='';
+ rows.forEach(r=>{
+  const nomes=Array.isArray(r.nomes)?r.nomes:[r.nome].filter(Boolean);
+  nomes.forEach((nome,j)=>{
+   const numero=j===0?String(++ordem).padStart(2,'0')+'. ':'&nbsp;&nbsp;&nbsp;&nbsp;';
+   html+=`<div class="autorizacao-linha"><span class="autorizacao-texto">${numero}${escHosp(nome)} - ${escHosp(r.detalhe)}</span>${j===0?`<button class="no-print" type="button" onclick="excluirAutorizacaoCumprida(${r.id})">Excluir documento</button>`:`<button class="no-print" type="button" onclick="excluirNomeAutorizacaoCumprida(${r.id},${j})">Excluir nome</button>`}</div>`;
+  });
+ });
+ box.innerHTML='<div class="autorizacoes-lista">'+html+'</div><p class="no-print"><strong>Total de documentos de autorização: '+rows.length+' | Total de internos: '+rows.reduce((n,r)=>n+(Array.isArray(r.nomes)?r.nomes.length:(r.nome?1:0)),0)+'</strong></p>';
+}
+function excluirNomeAutorizacaoCumprida(id, indice){
+ const r=listaAutorizacoesCumpridas.find(x=>x.id===id);if(!r)return;
+ r.nomes=Array.isArray(r.nomes)?r.nomes:[r.nome].filter(Boolean);r.nomes.splice(indice,1);
+ if(!r.nomes.length)listaAutorizacoesCumpridas=listaAutorizacoesCumpridas.filter(x=>x.id!==id);
+ if(!listaAutorizacoesCumpridas.length)listaAutorizacoesCumpridas=[{id:++seqAutorizacaoCumprida,nc:true,nomes:[],detalhe:''}];
+ renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();
 }
 function sincronizarAutorizacoesCumpridas(){
  const campo=document.getElementById('s29');if(!campo)return;
- const rows=listaAutorizacoesCumpridas.filter(r=>!r.nc);
- campo.value=rows.length?rows.map(r=>`${r.nome} - ${r.detalhe}`).join('\n'):'N/C.';
+ const rows=listaAutorizacoesCumpridas.filter(r=>!r.nc);let ordem=0, linhas=[];
+ rows.forEach(r=>{const nomes=Array.isArray(r.nomes)?r.nomes:[r.nome].filter(Boolean);nomes.forEach((nome,j)=>{linhas.push((j===0?String(++ordem).padStart(2,'0')+'. ':'    ')+nome+' - '+r.detalhe);});});
+ campo.value=linhas.length?linhas.join('\n'):'N/C.';
  campo.dispatchEvent(new Event('input',{bubbles:true}));campo.dispatchEvent(new Event('change',{bubbles:true}));
 }
 function carregarAutorizacoesCumpridas(valor){
- listaAutorizacoesCumpridas=[];
- const linhas=String(valor||'N/C.').split(/\n+/).map(x=>x.trim()).filter(Boolean);
- if(linhas.length&&!linhas.every(x=>/^N\/C\.?$/i.test(x)))linhas.forEach(l=>{const pos=l.indexOf(' - ');listaAutorizacoesCumpridas.push({id:++seqAutorizacaoCumprida,nome:pos>=0?l.slice(0,pos).trim():l,detalhe:pos>=0?l.slice(pos+3).trim():''});});
- if(!listaAutorizacoesCumpridas.length)listaAutorizacoesCumpridas=[{id:++seqAutorizacaoCumprida,nc:true,nome:'',detalhe:''}];
+ listaAutorizacoesCumpridas=[];seqAutorizacaoCumprida=0;
+ const linhas=String(valor||'N/C.').split(/\n+/).filter(x=>x.trim());
+ let atual=null;
+ linhas.forEach(l=>{
+  const indentado=/^\s+/.test(l);let conteudo=l.trim();
+  if(/^N\/C\.?$/i.test(conteudo))return;
+  const numerada=/^\d+\s*[.)º-]\s*/.test(conteudo);
+  conteudo=conteudo.replace(/^\d+\s*[.)º-]\s*/, '');
+  const pos=conteudo.indexOf(' - '), nome=pos>=0?conteudo.slice(0,pos).trim():conteudo, detalhe=pos>=0?conteudo.slice(pos+3).trim():'';
+  if((indentado||!numerada)&&atual){if(!atual.nomes.includes(nome))atual.nomes.push(nome);if(!atual.detalhe&&detalhe)atual.detalhe=detalhe;}
+  else {atual={id:++seqAutorizacaoCumprida,nomes:[nome],detalhe};listaAutorizacoesCumpridas.push(atual);}
+ });
+ if(!listaAutorizacoesCumpridas.length)listaAutorizacoesCumpridas=[{id:++seqAutorizacaoCumprida,nc:true,nomes:[],detalhe:''}];
  renderAutorizacoesCumpridas();
 }
 document.addEventListener('DOMContentLoaded',()=>{const campo=document.getElementById('s29');if(campo)carregarAutorizacoesCumpridas(campo.value||'N/C.');});
