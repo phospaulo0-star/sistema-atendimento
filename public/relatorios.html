@@ -758,7 +758,7 @@ function preencherViaturas(){
  if(!viaturas.length)viaturas=VIATURAS_PADRAO.map(r=>({...r}));
  renderViaturas();sincronizarViaturas();
 }
-function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca();if(typeof carregarLicencaJudicial==='function')carregarLicencaJudicial($('s27').value);if(typeof carregarRetornoLicencaJudicial==='function')carregarRetornoLicencaJudicial($('s28a').value)}
+function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca();if(typeof carregarLicencaJudicial==='function')carregarLicencaJudicial($('s27').value);if(typeof carregarRetornoLicencaJudicial==='function')carregarRetornoLicencaJudicial($('s28a').value);if(typeof lerDocumentosManuaisItem35==='function'){lerDocumentosManuaisItem35();renderEditorItem35()}}
 function lerItem01DoTexto(){const texto=$('s0').value||'';let recebe='',entrega='',quantidade='';const extras=[];texto.split('\n').forEach(linha=>{const m1=linha.match(/^\s*QUEM RECEBE O PLANTÃO:\s*(.*)$/i);const m2=linha.match(/^\s*QUEM ENTREGA O PLANTÃO:\s*(.*)$/i);const mq=linha.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*(\d*)\s*$/i);if(m1)recebe=m1[1].trim();else if(m2)entrega=m2[1].trim();else if(mq)quantidade=mq[1];else if(linha.trim())extras.push(linha)});$('recebePlantao').dataset.pendingName=recebe;$('entregaPlantao').dataset.pendingName=entrega;$('quantidadeCustodiados').value=quantidade;$('s0Extra').value=extras.join('\n');atualizarQuantidadeExtenso();aplicarSelecoesItem01()}
 function aplicarSelecoesItem01(){for(const id of ['recebePlantao','entregaPlantao']){const el=$(id);const pending=el.dataset.pendingName||'';if(pending&&![...el.options].some(o=>o.value===pending)){const op=document.createElement('option');op.value=pending;op.textContent=pending+' (nome salvo anteriormente)';el.appendChild(op)}if(pending)el.value=pending;delete el.dataset.pendingName}}
 function numeroPorExtenso(n){n=Number(n);if(!Number.isInteger(n)||n<0||n>999999999)return '';if(n===0)return 'zero';const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove'];const teen=['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];function a999(x){if(x===0)return '';if(x===100)return 'cem';if(x<10)return u[x];if(x<20)return teen[x-10];if(x<100)return d[Math.floor(x/10)]+(x%10?' e '+u[x%10]:'');return c[Math.floor(x/100)]+(x%100?' e '+a999(x%100):'')}const grupos=[];let x=n;while(x>0){grupos.unshift(x%1000);x=Math.floor(x/1000)}const partes=[];for(let i=0;i<grupos.length;i++){const g=grupos[i];if(!g)continue;const ordem=grupos.length-1-i;let parte=a999(g);if(ordem===1)parte=g===1?'mil':parte+' mil';else if(ordem===2)parte=g===1?'um milhão':parte+' milhões';else if(ordem===3)parte=g===1?'um bilhão':parte+' bilhões';partes.push(parte)}return partes.join(', ')}
@@ -1532,12 +1532,26 @@ let seqDocumentoItem35=0;
 function lerDocumentosManuaisItem35(){
  const el=document.getElementById('s34');
  const raw=String(el?.value||'').trim();
- const marcador=raw.match(/\[\[SAIDAS_7_DIAS=(\d*)\]\]/i);if(marcador)saidasSeteDiasItem35=marcador[1]||'';
- const docsMarcador=raw.match(/\[\[DOCS35=([^\]]*)\]\]/i);if(docsMarcador){try{const lista=JSON.parse(decodeURIComponent(docsMarcador[1]));if(Array.isArray(lista)){documentosManuaisItem35=lista.map(d=>({...d,id:Number(d.id)||++seqDocumentoItem35,ordemItem35:Number(d.ordemItem35)||novaOrdemDocumentoItem35()}));for(const d of documentosManuaisItem35){seqDocumentoItem35=Math.max(seqDocumentoItem35,Number(d.id)||0);seqOrdemDocumentoItem35=Math.max(seqOrdemDocumentoItem35,Number(d.ordemItem35)||0);}return;}}catch{}}
+ // Reinicia o estado antes de carregar outro relatório, para não misturar documentos entre relatórios.
+ documentosManuaisItem35=[];
+ saidasSeteDiasItem35='';
  if(!raw||/^N\/C\.?$/i.test(raw))return;
- // Recupera formatos antigos de texto, preservando cada linha como documento manual.
+ const marcador=raw.match(/\[\[SAIDAS_7_DIAS=(\d*)\]\]/i);
+ if(marcador)saidasSeteDiasItem35=marcador[1]||'';
+ const docsMarcador=raw.match(/\[\[DOCS35=([^\]]*)\]\]/i);
+ if(docsMarcador){
+  try{
+   const lista=JSON.parse(decodeURIComponent(docsMarcador[1]));
+   if(Array.isArray(lista)){
+    documentosManuaisItem35=lista.map(d=>({...d,id:Number(d.id)||++seqDocumentoItem35,ordemItem35:Number(d.ordemItem35)||novaOrdemDocumentoItem35()}));
+    for(const d of documentosManuaisItem35){seqDocumentoItem35=Math.max(seqDocumentoItem35,Number(d.id)||0);seqOrdemDocumentoItem35=Math.max(seqOrdemDocumentoItem35,Number(d.ordemItem35)||0);}
+    return;
+   }
+  }catch(e){console.warn('Não foi possível recuperar os documentos do Item 35:',e);}
+ }
+ // Compatibilidade com versões antigas que guardavam documentos como texto simples.
  for(const linha of raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)){
-  if(/^\[\[SAIDAS_7_DIAS=\d*\]\]$/i.test(linha))continue;
+  if(/^\[\[SAIDAS_7_DIAS=\d*\]\]$/i.test(linha)||/^\[\[DOCS35=/.test(linha))continue;
   const limpa=linha.replace(/^\s*(?:[•·▪●]|\d+[.)])\s*/,'').trim();
   if(!limpa||/^N\/C\.?$/i.test(limpa))continue;
   if(['Confere por Pavilhões','Listagem de Internos Ativos','Escalas Diurna e Noturna','Relatório Digital do Livro da Portaria II'].some(f=>f.toLocaleLowerCase('pt-BR')===limpa.toLocaleLowerCase('pt-BR')))continue;
