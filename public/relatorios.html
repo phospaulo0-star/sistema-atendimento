@@ -168,6 +168,8 @@
  .autorizacao-texto{display:block!important;flex:1 1 auto!important;min-width:0!important;font:inherit!important}
  .autorizacao-linha button{display:none!important}
 }
+
+.custody-editor-table{width:100%;border-collapse:collapse;table-layout:fixed;margin:8px 0}.custody-editor-table th,.custody-editor-table td{border:1px solid #888;padding:5px}.custody-editor-table th{background:#e7e7e7}.custody-editor-table input{width:100%;min-width:0;padding:7px;box-sizing:border-box}.custody-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}.custody-delete{padding:5px 8px!important}.custody-preview-table{width:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,sans-serif;font-size:9.5pt}.custody-preview-table th,.custody-preview-table td{border:1px solid #222;padding:4px;overflow-wrap:anywhere;vertical-align:top}.custody-preview-table th{background:#d9d9d9;text-align:center}.movement-page{break-before:page;page-break-before:always}.movement-page h2{text-align:center;font-size:13pt;margin:0 0 14px}.movement-page h3{font-size:11pt;margin:12px 0 5px}.movement-total{text-align:right;font-weight:bold;margin-top:5px}.movement-page table{break-inside:auto;page-break-inside:auto}.movement-page tr{break-inside:avoid;page-break-inside:avoid}
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -415,8 +417,8 @@
 <div id="autorizacoesCumpridasContainer" class="hospitalizado-visual"></div>
 <textarea id="s29" data-section="30 – AUTORIZAÇÕES CUMPRIDAS" rows="3" class="no-print" style="display:none">N/C.</textarea>
 </section>
-<section class="field"><label for="s30">31 – ENTRADA DE CUSTODIADOS</label><textarea id="s30" data-section="31 – ENTRADA DE CUSTODIADOS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s31">32 – SAÍDA DE CUSTODIADOS</label><textarea id="s31" data-section="32 – SAÍDA DE CUSTODIADOS" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field custody-table-field"><label>31 – ENTRADA DE CUSTODIADOS</label><p class="small">Preencha manualmente os quatro campos. O total é calculado automaticamente.</p><div id="entradaCustodiadosEditor"></div><div class="custody-actions no-print"><button type="button" onclick="adicionarMovimentacao('entrada')">＋ ADICIONAR ENTRADA</button><strong id="totalEntradasEditor">TOTAL DE ENTRADAS: 0</strong></div><textarea id="s30" data-section="31 – ENTRADA DE CUSTODIADOS" rows="3" class="no-print" style="display:none"></textarea></section>
+<section class="field custody-table-field"><label>32 – SAÍDA DE CUSTODIADOS</label><p class="small">Pesquise o nome na listagem do Excel ou digite manualmente. O total é calculado automaticamente.</p><div id="saidaCustodiadosEditor"></div><div class="custody-actions no-print"><button type="button" onclick="adicionarMovimentacao('saida')">＋ ADICIONAR SAÍDA</button><strong id="totalSaidasEditor">TOTAL DE SAÍDAS: 0</strong></div><textarea id="s31" data-section="32 – SAÍDA DE CUSTODIADOS" rows="3" class="no-print" style="display:none"></textarea></section>
 <section class="field"><label for="s32">33 – CI SETOR TRABALHO</label><textarea id="s32" data-section="33 – CI SETOR TRABALHO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s33">34 – CI SETOR SEGURANÇA</label><textarea id="s33" data-section="34 – CI SETOR SEGURANÇA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s34">35 – DOCUMENTOS REPASSADOS À CHEFIA / SDV</label><textarea id="s34" data-section="35 – DOCUMENTOS REPASSADOS À CHEFIA / SDV" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -1305,6 +1307,17 @@ function visualizarRelatorio(targetId=null){
     let textoFinal=item.texto;
     if(is02) textoFinal=parseEquipe02(item.texto).map((r,i)=>`${i+1}.  ${r.funcao?r.funcao+': ':''}${r.nome}`).join('\n');
     else if(numerar) textoFinal=textoComNumeracao(item.texto);
+    if(titulo.startsWith('31 – ENTRADA DE CUSTODIADOS') || titulo.startsWith('32 – SAÍDA DE CUSTODIADOS')){
+      const tipo=titulo.startsWith('31')?'entrada':'saida';
+      const rows=lerMovimentacoes(tipo).filter(r=>r.nome||r.rgi||r.procedencia||r.documento);
+      const total=rows.length;
+      const trs=rows.map((r,i)=>`<tr><td style="text-align:center;width:6%">${i+1}</td><td>${esc(r.nome)}</td><td style="width:14%">${esc(r.rgi)}</td><td style="width:23%">${esc(r.procedencia)}</td><td style="width:25%">${esc(r.documento)}</td></tr>`).join('');
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table"><colgroup><col style="width:6%"><col style="width:32%"><col style="width:14%"><col style="width:23%"><col style="width:25%"></colgroup><thead><tr><th>Nº</th><th>NOME</th><th>RGI</th><th>PROCEDÊNCIA</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}</div></section>`;
+    }
+    if(titulo.startsWith('35 – DOCUMENTOS REPASSADOS À CHEFIA')){
+      const docs=montarDocumentosItem35(item.texto);
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div class="preview-text">${esc(docs||'N/C.')}</div></section>`;
+    }
     if(titulo.startsWith('17')){
       const linhas=String(item.texto||'').split(/\r?\n/).filter(l=>l.trim()&&!/^N\/C\.?$/i.test(l.trim()));
       const rows=linhas.map(l=>{const p=l.split('\t');return `<tr><td style="border:1px solid #222;padding:4px;background:#d9d9d9;vertical-align:middle;overflow-wrap:anywhere">${esc((p[0]||'').trim())}</td><td style="border:1px solid #222;padding:4px;vertical-align:middle;overflow-wrap:anywhere;white-space:pre-line">${esc(p.slice(1).join('\t').trim())}</td></tr>`}).join('');
@@ -1362,9 +1375,10 @@ function visualizarRelatorio(targetId=null){
     }
     return `<section class="preview-section${titulo.startsWith('01')?' item01-justified':''}"><h3>${esc(item.titulo)}:</h3><div class="preview-text${is02?' team02-print':''}">${esc(textoFinal)}</div></section>`
   }).join(''):'<p>Nenhuma seção foi preenchida ainda.</p>';
+  const paginaMovimentacao=(!targetId)?gerarPaginaMovimentacao(dataExtenso):'';
   const rodape=`<div class="preview-footer">Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS<br>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</div></div>`;
   const botaoRetorno=targetId?`<div class="preview-return-wrap" style="margin:12px 0;text-align:center"><button type="button" class="primary" onclick="voltarEdicaoItem('${targetId}')">✏️ VOLTAR À EDIÇÃO DESTE ITEM</button></div>`:'';
-  $('previewContent').innerHTML=cabecalho+corpo+botaoRetorno+rodape;
+  $('previewContent').innerHTML=cabecalho+corpo+paginaMovimentacao+botaoRetorno+rodape;
   $('editor').classList.add('hidden');
   $('previewPanel').classList.remove('hidden');
   document.body.classList.add('preview-mode');
@@ -1376,10 +1390,37 @@ function voltarEdicao(){
   $('editor').classList.remove('hidden');
   $('editor').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+// Itens 31/32: tabelas editáveis, totais e integração com Item 35 e página final.
+let movimentacoesCustodiados={entrada:[{nome:'',rgi:'',procedencia:'',documento:''}],saida:[{nome:'',rgi:'',procedencia:'',documento:''}]};
+function escMov(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function lerMovimentacoes(tipo){const el=document.getElementById(tipo==='entrada'?'s30':'s31');if(!el)return movimentacoesCustodiados[tipo]||[];const raw=String(el.value||'').trim();if(!raw)return movimentacoesCustodiados[tipo]||[];try{const parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed;}catch{}return movimentacoesCustodiados[tipo]||[];}
+function sincronizarMovimentacoes(tipo,avisar=true){const el=document.getElementById(tipo==='entrada'?'s30':'s31');if(el)el.value=JSON.stringify(movimentacoesCustodiados[tipo]);const total=movimentacoesCustodiados[tipo].filter(r=>r.nome||r.rgi||r.procedencia||r.documento).length;const out=document.getElementById(tipo==='entrada'?'totalEntradasEditor':'totalSaidasEditor');if(out)out.textContent=`TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}`;if(avisar&&typeof changed==='function')changed();}
+function renderMovimentacoes(tipo){const box=document.getElementById(tipo==='entrada'?'entradaCustodiadosEditor':'saidaCustodiadosEditor');if(!box)return;const rows=movimentacoesCustodiados[tipo];const cols=[['nome','NOME'],['rgi','RGI'],['procedencia','PROCEDÊNCIA'],['documento','DOCUMENTO']];box.innerHTML=`<table class="custody-editor-table"><thead><tr><th style="width:35px">Nº</th>${cols.map(c=>`<th>${c[1]}</th>`).join('')}<th style="width:66px">AÇÃO</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td>${cols.map(c=>`<td><input ${tipo==='saida'&&c[0]==='nome'?'list="listaInternosCompartilhada" autocomplete="off"':''} aria-label="${c[1]} ${i+1}" value="${escMov(r[c[0]])}" oninput="alterarMovimentacao('${tipo}',${i},'${c[0]}',this.value)"></td>`).join('')}<td><button class="custody-delete" type="button" onclick="excluirMovimentacao('${tipo}',${i})">Excluir</button></td></tr>`).join('')}</tbody></table>`;}
+function alterarMovimentacao(tipo,i,campo,valor){if(!movimentacoesCustodiados[tipo][i])return;movimentacoesCustodiados[tipo][i][campo]=valor;sincronizarMovimentacoes(tipo);}
+function adicionarMovimentacao(tipo){movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:''});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
+function excluirMovimentacao(tipo,i){movimentacoesCustodiados[tipo].splice(i,1);if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:''});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
+function prepararMovimentacoes(){for(const tipo of ['entrada','saida']){const id=tipo==='entrada'?'s30':'s31';const el=document.getElementById(id);if(el&&el.value.trim()){try{const val=JSON.parse(el.value);if(Array.isArray(val))movimentacoesCustodiados[tipo]=val;}catch{}}if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo]=[{nome:'',rgi:'',procedencia:'',documento:''}];renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo,false);}}
+function montarDocumentosItem35(textoBase){
+ const fixos=['Confere por Pavilhões','Listagem de Internos Ativos','Escalas Diurna e Noturna','Relatório Digital do Livro da Portaria II'];
+ const manual=String(textoBase||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).filter(x=>!/^N\/C\.?$/i.test(x));
+ // Conserva a lista fixa, e tudo que foi digitado abaixo dela, na ordem original.
+ const encontrados=[];let iniciouExtras=false;
+ for(const linha of manual){const limpa=linha.replace(/^\d+[.)]\s*/,'').trim();if(fixos.some(f=>f.toLocaleLowerCase('pt-BR')===limpa.toLocaleLowerCase('pt-BR'))){if(!encontrados.some(x=>x.toLocaleLowerCase('pt-BR')===limpa.toLocaleLowerCase('pt-BR')))encontrados.push(limpa);if(limpa===fixos[3])iniciouExtras=true;}else if(iniciouExtras){encontrados.push(limpa);}}
+ for(const f of fixos){if(!encontrados.some(x=>x.toLocaleLowerCase('pt-BR')===f.toLocaleLowerCase('pt-BR'))){if(f===fixos[3]){encontrados.push(f);iniciouExtras=true;}else encontrados.splice(Math.min(fixos.indexOf(f),encontrados.length),0,f);}}
+ const auto=[];for(const tipo of ['entrada','saida'])for(const r of lerMovimentacoes(tipo)){const d=String(r.documento||'').trim();if(d&&!auto.some(x=>x.toLocaleLowerCase('pt-BR')===d.toLocaleLowerCase('pt-BR')))auto.push(d);}
+ for(const d of auto){if(!encontrados.some(x=>x.toLocaleLowerCase('pt-BR')===d.toLocaleLowerCase('pt-BR')))encontrados.push(d);}
+ return encontrados.map((x,i)=>`${i+1}. ${x}`).join('\n');
+}
+function gerarPaginaMovimentacao(dataExtenso){
+ const tabela=(tipo,titulo)=>{const rows=lerMovimentacoes(tipo).filter(r=>r.nome||r.rgi||r.procedencia||r.documento);const trs=rows.map((r,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${escMov(r.nome)}</td><td>${escMov(r.rgi)}</td><td>${escMov(r.procedencia)}</td><td>${escMov(r.documento)}</td></tr>`).join('');return `<h3>${titulo}</h3><table class="custody-preview-table"><colgroup><col style="width:6%"><col style="width:32%"><col style="width:14%"><col style="width:23%"><col style="width:25%"></colgroup><thead><tr><th>Nº</th><th>NOME</th><th>RGI</th><th>PROCEDÊNCIA</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${rows.length}</div>`;};
+ return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO DIA ${escMov(String(dataExtenso||'DATA NÃO INFORMADA').toLocaleUpperCase('pt-BR'))}</h2>${tabela('entrada','ENTRADA DE CUSTODIADOS')}${tabela('saida','SAÍDA DE CUSTODIADOS')}</section>`;
+}
+
 window.addEventListener('online',async()=>{state('Conexão retornou · sincronizando…');if(dirty)await salvar('salvar');await carregarLista()});window.addEventListener('beforeunload',e=>{if(dirty){localSave();e.preventDefault();e.returnValue=''}});
 async function sair(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}finally{location.replace('/login.html')}}
 instalarBotoesVisualizarItens();
-iniciar().then(() => { instalarBotoesVisualizarItens(); return carregarNomesHE(); });
+iniciar().then(() => { prepararMovimentacoes(); instalarBotoesVisualizarItens(); return carregarNomesHE(); });
 
 let vistoriasCela=[], vistoriaCelaSeq=0;
 function escVistoria(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
