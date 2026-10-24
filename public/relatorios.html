@@ -456,8 +456,20 @@
 <section class="field"><label for="s32">33 – CI SETOR TRABALHO</label><textarea id="s32" data-section="33 – CI SETOR TRABALHO" rows="2" placeholder="Deixe vazio para aparecer N/C. Digite somente o número da CI quando houver."></textarea><p class="small">Automático: campo vazio = N/C. Ao informar o número, será exibido CI N° [número]/26/ST/CPAIG/AGEPEN/MS. Não precisa de botão.</p></section>
 <section class="field"><label for="s33">34 – CI SETOR SEGURANÇA</label><textarea id="s33" data-section="34 – CI SETOR SEGURANÇA" rows="2" placeholder="Deixe vazio para aparecer N/C. Digite somente o número da CI quando houver."></textarea><p class="small">Automático: campo vazio = N/C. Ao informar o número, será exibido CI N° [número]/SEG/CPAIG/AGEPEN/MS/26. Não precisa de botão.</p></section>
 <section class="field item35-field"><label for="s34">35 – DOCUMENTOS REPASSADOS À CHEFIA / SDV</label><p class="small">Os quatro documentos padrões aparecem automaticamente. Cadastre documentos adicionais preenchendo os dois campos: documento e complemento.</p><div id="item35Editor" class="item35-editor"></div><div class="toolbar no-print item35-add-row"><button type="button" onclick="adicionarDocumentoItem35()">＋ ADICIONAR DOCUMENTO</button></div><textarea id="s34" data-section="35 – DOCUMENTOS REPASSADOS À CHEFIA / SDV" rows="3" class="no-print" style="display:none"></textarea></section>
-<section class="field"><label for="s35">36 – MATERIAL REPASSADO PARA CHEFIA</label><textarea id="s35" data-section="36 – MATERIAL REPASSADO PARA CHEFIA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
-<section class="field"><label for="s36">37 – MATERIAL RECEBIDO DA CHEFIA</label><textarea id="s36" data-section="37 – MATERIAL RECEBIDO DA CHEFIA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field item36-field">
+<label>36 – MATERIAL REPASSADO PARA CHEFIA</label>
+<p class="small">Escolha material vinculado a interno para preencher nome, cela e pavilhão pelo Excel, ou material/documento sem interno para descrever livremente.</p>
+<div id="item36Container"></div>
+<div class="toolbar no-print" style="margin-top:8px"><button type="button" onclick="adicionarItem36()">＋ ADICIONAR MATERIAL REPASSADO</button></div>
+<textarea id="s35" data-section="36 – MATERIAL REPASSADO PARA CHEFIA" rows="3" class="no-print" style="display:none">N/C.</textarea>
+</section>
+<section class="field item37-field">
+<label>37 – MATERIAL RECEBIDO DA CHEFIA</label>
+<p class="small">Cadastre cada material recebido em um campo separado. A lista será numerada automaticamente na visualização e na impressão.</p>
+<div id="item37Container"></div>
+<div class="toolbar no-print" style="margin-top:8px"><button type="button" onclick="adicionarItem37()">＋ ADICIONAR MATERIAL RECEBIDO</button></div>
+<textarea id="s36" data-section="37 – MATERIAL RECEBIDO DA CHEFIA" rows="3" class="no-print" style="display:none">N/C.</textarea>
+</section>
 <section class="field"><label for="s37">38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE</label><textarea id="s37" data-section="38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s38">39 – INFORMAÇÕES</label><textarea id="s38" data-section="39 – INFORMAÇÕES" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s39">40 – ENCERRAMENTO</label><textarea id="s39" data-section="40 – ENCERRAMENTO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section></div></section>
@@ -584,6 +596,80 @@ function selecionarNomeEscalaNoturna(i,nome){if(!escalaNoturnaLinhas[i])return;e
 function editarNomeEscalaNoturna(i,nome){if(!escalaNoturnaLinhas[i])return;escalaNoturnaLinhas[i].nome=nome;sincronizarEscalaNoturna()}
 function adicionarLinhaEscalaNoturna(){const n=escalaNoturnaLinhas.length+1;escalaNoturnaLinhas.push({turno:n+'º TURNO',horario:'',nome:''});renderEscalaNoturna();sincronizarEscalaNoturna()}
 function excluirLinhaEscalaNoturna(i){escalaNoturnaLinhas.splice(i,1);renderEscalaNoturna();sincronizarEscalaNoturna()}
+// Itens 36 e 37 — registros estruturados, numerados e persistidos nos campos data-section.
+let listaItem36=[];
+let listaItem37=[];
+let seqItem36=0;
+let seqItem37=0;
+function campoInterno(interno, candidatos){
+ if(!interno)return '';
+ const normalizarChave=k=>String(k||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+ const mapa=new Map(Object.keys(interno).map(k=>[normalizarChave(k),interno[k]]));
+ for(const nome of candidatos){const v=mapa.get(normalizarChave(nome));if(v!=null&&String(v).trim())return String(v).trim();}
+ return '';
+}
+function nomeBaseInterno(x){return x?(x.nome||x.nome_interno||x.NOME||x.nomeCompleto||x.NOME_COMPLETO||''):'';}
+function dadosLocalizacaoInterno(x){return {
+ nome:nomeBaseInterno(x),
+ cela:campoInterno(x,['cela','cel','n_cela','numero_cela','cela_atual','cela do interno','cela atual']),
+ pavilhao:campoInterno(x,['pavilhao','pavilhão','pav','bloco','pavilhao_atual','pavilhão atual','pavilhao do interno'])
+};}
+function resolverInternoItem36(nome){
+ const exato=nomeInternoSelecionado(nome);if(exato)return exato;
+ const q=normalizarNomeInterno(nome);if(!q)return null;
+ const achados=baseInternosCompartilhada.filter(x=>normalizarNomeInterno(nomeBaseInterno(x)).startsWith(q));
+ return achados.length===1?achados[0]:null;
+}
+function carregarItem36DoTexto(valor){
+ const bruto=String(valor||'').trim();let dados=[];
+ if(bruto&&!/^N\/C\.?$/i.test(bruto)){
+  try{const x=JSON.parse(bruto);if(Array.isArray(x))dados=x;}catch{}
+  if(!dados.length){bruto.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach(l=>{const m=l.match(/^\s*\d+[.)]\s*01\s*\(um\)\s*ventilador\s*40\s*cm,\s*marca\s*(.*?)\s*-\s*interno\s*(.*?),\s*cela\s*(.*?)\s*do\s*pavilh[aã]o\s*["“]?(.+?)["”]?\.?$/i);if(m)dados.push({id:++seqItem36,marca:m[1],nome:m[2],cela:m[3],pavilhao:m[4]});else dados.push({id:++seqItem36,marca:'',nome:l.replace(/^\s*\d+[.)]\s*/,''),cela:'',pavilhao:''});});}
+ }
+ listaItem36=dados.map(r=>({id:r.id||++seqItem36,tipo:r.tipo||((r.nome||r.marca||r.cela||r.pavilhao)?'interno':'livre'),descricao:r.descricao||'',marca:r.marca||'',nome:r.nome||'',cela:r.cela||'',pavilhao:r.pavilhao||''}));
+ if(!listaItem36.length)listaItem36=[{id:++seqItem36,tipo:'interno',descricao:'',marca:'',nome:'',cela:'',pavilhao:''}];
+ renderItem36();
+}
+function renderItem36(){
+ const c=$('item36Container');if(!c)return;c.innerHTML='';
+ listaItem36.forEach((r,i)=>{
+  const box=document.createElement('div');box.className='item36-row';box.style.cssText='border:1px solid #cbd5e1;border-radius:8px;padding:10px;margin:8px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px';
+  const modeWrap=document.createElement('div');modeWrap.style.gridColumn='1/-1';const modeLabel=document.createElement('label');modeLabel.textContent='TIPO DE CADASTRO';modeLabel.style.fontSize='12px';const mode=document.createElement('select');mode.style.width='100%';mode.innerHTML='<option value="interno">Material vinculado a interno</option><option value="livre">Material / documento sem interno</option>';mode.value=r.tipo||'interno';mode.addEventListener('change',()=>{r.tipo=mode.value;renderItem36();sincronizarItem36()});modeWrap.append(modeLabel,mode);
+  const make=(label,field,placeholder='',readonly=false)=>{const wrap=document.createElement('div');const lab=document.createElement('label');lab.textContent=label;lab.style.fontSize='12px';const inp=document.createElement('input');inp.type='text';inp.value=r[field]||'';inp.placeholder=placeholder;inp.autocomplete='off';inp.style.width='100%';if(readonly){inp.readOnly=true;inp.classList.add('readonly-field');}inp.addEventListener('input',()=>{r[field]=inp.value;sincronizarItem36();});wrap.append(lab,inp);return {wrap,inp};};
+  const descricao=make('DESCRIÇÃO LIVRE DO MATERIAL / DOCUMENTO','descricao','Ex.: 02 cadeiras de escritório');
+  const marca=make('MARCA / COMPLEMENTO','marca','Digite a marca livremente');
+  const nome=make('NOME DO INTERNO','nome','Busque pelo primeiro nome no Excel');nome.inp.setAttribute('list','listaInternosCompartilhada');
+  nome.inp.addEventListener('change',()=>atualizarLocalizacaoItem36(r,nome.inp.value));
+  nome.inp.addEventListener('blur',()=>atualizarLocalizacaoItem36(r,nome.inp.value));
+  const cela=make('CELA (AUTOMÁTICA DO EXCEL)','cela','Preenchimento automático',true);
+  const pav=make('PAVILHÃO (AUTOMÁTICO DO EXCEL)','pavilhao','Preenchimento automático',true);
+  const livre=(r.tipo==='livre');descricao.wrap.style.display=livre?'block':'none';marca.wrap.style.display=livre?'none':'block';nome.wrap.style.display=livre?'none':'block';cela.wrap.style.display=livre?'none':'block';pav.wrap.style.display=livre?'none':'block';
+  const acoes=document.createElement('div');acoes.style.cssText='grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px';
+  const resumo=document.createElement('span');resumo.className='small';resumo.textContent=`Cadastro ${i+1}`;
+  const del=document.createElement('button');del.type='button';del.className='red';del.textContent='EXCLUIR';del.addEventListener('click',()=>excluirItem36(i));acoes.append(resumo,del);
+  box.append(modeWrap,descricao.wrap,marca.wrap,nome.wrap,cela.wrap,pav.wrap,acoes);c.append(box);
+ });
+}
+function atualizarLocalizacaoItem36(r,nome){
+ const x=resolverInternoItem36(nome);if(x){const d=dadosLocalizacaoInterno(x);r.nome=d.nome||nome;r.cela=d.cela;r.pavilhao=d.pavilhao;}
+ else{r.nome=nome;r.cela='';r.pavilhao='';}
+ renderItem36();sincronizarItem36();
+}
+function adicionarItem36(){if(listaItem36.length===1&&!listaItem36[0].marca&&!listaItem36[0].nome&&!listaItem36[0].cela&&!listaItem36[0].pavilhao&&!listaItem36[0].descricao)listaItem36=[];listaItem36.push({id:++seqItem36,tipo:'interno',descricao:'',marca:'',nome:'',cela:'',pavilhao:''});renderItem36();sincronizarItem36();}
+function excluirItem36(i){listaItem36.splice(i,1);if(!listaItem36.length)listaItem36=[{id:++seqItem36,tipo:'interno',descricao:'',marca:'',nome:'',cela:'',pavilhao:''}];renderItem36();sincronizarItem36();}
+function sincronizarItem36(){const rows=listaItem36.filter(r=>String(r.descricao||'').trim()||String(r.marca||'').trim()||String(r.nome||'').trim()||String(r.cela||'').trim()||String(r.pavilhao||'').trim()).map(r=>({...r,tipo:r.tipo||'interno'}));$('s35').value=rows.length?JSON.stringify(rows):'N/C.';changed();}
+function carregarItem37DoTexto(valor){
+ const bruto=String(valor||'').trim();let dados=[];
+ if(bruto&&!/^N\/C\.?$/i.test(bruto)){try{const x=JSON.parse(bruto);if(Array.isArray(x))dados=x;}catch{}if(!dados.length)dados=bruto.split(/\r?\n/).map(l=>l.replace(/^\s*\d+[.)]\s*/, '').trim()).filter(Boolean).map(texto=>({id:++seqItem37,texto}));}
+ listaItem37=dados.map(r=>({id:r.id||++seqItem37,texto:r.texto||''}));if(!listaItem37.length)listaItem37=[{id:++seqItem37,texto:''}];renderItem37();
+}
+function renderItem37(){const c=$('item37Container');if(!c)return;c.innerHTML='';listaItem37.forEach((r,i)=>{const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin:8px 0';const wrap=document.createElement('div');const lab=document.createElement('label');lab.textContent=`MATERIAL RECEBIDO Nº ${i+1}`;lab.style.fontSize='12px';const input=document.createElement('input');input.type='text';input.value=r.texto||'';input.placeholder='Descreva o material ou documento recebido';input.style.width='100%';input.addEventListener('input',()=>{r.texto=input.value;sincronizarItem37();});wrap.append(lab,input);const del=document.createElement('button');del.type='button';del.className='red';del.textContent='EXCLUIR';del.addEventListener('click',()=>excluirItem37(i));row.append(wrap,del);c.append(row);});}
+function adicionarItem37(){if(listaItem37.length===1&&!listaItem37[0].texto.trim())listaItem37=[];listaItem37.push({id:++seqItem37,texto:''});renderItem37();sincronizarItem37();}
+function excluirItem37(i){listaItem37.splice(i,1);if(!listaItem37.length)listaItem37=[{id:++seqItem37,texto:''}];renderItem37();sincronizarItem37();}
+function sincronizarItem37(){const rows=listaItem37.filter(r=>String(r.texto||'').trim());$('s36').value=rows.length?JSON.stringify(rows):'N/C.';changed();}
+function textoItem36(valor){let rows=[];try{const x=JSON.parse(String(valor||''));if(Array.isArray(x))rows=x;}catch{}rows=rows.filter(r=>r.descricao||r.marca||r.nome||r.cela||r.pavilhao);if(!rows.length)return 'N/C.';return rows.map((r,i)=>r.tipo==='livre'?`${i+1}. ${String(r.descricao||'').trim()}`:`${i+1}. 01 (um) ventilador 40 cm, marca ${String(r.marca||'').trim()||'XXX'} - interno ${String(r.nome||'').trim()||'YYY'}, cela ${String(r.cela||'').trim()||'ZZZ'} do pavilhão "${String(r.pavilhao||'').trim()||'W'}".`).join('\n');}
+function textoItem37(valor){let rows=[];try{const x=JSON.parse(String(valor||''));if(Array.isArray(x))rows=x;}catch{}rows=rows.map(r=>String(r.texto||'').trim()).filter(Boolean);if(!rows.length)return 'N/C.';return rows.map((t,i)=>`${i+1}. ${t}`).join('\n');}
+
 function formContent(){const out={};document.querySelectorAll('[data-section]').forEach(el=>out[el.dataset.section]=el.value);return out}
 const PADROES_RELATORIO={
   '25 – HOSPITALIZADO':'N/C.',
@@ -604,6 +690,7 @@ const PADROES_RELATORIO={
   '21 – SIAPEN':'• N/C.',
   '22 – SIGO':'• N/C.',
   '23 – SISTEMA DE MONITORAMENTO':'• N/C.',
+  '36 – MATERIAL REPASSADO PARA CHEFIA':'N/C.',
   '37 – MATERIAL RECEBIDO DA CHEFIA':'N/C.'
 };
 let reforcoLinhas=[];
@@ -758,7 +845,7 @@ function preencherViaturas(){
  if(!viaturas.length)viaturas=VIATURAS_PADRAO.map(r=>({...r}));
  renderViaturas();sincronizarViaturas();
 }
-function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca();if(typeof carregarLicencaJudicial==='function')carregarLicencaJudicial($('s27').value);if(typeof carregarRetornoLicencaJudicial==='function')carregarRetornoLicencaJudicial($('s28a').value);if(typeof carregarTemporaria==='function'){carregarTemporaria($('s28').value,false);carregarTemporaria($('s29a').value,true);renderLicencaTemporaria();renderRetornoTemporaria();renderVisualTemporaria()}if(typeof carregarAutorizacoesCumpridas==='function')carregarAutorizacoesCumpridas($('s29').value);if(typeof lerDocumentosManuaisItem35==='function'){lerDocumentosManuaisItem35();renderEditorItem35()}}
+function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca();if(typeof carregarLicencaJudicial==='function')carregarLicencaJudicial($('s27').value);if(typeof carregarRetornoLicencaJudicial==='function')carregarRetornoLicencaJudicial($('s28a').value);if(typeof carregarItem36DoTexto==='function')carregarItem36DoTexto($('s35').value);if(typeof carregarItem37DoTexto==='function')carregarItem37DoTexto($('s36').value);if(typeof lerDocumentosManuaisItem35==='function'){lerDocumentosManuaisItem35();renderEditorItem35()}}
 function lerItem01DoTexto(){const texto=$('s0').value||'';let recebe='',entrega='',quantidade='';const extras=[];texto.split('\n').forEach(linha=>{const m1=linha.match(/^\s*QUEM RECEBE O PLANTÃO:\s*(.*)$/i);const m2=linha.match(/^\s*QUEM ENTREGA O PLANTÃO:\s*(.*)$/i);const mq=linha.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*(\d*)\s*$/i);if(m1)recebe=m1[1].trim();else if(m2)entrega=m2[1].trim();else if(mq)quantidade=mq[1];else if(linha.trim())extras.push(linha)});$('recebePlantao').dataset.pendingName=recebe;$('entregaPlantao').dataset.pendingName=entrega;$('quantidadeCustodiados').value=quantidade;$('s0Extra').value=extras.join('\n');atualizarQuantidadeExtenso();aplicarSelecoesItem01()}
 function aplicarSelecoesItem01(){for(const id of ['recebePlantao','entregaPlantao']){const el=$(id);const pending=el.dataset.pendingName||'';if(pending&&![...el.options].some(o=>o.value===pending)){const op=document.createElement('option');op.value=pending;op.textContent=pending+' (nome salvo anteriormente)';el.appendChild(op)}if(pending)el.value=pending;delete el.dataset.pendingName}}
 function numeroPorExtenso(n){n=Number(n);if(!Number.isInteger(n)||n<0||n>999999999)return '';if(n===0)return 'zero';const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove'];const teen=['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];function a999(x){if(x===0)return '';if(x===100)return 'cem';if(x<10)return u[x];if(x<20)return teen[x-10];if(x<100)return d[Math.floor(x/10)]+(x%10?' e '+u[x%10]:'');return c[Math.floor(x/100)]+(x%100?' e '+a999(x%100):'')}const grupos=[];let x=n;while(x>0){grupos.unshift(x%1000);x=Math.floor(x/1000)}const partes=[];for(let i=0;i<grupos.length;i++){const g=grupos[i];if(!g)continue;const ordem=grupos.length-1-i;let parte=a999(g);if(ordem===1)parte=g===1?'mil':parte+' mil';else if(ordem===2)parte=g===1?'um milhão':parte+' milhões';else if(ordem===3)parte=g===1?'um bilhão':parte+' bilhões';partes.push(parte)}return partes.join(', ')}
@@ -1434,6 +1521,14 @@ function visualizarRelatorio(targetId=null){
       const trs=rows.map((r,i)=>`<tr><td style="text-align:center;width:6%">${i+1}</td><td>${esc(r.nome)}</td><td style="width:14%">${esc(r.rgi)}</td><td style="width:23%">${esc(r.procedencia)}</td><td style="width:25%">${esc(r.documento)}</td></tr>`).join('');
       return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table"><colgroup><col style="width:6%"><col style="width:32%"><col style="width:14%"><col style="width:23%"><col style="width:25%"></colgroup><thead><tr><th>Nº</th><th>NOME</th><th>RGI</th><th>${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}</div></section>`;
     }
+    if(titulo.startsWith('36 – MATERIAL REPASSADO PARA CHEFIA')){
+      const texto=textoItem36(item.texto);
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div class="preview-text" style="white-space:pre-line">${esc(texto)}</div></section>`;
+    }
+    if(titulo.startsWith('37 – MATERIAL RECEBIDO DA CHEFIA')){
+      const texto=textoItem37(item.texto);
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div class="preview-text" style="white-space:pre-line">${esc(texto)}</div></section>`;
+    }
     if(titulo.startsWith('35 – DOCUMENTOS REPASSADOS À CHEFIA')){
       const docs=montarDocumentosItem35(item.texto);
       return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div class="preview-text documentos-item35">${docs||'<strong>N/C.</strong>'}</div></section>`;
@@ -1696,6 +1791,7 @@ async function carregarBaseInternosCompartilhada(){
   const resposta=await api('/api/internals/base');
   baseInternosCompartilhada=Array.isArray(resposta.items)?resposta.items:(Array.isArray(resposta)?resposta:[]);
   atualizarSugestoesInternos('');
+  if(typeof renderItem36==='function')renderItem36();
  }catch(e){
   // A edição manual continua disponível se a base não puder ser carregada.
   console.warn('Não foi possível carregar a base compartilhada de internos:',e.message);
