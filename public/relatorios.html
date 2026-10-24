@@ -191,7 +191,11 @@
 #licencaJudicialContainer .retorno-hosp-row>div,#retornoLicencaJudicialContainer .retorno-hosp-row>div{overflow:hidden;min-width:0}
 #licencaJudicialContainer .retorno-hosp-row>div:last-child{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:4px}
 #licencaJudicialContainer .retorno-hosp-row>div:last-child button,#retornoLicencaJudicialContainer .retorno-hosp-row>div:last-child button{white-space:normal;overflow-wrap:anywhere;font-size:11px;padding:6px}
-#editor .field:has(#licencaJudicialContainer),#editor .field:has(#retornoLicencaJudicialContainer){min-width:0;overflow:visible}
+#editor .field:has(#licencaJudicialContainer),#editor .field:has(#retornoLicencaJudicialContainer){min-width:0;max-width:100%;overflow:hidden;position:relative}
+#licencaJudicialContainer .retorno-hosp-row>div:last-child{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+#licencaJudicialContainer .retorno-hosp-row>div:last-child button{max-width:100%;white-space:normal;line-height:1.2}
+#editor .grid>.field:has(#licencaJudicialContainer){grid-column:1 / -1}
+#editor .grid>.field:has(#retornoLicencaJudicialContainer){grid-column:1 / -1}
 .item35-editor{display:grid;gap:8px;margin:8px 0}
 .item35-row{display:grid;grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) auto;gap:8px;align-items:end;border:1px solid var(--line);border-radius:7px;padding:8px;background:#fafafa}
 .item35-row label{font-size:12px!important;margin-bottom:4px!important}
@@ -1440,7 +1444,7 @@ function lerMovimentacoes(tipo){const el=document.getElementById(tipo==='entrada
 function sincronizarMovimentacoes(tipo,avisar=true){const el=document.getElementById(tipo==='entrada'?'s30':'s31');if(el)el.value=JSON.stringify(movimentacoesCustodiados[tipo]);const total=movimentacoesCustodiados[tipo].filter(r=>r.nome||r.rgi||r.procedencia||r.documento).length;const out=document.getElementById(tipo==='entrada'?'totalEntradasEditor':'totalSaidasEditor');if(out)out.textContent=`TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}`;if(avisar&&typeof changed==='function')changed();}
 function renderMovimentacoes(tipo){const box=document.getElementById(tipo==='entrada'?'entradaCustodiadosEditor':'saidaCustodiadosEditor');if(!box)return;const rows=movimentacoesCustodiados[tipo];const cols=[['nome','NOME'],['rgi','RGI'],['procedencia',tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'],['documento','DOCUMENTO']];box.innerHTML=`<table class="custody-editor-table"><thead><tr><th style="width:35px">Nº</th>${cols.map(c=>`<th>${c[1]}</th>`).join('')}<th style="width:66px">AÇÃO</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td>${cols.map(c=>`<td><input ${tipo==='saida'&&c[0]==='nome'?'list="listaInternosCompartilhada" autocomplete="off"':''} aria-label="${c[1]} ${i+1}" value="${escMov(r[c[0]])}" oninput="alterarMovimentacao('${tipo}',${i},'${c[0]}',this.value)" ${tipo==='saida'&&c[0]==='nome'?`onchange="selecionarNomeMovimentacao(${i},this.value)"`:''}></td>`).join('')}<td><button class="custody-delete" type="button" onclick="excluirMovimentacao('${tipo}',${i})">Excluir</button></td></tr>`).join('')}</tbody></table>`;}
 function selecionarNomeMovimentacao(i,valor){alterarMovimentacao('saida',i,'nome',valor);renderMovimentacoes('saida');}
-function alterarMovimentacao(tipo,i,campo,valor){if(!movimentacoesCustodiados[tipo][i])return;const r=movimentacoesCustodiados[tipo][i];r[campo]=valor;if(tipo==='saida'&&campo==='nome'){const interno=nomeInternoSelecionado(valor);if(interno){r.nome=interno.nome;r.rgi=String(interno.rgi||interno.RGI||interno.rgi_interno||'');}}sincronizarMovimentacoes(tipo);}
+function alterarMovimentacao(tipo,i,campo,valor){if(!movimentacoesCustodiados[tipo][i])return;const r=movimentacoesCustodiados[tipo][i];r[campo]=valor;if(tipo==='saida'&&campo==='nome'){const interno=nomeInternoSelecionado(valor);if(interno){r.nome=interno.nome||interno.nome_interno||interno.NOME||valor;r.rgi=rgiDoInterno(interno);}}sincronizarMovimentacoes(tipo);}
 function adicionarMovimentacao(tipo){movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:''});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
 function excluirMovimentacao(tipo,i){movimentacoesCustodiados[tipo].splice(i,1);if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:''});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
 function prepararMovimentacoes(){for(const tipo of ['entrada','saida']){const id=tipo==='entrada'?'s30':'s31';const el=document.getElementById(id);if(el&&el.value.trim()){try{const val=JSON.parse(el.value);if(Array.isArray(val))movimentacoesCustodiados[tipo]=val;}catch{}}if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo]=[{nome:'',rgi:'',procedencia:'',documento:''}];renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo,false);}}
@@ -1473,19 +1477,24 @@ function sincronizarEditorItem35(){
 }
 function renderEditorItem35(){
  const box=document.getElementById('item35Editor');if(!box)return;
- const fixos=['Confere por Pavilhões','Listagem de Internos Ativos','Escalas Diurna e Noturna','Relatório Digital do Livro da Portaria II'];
- box.innerHTML=fixos.map((f,i)=>`<div class="item35-row item35-fixo"><div><label>DOCUMENTO PADRÃO ${i+1}</label><input value="${escMov(f)}" readonly></div><div><label>COMPLEMENTO (OPCIONAL)</label><input value="" placeholder="Complemento opcional" oninput="atualizarComplementoFixoItem35(${i},this.value)"></div><div><span class="small">Padrão</span></div></div>`).join('')+documentosManuaisItem35.map((d,i)=>`<div class="item35-row"><div><label>DOCUMENTO (CAIXA ALTA E NEGRITO)</label><input value="${escMov(d.documento)}" placeholder="Digite o documento" oninput="alterarDocumentoItem35(${d.id},'documento',this.value)"></div><div><label>COMPLEMENTO (EDITÁVEL, SEM PADRÃO DE CAIXA ALTA/NEGRITO)</label><input value="${escMov(d.complemento)}" placeholder="Texto após o hífen" oninput="alterarDocumentoItem35(${d.id},'complemento',this.value)"></div><div><button type="button" class="red" onclick="excluirDocumentoItem35(${d.id})">Excluir</button></div></div>`).join('');
+ // A edição mostra somente o formulário de dois campos; documentos registrados aparecem
+ // apenas na visualização/impressão, evitando duplicação e poluição da área de edição.
+ box.innerHTML=`<div class="item35-row item35-cadastro"><div><label>DOCUMENTO (CAIXA ALTA E NEGRITO)</label><input id="item35NovoDocumento" placeholder="Digite o documento" autocomplete="off"></div><div><label>COMPLEMENTO (SEM CAIXA ALTA/NEGRITO)</label><input id="item35NovoComplemento" placeholder="Texto após o hífen" autocomplete="off"></div></div>`;
 }
 let complementosFixosItem35={};
 function atualizarComplementoFixoItem35(i,v){complementosFixosItem35[i]=v;sincronizarEditorItem35();}
-function adicionarDocumentoItem35(){documentosManuaisItem35.push({id:++seqDocumentoItem35,documento:'',complemento:''});renderEditorItem35();const box=document.getElementById('item35Editor');const inputs=box?.querySelectorAll('.item35-row input');inputs?.[inputs.length-2]?.focus();}
+function adicionarDocumentoItem35(){const doc=document.getElementById('item35NovoDocumento'),comp=document.getElementById('item35NovoComplemento');const documento=String(doc?.value||'').trim().toLocaleUpperCase('pt-BR'),complemento=String(comp?.value||'').trim();if(!documento){doc?.focus();return;}documentosManuaisItem35.push({id:++seqDocumentoItem35,documento,complemento});sincronizarEditorItem35();renderEditorItem35();const d=document.getElementById('item35NovoDocumento');if(d)d.focus();}
 function alterarDocumentoItem35(id,campo,valor){const d=documentosManuaisItem35.find(x=>x.id===id);if(!d)return;d[campo]=campo==='documento'?String(valor).toLocaleUpperCase('pt-BR'):valor;sincronizarEditorItem35();}
 function excluirDocumentoItem35(id){documentosManuaisItem35=documentosManuaisItem35.filter(x=>x.id!==id);renderEditorItem35();sincronizarEditorItem35();}
 function montarDocumentosItem35(textoBase){
  const fixos=['Confere por Pavilhões','Listagem de Internos Ativos','Escalas Diurna e Noturna','Relatório Digital do Livro da Portaria II'];
- const manual=String(textoBase||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).filter(x=>!/^N\/C\.?$/i.test(x));
+ // O textarea oculto é apenas persistência. Quando o editor estruturado está ativo,
+ // não releia suas linhas como novos documentos, pois isso duplicava os documentos.
  const extras=[];
- for(const linha of manual){const limpa=linha.replace(/^\s*(?:[•·▪●]|\d+[.)])\s*/,'').trim();if(!limpa)continue;if(fixos.some(f=>f.toLocaleLowerCase('pt-BR')===limpa.toLocaleLowerCase('pt-BR')))continue;if(/\s-\s(?:Entrada|Saída) de Custodiados\s-\s/i.test(limpa))continue;extras.push(limpa);}
+ if(!document.getElementById('item35Editor')){
+  const manual=String(textoBase||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).filter(x=>!/^N\/C\.?$/i.test(x));
+  for(const linha of manual){const limpa=linha.replace(/^\s*(?:[•·▪●]|\d+[.)])\s*/,'').trim();if(!limpa)continue;if(fixos.some(f=>f.toLocaleLowerCase('pt-BR')===limpa.toLocaleLowerCase('pt-BR')))continue;if(/\s-\s(?:Entrada|Saída) de Custodiados\s-\s/i.test(limpa))continue;extras.push(limpa);}
+ }
  const linhas=[];
  for(let i=0;i<fixos.length;i++){const complemento=String(complementosFixosItem35[i]||'').trim();linhas.push(`<div class="documento-item35-linha">• <strong>${esc(fixos[i])}</strong>${complemento?' - '+esc(complemento):''}</div>`);}
  for(const d of documentosManuaisItem35){const doc=String(d.documento||'').trim(),comp=String(d.complemento||'').trim();if(doc)linhas.push(`<div class="documento-item35-linha">• <strong>${esc(doc.toLocaleUpperCase('pt-BR'))}</strong>${comp?' - '+esc(comp):''}</div>`);}
@@ -1566,17 +1575,25 @@ function compararNomePrimeiroNome(a,b){
 }
 // Componente reutilizável: busca de internos pela base compartilhada do sistema.
 let baseInternosCompartilhada = [];
-function normalizarNomeInterno(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();}
+function normalizarNomeInterno(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
+function nomeInternoSelecionado(valor){
+ const alvo=normalizarNomeInterno(valor);if(!alvo)return null;
+ const exato=baseInternosCompartilhada.find(x=>normalizarNomeInterno(x.nome||x.nome_interno||x.NOME)===alvo);
+ if(exato)return exato;
+ const candidatos=baseInternosCompartilhada.filter(x=>normalizarNomeInterno(x.nome||x.nome_interno||x.NOME).startsWith(alvo));
+ return candidatos.length===1?candidatos[0]:null;
+}
+function rgiDoInterno(interno){if(!interno)return '';for(const k of ['rgi','RGI','rgi_interno','RGI_INTERNO','identificacao','identificação','matricula','matrícula']){if(interno[k]!=null&&String(interno[k]).trim())return String(interno[k]).trim();}return '';}
 async function carregarBaseInternosCompartilhada(){
  const lista=document.getElementById('listaInternosCompartilhada');
  if(!lista)return;
  try{
   const resposta=await api('/api/internals/base');
-  baseInternosCompartilhada=Array.isArray(resposta.items)?resposta.items:[];
+  baseInternosCompartilhada=Array.isArray(resposta.items)?resposta.items:(Array.isArray(resposta)?resposta:[]);
   lista.innerHTML=baseInternosCompartilhada
-   .filter(x=>x&&x.nome)
-   .sort((a,b)=>compararNomePrimeiroNome(a.nome,b.nome))
-   .map(x=>`<option value="${escHosp(x.nome)}"></option>`).join('');
+   .filter(x=>x&&(x.nome||x.nome_interno||x.NOME))
+   .sort((a,b)=>compararNomePrimeiroNome(a.nome||a.nome_interno||a.NOME,b.nome||b.nome_interno||b.NOME))
+   .map(x=>`<option value="${escHosp(x.nome||x.nome_interno||x.NOME)}"></option>`).join('');
  }catch(e){
   // A edição manual continua disponível se a base não puder ser carregada.
   console.warn('Não foi possível carregar a base compartilhada de internos:',e.message);
