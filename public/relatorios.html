@@ -419,7 +419,7 @@
 </section>
 <section class="field custody-table-field"><label>31 – ENTRADA DE CUSTODIADOS</label><p class="small">Preencha manualmente os quatro campos. O total é calculado automaticamente.</p><div id="entradaCustodiadosEditor"></div><div class="custody-actions no-print"><button type="button" onclick="adicionarMovimentacao('entrada')">＋ ADICIONAR ENTRADA</button><strong id="totalEntradasEditor">TOTAL DE ENTRADAS: 0</strong></div><textarea id="s30" data-section="31 – ENTRADA DE CUSTODIADOS" rows="3" class="no-print" style="display:none"></textarea></section>
 <section class="field custody-table-field"><label>32 – SAÍDA DE CUSTODIADOS</label><p class="small">Pesquise o nome na listagem do Excel ou digite manualmente. O total é calculado automaticamente.</p><div id="saidaCustodiadosEditor"></div><div class="custody-actions no-print"><button type="button" onclick="adicionarMovimentacao('saida')">＋ ADICIONAR SAÍDA</button><strong id="totalSaidasEditor">TOTAL DE SAÍDAS: 0</strong></div><textarea id="s31" data-section="32 – SAÍDA DE CUSTODIADOS" rows="3" class="no-print" style="display:none"></textarea></section>
-<section class="field"><label for="s32">33 – CI SETOR TRABALHO</label><textarea id="s32" data-section="33 – CI SETOR TRABALHO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
+<section class="field"><label for="s32">33 – CI SETOR TRABALHO</label><textarea id="s32" data-section="33 – CI SETOR TRABALHO" rows="2" placeholder="Deixe vazio para aparecer N/C. Digite somente o número da CI quando houver."></textarea><p class="small">Automático: campo vazio = N/C. Ao informar o número, será exibido CI N° [número]/26/ST/CPAIG/AGEPEN/MS. Não precisa de botão.</p></section>
 <section class="field"><label for="s33">34 – CI SETOR SEGURANÇA</label><textarea id="s33" data-section="34 – CI SETOR SEGURANÇA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s34">35 – DOCUMENTOS REPASSADOS À CHEFIA / SDV</label><textarea id="s34" data-section="35 – DOCUMENTOS REPASSADOS À CHEFIA / SDV" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
 <section class="field"><label for="s35">36 – MATERIAL REPASSADO PARA CHEFIA</label><textarea id="s35" data-section="36 – MATERIAL REPASSADO PARA CHEFIA" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section>
@@ -1305,6 +1305,12 @@ function visualizarRelatorio(targetId=null){
     const is02=titulo.startsWith('02');
     const numerar=['04','05','06','08','09'].some(n=>titulo.startsWith(n));
     let textoFinal=item.texto;
+    if(titulo.startsWith('33 – CI SETOR TRABALHO')){
+      const numero=String(item.texto||'').trim();
+      if(!numero || /^N\/C\.?$/i.test(numero)) textoFinal='N/C';
+      else if(/^CI\s*N[°º.]?\s*/i.test(numero)) textoFinal=numero;
+      else textoFinal=`CI N° ${numero}/26/ST/CPAIG/AGEPEN/MS`;
+    }
     if(is02) textoFinal=parseEquipe02(item.texto).map((r,i)=>`${i+1}.  ${r.funcao?r.funcao+': ':''}${r.nome}`).join('\n');
     else if(numerar) textoFinal=textoComNumeracao(item.texto);
     if(titulo.startsWith('31 – ENTRADA DE CUSTODIADOS') || titulo.startsWith('32 – SAÍDA DE CUSTODIADOS')){
