@@ -1438,16 +1438,17 @@ function voltarEdicao(){
 }
 
 // Itens 31/32: tabelas editáveis, totais e integração com Item 35 e página final.
-let movimentacoesCustodiados={entrada:[{nome:'',rgi:'',procedencia:'',documento:''}],saida:[{nome:'',rgi:'',procedencia:'',documento:''}]};
+let seqOrdemDocumentoItem35=0; function novaOrdemDocumentoItem35(){seqOrdemDocumentoItem35+=1;return seqOrdemDocumentoItem35;} function garantirOrdemDocumentoItem35(r){if(r && String(r.documento||'').trim() && !Number(r.ordemItem35)){r.ordemItem35=novaOrdemDocumentoItem35();}else if(r&&Number(r.ordemItem35)>seqOrdemDocumentoItem35){seqOrdemDocumentoItem35=Number(r.ordemItem35);}return r;}
+let movimentacoesCustodiados={entrada:[{nome:'',rgi:'',procedencia:'',documento:'',ordemItem35:0}],saida:[{nome:'',rgi:'',procedencia:'',documento:'',ordemItem35:0}]};
 function escMov(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function lerMovimentacoes(tipo){const el=document.getElementById(tipo==='entrada'?'s30':'s31');if(!el)return movimentacoesCustodiados[tipo]||[];const raw=String(el.value||'').trim();if(!raw)return movimentacoesCustodiados[tipo]||[];try{const parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed;}catch{}return movimentacoesCustodiados[tipo]||[];}
 function sincronizarMovimentacoes(tipo,avisar=true){const el=document.getElementById(tipo==='entrada'?'s30':'s31');if(el)el.value=JSON.stringify(movimentacoesCustodiados[tipo]);const total=movimentacoesCustodiados[tipo].filter(r=>r.nome||r.rgi||r.procedencia||r.documento).length;const out=document.getElementById(tipo==='entrada'?'totalEntradasEditor':'totalSaidasEditor');if(out)out.textContent=`TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}`;if(avisar&&typeof changed==='function')changed();}
 function renderMovimentacoes(tipo){const box=document.getElementById(tipo==='entrada'?'entradaCustodiadosEditor':'saidaCustodiadosEditor');if(!box)return;const rows=movimentacoesCustodiados[tipo];const cols=[['nome','NOME'],['rgi','RGI'],['procedencia',tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'],['documento','DOCUMENTO']];box.innerHTML=`<table class="custody-editor-table"><thead><tr><th style="width:35px">Nº</th>${cols.map(c=>`<th>${c[1]}</th>`).join('')}<th style="width:66px">AÇÃO</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td>${cols.map(c=>`<td><input ${tipo==='saida'&&c[0]==='nome'?'list="listaInternosCompartilhada" autocomplete="off"':''} aria-label="${c[1]} ${i+1}" value="${escMov(r[c[0]])}" oninput="alterarMovimentacao('${tipo}',${i},'${c[0]}',this.value)" ${tipo==='saida'&&c[0]==='nome'?`onchange="selecionarNomeMovimentacao(${i},this.value)"`:''}></td>`).join('')}<td><button class="custody-delete" type="button" onclick="excluirMovimentacao('${tipo}',${i})">Excluir</button></td></tr>`).join('')}</tbody></table>`;}
 function selecionarNomeMovimentacao(i,valor){alterarMovimentacao('saida',i,'nome',valor);renderMovimentacoes('saida');}
-function alterarMovimentacao(tipo,i,campo,valor){if(!movimentacoesCustodiados[tipo][i])return;const r=movimentacoesCustodiados[tipo][i];r[campo]=valor;if(tipo==='saida'&&campo==='nome'){const interno=nomeInternoSelecionado(valor);if(interno){r.nome=interno.nome||interno.nome_interno||interno.NOME||valor;r.rgi=rgiDoInterno(interno);}}sincronizarMovimentacoes(tipo);}
-function adicionarMovimentacao(tipo){movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:''});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
+function alterarMovimentacao(tipo,i,campo,valor){if(!movimentacoesCustodiados[tipo][i])return;const r=movimentacoesCustodiados[tipo][i];r[campo]=valor;if(campo==='documento'&&String(valor||'').trim())garantirOrdemDocumentoItem35(r);if(tipo==='saida'&&campo==='nome'){const interno=nomeInternoSelecionado(valor);if(interno){r.nome=interno.nome||interno.nome_interno||interno.NOME||valor;r.rgi=rgiDoInterno(interno);}}sincronizarMovimentacoes(tipo);}
+function adicionarMovimentacao(tipo){movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:'',ordemItem35:0});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
 function excluirMovimentacao(tipo,i){movimentacoesCustodiados[tipo].splice(i,1);if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:''});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
-function prepararMovimentacoes(){for(const tipo of ['entrada','saida']){const id=tipo==='entrada'?'s30':'s31';const el=document.getElementById(id);if(el&&el.value.trim()){try{const val=JSON.parse(el.value);if(Array.isArray(val))movimentacoesCustodiados[tipo]=val;}catch{}}if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo]=[{nome:'',rgi:'',procedencia:'',documento:''}];renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo,false);}}
+function prepararMovimentacoes(){for(const tipo of ['entrada','saida']){const id=tipo==='entrada'?'s30':'s31';const el=document.getElementById(id);if(el&&el.value.trim()){try{const val=JSON.parse(el.value);if(Array.isArray(val))movimentacoesCustodiados[tipo]=val;}catch{}}if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo]=[{nome:'',rgi:'',procedencia:'',documento:'',ordemItem35:0}];for(const r of movimentacoesCustodiados[tipo])garantirOrdemDocumentoItem35(r);renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo,false);}}
 function formatarTituloMovimentacao(tipo){
  const titulo=tipo==='entrada'?'Entrada de Custodiados':'Saída de Custodiados';
  return titulo.replace(/\bde\b/gi,'de');
@@ -1458,6 +1459,7 @@ function lerDocumentosManuaisItem35(){
  const el=document.getElementById('s34');
  const raw=String(el?.value||'').trim();
  const marcador=raw.match(/\[\[SAIDAS_7_DIAS=(\d*)\]\]/i);if(marcador)saidasSeteDiasItem35=marcador[1]||'';
+ const docsMarcador=raw.match(/\[\[DOCS35=([^\]]*)\]\]/i);if(docsMarcador){try{const lista=JSON.parse(decodeURIComponent(docsMarcador[1]));if(Array.isArray(lista)){documentosManuaisItem35=lista.map(d=>({...d,id:Number(d.id)||++seqDocumentoItem35,ordemItem35:Number(d.ordemItem35)||novaOrdemDocumentoItem35()}));for(const d of documentosManuaisItem35){seqDocumentoItem35=Math.max(seqDocumentoItem35,Number(d.id)||0);seqOrdemDocumentoItem35=Math.max(seqOrdemDocumentoItem35,Number(d.ordemItem35)||0);}return;}}catch{}}
  if(!raw||/^N\/C\.?$/i.test(raw))return;
  // Recupera formatos antigos de texto, preservando cada linha como documento manual.
  for(const linha of raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)){
@@ -1469,11 +1471,11 @@ function lerDocumentosManuaisItem35(){
   const m=limpa.match(/^(.+?)\s+-\s+(.*)$/);
   const documento=m?m[1].trim():limpa;
   const complemento=m?m[2].trim():'';
-  if(!documentosManuaisItem35.some(x=>x.documento===documento&&x.complemento===complemento))documentosManuaisItem35.push({id:++seqDocumentoItem35,documento,complemento});
+  if(!documentosManuaisItem35.some(x=>x.documento===documento&&x.complemento===complemento))documentosManuaisItem35.push({id:++seqDocumentoItem35,documento,complemento,ordemItem35:novaOrdemDocumentoItem35()});
  }
 }
 function sincronizarEditorItem35(){
- const el=document.getElementById('s34');if(el){const docs=documentosManuaisItem35.map(x=>`${String(x.documento||'').trim()}${String(x.complemento||'').trim()?' - '+String(x.complemento).trim():''}`).filter(Boolean);const marcador=`[[SAIDAS_7_DIAS=${String(saidasSeteDiasItem35||'').trim()}]]`;el.value=[...docs,marcador].join('\n')||marcador;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}
+ const el=document.getElementById('s34');if(el){const dados=encodeURIComponent(JSON.stringify(documentosManuaisItem35));const docsMarker=`[[DOCS35=${dados}]]`;const marcador=`[[SAIDAS_7_DIAS=${String(saidasSeteDiasItem35||'').trim()}]]`;el.value=[docsMarker,marcador].join('\n');el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}
  if(typeof changed==='function')changed();
 }
 function atualizarSaidasSeteDiasItem35(valor){const n=String(valor||'').replace(/[^0-9]/g,'');saidasSeteDiasItem35=n;sincronizarEditorItem35();renderEditorItem35();const el=document.getElementById('item35SaidasSeteDias');if(el){el.value=n;el.focus();}}
@@ -1492,7 +1494,7 @@ function renderEditorItem35(){
 function excluirDocumentoSelecionadoItem35(){const seletor=document.getElementById('item35DocumentoExcluir');const id=Number(seletor?.value);if(!id)return;excluirDocumentoItem35(id);}
 let complementosFixosItem35={};
 function atualizarComplementoFixoItem35(i,v){complementosFixosItem35[i]=v;sincronizarEditorItem35();}
-function adicionarDocumentoItem35(){const doc=document.getElementById('item35NovoDocumento'),comp=document.getElementById('item35NovoComplemento');const documento=String(doc?.value||'').trim().toLocaleUpperCase('pt-BR'),complemento=String(comp?.value||'').trim();if(!documento){doc?.focus();return;}documentosManuaisItem35.push({id:++seqDocumentoItem35,documento,complemento});sincronizarEditorItem35();renderEditorItem35();const d=document.getElementById('item35NovoDocumento');if(d)d.focus();}
+function adicionarDocumentoItem35(){const doc=document.getElementById('item35NovoDocumento'),comp=document.getElementById('item35NovoComplemento');const documento=String(doc?.value||'').trim().toLocaleUpperCase('pt-BR'),complemento=String(comp?.value||'').trim();if(!documento){doc?.focus();return;}documentosManuaisItem35.push({id:++seqDocumentoItem35,documento,complemento,ordemItem35:novaOrdemDocumentoItem35()});sincronizarEditorItem35();renderEditorItem35();const d=document.getElementById('item35NovoDocumento');if(d)d.focus();}
 function alterarDocumentoItem35(id,campo,valor){const d=documentosManuaisItem35.find(x=>x.id===id);if(!d)return;d[campo]=campo==='documento'?String(valor).toLocaleUpperCase('pt-BR'):valor;sincronizarEditorItem35();}
 function excluirDocumentoItem35(id){documentosManuaisItem35=documentosManuaisItem35.filter(x=>x.id!==id);renderEditorItem35();sincronizarEditorItem35();}
 function montarDocumentosItem35(textoBase){
@@ -1506,12 +1508,12 @@ function montarDocumentosItem35(textoBase){
  }
  const linhas=[];
  for(let i=0;i<fixos.length;i++){const complemento=String(complementosFixosItem35[i]||'').trim();linhas.push(`<div class="documento-item35-linha">• <strong>${esc(fixos[i])}</strong>${complemento?' - '+esc(complemento):''}</div>`);}
- for(const d of documentosManuaisItem35){const doc=String(d.documento||'').trim(),comp=String(d.complemento||'').trim();if(doc)linhas.push(`<div class="documento-item35-linha">• <strong>${esc(doc.toLocaleUpperCase('pt-BR'))}</strong>${comp?' - '+esc(comp):''}</div>`);}
+ const ordenados=[];
+ for(const d of documentosManuaisItem35){const doc=String(d.documento||'').trim(),comp=String(d.complemento||'').trim();if(doc)ordenados.push({ordem:Number(d.ordemItem35)||novaOrdemDocumentoItem35(),tipo:'manual',doc,comp,id:d.id});}
  // Mantém compatibilidade com documentos adicionais antigos já salvos em texto.
- for(const texto of extras){const m=texto.match(/^(.+?)\s+-\s+(.*)$/);if(m)linhas.push(`<div class="documento-item35-linha">• <strong>${esc(m[1])}</strong> - ${esc(m[2])}</div>`);else linhas.push(`<div class="documento-item35-linha">• <strong>${esc(texto)}</strong></div>`);}
- const auto=[];
- for(const tipo of ['entrada','saida'])for(const r of lerMovimentacoes(tipo)){const doc=String(r.documento||'').trim();if(!doc)continue;const detalhe=String(r.procedencia||'').trim().toLocaleUpperCase('pt-BR');const linha=`${doc.toLocaleUpperCase('pt-BR')} - ${formatarTituloMovimentacao(tipo)} - ${detalhe}`;if(!auto.some(x=>x.linha.toLocaleLowerCase('pt-BR')===linha.toLocaleLowerCase('pt-BR')))auto.push({linha,doc});}
- for(const a of auto){const resto=a.linha.slice(a.doc.length);linhas.push(`<div class="documento-item35-linha">• <strong>${esc(a.doc.toLocaleUpperCase('pt-BR'))}</strong>${esc(resto)}</div>`);}
+ for(const texto of extras){const m=texto.match(/^(.+?)\s+-\s+(.*)$/);const doc=m?m[1].trim():texto;const comp=m?m[2].trim():'';ordenados.push({ordem:novaOrdemDocumentoItem35(),tipo:'manual-antigo',doc,comp});}
+ for(const tipo of ['entrada','saida'])for(const r of lerMovimentacoes(tipo)){const doc=String(r.documento||'').trim();if(!doc)continue;garantirOrdemDocumentoItem35(r);const detalhe=String(r.procedencia||'').trim().toLocaleUpperCase('pt-BR');const linha=`${doc.toLocaleUpperCase('pt-BR')} - ${formatarTituloMovimentacao(tipo)} - ${detalhe}`;ordenados.push({ordem:Number(r.ordemItem35),tipo:'automatico',doc:doc.toLocaleUpperCase('pt-BR'),resto:linha.slice(doc.length),chave:`${tipo}|${r.ordemItem35}`});}
+ const vistos=new Set();ordenados.sort((a,b)=>a.ordem-b.ordem);for(const d of ordenados){if(d.tipo==='automatico'){if(vistos.has(d.chave))continue;vistos.add(d.chave);linhas.push(`<div class="documento-item35-linha">• <strong>${esc(d.doc)}</strong>${esc(d.resto)}</div>`);}else{linhas.push(`<div class="documento-item35-linha">• <strong>${esc(d.doc.toLocaleUpperCase('pt-BR'))}</strong>${d.comp?' - '+esc(d.comp):''}</div>`);}}
  const qtdAut=quantidadeAutorizacoesItem30(), qtdRet=quantidadeRetornosSeteDiasItem291(), qtdSaida=String(saidasSeteDiasItem35||'').trim();
  if(qtdAut>0)linhas.push(`<div class="documento-item35-linha">• <strong>${qtdAut} AUTORIZAÇÕES CUMPRIDAS</strong></div>`);
  if(qtdSaida&&Number(qtdSaida)>0)linhas.push(`<div class="documento-item35-linha">• <strong>${esc(qtdSaida)} SAÍDA DE 7 DIAS</strong></div>`);
