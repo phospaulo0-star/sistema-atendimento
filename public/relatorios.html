@@ -170,6 +170,18 @@
 }
 
 .custody-editor-table{width:100%;border-collapse:collapse;table-layout:fixed;margin:8px 0}.custody-editor-table th,.custody-editor-table td{border:1px solid #888;padding:5px}.custody-editor-table th{background:#e7e7e7}.custody-editor-table input{width:100%;min-width:0;padding:7px;box-sizing:border-box}.custody-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}.custody-delete{padding:5px 8px!important}.custody-preview-table{width:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,sans-serif;font-size:9.5pt}.custody-preview-table th,.custody-preview-table td{border:1px solid #222;padding:4px;overflow-wrap:anywhere;vertical-align:top}.custody-preview-table th{background:#d9d9d9;text-align:center}.movement-page{break-before:page;page-break-before:always}.movement-page h2{text-align:center;font-size:13pt;margin:0 0 14px}.movement-page h3{font-size:11pt;margin:12px 0 5px}.movement-total{text-align:right;font-weight:bold;margin-top:5px}.movement-page table{break-inside:auto;page-break-inside:auto}.movement-page tr{break-inside:avoid;page-break-inside:avoid}
+
+/* Ajuste de layout do Item 28 e 28.1: botões legíveis, sem sobrepor as tabelas. */
+.hospitalizado-actions{display:flex!important;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;flex-wrap:wrap;width:100%;clear:both;position:static;margin:8px 0 12px!important}
+#licencaJudicialContainer .retorno-hosp-row>div:last-child{display:flex;align-items:center;justify-content:flex-start;gap:5px;flex-wrap:wrap;overflow:visible}
+#licencaJudicialContainer .retorno-hosp-row>div:last-child button{max-width:100%;white-space:normal;line-height:1.2;padding:6px 8px!important;font-size:12px}
+#licencaJudicialContainer .retorno-hosp-row{align-items:stretch}
+#retornoLicencaJudicialContainer .retorno-hosp-row>div:last-child button{white-space:normal}
+@media(max-width:900px){#licencaJudicialContainer .retorno-hosp-row>div:last-child{flex-direction:column;align-items:stretch}#licencaJudicialContainer .retorno-hosp-row>div:last-child button{width:100%}}
+
+.documentos-item35{font-weight:400!important;}
+.documentos-item35 .documento-item35-linha{font-weight:400!important;margin:0 0 2px 0;}
+.documentos-item35 .documento-item35-linha strong{font-weight:700!important;}
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1324,11 +1336,11 @@ function visualizarRelatorio(targetId=null){
       const rows=lerMovimentacoes(tipo).filter(r=>r.nome||r.rgi||r.procedencia||r.documento);
       const total=rows.length;
       const trs=rows.map((r,i)=>`<tr><td style="text-align:center;width:6%">${i+1}</td><td>${esc(r.nome)}</td><td style="width:14%">${esc(r.rgi)}</td><td style="width:23%">${esc(r.procedencia)}</td><td style="width:25%">${esc(r.documento)}</td></tr>`).join('');
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table"><colgroup><col style="width:6%"><col style="width:32%"><col style="width:14%"><col style="width:23%"><col style="width:25%"></colgroup><thead><tr><th>Nº</th><th>NOME</th><th>RGI</th><th>PROCEDÊNCIA</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}</div></section>`;
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table"><colgroup><col style="width:6%"><col style="width:32%"><col style="width:14%"><col style="width:23%"><col style="width:25%"></colgroup><thead><tr><th>Nº</th><th>NOME</th><th>RGI</th><th>${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}</div></section>`;
     }
     if(titulo.startsWith('35 – DOCUMENTOS REPASSADOS À CHEFIA')){
       const docs=montarDocumentosItem35(item.texto);
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div class="preview-text">${esc(docs||'N/C.')}</div></section>`;
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div class="preview-text documentos-item35">${docs||'<strong>N/C.</strong>'}</div></section>`;
     }
     if(titulo.startsWith('17')){
       const linhas=String(item.texto||'').split(/\r?\n/).filter(l=>l.trim()&&!/^N\/C\.?$/i.test(l.trim()));
@@ -1408,24 +1420,48 @@ let movimentacoesCustodiados={entrada:[{nome:'',rgi:'',procedencia:'',documento:
 function escMov(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function lerMovimentacoes(tipo){const el=document.getElementById(tipo==='entrada'?'s30':'s31');if(!el)return movimentacoesCustodiados[tipo]||[];const raw=String(el.value||'').trim();if(!raw)return movimentacoesCustodiados[tipo]||[];try{const parsed=JSON.parse(raw);if(Array.isArray(parsed))return parsed;}catch{}return movimentacoesCustodiados[tipo]||[];}
 function sincronizarMovimentacoes(tipo,avisar=true){const el=document.getElementById(tipo==='entrada'?'s30':'s31');if(el)el.value=JSON.stringify(movimentacoesCustodiados[tipo]);const total=movimentacoesCustodiados[tipo].filter(r=>r.nome||r.rgi||r.procedencia||r.documento).length;const out=document.getElementById(tipo==='entrada'?'totalEntradasEditor':'totalSaidasEditor');if(out)out.textContent=`TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}`;if(avisar&&typeof changed==='function')changed();}
-function renderMovimentacoes(tipo){const box=document.getElementById(tipo==='entrada'?'entradaCustodiadosEditor':'saidaCustodiadosEditor');if(!box)return;const rows=movimentacoesCustodiados[tipo];const cols=[['nome','NOME'],['rgi','RGI'],['procedencia','PROCEDÊNCIA'],['documento','DOCUMENTO']];box.innerHTML=`<table class="custody-editor-table"><thead><tr><th style="width:35px">Nº</th>${cols.map(c=>`<th>${c[1]}</th>`).join('')}<th style="width:66px">AÇÃO</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td>${cols.map(c=>`<td><input ${tipo==='saida'&&c[0]==='nome'?'list="listaInternosCompartilhada" autocomplete="off"':''} aria-label="${c[1]} ${i+1}" value="${escMov(r[c[0]])}" oninput="alterarMovimentacao('${tipo}',${i},'${c[0]}',this.value)"></td>`).join('')}<td><button class="custody-delete" type="button" onclick="excluirMovimentacao('${tipo}',${i})">Excluir</button></td></tr>`).join('')}</tbody></table>`;}
+function renderMovimentacoes(tipo){const box=document.getElementById(tipo==='entrada'?'entradaCustodiadosEditor':'saidaCustodiadosEditor');if(!box)return;const rows=movimentacoesCustodiados[tipo];const cols=[['nome','NOME'],['rgi','RGI'],['procedencia',tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'],['documento','DOCUMENTO']];box.innerHTML=`<table class="custody-editor-table"><thead><tr><th style="width:35px">Nº</th>${cols.map(c=>`<th>${c[1]}</th>`).join('')}<th style="width:66px">AÇÃO</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td>${cols.map(c=>`<td><input ${tipo==='saida'&&c[0]==='nome'?'list="listaInternosCompartilhada" autocomplete="off"':''} aria-label="${c[1]} ${i+1}" value="${escMov(r[c[0]])}" oninput="alterarMovimentacao('${tipo}',${i},'${c[0]}',this.value)"></td>`).join('')}<td><button class="custody-delete" type="button" onclick="excluirMovimentacao('${tipo}',${i})">Excluir</button></td></tr>`).join('')}</tbody></table>`;}
 function alterarMovimentacao(tipo,i,campo,valor){if(!movimentacoesCustodiados[tipo][i])return;movimentacoesCustodiados[tipo][i][campo]=valor;sincronizarMovimentacoes(tipo);}
 function adicionarMovimentacao(tipo){movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:''});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
 function excluirMovimentacao(tipo,i){movimentacoesCustodiados[tipo].splice(i,1);if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo].push({nome:'',rgi:'',procedencia:'',documento:''});renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo);}
 function prepararMovimentacoes(){for(const tipo of ['entrada','saida']){const id=tipo==='entrada'?'s30':'s31';const el=document.getElementById(id);if(el&&el.value.trim()){try{const val=JSON.parse(el.value);if(Array.isArray(val))movimentacoesCustodiados[tipo]=val;}catch{}}if(!movimentacoesCustodiados[tipo].length)movimentacoesCustodiados[tipo]=[{nome:'',rgi:'',procedencia:'',documento:''}];renderMovimentacoes(tipo);sincronizarMovimentacoes(tipo,false);}}
+function formatarTituloMovimentacao(tipo){
+ const titulo=tipo==='entrada'?'Entrada de Custodiados':'Saída de Custodiados';
+ return titulo.replace(/\bde\b/gi,'de');
+}
 function montarDocumentosItem35(textoBase){
  const fixos=['Confere por Pavilhões','Listagem de Internos Ativos','Escalas Diurna e Noturna','Relatório Digital do Livro da Portaria II'];
  const manual=String(textoBase||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).filter(x=>!/^N\/C\.?$/i.test(x));
- // Conserva a lista fixa, e tudo que foi digitado abaixo dela, na ordem original.
+ // Mantém os quatro documentos fixos na ordem combinada e preserva os complementos manuais.
  const encontrados=[];let iniciouExtras=false;
- for(const linha of manual){const limpa=linha.replace(/^\d+[.)]\s*/,'').trim();if(fixos.some(f=>f.toLocaleLowerCase('pt-BR')===limpa.toLocaleLowerCase('pt-BR'))){if(!encontrados.some(x=>x.toLocaleLowerCase('pt-BR')===limpa.toLocaleLowerCase('pt-BR')))encontrados.push(limpa);if(limpa===fixos[3])iniciouExtras=true;}else if(iniciouExtras){encontrados.push(limpa);}}
- for(const f of fixos){if(!encontrados.some(x=>x.toLocaleLowerCase('pt-BR')===f.toLocaleLowerCase('pt-BR'))){if(f===fixos[3]){encontrados.push(f);iniciouExtras=true;}else encontrados.splice(Math.min(fixos.indexOf(f),encontrados.length),0,f);}}
- const auto=[];for(const tipo of ['entrada','saida'])for(const r of lerMovimentacoes(tipo)){const d=String(r.documento||'').trim();if(d&&!auto.some(x=>x.toLocaleLowerCase('pt-BR')===d.toLocaleLowerCase('pt-BR')))auto.push(d);}
- for(const d of auto){if(!encontrados.some(x=>x.toLocaleLowerCase('pt-BR')===d.toLocaleLowerCase('pt-BR')))encontrados.push(d);}
- return encontrados.map((x,i)=>`${i+1}. ${x}`).join('\n');
+ for(const linha of manual){
+  const limpa=linha.replace(/^\s*(?:[•·▪●]|\d+[.)])\s*/,'').trim();
+  const fixo=fixos.find(f=>f.toLocaleLowerCase('pt-BR')===limpa.toLocaleLowerCase('pt-BR'));
+  if(fixo){if(!encontrados.some(x=>x.texto.toLocaleLowerCase('pt-BR')===fixo.toLocaleLowerCase('pt-BR')))encontrados.push({texto:fixo,tipo:'fixo'});if(fixo===fixos[3])iniciouExtras=true;}
+  else if(iniciouExtras)encontrados.push({texto:limpa,tipo:'manual'});
+ }
+ for(const f of fixos){if(!encontrados.some(x=>x.texto.toLocaleLowerCase('pt-BR')===f.toLocaleLowerCase('pt-BR'))){if(f===fixos[3]){encontrados.push({texto:f,tipo:'fixo'});iniciouExtras=true;}else encontrados.splice(Math.min(fixos.indexOf(f),encontrados.length),0,{texto:f,tipo:'fixo'});}}
+ const auto=[];
+ for(const tipo of ['entrada','saida'])for(const r of lerMovimentacoes(tipo)){
+  const doc=String(r.documento||'').trim();if(!doc)continue;
+  const detalhe=String(r.procedencia||'').trim().toLocaleUpperCase('pt-BR');
+  const linha=`${doc.toLocaleUpperCase('pt-BR')} - ${formatarTituloMovimentacao(tipo)} - ${detalhe}`;
+  if(!auto.some(x=>x.linha.toLocaleLowerCase('pt-BR')===linha.toLocaleLowerCase('pt-BR')))auto.push({linha,doc,tipo:'automatico'});
+ }
+ // Os documentos automáticos são reconstruídos a cada visualização para evitar duplicação.
+ for(const a of auto)if(!encontrados.some(x=>x.texto.toLocaleLowerCase('pt-BR')===a.linha.toLocaleLowerCase('pt-BR')))encontrados.push({texto:a.linha,tipo:'automatico',doc:a.doc});
+ const linhas=encontrados.map(x=>{
+  if(x.tipo==='automatico'){
+   const resto=x.texto.slice(x.doc.length);
+   return `<div class="documento-item35-linha">• <strong>${esc(x.doc)}</strong>${esc(resto)}</div>`;
+  }
+  // Documentos fixos e documentos adicionais digitados manualmente ficam em negrito.
+  return `<div class="documento-item35-linha">• <strong>${esc(x.texto)}</strong></div>`;
+ });
+ return linhas.join('');
 }
 function gerarPaginaMovimentacao(dataExtenso){
- const tabela=(tipo,titulo)=>{const rows=lerMovimentacoes(tipo).filter(r=>r.nome||r.rgi||r.procedencia||r.documento);const trs=rows.map((r,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${escMov(r.nome)}</td><td>${escMov(r.rgi)}</td><td>${escMov(r.procedencia)}</td><td>${escMov(r.documento)}</td></tr>`).join('');return `<h3>${titulo}</h3><table class="custody-preview-table"><colgroup><col style="width:6%"><col style="width:32%"><col style="width:14%"><col style="width:23%"><col style="width:25%"></colgroup><thead><tr><th>Nº</th><th>NOME</th><th>RGI</th><th>PROCEDÊNCIA</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${rows.length}</div>`;};
+ const tabela=(tipo,titulo)=>{const rows=lerMovimentacoes(tipo).filter(r=>r.nome||r.rgi||r.procedencia||r.documento);const trs=rows.map((r,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${escMov(r.nome)}</td><td>${escMov(r.rgi)}</td><td>${escMov(r.procedencia)}</td><td>${escMov(r.documento)}</td></tr>`).join('');return `<h3>${titulo}</h3><table class="custody-preview-table"><colgroup><col style="width:6%"><col style="width:32%"><col style="width:14%"><col style="width:23%"><col style="width:25%"></colgroup><thead><tr><th>Nº</th><th>NOME</th><th>RGI</th><th>${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${rows.length}</div>`;};
  return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO DIA ${escMov(String(dataExtenso||'DATA NÃO INFORMADA').toLocaleUpperCase('pt-BR'))}</h2>${tabela('entrada','ENTRADA DE CUSTODIADOS')}${tabela('saida','SAÍDA DE CUSTODIADOS')}</section>`;
 }
 
