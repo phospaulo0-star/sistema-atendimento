@@ -316,7 +316,7 @@
 
 /* AJUSTE DEFINITIVO DE IMPRESSÃO: reservar áreas próprias para cabeçalho, corpo e rodapé */
 @media print {
-  @page { size: A4 portrait; margin: 32mm 18mm 22mm 18mm; }
+  @page { size: A4 portrait; margin: 26mm 18mm 22mm 18mm; }
   html, body { background:#fff !important; color:#000 !important; margin:0 !important; padding:0 !important; height:auto !important; overflow:visible !important; }
   body.preview-mode #editor,
   body.preview-mode #reportsPanel,
@@ -331,7 +331,7 @@
   body.preview-mode .preview-document { display:block !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; overflow:visible !important; font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; color:#000 !important; }
   /* Cabeçalho fixo dentro da faixa superior reservada pelo @page. */
   body.preview-mode #previewContent .preview-letterhead {
-    position:fixed !important; top:2mm !important; left:18mm !important; right:18mm !important;
+    position:fixed !important; top:-14mm !important; left:18mm !important; right:18mm !important;
     width:auto !important; height:17mm !important; min-height:17mm !important; max-height:17mm !important;
     margin:0 !important; padding:0 !important; display:grid !important;
     grid-template-columns:14mm minmax(0,1fr) 14mm !important; gap:2mm !important;
