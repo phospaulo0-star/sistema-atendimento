@@ -1670,7 +1670,7 @@ function visualizarRelatorio(targetId=null){
   const title=$('title').value.trim()||'RELATÓRIO DE PLANTÃO';
   const todosCampos=[...document.querySelectorAll('#editor [data-section]')].filter(el=>!el.id.startsWith('assinatura') || !el.id.endsWith('Data'));
   const campos=targetId?todosCampos.filter(el=>el.id===targetId):todosCampos;
-  atualizarItem40(); const secoes=campos.map(el=>({titulo:el.dataset.section.replace(/\s*:\s*$/,''),texto:el.id==='s0'?textoFormalItem01():(el.id==='s39'?textoEncerramentoItem40():((el.value||'').trim()||PADROES_RELATORIO[el.dataset.section]||''))}));
+  atualizarItem40(); const secoes=campos.map(el=>({titulo:el.dataset.section.replace(/\s*:\s*$/,''),texto:el.id==='s0'?textoFormalItem01():(el.id==='s39'?textoEncerramentoItem40():((el.value||'').trim()||PADROES_RELATORIO[el.dataset.section]||''))})).filter(item=>!/^ITEM 40 – (QUEM ENCERRA O PLANTÃO|QUEM RECEBE O PLANTÃO|SUBSTITUIÇÃO|POLICIAL SUBSTITUÍDO)$/i.test(item.titulo.trim())&&!/^ASSINATURA – (NOME COMPLETO DO POLICIAL|FUNÇÃO|UNIDADE PENAL|MATRÍCULA)$/i.test(item.titulo.trim()));
   const diaAno=dataObj?Math.floor((Date.UTC(dataObj.getFullYear(),dataObj.getMonth(),dataObj.getDate())-Date.UTC(dataObj.getFullYear(),0,0))/86400000):null;
   const diaMes=dataObj?dataObj.getDate():null;
   const mesExtenso=dataObj?dataObj.toLocaleDateString('pt-BR',{month:'long'}).toLocaleUpperCase('pt-BR'):'';
@@ -1922,7 +1922,7 @@ function gerarPaginaMovimentacao(dataExtenso){
  const assinaturaFuncao=String($('assinaturaFuncaoData')?.value||'').trim();
  const assinaturaUnidade=String($('assinaturaUnidadeData')?.value||'').trim();
  const assinaturaMatricula=String($('assinaturaMatriculaData')?.value||'').trim();
- const assinatura=`<div class="movement-signature" style="text-align:center;margin:50px auto 0;max-width:100%;line-height:1.35;white-space:pre-wrap">${escMov(assinaturaNome)}${assinaturaFuncao?`<br>${escMov(assinaturaFuncao)}`:''}${assinaturaUnidade?`<br>${escMov(assinaturaUnidade)}`:''}${assinaturaMatricula?`<br>Matrícula: ${escMov(assinaturaMatricula)}`:''}</div>`;
+ const assinatura=`<div class="movement-signature" style="text-align:center;margin:50px auto 0;max-width:100%;line-height:1.35;white-space:pre-wrap">${assinaturaNome?`<strong>${escMov(assinaturaNome)}</strong>`:''}${assinaturaFuncao?`<br><em>${escMov(assinaturaFuncao)}</em>`:''}${assinaturaUnidade?`<br><em>${escMov(assinaturaUnidade)}</em>`:''}${assinaturaMatricula?`<br><em>Matrícula: ${escMov(assinaturaMatricula)}</em>`:''}</div>`;
  return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><div class="movement-initial"><strong><u>INICIAL / RECEBI:</u></strong> ${inicial}</div>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<div class="movement-final"><strong><u>FINAL / PASSO:</u></strong> ${final}</div><p class="movement-closing">${textoEncerramento}</p>${assinatura}</section>`;
 }
 
