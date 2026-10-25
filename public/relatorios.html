@@ -230,7 +230,7 @@
 
 /* CORREÇÃO DE IMPRESSÃO: cabeçalho e rodapé repetidos em cada folha */
 @media print {
-  @page { size: A4 portrait; margin: 23mm 18mm 25mm 18mm; }
+  @page { size: A4 portrait; margin: 28mm 18mm 25mm 18mm; }
   html, body { margin: 0 !important; padding: 0 !important; }
   body.preview-mode #previewPanel { display: block !important; }
   body.preview-mode #previewContent { display: block !important; }
@@ -240,18 +240,18 @@
     overflow: visible !important;
   }
   body.preview-mode .preview-letterhead {
-    position: fixed !important; top: -20mm !important;
+    position: fixed !important; top: -25mm !important;
     left: 0 !important; right: 0 !important;
-    height: 18mm !important; margin: 0 !important;
+    height: 20mm !important; margin: 0 !important;
     padding: 0 !important; background: #fff !important;
     z-index: 9999 !important; display: grid !important;
-    grid-template-columns: 18mm minmax(0,1fr) 18mm !important;
+    grid-template-columns: 20mm minmax(0,1fr) 20mm !important;
     align-items: center !important; gap: 2mm !important;
     font-size: 8pt !important; line-height: 1.05 !important;
   }
   body.preview-mode .preview-letterhead .preview-logo {
-    display: block !important; width: 15mm !important;
-    height: 17mm !important; object-fit: contain !important;
+    display: block !important; width: 17mm !important;
+    height: 19mm !important; object-fit: contain !important;
     filter: none !important;
   }
   body.preview-mode .preview-letterhead-text,
@@ -273,6 +273,41 @@
   body.preview-mode .preview-section { max-width: 100% !important; }
   body.preview-mode .movement-page { min-height: 0 !important; }
   body.preview-mode .preview-return-wrap { display: none !important; }
+}
+
+
+/* CABEÇALHO INSTITUCIONAL: repetir no topo de cada página impressa */
+@media print {
+  @page { size: A4 portrait; margin: 28mm 18mm 25mm 18mm; }
+  body.preview-mode #previewContent .preview-document { padding-top: 0 !important; }
+  body.preview-mode #previewContent .preview-letterhead {
+    position: fixed !important;
+    top: -25mm !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 20mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: grid !important;
+    grid-template-columns: 20mm minmax(0,1fr) 20mm !important;
+    align-items: center !important;
+    gap: 2mm !important;
+    background: #fff !important;
+    z-index: 99999 !important;
+    color: #000 !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead .preview-logo {
+    display: block !important;
+    width: 17mm !important;
+    height: 19mm !important;
+    object-fit: contain !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead-text {
+    font-size: 7pt !important;
+    line-height: 1.08 !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+  }
 }
 
 </style></head><body>
