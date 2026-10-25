@@ -204,6 +204,31 @@
 .documento-item35-linha{margin:0 0 3px;padding-left:0}
 @media(max-width:700px){.item35-row{grid-template-columns:1fr}.item35-row button{justify-self:start}#licencaJudicialContainer .retorno-hosp-head,#licencaJudicialContainer .retorno-hosp-row{min-width:650px}}
 
+
+.movement-page{font-family:Arial,Helvetica,sans-serif;font-size:9pt;break-before:page;page-break-before:always;position:relative;min-height:230mm;padding-bottom:22mm}
+.movement-page h2{text-align:center;font-size:10pt;text-decoration:underline;margin:10px 0 12px}
+.movement-page h3{font-size:9pt;text-decoration:underline;margin:8px 0 2px}
+.movement-initial,.movement-final{font-size:9pt;margin:8px 0}
+.custody-preview-table{width:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,Helvetica,sans-serif;font-size:8pt;margin:0}
+.custody-preview-table th,.custody-preview-table td{border:1px solid #222;padding:2px 3px;height:15px;overflow-wrap:anywhere}
+.custody-preview-table th{background:#d2d2d2;text-align:center}
+.movement-total{text-align:right;font-size:8pt;margin:2px 0 8px}
+.movement-total strong{background:#ffff00}
+.movement-closing{text-align:justify;font-size:8.5pt;line-height:1.15;margin:8px 0 25px}
+.movement-signature{text-align:center;font-size:8pt;font-weight:bold;margin:22px auto 0;line-height:1.2}
+.preview-footer{border-top:1px solid #777;margin-top:22px;padding-top:5px;text-align:center;font-size:7.5pt;line-height:1.15}
+.page-number{margin-top:3px;text-align:right;font-size:7.5pt}
+@media print{
+ @page{size:A4 portrait;margin:20mm 18mm 22mm 18mm}
+ body.preview-mode .preview-letterhead{position:fixed;top:-17mm;left:0;right:0;height:15mm;margin:0;background:white;z-index:20}
+ body.preview-mode .preview-footer{position:fixed;bottom:-18mm;left:0;right:0;margin:0;padding-top:3px;background:white;border-top:1px solid #777}
+ body.preview-mode .preview-footer .page-current:after{content:counter(page)}
+ body.preview-mode .preview-footer .page-total:after{content:counter(pages)}
+ body.preview-mode .preview-document{padding-top:1mm;padding-bottom:2mm}
+ body.preview-mode .movement-page{break-before:page;page-break-before:always;min-height:245mm}
+ body.preview-mode .movement-signature{break-inside:avoid;page-break-inside:avoid}
+}
+
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1651,7 +1676,7 @@ function visualizarRelatorio(targetId=null){
     return `<section class="preview-section${titulo.startsWith('01')?' item01-justified':''}"><h3>${esc(item.titulo)}:</h3><div class="preview-text${is02?' team02-print':''}">${esc(textoFinal)}</div></section>`
   }).join(''):'<p>Nenhuma seção foi preenchida ainda.</p>';
   const paginaMovimentacao=(!targetId)?gerarPaginaMovimentacao(dataExtenso):'';
-  const rodape=`<div class="preview-footer">Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS<br>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</div></div>`;
+  const rodape=`<div class="preview-footer"><div>Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS<br>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</div><div class="page-number">Página <span class="page-current"></span> de <span class="page-total"></span></div></div></div>`;
   const botaoRetorno=targetId?`<div class="preview-return-wrap" style="margin:12px 0;text-align:center"><button type="button" class="primary" onclick="voltarEdicaoItem('${targetId}')">✏️ VOLTAR À EDIÇÃO DESTE ITEM</button></div>`:'';
   $('previewContent').innerHTML=cabecalho+corpo+paginaMovimentacao+botaoRetorno+rodape;
   $('editor').classList.add('hidden');
@@ -1765,9 +1790,30 @@ function montarDocumentosItem35(textoBase){
  if(qtdRet>0)linhas.push(`<div class="documento-item35-linha">• <strong>${qtdRet} RETORNO DE 7 DIAS</strong></div>`);
  return linhas.join('');
 }
+function numeroExtensoMovimentacao(valor){
+ const n=Number(valor); if(!Number.isFinite(n)||n<0)return '';
+ if(typeof numeroPorExtenso==='function')return numeroPorExtenso(n);
+ return String(n);
+}
 function gerarPaginaMovimentacao(dataExtenso){
- const tabela=(tipo,titulo)=>{const rows=lerMovimentacoes(tipo).filter(r=>r.nome||r.rgi||r.procedencia||r.documento);const trs=rows.map((r,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${escMov(r.nome)}</td><td>${escMov(r.rgi)}</td><td>${escMov(r.procedencia)}</td><td>${escMov(r.documento)}</td></tr>`).join('');return `<h3>${titulo}</h3><table class="custody-preview-table"><colgroup><col style="width:6%"><col style="width:32%"><col style="width:14%"><col style="width:23%"><col style="width:25%"></colgroup><thead><tr><th>Nº</th><th>NOME</th><th>RGI</th><th>${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${rows.length}</div>`;};
- return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO DIA ${escMov(String(dataExtenso||'DATA NÃO INFORMADA').toLocaleUpperCase('pt-BR'))}</h2>${tabela('entrada','ENTRADA DE CUSTODIADOS')}${tabela('saida','SAÍDA DE CUSTODIADOS')}</section>`;
+ const entradas=lerMovimentacoes('entrada').filter(r=>r.nome||r.rgi||r.procedencia||r.documento);
+ const saidas=lerMovimentacoes('saida').filter(r=>r.nome||r.rgi||r.procedencia||r.documento);
+ const totalEntradas=entradas.length,totalSaidas=saidas.length;
+ const qtdCampo=document.getElementById('quantidadeCustodiados');
+ const finalItem01=qtdCampo?Number(qtdCampo.value||0):0;
+ // O saldo final editado no Item 01 é a fonte oficial do encerramento.
+ // Quando houver saldo inicial informado, a movimentação apresenta os totais sem sobrescrever a correção manual.
+ const inicialSalvo=window.cpaigSaldoInicialMovimentacao;
+ const inicial=(inicialSalvo!==undefined&&inicialSalvo!==null&&inicialSalvo!=='')?Number(inicialSalvo):Math.max(0,finalItem01-totalEntradas+totalSaidas);
+ const final=(window.cpaigSaldoFinalMovimentacao!==undefined&&window.cpaigSaldoFinalMovimentacao!==null&&window.cpaigSaldoFinalMovimentacao!=='')?Number(window.cpaigSaldoFinalMovimentacao):finalItem01;
+ const tabela=(tipo,titulo,rows)=>{const trs=rows.map((r,i)=>`<tr><td style="text-align:center">${i+1}.</td><td>${escMov(r.nome)}</td><td>${escMov(r.rgi)}</td><td>${escMov(r.procedencia)}</td><td>${escMov(r.documento)}</td></tr>`).join('');return `<h3>${titulo}</h3><table class="custody-preview-table"><colgroup><col style="width:5%"><col style="width:32%"><col style="width:13%"><col style="width:25%"><col style="width:25%"></colgroup><thead><tr><th></th><th colspan="4" style="text-align:center">${titulo}</th></tr><tr><th></th><th>NOME</th><th>RGI</th><th>${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th>DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total">TOTAL ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: <strong>${String(rows.length).padStart(2,'0')}</strong></div>`;};
+ const data=escMov(String(dataExtenso||'DATA NÃO INFORMADA').toLocaleUpperCase('pt-BR'));
+ const recebe=$('recebePlantao')?.value||$('recebePlantao')?.dataset.pendingName||'________________';
+ const entrega=$('entregaPlantao')?.value||$('entregaPlantao')?.dataset.pendingName||'________________';
+ const dataEncerramento=(typeof dataRelatorioPorExtenso==='function'?dataRelatorioPorExtenso():data);
+ const quantidadeExtenso=numeroExtensoMovimentacao(final);
+ const textoEncerramento=`Eu, ${escMov(entrega)}, encerro as atividades deste plantão e passo para ${escMov(recebe)}, em ${escMov(dataEncerramento)}, às 08h, com o efetivo carcerário de ${final} (${escMov(quantidadeExtenso)}) custodiados, já incluídos neste quantitativo os custodiados em trânsitos, com material carga completo e sem alteração.`;
+ return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><div class="movement-initial"><strong><u>INICIAL / RECEBI:</u></strong> ${inicial}</div>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<div class="movement-final"><strong><u>FINAL / PASSO:</u></strong> ${final}</div><p class="movement-closing">${textoEncerramento}</p><div class="movement-signature">${escMov(entrega)}<br><em>Policial Penal</em><br>Chefe de Equipe</div></section>`;
 }
 
 // Inicialização do editor de documentos do Item 35 a partir do conteúdo salvo.
