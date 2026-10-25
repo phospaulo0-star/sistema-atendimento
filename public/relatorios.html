@@ -236,7 +236,7 @@
 
 /* IMPRESSÃO CPAIG: elementos fixos alinhados ao limite da página */
 @media print {
-  @page { size: A4 portrait; margin: 30mm 18mm 22mm 18mm; }
+  @page { size: A4 portrait; margin: 35mm 18mm 17mm 18mm; }
   html, body { margin: 0 !important; padding: 0 !important; }
   body.preview-mode #previewPanel {
     display:block !important; margin:0 !important; padding:0 !important;
@@ -250,7 +250,7 @@
   }
   body.preview-mode #previewContent .preview-letterhead {
     position:fixed !important;
-    top:0 !important; left:0 !important; right:0 !important;
+    top:-5mm !important; left:0 !important; right:0 !important;
     height:25mm !important; margin:0 !important; padding:0 !important;
     display:grid !important;
     grid-template-columns:18mm minmax(0,1fr) 18mm !important;
@@ -268,7 +268,7 @@
   }
   body.preview-mode #previewContent .preview-footer {
     position:fixed !important;
-    top:auto !important; bottom:0 !important; left:0 !important; right:0 !important;
+    top:auto !important; bottom:-5mm !important; left:0 !important; right:0 !important;
     display:block !important; margin:0 !important; padding:2mm 0 0 !important;
     background:#fff !important; color:#000 !important; border-top:.3mm solid #777 !important;
     text-align:center !important; font-size:7pt !important; line-height:1.1 !important;
