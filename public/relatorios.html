@@ -314,50 +314,57 @@
   * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
 }
 
-/* AJUSTE FINAL: reservar faixas exclusivas para cabeçalho e rodapé em cada folha impressa */
+/* AJUSTE DEFINITIVO DE IMPRESSÃO: reservar áreas próprias para cabeçalho, corpo e rodapé */
 @media print {
-  @page { size: A4 portrait; margin: 25mm 18mm 21mm 18mm !important; }
-  html, body { margin:0 !important; padding:0 !important; background:#fff !important; }
+  @page { size: A4 portrait; margin: 25mm 18mm 19mm 18mm !important; }
+  html, body { background:#fff !important; color:#000 !important; margin:0 !important; padding:0 !important; height:auto !important; overflow:visible !important; }
+  body.preview-mode #editor,
+  body.preview-mode #reportsPanel,
+  body.preview-mode .preview-actions,
+  body.preview-mode .toolbar,
+  body.preview-mode .status,
+  body.preview-mode .no-print,
+  body.preview-mode .preview-return-wrap { display:none !important; }
+  body.preview-mode .wrap,
   body.preview-mode #previewPanel,
-  body.preview-mode #previewContent,
-  body.preview-mode .preview-document {
-    margin:0 !important; padding:0 !important; width:100% !important;
-    max-width:100% !important; overflow:visible !important; height:auto !important;
-  }
+  body.preview-mode #previewContent { display:block !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; background:#fff !important; overflow:visible !important; }
+  body.preview-mode .preview-document { display:block !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; overflow:visible !important; font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; color:#000 !important; }
+  /* Cabeçalho fixo dentro da faixa superior reservada pelo @page. */
   body.preview-mode #previewContent .preview-letterhead {
-    position:fixed !important; top:-21mm !important; left:0 !important; right:0 !important;
-    width:100% !important; height:16mm !important; min-height:16mm !important;
-    margin:0 !important; padding:0 !important; box-sizing:border-box !important;
-    display:grid !important; grid-template-columns:14mm minmax(0,1fr) 14mm !important;
-    align-items:center !important; gap:2mm !important;
-    background:#fff !important; color:#000 !important; z-index:10 !important;
+    position:fixed !important; top:2mm !important; left:18mm !important; right:18mm !important;
+    width:auto !important; height:17mm !important; min-height:17mm !important; max-height:17mm !important;
+    margin:0 !important; padding:0 !important; display:grid !important;
+    grid-template-columns:14mm minmax(0,1fr) 14mm !important; gap:2mm !important;
+    align-items:center !important; background:#fff !important; color:#000 !important; z-index:1000 !important;
     break-inside:avoid !important; page-break-inside:avoid !important;
   }
-  body.preview-mode #previewContent .preview-letterhead .preview-logo {
-    display:block !important; width:12mm !important; height:13mm !important;
-    max-height:13mm !important; object-fit:contain !important; visibility:visible !important;
-  }
+  body.preview-mode #previewContent .preview-letterhead .preview-logo { display:block !important; width:12mm !important; height:15mm !important; max-height:15mm !important; object-fit:contain !important; opacity:1 !important; visibility:visible !important; filter:none !important; }
   body.preview-mode #previewContent .preview-letterhead-text,
-  body.preview-mode #previewContent .preview-letterhead-text div {
-    display:block !important; font-size:6pt !important; line-height:1.05 !important;
-    white-space:nowrap !important; text-align:center !important; color:#000 !important;
-  }
+  body.preview-mode #previewContent .preview-letterhead-text div { display:block !important; font-family:Arial,Helvetica,sans-serif !important; font-size:5.8pt !important; line-height:1.05 !important; letter-spacing:0 !important; white-space:nowrap !important; text-align:center !important; color:#000 !important; }
+  /* O corpo começa dentro da área útil, abaixo do cabeçalho; não usa posicionamento fixo. */
+  body.preview-mode .preview-archive { position:static !important; margin:0 0 5mm !important; padding:0 !important; }
+  body.preview-mode .preview-title { position:static !important; margin:0 0 5mm !important; padding:0 !important; }
+  body.preview-mode .preview-title h2 { margin:0 !important; font-size:11pt !important; }
+  body.preview-mode .preview-section { color:#000 !important; margin:0 0 3mm !important; break-inside:auto !important; page-break-inside:auto !important; }
+  body.preview-mode .preview-section h3 { font-family:"Times New Roman",Times,serif !important; font-size:10.5pt !important; line-height:1.12 !important; margin:0 0 1mm !important; break-after:avoid-page !important; page-break-after:avoid !important; }
+  body.preview-mode .preview-section .preview-text { font-family:"Times New Roman",Times,serif !important; font-size:10.5pt !important; line-height:1.12 !important; white-space:pre-wrap !important; overflow-wrap:anywhere !important; }
+  body.preview-mode #previewContent table { max-width:100% !important; break-inside:auto !important; page-break-inside:auto !important; }
+  body.preview-mode #previewContent tr { break-inside:avoid !important; page-break-inside:avoid !important; }
+  /* Rodapé fixo dentro da faixa inferior reservada pelo @page. */
   body.preview-mode #previewContent .preview-footer {
-    position:fixed !important; left:0 !important; right:0 !important; bottom:-17mm !important;
-    width:100% !important; min-height:12mm !important; margin:0 !important;
-    padding:1.5mm 0 0 !important; box-sizing:border-box !important;
-    border-top:.25mm solid #777 !important; background:#fff !important; color:#000 !important;
-    text-align:center !important; font-size:6pt !important; line-height:1.1 !important;
-    z-index:10 !important; break-inside:avoid !important; page-break-inside:avoid !important;
+    position:fixed !important; left:18mm !important; right:18mm !important; bottom:2mm !important;
+    width:auto !important; height:10mm !important; margin:0 !important; padding:1.5mm 0 0 !important;
+    display:block !important; border-top:.25mm solid #777 !important; background:#fff !important;
+    color:#000 !important; text-align:center !important; font-family:Arial,Helvetica,sans-serif !important;
+    font-size:5.5pt !important; line-height:1.1 !important; z-index:1000 !important;
   }
-  body.preview-mode #previewContent .preview-footer .page-current:after,
-  body.preview-mode #previewContent .preview-footer .page-total:after { content:"" !important; }
-  body.preview-mode .preview-return-wrap,
-  body.preview-mode .preview-actions { display:none !important; }
-  body.preview-mode .preview-section { orphans:2; widows:2; }
-  body.preview-mode .preview-section h3 { break-after:avoid-page; page-break-after:avoid; }
-  body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; }
-  body.preview-mode .movement-signature { break-inside:avoid !important; page-break-inside:avoid !important; }
+  body.preview-mode #previewContent .preview-footer .page-number { margin-top:1mm !important; font-size:6pt !important; text-align:right !important; }
+  body.preview-mode #previewContent .preview-footer .page-current:after { content:counter(page) !important; }
+  body.preview-mode #previewContent .preview-footer .page-total:after { content:counter(pages) !important; }
+  body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; min-height:0 !important; width:100% !important; max-width:100% !important; }
+  body.preview-mode .movement-signature { text-align:center !important; break-inside:avoid !important; page-break-inside:avoid !important; }
+  body.preview-mode .movement-closing { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.2 !important; }
+  * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
 }
 
 </style></head><body>
