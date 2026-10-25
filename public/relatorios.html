@@ -236,7 +236,17 @@
 
 /* IMPRESSÃO CPAIG — posição estável: cabeçalho e rodapé nos limites da página */
 @media print {
-  @page { size: A4 portrait; margin: 11mm 12mm 9mm 12mm; }
+  @page {
+    size: A4 portrait;
+    margin: 11mm 12mm 12mm 12mm;
+    /* Contagem nativa do navegador: não depende de spans no conteúdo. */
+    @bottom-right {
+      content: "Página " counter(page) " de " counter(pages);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 7pt;
+      color: #000;
+    }
+  }
   html, body { margin:0 !important; padding:0 !important; }
   body.preview-mode #previewPanel {
     display:block !important; margin:0 !important; padding:0 !important;
@@ -278,8 +288,9 @@
     text-align:center !important; font-size:5.5pt !important; line-height:1.1 !important;
     z-index:auto !important; break-inside:avoid-page; page-break-inside:avoid;
   }
-  body.preview-mode #previewContent .preview-footer .page-current:after { content:counter(page) !important; }
-  body.preview-mode #previewContent .preview-footer .page-total:after { content:counter(pages) !important; }
+  /* A numeração fica no rodapé nativo de cada página. Oculta o contador antigo,
+     que em navegadores sem suporte resultava em Página 0 de 0. */
+  body.preview-mode #previewContent .preview-footer .page-number { display:none !important; }
   body.preview-mode .preview-return-wrap { display:none !important; }
   body.preview-mode .movement-page { min-height:0 !important; }
 }
