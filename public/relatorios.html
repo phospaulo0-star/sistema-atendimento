@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relatórios de Plantão — CPAIG</title>
 <style>
-:root{--gold:#d1b34f;--ink:#17191c;--paper:#f2f4f6;--line:#d7dce2;--muted:#66717c;--green:#176a35;--red:#9c2222;--blue:#145da0}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:#20252b;font:14px Arial,Helvetica,sans-serif}header{background:var(--ink);color:white;padding:18px 22px;border-bottom:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}header h1{font-size:21px;margin:0}header p{margin:6px 0 0;color:#eee}header strong{display:block;color:#f6d348;margin-top:5px;letter-spacing:.08em}.wrap{max-width:1200px;margin:20px auto;padding:0 14px}.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.meta{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:10px;margin-top:14px}.field label{display:block;font-weight:bold;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;font:inherit;border:1px solid #bbc3cc;border-radius:6px;padding:10px;background:white}.field textarea{min-height:68px;resize:vertical;line-height:1.4}.field textarea:focus,.field input:focus,.field select:focus{outline:2px solid #d1b34f55;border-color:var(--gold)}button{border:0;border-radius:7px;padding:10px 14px;font-weight:bold;cursor:pointer;background:#30353b;color:white}button.primary{background:var(--gold);color:#171717}button.blue{background:var(--blue)}button.red{background:var(--red)}button:disabled{opacity:.5;cursor:wait}.status{padding:10px;border-radius:7px;background:#eef5fc;color:#244d76;margin:12px 0}.status.good{background:#e8f6ec;color:var(--green)}.status.bad{background:#fff0f0;color:var(--red)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{min-width:0}.item01-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.item01-field .field label{font-size:12px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.small{font-size:12px;color:var(--muted)}.list{display:grid;gap:8px}.report-item{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);padding:10px;border-radius:7px}.report-item button{padding:7px 10px}.hidden{display:none!important}#previewPanel{background:#fff}.preview-document{font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.15;color:#000;max-width:100%;margin:0 auto}.preview-letterhead{text-align:center;line-height:1.15;font-size:10.5pt;margin:0 0 18px}.preview-letterhead div{margin:0}.preview-archive{text-align:right;font-size:10pt;margin:0 0 18px}.preview-title{text-align:center;margin:0 0 18px;padding:0;border:0}.preview-title h2{font-family:"Times New Roman",Times,serif;font-size:12pt;margin:0;font-weight:bold}.preview-meta{display:none}.preview-section{margin:0 0 11px;break-inside:avoid;page-break-inside:avoid}.preview-section h3{font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.15;margin:0 0 4px;padding:0;border:0;font-weight:bold}.preview-section .preview-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.15;min-height:0;padding-left:12px}.preview-section.item01-justified .preview-text{text-align:justify;text-align-last:left}.preview-footer{border-top:1px solid #777;margin-top:22px;padding-top:5px;text-align:center;font-size:8.5pt;line-height:1.15}.preview-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.preview-mode #editor{display:none!important}.preview-mode #previewPanel{display:block!important}@page{size:A4 portrait;margin:2cm 2cm 1.8cm 2.5cm}.team02-row{display:grid;grid-template-columns:54px minmax(130px,1fr) minmax(160px,2fr) auto;gap:8px;align-items:center;margin:7px 0}.team02-row input{width:100%;font:inherit;border:1px solid #bbc3cc;border-radius:6px;padding:9px;background:white}.team02-row .team02-num{font-weight:bold;text-align:right}.team02-row button{padding:8px 10px}.team02-print{white-space:pre-wrap}.team02-preview-line{margin:0 0 1px 5px;white-space:pre-wrap}@media(max-width:650px){.team02-row{grid-template-columns:38px 1fr}.team02-row .team02-name{grid-column:2}.team02-row button{grid-column:2;justify-self:start}}@media print{body.preview-mode #editor{display:none!important}body.preview-mode #previewPanel{display:block!important}body.preview-mode #previewPanel .preview-actions{display:none!important}body.preview-mode #previewPanel{padding:0!important;margin:0!important;border:0!important;box-shadow:none!important}body.preview-mode .preview-document{width:100%;max-width:none;font-size:11pt}body.preview-mode .preview-section{break-inside:auto;page-break-inside:auto}body.preview-mode .preview-footer{position:static}body.preview-mode .preview-title,body.preview-mode .preview-letterhead,body.preview-mode .preview-section{color:#000}body.preview-mode .preview-section h3{border:0}}@media(max-width:800px){.meta,.grid,.item01-grid{grid-template-columns:1fr}.report-item{align-items:flex-start;flex-direction:column}}@media print{header,.no-print,#reportsPanel,.toolbar,.status{display:none!important}body{background:white}.wrap{max-width:none;margin:0;padding:0}.panel{border:0;padding:0}.grid{display:block}.field textarea{border:0;min-height:0;white-space:pre-wrap;padding:4px 0;resize:none;overflow:visible}.field{break-inside:avoid;margin-bottom:10px}input,select{border:0!important;padding:0!important}}
+:root{--gold:#d1b34f;--ink:#17191c;--paper:#f2f4f6;--line:#d7dce2;--muted:#66717c;--green:#176a35;--red:#9c2222;--blue:#145da0}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:#20252b;font:14px Arial,Helvetica,sans-serif}header{background:var(--ink);color:white;padding:18px 22px;border-bottom:4px solid var(--gold);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}header h1{font-size:21px;margin:0}header p{margin:6px 0 0;color:#eee}header strong{display:block;color:#f6d348;margin-top:5px;letter-spacing:.08em}.wrap{max-width:1200px;margin:20px auto;padding:0 14px}.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.meta{display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:10px;margin-top:14px}.field label{display:block;font-weight:bold;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;font:inherit;border:1px solid #bbc3cc;border-radius:6px;padding:10px;background:white}.field textarea{min-height:68px;resize:vertical;line-height:1.4}.field textarea:focus,.field input:focus,.field select:focus{outline:2px solid #d1b34f55;border-color:var(--gold)}button{border:0;border-radius:7px;padding:10px 14px;font-weight:bold;cursor:pointer;background:#30353b;color:white}button.primary{background:var(--gold);color:#171717}button.blue{background:var(--blue)}button.red{background:var(--red)}button:disabled{opacity:.5;cursor:wait}.status{padding:10px;border-radius:7px;background:#eef5fc;color:#244d76;margin:12px 0}.status.good{background:#e8f6ec;color:var(--green)}.status.bad{background:#fff0f0;color:var(--red)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{min-width:0}.item01-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.item01-field .field label{font-size:12px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.small{font-size:12px;color:var(--muted)}.list{display:grid;gap:8px}.report-item{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);padding:10px;border-radius:7px}.report-item button{padding:7px 10px}.hidden{display:none!important}#previewPanel{background:#fff}.preview-document{font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.15;color:#000;max-width:100%;margin:0 auto}.preview-letterhead{text-align:center;line-height:1.15;font-size:10.5pt;margin:0 0 18px}.preview-letterhead div{margin:0}.preview-archive{text-align:right;font-size:10pt;margin:0 0 18px}.preview-title{text-align:center;margin:0 0 18px;padding:0;border:0}.preview-title h2{font-family:"Times New Roman",Times,serif;font-size:12pt;margin:0;font-weight:bold}.preview-meta{display:none}.preview-section{margin:0 0 11px;break-inside:avoid;page-break-inside:avoid}.preview-section h3{font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.15;margin:0 0 4px;padding:0;border:0;font-weight:bold}.preview-section .preview-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.15;min-height:0;padding-left:12px}.preview-section.item01-justified .preview-text{text-align:justify;text-align-last:left}.preview-footer{border-top:1px solid #777;margin-top:22px;padding-top:5px;text-align:center;font-size:8.5pt;line-height:1.15}.item40-preview{font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.4;color:#111}.preview-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.preview-mode #editor{display:none!important}.preview-mode #previewPanel{display:block!important}@page{size:A4 portrait;margin:2cm 2cm 1.8cm 2.5cm}.team02-row{display:grid;grid-template-columns:54px minmax(130px,1fr) minmax(160px,2fr) auto;gap:8px;align-items:center;margin:7px 0}.team02-row input{width:100%;font:inherit;border:1px solid #bbc3cc;border-radius:6px;padding:9px;background:white}.team02-row .team02-num{font-weight:bold;text-align:right}.team02-row button{padding:8px 10px}.team02-print{white-space:pre-wrap}.team02-preview-line{margin:0 0 1px 5px;white-space:pre-wrap}@media(max-width:650px){.team02-row{grid-template-columns:38px 1fr}.team02-row .team02-name{grid-column:2}.team02-row button{grid-column:2;justify-self:start}}@media print{body.preview-mode #editor{display:none!important}body.preview-mode #previewPanel{display:block!important}body.preview-mode #previewPanel .preview-actions{display:none!important}body.preview-mode #previewPanel{padding:0!important;margin:0!important;border:0!important;box-shadow:none!important}body.preview-mode .preview-document{width:100%;max-width:none;font-size:11pt}body.preview-mode .preview-section{break-inside:auto;page-break-inside:auto}body.preview-mode .preview-footer{position:static}body.preview-mode .preview-title,body.preview-mode .preview-letterhead,body.preview-mode .preview-section{color:#000}body.preview-mode .preview-section h3{border:0}}@media(max-width:800px){.meta,.grid,.item01-grid{grid-template-columns:1fr}.report-item{align-items:flex-start;flex-direction:column}}@media print{header,.no-print,#reportsPanel,.toolbar,.status{display:none!important}body{background:white}.wrap{max-width:none;margin:0;padding:0}.panel{border:0;padding:0}.grid{display:block}.field textarea{border:0;min-height:0;white-space:pre-wrap;padding:4px 0;resize:none;overflow:visible}.field{break-inside:avoid;margin-bottom:10px}input,select{border:0!important;padding:0!important}}
 
 /* Cabeçalho institucional conforme modelo Word */
 .preview-letterhead{display:grid;grid-template-columns:58px minmax(0,1fr) 58px;align-items:center;gap:4px;text-align:center;font-family:Arial,Helvetica,sans-serif;font-size:7.2pt;font-style:italic;font-weight:bold;color:#858585;line-height:1.15;margin:0 0 10px}
@@ -227,6 +227,54 @@
  body.preview-mode .preview-document{padding-top:1mm;padding-bottom:2mm}
  body.preview-mode .movement-page{break-before:page;page-break-before:always;min-height:245mm}
  body.preview-mode .movement-signature{break-inside:avoid;page-break-inside:avoid}
+}
+
+
+/* CORREÇÃO DE IMPRESSÃO: cabeçalho e rodapé repetidos em cada folha */
+@media print {
+  @page { size: A4 portrait; margin: 23mm 18mm 25mm 18mm; }
+  html, body { margin: 0 !important; padding: 0 !important; }
+  body.preview-mode #previewPanel { display: block !important; }
+  body.preview-mode #previewContent { display: block !important; }
+  body.preview-mode .preview-document {
+    width: 100% !important; max-width: none !important;
+    margin: 0 !important; padding: 0 !important;
+    overflow: visible !important;
+  }
+  body.preview-mode .preview-letterhead {
+    position: fixed !important; top: -20mm !important;
+    left: 0 !important; right: 0 !important;
+    height: 18mm !important; margin: 0 !important;
+    padding: 0 !important; background: #fff !important;
+    z-index: 9999 !important; display: grid !important;
+    grid-template-columns: 18mm minmax(0,1fr) 18mm !important;
+    align-items: center !important; gap: 2mm !important;
+    font-size: 8pt !important; line-height: 1.05 !important;
+  }
+  body.preview-mode .preview-letterhead .preview-logo {
+    display: block !important; width: 15mm !important;
+    height: 17mm !important; object-fit: contain !important;
+    filter: none !important;
+  }
+  body.preview-mode .preview-letterhead-text,
+  body.preview-mode .preview-letterhead-text div {
+    white-space: nowrap !important; font-size: 7pt !important;
+    line-height: 1.05 !important; margin: 0 !important;
+  }
+  body.preview-mode .preview-footer {
+    position: fixed !important; bottom: -22mm !important;
+    left: 0 !important; right: 0 !important;
+    display: block !important; margin: 0 !important;
+    padding: 2mm 0 0 !important; background: #fff !important;
+    border-top: .3mm solid #777 !important;
+    text-align: center !important; font-size: 7pt !important;
+    line-height: 1.1 !important; z-index: 9999 !important;
+  }
+  body.preview-mode .preview-footer .page-current:after { content: counter(page) !important; }
+  body.preview-mode .preview-footer .page-total:after { content: counter(pages) !important; }
+  body.preview-mode .preview-section { max-width: 100% !important; }
+  body.preview-mode .movement-page { min-height: 0 !important; }
+  body.preview-mode .preview-return-wrap { display: none !important; }
 }
 
 </style></head><body>
@@ -497,7 +545,7 @@
 </section>
 <section class="field item38-field"><label>38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE</label><p class="small">Os campos padrão permitem informar o número da OF e da CI. Use “ADICIONAR OUTRO DOCUMENTO” para incluir outras frases ou documentos livremente.</p><div id="item38Container"></div><div class="toolbar no-print" style="margin-top:8px"><button type="button" onclick="adicionarItem38('outro')">＋ ADICIONAR OUTRO DOCUMENTO</button></div><textarea id="s37" data-section="38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE" rows="3" class="no-print" style="display:none"></textarea></section>
 <section class="field item39-field"><label>39 – INFORMAÇÕES</label><p class="small">As informações do relatório anterior da mesma equipe são carregadas para você editar. Cada informação aparece com uma bolinha (•); você pode acrescentar ou excluir itens.</p><div id="item39Container"></div><div class="toolbar no-print" style="margin-top:8px"><button type="button" onclick="adicionarItem39()">＋ ACRESCENTAR INFORMAÇÃO</button></div><textarea id="s38" data-section="39 – INFORMAÇÕES" rows="3" class="no-print" style="display:none"></textarea></section>
-<section class="field"><label for="s39">40 – ENCERRAMENTO</label><textarea id="s39" data-section="40 – ENCERRAMENTO" rows="3" placeholder="Preencha esta seção do relatório..."></textarea></section></div></section>
+<section class="field item40-field"><label>40 – ENCERRAMENTO</label><p class="small">O texto é montado automaticamente com os nomes selecionados, a data do encerramento e o saldo FINAL / PASSO. Selecione “Sim” somente quando houver substituição.</p><div class="item01-grid"><div class="field"><label for="item40Entrega">QUEM ENCERRA O PLANTÃO</label><select id="item40Entrega"><option value="">Selecione o policial</option></select></div><div class="field"><label for="item40Substitui">EM SUBSTITUIÇÃO A OUTRO POLICIAL?</label><select id="item40Substitui"><option value="nao">Não</option><option value="sim">Sim</option></select></div></div><div class="field" id="item40SubstituidoWrap" style="display:none;margin-top:10px"><label for="item40Substituido">NOME DO POLICIAL SUBSTITUÍDO</label><input id="item40Substituido" type="text" placeholder="Nome do policial substituído"></div><div class="field" style="margin-top:10px"><label for="item40Recebe">QUEM RECEBE O PLANTÃO</label><select id="item40Recebe"><option value="">Selecione o policial</option></select></div><div class="item40-preview" id="item40Texto" style="margin-top:12px;border:1px solid #bbc3cc;border-radius:6px;padding:12px;background:#f8f9fa;white-space:pre-wrap">O texto de encerramento aparecerá aqui.</div><textarea id="s39" data-section="40 – ENCERRAMENTO" rows="3" class="no-print" style="display:none" aria-hidden="true"></textarea></section></div></section>
 <section class="panel hidden" id="previewPanel"><div class="preview-actions no-print"><button onclick="voltarEdicao()">✏️ VOLTAR À EDIÇÃO</button><button class="blue" onclick="window.print()">🖨️ IMPRIMIR RELATÓRIO</button></div><div id="previewContent"></div></section>
 <section class="panel hidden" id="historyPanel"><div class="section-head"><h2>Histórico de alterações</h2><button onclick="$('historyPanel').classList.add('hidden')">FECHAR HISTÓRICO</button></div><div id="historyList"></div></section></main>
 <script>
@@ -926,7 +974,7 @@ function preencherViaturas(){
  if(!viaturas.length)viaturas=VIATURAS_PADRAO.map(r=>({...r}));
  renderViaturas();sincronizarViaturas();
 }
-function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof renderListaTroca==='function')renderListaTroca();if(typeof carregarLicencaJudicial==='function')carregarLicencaJudicial($('s27').value);if(typeof carregarRetornoLicencaJudicial==='function')carregarRetornoLicencaJudicial($('s28a').value);if(typeof carregarItem36DoTexto==='function')carregarItem36DoTexto($('s35').value);if(typeof carregarItem37DoTexto==='function')carregarItem37DoTexto($('s36').value);if(typeof carregarItem38DoTexto==='function')carregarItem38DoTexto($('s37').value);if(typeof carregarItem39DoTexto==='function')carregarItem39DoTexto($('s38').value);if(typeof lerDocumentosManuaisItem35==='function'){lerDocumentosManuaisItem35();renderEditorItem35()}}
+function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof atualizarItem40==='function')atualizarItem40();if(typeof renderListaTroca==='function')renderListaTroca();if(typeof carregarLicencaJudicial==='function')carregarLicencaJudicial($('s27').value);if(typeof carregarRetornoLicencaJudicial==='function')carregarRetornoLicencaJudicial($('s28a').value);if(typeof carregarItem36DoTexto==='function')carregarItem36DoTexto($('s35').value);if(typeof carregarItem37DoTexto==='function')carregarItem37DoTexto($('s36').value);if(typeof carregarItem38DoTexto==='function')carregarItem38DoTexto($('s37').value);if(typeof carregarItem39DoTexto==='function')carregarItem39DoTexto($('s38').value);if(typeof lerDocumentosManuaisItem35==='function'){lerDocumentosManuaisItem35();renderEditorItem35()}}
 function lerItem01DoTexto(){const texto=$('s0').value||'';let recebe='',entrega='',quantidade='';const extras=[];texto.split('\n').forEach(linha=>{const m1=linha.match(/^\s*QUEM RECEBE O PLANTÃO:\s*(.*)$/i);const m2=linha.match(/^\s*QUEM ENTREGA O PLANTÃO:\s*(.*)$/i);const mq=linha.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*(\d*)\s*$/i);if(m1)recebe=m1[1].trim();else if(m2)entrega=m2[1].trim();else if(mq)quantidade=mq[1];else if(linha.trim())extras.push(linha)});$('recebePlantao').dataset.pendingName=recebe;$('entregaPlantao').dataset.pendingName=entrega;$('quantidadeCustodiados').value=quantidade;$('s0Extra').value=extras.join('\n');atualizarQuantidadeExtenso();aplicarSelecoesItem01()}
 function aplicarSelecoesItem01(){for(const id of ['recebePlantao','entregaPlantao']){const el=$(id);const pending=el.dataset.pendingName||'';if(pending&&![...el.options].some(o=>o.value===pending)){const op=document.createElement('option');op.value=pending;op.textContent=pending+' (nome salvo anteriormente)';el.appendChild(op)}if(pending)el.value=pending;delete el.dataset.pendingName}}
 function numeroPorExtenso(n){n=Number(n);if(!Number.isInteger(n)||n<0||n>999999999)return '';if(n===0)return 'zero';const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove'];const teen=['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];function a999(x){if(x===0)return '';if(x===100)return 'cem';if(x<10)return u[x];if(x<20)return teen[x-10];if(x<100)return d[Math.floor(x/10)]+(x%10?' e '+u[x%10]:'');return c[Math.floor(x/100)]+(x%100?' e '+a999(x%100):'')}const grupos=[];let x=n;while(x>0){grupos.unshift(x%1000);x=Math.floor(x/1000)}const partes=[];for(let i=0;i<grupos.length;i++){const g=grupos[i];if(!g)continue;const ordem=grupos.length-1-i;let parte=a999(g);if(ordem===1)parte=g===1?'mil':parte+' mil';else if(ordem===2)parte=g===1?'um milhão':parte+' milhões';else if(ordem===3)parte=g===1?'um bilhão':parte+' bilhões';partes.push(parte)}return partes.join(', ')}
@@ -1427,6 +1475,12 @@ $('heDeleteSharedBtn').addEventListener('click', excluirNomeListaCompartilhadaHE
 $('heSelectBtn').addEventListener('click', selecionarNomeHE);
 $('heSeedBtn').addEventListener('click', cadastrarListaPadraoEquipeC);function renderList(){const root=$('reportsList');if(!reports.length){root.innerHTML='<p class="small">Nenhum relatório cadastrado para esta equipe.</p>';return}root.innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="abrir('${esc(r.id)}')">${r.id===current?.id?'ABERTO':'ABRIR'}</button></div>`).join('')}
 async function api(url,options={}){const res=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let j={};try{j=await res.json()}catch{}if(!res.ok){const e=new Error(j.message||'Falha na comunicação com o servidor.');e.status=res.status;e.data=j;throw e}return j}
+function numeroPorExtensoEncerramento(valor){const n=Number(valor);if(!Number.isFinite(n)||n<0)return '';if(typeof numeroPorExtenso==='function')return numeroPorExtenso(n);return String(n)}
+function preencherOpcoesItem40(){for(const id of ['item40Entrega','item40Recebe']){const el=$(id);if(!el||el.options.length>1)continue;const origem=$('recebePlantao');if(origem){[...origem.options].slice(1).forEach(o=>{const op=document.createElement('option');op.value=o.value;op.textContent=o.textContent;el.appendChild(op)})}const origem2=$('entregaPlantao');if(origem2){[...origem2.options].slice(1).forEach(o=>{if(![...el.options].some(x=>x.value===o.value)){const op=document.createElement('option');op.value=o.value;op.textContent=o.textContent;el.appendChild(op)}})}}}
+function dataEncerramentoFormatada(){const d=$('reportDate').value;if(!d)return 'DATA NÃO INFORMADA';const dt=new Date(d+'T12:00:00');dt.setDate(dt.getDate()+1);return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}
+function textoEncerramentoItem40(){const entrega=$('item40Entrega')?.value||$('entregaPlantao')?.value||$('entregaPlantao')?.dataset.pendingName||'________________';const recebe=$('item40Recebe')?.value||$('recebePlantao')?.value||$('recebePlantao')?.dataset.pendingName||'________________';const substitui=$('item40Substitui')?.value==='sim';const nomeSub=($('item40Substituido')?.value||'').trim();const qtd=(window.cpaigSaldoFinalMovimentacao!==undefined&&window.cpaigSaldoFinalMovimentacao!==null&&window.cpaigSaldoFinalMovimentacao!=='')?Number(window.cpaigSaldoFinalMovimentacao):Number($('quantidadeCustodiados')?.value||0);const ext=numeroPorExtensoEncerramento(qtd);const fraseSub=substitui?`, em substituição a ${nomeSub||'________________'}`:'';return `Eu, ${entrega}${fraseSub}, encerro o plantão e passo para ${recebe}, em ${dataEncerramentoFormatada()}, às 08h, com o efetivo carcerário de ${qtd} (${ext}) custodiados, já incluídos os custodiados em trânsitos, com material carga completo e sem alteração.`}
+function atualizarItem40(){if(!$('item40Texto'))return;preencherOpcoesItem40();$('item40SubstituidoWrap').style.display=$('item40Substitui').value==='sim'?'block':'none';const texto=textoEncerramentoItem40();$('item40Texto').textContent=texto;$('s39').value=texto;window.cpaigTextoEncerramento=texto;}
+function instalarItem40(){['item40Entrega','item40Recebe','item40Substitui','item40Substituido','reportDate','recebePlantao','entregaPlantao','quantidadeCustodiados'].forEach(id=>{const el=$(id);if(el&&!el.dataset.item40Bound){el.addEventListener('input',()=>{atualizarItem40();if(typeof changed==='function')changed()});el.addEventListener('change',()=>{atualizarItem40();if(typeof changed==='function')changed()});el.dataset.item40Bound='1'}});atualizarItem40()}
 async function iniciar(){try{carregarEscalaDiurna('');const j=await api('/api/auth/me');me=j.user;if(!['chefe','auxiliar','admin'].includes(me.role)){location.replace(me.role==='mesa'?'/mesa.html':me.role==='pertences'?'/pertences.html':'/index.html');return}readOnly=me.role==='admin';$('who').textContent=me.fullName+' · '+(readOnly?'ADMINISTRADOR (CONSULTA)':(me.role==='chefe'?'CHEFE':'AUXILIAR')+' · EQUIPE '+me.team);$('team').value=me.team||'Todas';$('newBtn').classList.toggle('hidden',readOnly);$('editor').classList.toggle('hidden',readOnly);$('saveBtn').classList.toggle('hidden',readOnly);$('closeBtn').classList.toggle('hidden',readOnly);$('reopenBtn').classList.toggle('hidden',readOnly);document.querySelectorAll('#reportDate,#shiftName,#title').forEach(el=>el.addEventListener('change',changed));document.querySelectorAll('#editor textarea').forEach(el=>el.addEventListener('input',()=>{changed();if(el.id==='s7'&&typeof renderListaTroca==='function')renderListaTroca()}));$('recebePlantao').addEventListener('change',atualizarTextoItem01);$('entregaPlantao').addEventListener('change',atualizarTextoItem01);$('quantidadeCustodiados').addEventListener('input',atualizarQuantidadeExtenso);$('s0Extra').addEventListener('input',atualizarTextoItem01);$('reportDate').addEventListener('change',()=>atualizarTextoItem01());if(readOnly){$('status').textContent='Modo consulta: o administrador não pode editar relatórios.';$('reportsPanel').querySelector('p').textContent='Consulta de relatórios de todas as equipes A, B, C e D.'}await carregarLista();if(!readOnly){const localNovo=loadLocal();if(localNovo&&!localNovo.id){const match=reports.find(r=>String(r.reportDate||'').slice(0,10)===String(localNovo.reportDate||'').slice(0,10)&&String(r.shiftName||'')===String(localNovo.shiftName||'')&&String(r.team||'').toUpperCase()===String(me.team||'').toUpperCase());if(match){abrir(match.id);const merged={...(match.content||{})};for(const [k,v] of Object.entries(localNovo.content||{})){if(v!==null&&v!==undefined&&String(v).trim()!=='')merged[k]=v;}preencherContent(merged);$('title').value=localNovo.title||match.title||'';$('reportDate').value=localNovo.reportDate||String(match.reportDate).slice(0,10);$('shiftName').value=localNovo.shiftName||match.shiftName;dirty=true;serverChanged=false;localSave();state('Rascunho local recuperado · confira e salve');msg('Recuperei o rascunho local e associei ao relatório já existente. Confira os campos e clique em SALVAR para gravar as alterações.','');$('saveBtn').disabled=false;}else{novoRelatorio();}}else{const first=reports.find(r=>r.status==='aberto')||reports[0];if(first)abrir(first.id);else novoRelatorio()}}refreshTimer=setInterval(poll,5000)}catch(e){msg(e.message,'bad')}}
 async function carregarLista(){try{const j=await api('/api/relatorios');reports=j.reports||[];renderList();if(readOnly){$('reportsList').innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="verAdmin('${esc(r.id)}')">CONSULTAR</button></div>`).join('')||'<p class="small">Nenhum relatório cadastrado.</p>'}return reports}catch(e){msg(e.message,'bad');return []}}
 function novoRelatorio(){if(readOnly)return;current=null;revision=0;dirty=false;const today=new Date();$('reportDate').value=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');$('shiftName').value='Plantão 24x72h';$('title').value='';preencherContent({});copiarMaterialCargaEquipeAnterior();const anteriorEquipe=reports.filter(r=>String(r.team||'').toUpperCase()===String(me?.team||'').toUpperCase()).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||'')))[0];if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['02 – EQUIPE DE PLANTÃO (24x72h)']){const conteudoEquipe=anteriorEquipe.content['02 – EQUIPE DE PLANTÃO (24x72h)'];$('s1').value=conteudoEquipe;carregarEquipe02(conteudoEquipe)}if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['10 – ESCALA DIURNA']){$('s9').value=anteriorEquipe.content['10 – ESCALA DIURNA'];carregarEscalaDiurna($('s9').value)}if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['11 – ESCALA NOTURNA (MONITORAMENTO)']){$('s10').value=anteriorEquipe.content['11 – ESCALA NOTURNA (MONITORAMENTO)'];carregarEscalaNoturna($('s10').value)}if(anteriorEquipe&&anteriorEquipe.content&&anteriorEquipe.content['12 – EXPEDIENTE'])$('s11').value=anteriorEquipe.content['12 – EXPEDIENTE'];if(anteriorEquipe&&anteriorEquipe.content&&String(anteriorEquipe.content['38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE']||'').trim()){const item38Anterior=anteriorEquipe.content['38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE'];$('s37').value=item38Anterior;carregarItem38DoTexto(item38Anterior)}if(anteriorEquipe&&anteriorEquipe.content&&String(anteriorEquipe.content['39 – INFORMAÇÕES']||'').trim()){const item39Anterior=anteriorEquipe.content['39 – INFORMAÇÕES'];$('s38').value=item39Anterior;carregarItem39DoTexto(item39Anterior)}const local=loadLocal();if(local&&!local.id){$('reportDate').value=local.reportDate||$('reportDate').value;$('shiftName').value=local.shiftName||$('shiftName').value;$('title').value=local.title||'';preencherContent(local.content||{});dirty=true;state('Rascunho local recuperado · pendente de sincronização');}$('historyBtn').disabled=true;$('revisionLabel').textContent='Novo relatório';inputsDisabled(false);$('saveBtn').disabled=true;$('closeBtn').disabled=true;msg('Novo relatório. Preencha os campos e salve para criar.');state(navigator.onLine?'Não salvo':'Offline — será guardado localmente');}
@@ -1562,7 +1616,7 @@ function visualizarRelatorio(targetId=null){
   const title=$('title').value.trim()||'RELATÓRIO DE PLANTÃO';
   const todosCampos=[...document.querySelectorAll('#editor [data-section]')];
   const campos=targetId?todosCampos.filter(el=>el.id===targetId):todosCampos;
-  const secoes=campos.map(el=>({titulo:el.dataset.section.replace(/\s*:\s*$/,''),texto:el.id==='s0'?textoFormalItem01():((el.value||'').trim()||PADROES_RELATORIO[el.dataset.section]||'')}));
+  atualizarItem40(); const secoes=campos.map(el=>({titulo:el.dataset.section.replace(/\s*:\s*$/,''),texto:el.id==='s0'?textoFormalItem01():(el.id==='s39'?textoEncerramentoItem40():((el.value||'').trim()||PADROES_RELATORIO[el.dataset.section]||''))}));
   const diaAno=dataObj?Math.floor((Date.UTC(dataObj.getFullYear(),dataObj.getMonth(),dataObj.getDate())-Date.UTC(dataObj.getFullYear(),0,0))/86400000):null;
   const diaMes=dataObj?dataObj.getDate():null;
   const mesExtenso=dataObj?dataObj.toLocaleDateString('pt-BR',{month:'long'}).toLocaleUpperCase('pt-BR'):'';
@@ -1813,423 +1867,4 @@ function gerarPaginaMovimentacao(dataExtenso){
  const dataEncerramento=(typeof dataRelatorioPorExtenso==='function'?dataRelatorioPorExtenso():data);
  const quantidadeExtenso=numeroExtensoMovimentacao(final);
  const textoEncerramento=`Eu, ${escMov(entrega)}, encerro as atividades deste plantão e passo para ${escMov(recebe)}, em ${escMov(dataEncerramento)}, às 08h, com o efetivo carcerário de ${final} (${escMov(quantidadeExtenso)}) custodiados, já incluídos neste quantitativo os custodiados em trânsitos, com material carga completo e sem alteração.`;
- return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><div class="movement-initial"><strong><u>INICIAL / RECEBI:</u></strong> ${inicial}</div>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<div class="movement-final"><strong><u>FINAL / PASSO:</u></strong> ${final}</div><p class="movement-closing">${textoEncerramento}</p><div class="movement-signature">${escMov(entrega)}<br><em>Policial Penal</em><br>Chefe de Equipe</div></section>`;
-}
-
-// Inicialização do editor de documentos do Item 35 a partir do conteúdo salvo.
-setTimeout(()=>{lerDocumentosManuaisItem35();renderEditorItem35();},0);
-
-window.addEventListener('online',async()=>{state('Conexão retornou · sincronizando…');if(dirty)await salvar('salvar');await carregarLista()});window.addEventListener('beforeunload',e=>{if(dirty){localSave();e.preventDefault();e.returnValue=''}});
-async function sair(){try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}finally{location.replace('/login.html')}}
-instalarBotoesVisualizarItens();
-iniciar().then(() => { prepararMovimentacoes(); instalarBotoesVisualizarItens(); return carregarNomesHE(); });
-
-let vistoriasCela=[], vistoriaCelaSeq=0;
-function escVistoria(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function textoVistoria(v){
- if(v.tipo==='nc')return 'N/C.';
- const c=(v.celas||'').trim()||'[informar cela(s)]', p=(v.pavilhao||'').trim()||'[informar pavilhão(s)]';
- if(v.tipo==='uma')return `Foi vistoriada a cela ${c} do pavilhão ${p}.`;
- if(v.tipo==='mesmo')return `Foram vistoriadas as celas ${c} do pavilhão ${p}.`;
- return `Foram vistoriadas as celas ${c} dos pavilhões ${p}.`;
-}
-function adicionarVistoriaCela(tipo){
- if(tipo==='nc')vistoriasCela=[];
- else vistoriasCela=vistoriasCela.filter(x=>x.tipo!=='nc');
- vistoriasCela.push({id:++vistoriaCelaSeq,tipo,celas:'',pavilhao:''}); renderVistoriasCela(); sincronizarVistoriasCela();
-}
-function alterarVistoriaCela(id,k,val){const v=vistoriasCela.find(x=>x.id===id);if(!v)return;v[k]=val;renderTextoVistoriasCela();sincronizarVistoriasCela(false);}
-function excluirVistoriaCela(id){vistoriasCela=vistoriasCela.filter(x=>x.id!==id);if(!vistoriasCela.length)vistoriasCela=[{id:++vistoriaCelaSeq,tipo:'nc',celas:'',pavilhao:''}];renderVistoriasCela();sincronizarVistoriasCela();}
-function renderVistoriasCela(){
- const box=document.getElementById('vistoriaCelasContainer');if(!box)return;
- box.innerHTML=vistoriasCela.map(v=>{
-  if(v.tipo==='nc')return `<div class="vistoria-row"><strong>N/C.</strong><div class="vistoria-row-actions"><button type="button" onclick="excluirVistoriaCela(${v.id})">Excluir</button></div></div>`;
-  const t=v.tipo==='uma'?'Uma cela':v.tipo==='mesmo'?'Várias celas do mesmo pavilhão':'Celas de pavilhões diferentes';
-  const cl=v.tipo==='uma'?'Número da cela':'Números das celas', pl=v.tipo==='diferentes'?'Números dos pavilhões':'Número do pavilhão';
-  return `<div class="vistoria-row"><strong>${t}</strong><label>${cl}</label><input value="${escVistoria(v.celas)}" placeholder="${cl}" oninput="alterarVistoriaCela(${v.id},'celas',this.value)"><label>${pl}</label><input value="${escVistoria(v.pavilhao)}" placeholder="${pl}" oninput="alterarVistoriaCela(${v.id},'pavilhao',this.value)"><div class="vistoria-row-actions"><button type="button" onclick="excluirVistoriaCela(${v.id})">Excluir registro</button></div></div>`;
- }).join('');
- renderTextoVistoriasCela();
-}
-function renderTextoVistoriasCela(){const v=document.getElementById('vistoriaCelasVisual');if(v)v.innerHTML=vistoriasCela.map(x=>`<div class="vistoria-print-row">• ${escVistoria(textoVistoria(x))}</div>`).join('');}
-function sincronizarVistoriasCela(redesenhar=true){const c=document.getElementById('s23');if(c){c.value=vistoriasCela.map(textoVistoria).join('\n');c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}if(redesenhar)renderVistoriasCela();}
-function carregarVistoriasCela(texto){
- vistoriasCela=[];const linhas=String(texto||'N/C.').split(/\n+/).map(x=>x.replace(/^\s*[•\-]\s*/,'').trim()).filter(Boolean);
- for(const l of linhas){
-  if(/^N\/C\.?$/i.test(l)){vistoriasCela.push({id:++vistoriaCelaSeq,tipo:'nc',celas:'',pavilhao:''});continue;}
-  let m=l.match(/^Foi vistoriada a cela (.*?) do pavilhão (.*?)\.?$/i);
-  if(m){vistoriasCela.push({id:++vistoriaCelaSeq,tipo:'uma',celas:m[1],pavilhao:m[2]});continue;}
-  m=l.match(/^Foram vistoriadas as celas (.*?) do pavilhão (.*?)\.?$/i);
-  if(m){vistoriasCela.push({id:++vistoriaCelaSeq,tipo:'mesmo',celas:m[1],pavilhao:m[2]});continue;}
-  m=l.match(/^Foram vistoriadas as celas (.*?) dos pavilhões (.*?)\.?$/i);
-  if(m){vistoriasCela.push({id:++vistoriaCelaSeq,tipo:'diferentes',celas:m[1],pavilhao:m[2]});}
- }
- if(!vistoriasCela.length)vistoriasCela=[{id:++vistoriaCelaSeq,tipo:'nc',celas:'',pavilhao:''}];
- renderVistoriasCela();
-}
-document.addEventListener('DOMContentLoaded',()=>{const c=document.getElementById('s23');if(c)carregarVistoriasCela(c.value||'N/C.');});
-
-
-// Ordena pelo primeiro nome; em caso de empate, compara o restante do nome.
-function partesNomeAlfabetico(nome){
- const partes=String(nome||'').trim().split(/\s+/).filter(Boolean);
- return {primeiro:partes[0]||'',restante:partes.slice(1).join(' ')};
-}
-function compararNomePrimeiroNome(a,b){
- const x=partesNomeAlfabetico(a),y=partesNomeAlfabetico(b);
- const p=x.primeiro.localeCompare(y.primeiro,'pt-BR',{sensitivity:'base'});
- return p||x.restante.localeCompare(y.restante,'pt-BR',{sensitivity:'base'});
-}
-// Componente reutilizável: busca de internos pela base compartilhada do sistema.
-let baseInternosCompartilhada = [];
-function normalizarNomeInterno(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
-function nomeInternoSelecionado(valor){
- const alvo=normalizarNomeInterno(valor);if(!alvo)return null;
- const exato=baseInternosCompartilhada.find(x=>normalizarNomeInterno(x.nome||x.nome_interno||x.NOME)===alvo);
- if(exato)return exato;
- const candidatos=baseInternosCompartilhada.filter(x=>normalizarNomeInterno(x.nome||x.nome_interno||x.NOME).startsWith(alvo));
- return candidatos.length===1?candidatos[0]:null;
-}
-function rgiDoInterno(interno){if(!interno)return '';for(const k of ['rgi','RGI','rgi_interno','RGI_INTERNO','identificacao','identificação','matricula','matrícula']){if(interno[k]!=null&&String(interno[k]).trim())return String(interno[k]).trim();}return '';}
-async function carregarBaseInternosCompartilhada(){
- const lista=document.getElementById('listaInternosCompartilhada');
- if(!lista)return;
- try{
-  const resposta=await api('/api/internals/base');
-  baseInternosCompartilhada=Array.isArray(resposta.items)?resposta.items:(Array.isArray(resposta)?resposta:[]);
-  atualizarSugestoesInternos('');
-  if(typeof renderItem36==='function')renderItem36();
- }catch(e){
-  // A edição manual continua disponível se a base não puder ser carregada.
-  console.warn('Não foi possível carregar a base compartilhada de internos:',e.message);
- }
-}
-
-// Prioriza sugestões cujo PRIMEIRO nome corresponde ao texto digitado; nomes em que o termo aparece apenas no sobrenome vêm depois.
-function atualizarSugestoesInternos(valor){
- const lista=document.getElementById('listaInternosCompartilhada');if(!lista||!Array.isArray(baseInternosCompartilhada))return;
- const q=normalizarNomeInterno(valor);let dados=baseInternosCompartilhada.filter(x=>x&&(x.nome||x.nome_interno||x.NOME));
- if(q){dados.sort((a,b)=>{const na=normalizarNomeInterno(a.nome||a.nome_interno||a.NOME),nb=normalizarNomeInterno(b.nome||b.nome_interno||b.NOME);const pa=na.split(' ')[0]||'',pb=nb.split(' ')[0]||'';const ca=pa.startsWith(q)?0:(na.includes(q)?1:2),cb=pb.startsWith(q)?0:(nb.includes(q)?1:2);return ca-cb||compararNomePrimeiroNome(a.nome||a.nome_interno||a.NOME,b.nome||b.nome_interno||b.NOME);});}
- else dados.sort((a,b)=>compararNomePrimeiroNome(a.nome||a.nome_interno||a.NOME,b.nome||b.nome_interno||b.NOME));
- lista.innerHTML=dados.map(x=>`<option value="${escHosp(x.nome||x.nome_interno||x.NOME)}"></option>`).join('');
-}
-document.addEventListener('input',e=>{const t=e.target;if(t&&t.matches&&t.matches('input[list="listaInternosCompartilhada"]'))atualizarSugestoesInternos(t.value);});
-document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.matches&&t.matches('input[list="listaInternosCompartilhada"]'))atualizarSugestoesInternos(t.value);});
-
-function formatarDataHosp(valor){
- if(!valor)return '';
- const s=String(valor);
- const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
- return m?`${m[3]}/${m[2]}/${m[1]}`:s;
-}
-
-
-// Item 27 — ÓBITO: tabela editável com nome da base compartilhada e calendário.
-let listaObitos=[], seqObito=0;
-function adicionarObito(){
- if(listaObitos.length===1&&listaObitos[0].nc)listaObitos=[];
- listaObitos.push({id:++seqObito,nome:'',data:''});
- renderObitos();sincronizarObitos();
-}
-function alterarObito(id,campo,valor){
- const r=listaObitos.find(x=>x.id===id);if(!r)return;
- r[campo]=valor;sincronizarObitos(false);renderVisualObitos();
-}
-function excluirObito(id){
- listaObitos=listaObitos.filter(x=>x.id!==id);
- if(!listaObitos.length)listaObitos.push({id:++seqObito,nc:true,nome:'',data:''});
- renderObitos();sincronizarObitos();
-}
-function serializarObitos(){
- if(!listaObitos.length||listaObitos.every(x=>x.nc))return 'N/C.';
- return listaObitos.filter(x=>!x.nc).map(x=>`${x.nome||''}\t${x.data||''}`).join('\n');
-}
-function sincronizarObitos(redesenhar=true){
- const c=document.getElementById('s26');if(c){
-  c.value=serializarObitos();
-  c.dispatchEvent(new Event('input',{bubbles:true}));
-  c.dispatchEvent(new Event('change',{bubbles:true}));
- }
- if(redesenhar)renderVisualObitos();
-}
-function renderObitos(){
- const box=document.getElementById('obitosContainer');if(!box)return;
- const rows=listaObitos;
- box.innerHTML='<div class="obito-head"><div>Nº</div><div>NOME DO PRESO</div><div>DATA</div><div class="no-print">AÇÃO</div></div>'+
- rows.map((r,i)=>r.nc?`<div class="obito-row"><div>${String(i+1).padStart(2,'0')}.</div><div style="grid-column:span 2;justify-content:center">N/C.</div><div class="no-print"><button type="button" onclick="excluirObito(${r.id})">Excluir</button></div></div>`:
- `<div class="obito-row"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do preso" list="listaInternosCompartilhada" value="${escHosp(r.nome)}" placeholder="Digite para buscar interno" autocomplete="off" oninput="alterarObito(${r.id},'nome',this.value)"></div><div><input type="date" aria-label="Data" value="${escHosp(r.data)}" oninput="alterarObito(${r.id},'data',this.value)"></div><div class="no-print"><button type="button" onclick="excluirObito(${r.id})">Excluir</button></div></div>`).join('');
- renderVisualObitos();
-}
-function renderVisualObitos(){
- const box=document.getElementById('obitosVisual');if(!box)return;
- const rows=listaObitos.filter(x=>!x.nc);
- if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}
- box.innerHTML='<table><thead><tr><th style="width:34px"></th><th>NOME DO PRESO</th><th style="width:25%">DATA</th></tr></thead><tbody>'+
- rows.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.data))}</td></tr>`).join('')+
- '</tbody></table>';
-}
-function carregarObitos(valor){
- listaObitos=[];const linhas=String(valor||'N/C.').split(/\n+/).map(x=>x.trim()).filter(Boolean);
- if(!linhas.length||linhas.every(x=>/^N\/C\.?$/i.test(x)))listaObitos.push({id:++seqObito,nc:true,nome:'',data:''});
- else linhas.forEach(l=>{const p=l.split(/\t+/);listaObitos.push({id:++seqObito,nome:p[0]||'',data:p[1]||''});});
- renderObitos();
-}
-
-// Itens 29 e 29.1 — Licença judicial de 7 dias.
-let listaLicencaTemporaria=[], listaRetornoTemporaria=[], seqTemporaria=0;
-function dataHojeTemporaria(){const el=document.getElementById('reportDate');return el&&el.value?el.value:dataISOdeHojeLJ();}
-function serializarTemporaria(lista){const arr=lista.filter(r=>!r.nc);if(!arr.length)return 'N/C.';return arr.map(r=>[r.nome||'',r.saida||'',r.retornoPrevisto||'',r.retornoReal||''].join('\t')).join('\n');}
-function sincronizarTemporaria(){const a=document.getElementById('s28'),b=document.getElementById('s29a');if(a){a.value=serializarTemporaria(listaLicencaTemporaria);a.dispatchEvent(new Event('input',{bubbles:true}));a.dispatchEvent(new Event('change',{bubbles:true}));}if(b){b.value=serializarTemporaria(listaRetornoTemporaria);b.dispatchEvent(new Event('input',{bubbles:true}));b.dispatchEvent(new Event('change',{bubbles:true}));}renderVisualTemporaria();}
-function adicionarLicencaTemporaria(){listaLicencaTemporaria=listaLicencaTemporaria.filter(r=>!r.nc);listaLicencaTemporaria.push({id:++seqTemporaria,nome:'',saida:'',retornoPrevisto:'',retornoReal:''});renderLicencaTemporaria();sincronizarTemporaria();}
-function alterarLicencaTemporaria(id,campo,valor){const r=listaLicencaTemporaria.find(x=>x.id===id);if(!r)return;r[campo]=valor;sincronizarTemporaria();}
-function excluirLicencaTemporaria(id){listaLicencaTemporaria=listaLicencaTemporaria.filter(x=>x.id!==id);renderLicencaTemporaria();sincronizarTemporaria();}
-function transferirTemporaria(id,automatico=false){const r=listaLicencaTemporaria.find(x=>x.id===id);if(!r||r.nc||!String(r.nome||'').trim())return false;if(listaRetornoTemporaria.some(x=>normalizarNomeInterno(x.nome)===normalizarNomeInterno(r.nome)&&x.saida===r.saida)){if(!automatico)alert('Este cadastro já consta no item 29.1.');return false;}listaRetornoTemporaria.push({id:++seqTemporaria,nome:r.nome,saida:r.saida||'',retornoReal:dataHojeTemporaria(),retornoPrevisto:r.retornoPrevisto||''});listaLicencaTemporaria=listaLicencaTemporaria.filter(x=>x.id!==id);renderLicencaTemporaria();renderRetornoTemporaria();sincronizarTemporaria();return true;}
-function verificarRetornosTemporaria(){const data=dataHojeTemporaria();if(!data)return;listaLicencaTemporaria.slice().forEach(r=>{if(!r.nc&&r.retornoPrevisto&&r.retornoPrevisto<=data)transferirTemporaria(r.id,true);});}
-function renderLicencaTemporaria(){const box=document.getElementById('licencaTemporariaContainer');if(!box)return;const rows=listaLicencaTemporaria.filter(r=>!r.nc);if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}box.innerHTML='<div class="retorno-hosp-head lj29-grid"><div>Nº</div><div>NOME DO INTERNO</div><div>SAÍDA</div><div>RETORNO PREVISTO</div><div class="no-print">AÇÃO</div></div>'+rows.map((r,i)=>`<div class="retorno-hosp-row lj29-grid"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do interno" list="listaInternosCompartilhada" autocomplete="off" value="${escHosp(r.nome)}" placeholder="Digite para buscar interno" oninput="alterarLicencaTemporaria(${r.id},'nome',this.value)"></div><div><input type="date" aria-label="Data de saída" value="${escHosp(r.saida)}" oninput="alterarLicencaTemporaria(${r.id},'saida',this.value)"></div><div><input type="date" aria-label="Retorno previsto" value="${escHosp(r.retornoPrevisto)}" oninput="alterarLicencaTemporaria(${r.id},'retornoPrevisto',this.value)"></div><div class="no-print lj29-buttons"><button type="button" onclick="transferirTemporaria(${r.id})">↪ Retornou</button><button type="button" onclick="excluirLicencaTemporaria(${r.id})">Excluir</button></div></div>`).join('');}
-function renderRetornoTemporaria(){const box=document.getElementById('retornoTemporariaContainer');if(!box)return;const rows=listaRetornoTemporaria.filter(r=>!r.nc);if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}box.innerHTML='<div class="retorno-hosp-head lj291-grid"><div>Nº</div><div>NOME DO INTERNO</div><div>SAÍDA</div><div>RETORNO</div><div class="no-print">AÇÃO</div></div>'+rows.map((r,i)=>`<div class="retorno-hosp-row lj291-grid"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do interno retornado" list="listaInternosCompartilhada" autocomplete="off" value="${escHosp(r.nome)}" oninput="alterarRetornoTemporaria(${r.id},'nome',this.value)"></div><div><input type="date" aria-label="Data de saída" value="${escHosp(r.saida)}" oninput="alterarRetornoTemporaria(${r.id},'saida',this.value)"></div><div><input type="date" aria-label="Data efetiva do retorno" value="${escHosp(r.retornoReal)}" oninput="alterarRetornoTemporaria(${r.id},'retornoReal',this.value)"></div><div class="no-print"><button type="button" onclick="excluirRetornoTemporaria(${r.id})">Excluir</button></div></div>`).join('');}
-function alterarRetornoTemporaria(id,campo,valor){const r=listaRetornoTemporaria.find(x=>x.id===id);if(!r)return;r[campo]=valor;sincronizarTemporaria();}
-function excluirRetornoTemporaria(id){listaRetornoTemporaria=listaRetornoTemporaria.filter(x=>x.id!==id);renderRetornoTemporaria();sincronizarTemporaria();}
-function renderVisualTemporaria(){const a=document.getElementById('licencaTemporariaVisual'),b=document.getElementById('retornoTemporariaVisual');if(!a||!b)return;const x=listaLicencaTemporaria.filter(r=>!r.nc),y=listaRetornoTemporaria.filter(r=>!r.nc);a.innerHTML=x.length?'<table class="licenca-judicial-preview-table"><colgroup><col style="width:6%"><col style="width:50%"><col style="width:22%"><col style="width:22%"></colgroup><thead><tr><th>Nº</th><th>NOME DO INTERNO</th><th>SAÍDA</th><th>RETORNO PREVISTO</th></tr></thead><tbody>'+x.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.saida))}</td><td>${escHosp(formatarDataHosp(r.retornoPrevisto))}</td></tr>`).join('')+'</tbody></table>':'<p>N/C.</p>';b.innerHTML=y.length?'<table class="retorno-licenca-judicial-preview-table"><colgroup><col style="width:6%"><col style="width:50%"><col style="width:22%"><col style="width:22%"></colgroup><thead><tr><th>Nº</th><th>NOME DO INTERNO</th><th>SAÍDA</th><th>RETORNO</th></tr></thead><tbody>'+y.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.saida))}</td><td>${escHosp(formatarDataHosp(r.retornoReal))}</td></tr>`).join('')+'</tbody></table>':'<p>N/C.</p>';}
-function carregarTemporaria(valor,retorno=false){const arr=[];const linhas=String(valor||'N/C.').split(/\n+/).map(x=>x.trim()).filter(Boolean);if(linhas.length&&!linhas.every(x=>/^N\/C\.?$/i.test(x)))linhas.forEach(l=>{const p=l.split(/\t+/);arr.push({id:++seqTemporaria,nome:p[0]||'',saida:p[1]||'',retornoPrevisto:p[2]||'',retornoReal:p[3]||''});});if(retorno)listaRetornoTemporaria=arr;else listaLicencaTemporaria=arr;}
-
-// Itens 28 e 28.1 — Licença judicial e retorno interligados.
-let listaLicencaJudicial=[], listaRetornoLicencaJudicial=[], seqLicencaJudicial=0;
-function dataISOdeHojeLJ(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function calcularRetornoLJ(saida,dias){if(!saida||!Number.isFinite(Number(dias))||Number(dias)<=0)return '';const d=new Date(saida+'T12:00:00');d.setDate(d.getDate()+Number(dias));return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function adicionarLicencaJudicial(){if(listaLicencaJudicial.length===1&&listaLicencaJudicial[0].nc)listaLicencaJudicial=[];listaLicencaJudicial.push({id:++seqLicencaJudicial,nome:'',autos:'',saida:'',dias:'',retorno:''});renderLicencaJudicial();sincronizarLicencaJudicial();}
-function alterarLicencaJudicial(id,campo,valor){const r=listaLicencaJudicial.find(x=>x.id===id);if(!r)return;r[campo]=valor;if(campo==='saida'||campo==='dias'){r.retorno=calcularRetornoLJ(r.saida,r.dias);const cel=document.getElementById('lj-retorno-'+id);if(cel)cel.textContent=formatarDataHosp(r.retorno);}sincronizarLicencaJudicial(false);renderVisualLicencaJudicial();}
-function excluirLicencaJudicial(id){listaLicencaJudicial=listaLicencaJudicial.filter(x=>x.id!==id);if(!listaLicencaJudicial.length)listaLicencaJudicial=[{id:++seqLicencaJudicial,nc:true,nome:'',autos:'',saida:'',dias:'',retorno:''}];renderLicencaJudicial();sincronizarLicencaJudicial();}
-function serializarLicencaJudicial(){const rows=listaLicencaJudicial.filter(x=>!x.nc);if(!rows.length)return 'N/C.';return rows.map(r=>[r.nome,r.autos,r.saida,r.dias,r.retorno].join('\t')).join('\n');}
-function sincronizarLicencaJudicial(redesenhar=true){const c=document.getElementById('s27');if(c){c.value=serializarLicencaJudicial();c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}if(redesenhar)renderVisualLicencaJudicial();}
-function transferirParaRetornoLJ(id){const r=listaLicencaJudicial.find(x=>x.id===id);if(!r||r.nc||!String(r.nome||'').trim()){alert('Informe o nome do interno antes de transferir.');return;}if(listaRetornoLicencaJudicial.some(x=>normalizarNomeInterno(x.nome)===normalizarNomeInterno(r.nome)&&x.saida===r.saida)){alert('Este registro já consta no Item 28.1 com a mesma data de saída.');return;}if(listaRetornoLicencaJudicial.length===1&&listaRetornoLicencaJudicial[0].nc)listaRetornoLicencaJudicial=[];listaRetornoLicencaJudicial.push({id:++seqLicencaJudicial,nome:r.nome,saida:r.saida||'',retorno:''});renderRetornoLicencaJudicial();sincronizarRetornoLicencaJudicial();}
-function renderLicencaJudicial(){const box=document.getElementById('licencaJudicialContainer');if(!box)return;const rows=listaLicencaJudicial;box.innerHTML='<div class="retorno-hosp-head" style="grid-template-columns:34px minmax(180px,2fr) minmax(120px,1fr) 110px 90px minmax(130px,auto)"><div>Nº</div><div>NOME / AUTOS</div><div>SAÍDA</div><div>RETORNO PREVISTO</div><div>DIAS</div><div class="no-print">AÇÃO</div></div>'+rows.map((r,i)=>r.nc?`<div class="retorno-hosp-row" style="grid-template-columns:34px 1fr"><div>01.</div><div>N/C.</div></div>`:`<div class="retorno-hosp-row" style="grid-template-columns:34px minmax(180px,2fr) minmax(120px,1fr) 110px 90px minmax(130px,auto)"><div>${String(i+1).padStart(2,'0')}.</div><div class="lj-nome-autos"><input aria-label="Nome do interno" list="listaInternosCompartilhada" value="${escHosp(r.nome)}" placeholder="Digite para buscar interno" autocomplete="off" oninput="alterarLicencaJudicial(${r.id},'nome',this.value)"><input aria-label="Número dos autos" value="${escHosp(r.autos)}" placeholder="Nº dos autos" oninput="alterarLicencaJudicial(${r.id},'autos',this.value)"></div><div><input type="date" aria-label="Data de saída" value="${escHosp(r.saida)}" oninput="alterarLicencaJudicial(${r.id},'saida',this.value)"></div><div id="lj-retorno-${r.id}">${escHosp(formatarDataHosp(r.retorno))}</div><div><input type="number" min="1" step="1" aria-label="Quantidade de dias de licença" value="${escHosp(r.dias)}" oninput="alterarLicencaJudicial(${r.id},'dias',this.value)" placeholder="Dias"></div><div class="no-print"><button type="button" onclick="transferirParaRetornoLJ(${r.id})">➜ Passar para 28.1</button><button type="button" onclick="excluirLicencaJudicial(${r.id})">Excluir</button></div></div>`).join('');renderVisualLicencaJudicial();}
-function renderVisualLicencaJudicial(){const box=document.getElementById('licencaJudicialVisual');if(!box)return;const rows=listaLicencaJudicial.filter(x=>!x.nc);if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}box.innerHTML='<table><thead><tr><th>Nº</th><th>NOME DO PRESO / AUTOS</th><th>SAÍDA</th><th>DIAS</th><th>RETORNO PREVISTO</th></tr></thead><tbody>'+rows.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td style="white-space:nowrap;overflow:hidden"><div style="white-space:nowrap;overflow:hidden">${escHosp(r.nome)}</div><div style="white-space:nowrap;overflow:hidden">${r.autos?'Nº DOS AUTOS: '+escHosp(r.autos):'&nbsp;'}</div></td><td>${escHosp(formatarDataHosp(r.saida))}</td><td>${escHosp(r.dias)}</td><td>${escHosp(formatarDataHosp(r.retorno))}</td></tr>`).join('')+'</tbody></table>';}
-function carregarLicencaJudicial(valor){listaLicencaJudicial=[];const linhas=String(valor||'N/C.').split(/\n+/).map(x=>x.trim()).filter(Boolean);if(!linhas.length||linhas.every(x=>/^N\/C\.?$/i.test(x)))listaLicencaJudicial.push({id:++seqLicencaJudicial,nc:true});else linhas.forEach(l=>{const p=l.split(/\t+/);listaLicencaJudicial.push({id:++seqLicencaJudicial,nome:p[0]||'',autos:p[1]||'',saida:p[2]||'',dias:p[3]||'',retorno:p[4]||calcularRetornoLJ(p[2]||'',p[3]||'')});});renderLicencaJudicial();}
-function adicionarRetornoLicencaJudicial(){if(listaRetornoLicencaJudicial.length===1&&listaRetornoLicencaJudicial[0].nc)listaRetornoLicencaJudicial=[];listaRetornoLicencaJudicial.push({id:++seqLicencaJudicial,nome:'',saida:'',retorno:''});renderRetornoLicencaJudicial();sincronizarRetornoLicencaJudicial();}
-function alterarRetornoLicencaJudicial(id,campo,valor){const r=listaRetornoLicencaJudicial.find(x=>x.id===id);if(!r)return;r[campo]=valor;sincronizarRetornoLicencaJudicial();}
-function excluirRetornoLicencaJudicial(id){listaRetornoLicencaJudicial=listaRetornoLicencaJudicial.filter(x=>x.id!==id);sincronizarRetornoLicencaJudicial();}
-function serializarRetornoLicencaJudicial(){const rows=listaRetornoLicencaJudicial.filter(x=>!x.nc);if(!rows.length)return 'N/C.';return rows.map(r=>[r.nome,r.saida,r.retorno].join('\t')).join('\n');}
-function sincronizarRetornoLicencaJudicial(){const c=document.getElementById('s28a');if(c){c.value=serializarRetornoLicencaJudicial();c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}renderRetornoLicencaJudicial();}
-function renderRetornoLicencaJudicial(){const box=document.getElementById('retornoLicencaJudicialContainer'),visual=document.getElementById('retornoLicencaJudicialVisual');if(!box||!visual)return;const rows=listaRetornoLicencaJudicial.filter(x=>!x.nc);if(!rows.length){box.innerHTML='<p>N/C.</p>';visual.innerHTML='<p>N/C.</p>';return;}box.innerHTML='<div class="retorno-hosp-head"><div>Nº</div><div>NOME DO PRESO</div><div>SAÍDA</div><div>RETORNO</div><div class="no-print">AÇÃO</div></div>'+rows.map((r,i)=>`<div class="retorno-hosp-row"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do preso" list="listaInternosCompartilhada" value="${escHosp(r.nome)}" oninput="alterarRetornoLicencaJudicial(${r.id},'nome',this.value)"></div><div><input type="date" aria-label="Data de saída" value="${escHosp(r.saida)}" oninput="alterarRetornoLicencaJudicial(${r.id},'saida',this.value)"></div><div><input type="date" aria-label="Data efetiva de retorno" value="${escHosp(r.retorno)}" oninput="alterarRetornoLicencaJudicial(${r.id},'retorno',this.value)"></div><div class="no-print"><button type="button" onclick="excluirRetornoLicencaJudicial(${r.id})">Excluir</button></div></div>`).join('');visual.innerHTML='<table><thead><tr><th>Nº</th><th>NOME DO PRESO</th><th>SAÍDA</th><th>RETORNO</th></tr></thead><tbody>'+rows.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.saida))}</td><td>${escHosp(formatarDataHosp(r.retorno))}</td></tr>`).join('')+'</tbody></table>';}
-function carregarRetornoLicencaJudicial(valor){listaRetornoLicencaJudicial=[];const linhas=String(valor||'N/C.').split(/\n+/).map(x=>x.trim()).filter(Boolean);if(linhas.length&&!linhas.every(x=>/^N\/C\.?$/i.test(x)))linhas.forEach(l=>{const p=l.split(/\t+/);listaRetornoLicencaJudicial.push({id:++seqLicencaJudicial,nome:p[0]||'',saida:p[1]||'',retorno:p[2]||''});});renderRetornoLicencaJudicial();}
-
-// Item 26 — retorno de hospitalizados; reutiliza os dados dos itens 25 e 25.1.
-let listaRetornoHospitalizados=[];
-function dataHojeISOHosp(){
- const d=new Date();
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function serializarRetornosHosp(){
- if(!listaRetornoHospitalizados.length)return 'N/C.';
- return listaRetornoHospitalizados.map(r=>`${r.nome||''}\t${r.saida||''}\t${r.retorno||''}`).join('\n');
-}
-function sincronizarRetornosHosp(){
- const campo=document.getElementById('s25');
- if(campo){
-  campo.value=serializarRetornosHosp();
-  campo.dispatchEvent(new Event('input',{bubbles:true}));
-  campo.dispatchEvent(new Event('change',{bubbles:true}));
- }
- renderRetornosHosp();
-}
-function registrarRetornoHospitalizado(tipo,id){
- const origem=itensHosp(tipo).find(x=>x.id===id);
- if(!origem||origem.nc||!String(origem.nome||'').trim()){
-  alert('Informe o nome do interno antes de registrar o retorno.');return;
- }
- const nome=String(origem.nome).trim();
- const jaExiste=listaRetornoHospitalizados.some(r=>normalizarNomeInterno(r.nome)===normalizarNomeInterno(nome)&&r.saida===origem.saida);
- if(jaExiste){
-  alert('Este interno já consta no Item 26 com a mesma data de saída.');return;
- }
- listaRetornoHospitalizados.push({id:++seqHospitalizado,nome,saida:origem.saida||'',retorno:dataHojeISOHosp()});
- sincronizarRetornosHosp();
-}
-function adicionarRetornoHospitalizado(){
- listaRetornoHospitalizados.push({id:++seqHospitalizado,nome:'',saida:'',retorno:dataHojeISOHosp()});
- sincronizarRetornosHosp();
-}
-function alterarRetornoHospitalizado(id,campo,valor){
- const r=listaRetornoHospitalizados.find(x=>x.id===id);if(!r)return;
- r[campo]=valor;sincronizarRetornosHosp();
-}
-function excluirRetornoHospitalizado(id){
- listaRetornoHospitalizados=listaRetornoHospitalizados.filter(x=>x.id!==id);
- sincronizarRetornosHosp();
-}
-function renderRetornosHosp(){
- const box=document.getElementById('retornoHospitalizadosContainer');
- const visual=document.getElementById('retornoHospitalizadosVisual');
- if(!box||!visual)return;
- let rows=listaRetornoHospitalizados;
- box.innerHTML='<div class="retorno-hosp-head"><div>Nº</div><div>NOME DO PRESO</div><div>SAÍDA</div><div>RETORNO</div><div class="no-print">AÇÃO</div></div>'+
- (rows.length?rows.map((r,i)=>`<div class="retorno-hosp-row"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do preso retornado" list="listaInternosCompartilhada" value="${escHosp(r.nome)}" oninput="alterarRetornoHospitalizado(${r.id},'nome',this.value)" placeholder="Nome do preso"></div><div><input type="date" aria-label="Data de saída" value="${escHosp(r.saida)}" oninput="alterarRetornoHospitalizado(${r.id},'saida',this.value)"></div><div><input type="date" aria-label="Data de retorno" value="${escHosp(r.retorno)}" oninput="alterarRetornoHospitalizado(${r.id},'retorno',this.value)"></div><div class="no-print"><button type="button" onclick="excluirRetornoHospitalizado(${r.id})">Excluir</button></div></div>`).join(''):'<p>N/C.</p>');
- visual.innerHTML=rows.length?'<table><thead><tr><th style="width:34px"></th><th>NOME DO PRESO</th><th style="width:20%">SAÍDA</th><th style="width:20%">RETORNO</th></tr></thead><tbody>'+
- rows.map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.saida))}</td><td>${escHosp(formatarDataHosp(r.retorno))}</td></tr>`).join('')+'</tbody></table>':'<p>N/C.</p>';
-}
-function carregarRetornosHosp(valor){
- listaRetornoHospitalizados=[];
- const linhas=String(valor||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
- if(linhas.length&&!linhas.every(x=>/^N\/C\.?$/i.test(x))){
-  linhas.forEach(l=>{
-   const partes=l.split(/\t+/);
-   listaRetornoHospitalizados.push({id:++seqHospitalizado,nome:partes[0]||'',saida:partes[1]||'',retorno:partes[2]||''});
-  });
- }
- renderRetornosHosp();
-}
-
-// Itens 25 e 25.1 — tabelas independentes de hospitalizados.
-let listaHospitalizados=[], listaHospitalizadosConfirmar=[], seqHospitalizado=0;
-function escHosp(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function itensHosp(tipo){return tipo==='confirmar'?listaHospitalizadosConfirmar:listaHospitalizados;}
-function campoHosp(tipo){return document.getElementById(tipo==='confirmar'?'s24a':'s24');}
-function containerHosp(tipo){return document.getElementById(tipo==='confirmar'?'hospitalizadosConfirmarContainer':'hospitalizadosContainer');}
-function visualHosp(tipo){return document.getElementById(tipo==='confirmar'?'hospitalizadosConfirmarVisual':'hospitalizadosVisual');}
-function adicionarHospitalizado(tipo){
- const arr=itensHosp(tipo);
- if(arr.length===1&&arr[0].nc)arr.length=0;
- arr.push({id:++seqHospitalizado,nome:'',saida:''});
- renderHospitalizados(tipo);sincronizarHospitalizados(tipo);
-}
-function alterarHospitalizado(tipo,id,campo,valor){
- const row=itensHosp(tipo).find(x=>x.id===id);if(!row)return;
- row[campo]=valor;sincronizarHospitalizados(tipo,false);renderVisualHospitalizados(tipo);
-}
-function excluirHospitalizado(tipo,id){
- const arr=itensHosp(tipo),i=arr.findIndex(x=>x.id===id);if(i>=0)arr.splice(i,1);
- if(!arr.length)arr.push({id:++seqHospitalizado,nc:true,nome:'',saida:''});
- renderHospitalizados(tipo);sincronizarHospitalizados(tipo);
-}
-function textoHosp(arr){
- if(!arr.length||arr.every(x=>x.nc))return 'N/C.';
- return arr.filter(x=>!x.nc).map(x=>`${x.nome||''}\t${x.saida||''}`).join('\n');
-}
-function sincronizarHospitalizados(tipo,redesenhar=true){
- const campo=campoHosp(tipo);if(campo){
-  campo.value=textoHosp(itensHosp(tipo));
-  campo.dispatchEvent(new Event('input',{bubbles:true}));
-  campo.dispatchEvent(new Event('change',{bubbles:true}));
- }
- if(redesenhar)renderVisualHospitalizados(tipo);
-}
-function renderHospitalizados(tipo){
- const box=containerHosp(tipo);if(!box)return;
- const arr=itensHosp(tipo);
- let s='<div class="hospitalizado-table-head"><div>Nº</div><div>NOME DO PRESO</div><div>SAÍDA</div><div class="no-print">AÇÃO</div></div>';
- s+=arr.map((r,i)=>r.nc?`<div class="hospitalizado-row"><div>${String(i+1).padStart(2,'0')}.</div><div style="grid-column:span 2;justify-content:center">N/C.</div><div class="no-print"><button type="button" onclick="excluirHospitalizado('${tipo}',${r.id})">Excluir</button></div></div>`:
- `<div class="hospitalizado-row"><div>${String(i+1).padStart(2,'0')}.</div><div><input aria-label="Nome do preso" list="listaInternosCompartilhada" value="${escHosp(r.nome)}" placeholder="Digite para buscar interno" autocomplete="off" oninput="alterarHospitalizado('${tipo}',${r.id},'nome',this.value)"></div><div><input aria-label="Data de saída" type="date" value="${escHosp(r.saida)}" oninput="alterarHospitalizado('${tipo}',${r.id},'saida',this.value)"></div><div class="no-print"><button type="button" onclick="registrarRetornoHospitalizado('${tipo}',${r.id})">↩ Retornou</button><button type="button" onclick="excluirHospitalizado('${tipo}',${r.id})">Excluir</button></div></div>`).join('');
- box.innerHTML=s;
- renderVisualHospitalizados(tipo);
-}
-function renderVisualHospitalizados(tipo){
- const box=visualHosp(tipo);if(!box)return;
- const arr=itensHosp(tipo);
- if(!arr.length||arr.every(x=>x.nc)){box.innerHTML='<p>N/C.</p>';return;}
- box.innerHTML='<table><thead><tr><th style="width:34px"></th><th>NOME DO PRESO</th><th style="width:22%">SAÍDA</th></tr></thead><tbody>'+
- arr.filter(x=>!x.nc).map((r,i)=>`<tr><td>${String(i+1).padStart(2,'0')}.</td><td>${escHosp(r.nome)}</td><td>${escHosp(formatarDataHosp(r.saida))}</td></tr>`).join('')+
- '</tbody></table>';
-}
-function carregarHospitalizados(tipo,valor){
- const linhas=String(valor||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
- const arr=itensHosp(tipo);arr.length=0;
- if(!linhas.length||linhas.every(x=>/^N\/C\.?$/i.test(x))){arr.push({id:++seqHospitalizado,nc:true,nome:'',saida:''});}
- else{
-  linhas.forEach(l=>{
-   const partes=l.split(/\t+|\s{2,}/);
-   arr.push({id:++seqHospitalizado,nome:partes[0]||'',saida:partes.slice(1).join(' ').trim()});
-  });
- }
- renderHospitalizados(tipo);
-}
-document.addEventListener('DOMContentLoaded',()=>{
- carregarBaseInternosCompartilhada();
- const a=document.getElementById('s24'),b=document.getElementById('s24a');
- if(a)carregarHospitalizados('hospitalizado',a.value||'N/C.');
- if(b)carregarHospitalizados('confirmar',b.value||'N/C.');
- const c=document.getElementById('s25');if(c)carregarRetornosHosp(c.value||'N/C.');
- const d=document.getElementById('s26');if(d)carregarObitos(d.value||'N/C.');
- const t29=document.getElementById('s28');if(t29)carregarTemporaria(t29.value,false);
- const t291=document.getElementById('s29a');if(t291)carregarTemporaria(t291.value,true);
- renderLicencaTemporaria();renderRetornoTemporaria();renderVisualTemporaria();verificarRetornosTemporaria();
- const rd=document.getElementById('reportDate');if(rd)rd.addEventListener('change',verificarRetornosTemporaria);
-
-});
-
-
-// Item 30 — Autorizações cumpridas. Cada registro representa um documento e pode conter vários internos.
-// O primeiro interno recebe número de ordem; os demais ficam abaixo, sem novo número, com o mesmo documento.
-let listaAutorizacoesCumpridas = [], seqAutorizacaoCumprida = 0;
-function limparNcAutorizacoes(){if(listaAutorizacoesCumpridas.length===1&&listaAutorizacoesCumpridas[0].nc)listaAutorizacoesCumpridas=[];}
-function adicionarAutorizacaoCumprida(){
- const nome=document.getElementById('autorizacaoNome'), detalhe=document.getElementById('autorizacaoDetalhe');
- const n=String(nome?.value||'').trim(), d=String(detalhe?.value||'').trim();
- if(!n&&!d){nome?.focus();return;}
- if(!n||!d){alert('Preencha o nome do interno e a autorização/detalhe.');(!n?nome:detalhe)?.focus();return;}
- limparNcAutorizacoes();
- listaAutorizacoesCumpridas.push({id:++seqAutorizacaoCumprida, nomes:[n], detalhe:d});
- if(nome)nome.value='';if(detalhe)detalhe.value='';
- renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();nome?.focus();
-}
-function adicionarNomeMesmoDocumento(){
- const nome=document.getElementById('autorizacaoNome');
- const n=String(nome?.value||'').trim();
- const ultimo=[...listaAutorizacoesCumpridas].reverse().find(r=>!r.nc);
- if(!n){alert('Digite ou selecione o nome do próximo interno.');nome?.focus();return;}
- if(!ultimo){alert('Cadastre primeiro uma autorização usando “NOVA AUTORIZAÇÃO”.');nome?.focus();return;}
- limparNcAutorizacoes();
- const alvo=[...listaAutorizacoesCumpridas].reverse().find(r=>!r.nc);
- alvo.nomes=Array.isArray(alvo.nomes)?alvo.nomes:[alvo.nome].filter(Boolean);
- alvo.nomes.push(n);
- if(nome)nome.value='';
- // Mantém o mesmo detalhe/documento no campo para deixar claro a qual autorização pertence.
- const detalhe=document.getElementById('autorizacaoDetalhe');if(detalhe)detalhe.value=alvo.detalhe||'';
- renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();nome?.focus();
-}
-function excluirAutorizacaoCumprida(id){listaAutorizacoesCumpridas=listaAutorizacoesCumpridas.filter(r=>r.id!==id);if(!listaAutorizacoesCumpridas.length)listaAutorizacoesCumpridas=[{id:++seqAutorizacaoCumprida,nc:true,nomes:[],detalhe:''}];renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();}
-function renderAutorizacoesCumpridas(){
- const box=document.getElementById('autorizacoesCumpridasContainer');if(!box)return;
- const rows=listaAutorizacoesCumpridas.filter(r=>!r.nc);
- if(!rows.length){box.innerHTML='<p>N/C.</p>';return;}
- let ordem=0, html='';
- rows.forEach(r=>{
-  const nomes=Array.isArray(r.nomes)?r.nomes:[r.nome].filter(Boolean);
-  nomes.forEach((nome,j)=>{
-   const numero=j===0?String(++ordem).padStart(2,'0')+'. ':'';
-   html+=`<div class="autorizacao-linha ${j===0?'autorizacao-principal':'autorizacao-continuacao'}"><span class="autorizacao-numero">${numero}</span><span class="autorizacao-texto">${escHosp(nome)} - ${escHosp(r.detalhe)}</span>${j===0?`<button class="no-print" type="button" onclick="excluirAutorizacaoCumprida(${r.id})">Excluir documento</button>`:`<button class="no-print" type="button" onclick="excluirNomeAutorizacaoCumprida(${r.id},${j})">Excluir nome</button>`}</div>`;
-  });
- });
- box.innerHTML='<div class="autorizacoes-lista">'+html+'</div><p class="no-print"><strong>Total de documentos de autorização: '+rows.length+' | Total de internos: '+rows.reduce((n,r)=>n+(Array.isArray(r.nomes)?r.nomes.length:(r.nome?1:0)),0)+'</strong></p>';
-}
-function excluirNomeAutorizacaoCumprida(id, indice){
- const r=listaAutorizacoesCumpridas.find(x=>x.id===id);if(!r)return;
- r.nomes=Array.isArray(r.nomes)?r.nomes:[r.nome].filter(Boolean);r.nomes.splice(indice,1);
- if(!r.nomes.length)listaAutorizacoesCumpridas=listaAutorizacoesCumpridas.filter(x=>x.id!==id);
- if(!listaAutorizacoesCumpridas.length)listaAutorizacoesCumpridas=[{id:++seqAutorizacaoCumprida,nc:true,nomes:[],detalhe:''}];
- renderAutorizacoesCumpridas();sincronizarAutorizacoesCumpridas();
-}
-function sincronizarAutorizacoesCumpridas(){
- const campo=document.getElementById('s29');if(!campo)return;
- const rows=listaAutorizacoesCumpridas.filter(r=>!r.nc);let ordem=0, linhas=[];
- rows.forEach(r=>{const nomes=Array.isArray(r.nomes)?r.nomes:[r.nome].filter(Boolean);nomes.forEach((nome,j)=>{linhas.push((j===0?String(++ordem).padStart(2,'0')+'. ':'    ')+nome+' - '+r.detalhe);});});
- campo.value=linhas.length?linhas.join('\n'):'N/C.';
- campo.dispatchEvent(new Event('input',{bubbles:true}));campo.dispatchEvent(new Event('change',{bubbles:true}));
-}
-function carregarAutorizacoesCumpridas(valor){
- listaAutorizacoesCumpridas=[];seqAutorizacaoCumprida=0;
- const linhas=String(valor||'N/C.').split(/\n+/).filter(x=>x.trim());
- let atual=null;
- linhas.forEach(l=>{
-  const indentado=/^\s+/.test(l);let conteudo=l.trim();
-  if(/^N\/C\.?$/i.test(conteudo))return;
-  const numerada=/^\d+\s*[.)º-]\s*/.test(conteudo);
-  conteudo=conteudo.replace(/^\d+\s*[.)º-]\s*/, '');
-  const pos=conteudo.indexOf(' - '), nome=pos>=0?conteudo.slice(0,pos).trim():conteudo, detalhe=pos>=0?conteudo.slice(pos+3).trim():'';
-  if((indentado||!numerada)&&atual){if(!atual.nomes.includes(nome))atual.nomes.push(nome);if(!atual.detalhe&&detalhe)atual.detalhe=detalhe;}
-  else {atual={id:++seqAutorizacaoCumprida,nomes:[nome],detalhe};listaAutorizacoesCumpridas.push(atual);}
- });
- if(!listaAutorizacoesCumpridas.length)listaAutorizacoesCumpridas=[{id:++seqAutorizacaoCumprida,nc:true,nomes:[],detalhe:''}];
- renderAutorizacoesCumpridas();
-}
-document.addEventListener('DOMContentLoaded',()=>{const campo=document.getElementById('s29');if(campo)carregarAutorizacoesCumpridas(campo.value||'N/C.');});
-
-</script></body></html>
+ return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO
