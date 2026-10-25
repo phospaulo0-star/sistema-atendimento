@@ -306,7 +306,14 @@
   body.preview-mode .preview-section { color:#000 !important; margin:0 0 11px !important; break-inside:auto !important; page-break-inside:auto !important; }
   body.preview-mode .preview-section h3 { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; margin:0 0 4px !important; text-decoration:underline !important; }
   body.preview-mode .preview-section .preview-text { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; white-space:pre-wrap !important; overflow-wrap:anywhere !important; }
-  body.preview-mode .preview-footer { position:static !important; inset:auto !important; width:100% !important; margin:22px 0 0 !important; padding-top:5px !important; border-top:1px solid #777 !important; font-size:8.5pt !important; }
+  body.preview-mode .preview-footer { position:static !important; inset:auto !important; width:100% !important; margin:22px 0 0 !important; padding-top:5px !important; border-top:1px solid #777 !important; font-size:8.5pt !important; break-inside:avoid !important; page-break-inside:avoid !important; }
+  /* Não imprimir a numeração 0 de 0: o Chrome não calcula esses contadores neste rodapé em fluxo normal. */
+  body.preview-mode .preview-footer .page-number { display:none !important; }
+  /* Evita que blocos pequenos, títulos e linhas de tabelas sejam cortados no meio da página. */
+  body.preview-mode .preview-section h3 { break-after:avoid-page !important; page-break-after:avoid !important; }
+  body.preview-mode .preview-section table tr { break-inside:avoid !important; page-break-inside:avoid !important; }
+  body.preview-mode .preview-section img { max-width:100% !important; height:auto !important; }
+  body.preview-mode .preview-section { overflow:visible !important; max-width:100% !important; }
   body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; width:100% !important; max-width:100% !important; }
   body.preview-mode .movement-closing { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.3 !important; }
   body.preview-mode .movement-signature { text-align:center !important; break-inside:avoid !important; page-break-inside:avoid !important; }
