@@ -313,6 +313,53 @@
   body.preview-mode table { max-width:100% !important; }
   * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
 }
+
+/* AJUSTE FINAL: reservar faixas exclusivas para cabeçalho e rodapé em cada folha impressa */
+@media print {
+  @page { size: A4 portrait; margin: 25mm 18mm 21mm 18mm !important; }
+  html, body { margin:0 !important; padding:0 !important; background:#fff !important; }
+  body.preview-mode #previewPanel,
+  body.preview-mode #previewContent,
+  body.preview-mode .preview-document {
+    margin:0 !important; padding:0 !important; width:100% !important;
+    max-width:100% !important; overflow:visible !important; height:auto !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead {
+    position:fixed !important; top:-21mm !important; left:0 !important; right:0 !important;
+    width:100% !important; height:16mm !important; min-height:16mm !important;
+    margin:0 !important; padding:0 !important; box-sizing:border-box !important;
+    display:grid !important; grid-template-columns:14mm minmax(0,1fr) 14mm !important;
+    align-items:center !important; gap:2mm !important;
+    background:#fff !important; color:#000 !important; z-index:10 !important;
+    break-inside:avoid !important; page-break-inside:avoid !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead .preview-logo {
+    display:block !important; width:12mm !important; height:13mm !important;
+    max-height:13mm !important; object-fit:contain !important; visibility:visible !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead-text,
+  body.preview-mode #previewContent .preview-letterhead-text div {
+    display:block !important; font-size:6pt !important; line-height:1.05 !important;
+    white-space:nowrap !important; text-align:center !important; color:#000 !important;
+  }
+  body.preview-mode #previewContent .preview-footer {
+    position:fixed !important; left:0 !important; right:0 !important; bottom:-17mm !important;
+    width:100% !important; min-height:12mm !important; margin:0 !important;
+    padding:1.5mm 0 0 !important; box-sizing:border-box !important;
+    border-top:.25mm solid #777 !important; background:#fff !important; color:#000 !important;
+    text-align:center !important; font-size:6pt !important; line-height:1.1 !important;
+    z-index:10 !important; break-inside:avoid !important; page-break-inside:avoid !important;
+  }
+  body.preview-mode #previewContent .preview-footer .page-current:after,
+  body.preview-mode #previewContent .preview-footer .page-total:after { content:"" !important; }
+  body.preview-mode .preview-return-wrap,
+  body.preview-mode .preview-actions { display:none !important; }
+  body.preview-mode .preview-section { orphans:2; widows:2; }
+  body.preview-mode .preview-section h3 { break-after:avoid-page; page-break-after:avoid; }
+  body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; }
+  body.preview-mode .movement-signature { break-inside:avoid !important; page-break-inside:avoid !important; }
+}
+
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
