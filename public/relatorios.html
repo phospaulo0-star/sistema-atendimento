@@ -1561,7 +1561,71 @@ function exportarWord(){
   const conteudo=$('previewContent')?.innerHTML;
   if(!conteudo){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
   const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}</style></head><body>'+conteudo+'</body></html>';
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}
+/* AJUSTE FINAL DE IMPRESSÃO CPAIG: reservar áreas reais para cabeçalho, texto e rodapé */
+@media print {
+  @page { size: A4 portrait; margin: 31mm 18mm 18mm 18mm !important; }
+  html, body { margin:0 !important; padding:0 !important; background:#fff !important; }
+  body.preview-mode #previewPanel,
+  body.preview-mode #previewContent,
+  body.preview-mode .preview-document {
+    display:block !important; position:static !important; width:100% !important;
+    max-width:100% !important; height:auto !important; min-height:0 !important;
+    margin:0 !important; padding:0 !important; border:0 !important;
+    box-shadow:none !important; overflow:visible !important; transform:none !important;
+  }
+  body.preview-mode .preview-letterhead {
+    position:fixed !important; top:-27mm !important; left:0 !important; right:0 !important;
+    width:100% !important; height:17mm !important; min-height:17mm !important;
+    margin:0 !important; padding:0 !important; display:grid !important;
+    grid-template-columns:16mm minmax(0,1fr) 16mm !important; gap:3mm !important;
+    align-items:center !important; background:#fff !important; z-index:9999 !important;
+  }
+  body.preview-mode .preview-letterhead .preview-logo {
+    display:block !important; width:14mm !important; height:16mm !important;
+    max-height:16mm !important; object-fit:contain !important; visibility:visible !important;
+    opacity:1 !important; filter:none !important;
+  }
+  body.preview-mode .preview-letterhead-text,
+  body.preview-mode .preview-letterhead-text div {
+    display:block !important; white-space:nowrap !important; text-align:center !important;
+    font-family:Arial,Helvetica,sans-serif !important; font-size:7pt !important;
+    line-height:1.08 !important; letter-spacing:0 !important; color:#333 !important;
+  }
+  body.preview-mode .preview-archive {
+    position:fixed !important; top:-10mm !important; left:0 !important; right:0 !important;
+    width:100% !important; margin:0 !important; padding:0 !important;
+    text-align:right !important; font-size:7pt !important; line-height:1 !important;
+    background:#fff !important; z-index:9999 !important;
+  }
+  body.preview-mode .preview-title { position:static !important; margin:0 0 5mm !important; padding:0 !important; text-align:left !important; }
+  body.preview-mode .preview-title h2 { font-size:12pt !important; margin:0 !important; text-align:left !important; }
+  body.preview-mode .preview-section { margin:0 0 3mm !important; break-inside:auto !important; page-break-inside:auto !important; }
+  body.preview-mode .preview-section h3 { margin:0 0 1mm !important; line-height:1.15 !important; }
+  body.preview-mode .preview-section .preview-text { white-space:pre-wrap !important; overflow-wrap:anywhere !important; }
+  body.preview-mode .preview-footer {
+    position:fixed !important; top:auto !important; bottom:-14mm !important;
+    left:0 !important; right:0 !important; width:100% !important;
+    margin:0 !important; padding:1mm 0 0 !important; border-top:.25mm solid #777 !important;
+    background:#fff !important; text-align:center !important; font-size:6pt !important;
+    line-height:1.05 !important; z-index:9999 !important;
+  }
+  /* Chrome não calcula de forma confiável counter(page/pages) dentro deste rodapé; ocultar o zero incorreto. */
+  body.preview-mode .preview-footer .page-number { display:none !important; }
+  body.preview-mode .preview-actions,
+  body.preview-mode .preview-return-wrap,
+  body.preview-mode #editor,
+  body.preview-mode #reportsPanel,
+  body.preview-mode .toolbar,
+  body.preview-mode .status,
+  body.preview-mode .no-print { display:none !important; }
+  body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; min-height:0 !important; padding-bottom:0 !important; }
+  body.preview-mode .movement-signature { break-inside:avoid !important; page-break-inside:avoid !important; }
+  table { max-width:100% !important; }
+  tr { break-inside:avoid !important; page-break-inside:avoid !important; }
+}
+
+</style></head><body>'+conteudo+'</body></html>';
   const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download='Relatorio_CPAIG.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
