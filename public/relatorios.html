@@ -236,7 +236,7 @@
 
 /* IMPRESSÃO CPAIG — posição estável: cabeçalho e rodapé nos limites da página */
 @media print {
-  @page { size: A4 portrait; margin: 18mm 14mm 10mm 14mm; }
+  @page { size: A4 portrait; margin: 11mm 12mm 9mm 12mm; }
   html, body { margin:0 !important; padding:0 !important; }
   body.preview-mode #previewPanel {
     display:block !important; margin:0 !important; padding:0 !important;
@@ -251,28 +251,28 @@
   body.preview-mode #previewContent .preview-letterhead {
     position:fixed !important;
     top:0 !important; left:0 !important; right:0 !important;
-    height:25mm !important; margin:0 !important; padding:0 !important;
+    height:14mm !important; margin:0 !important; padding:0 !important;
     display:grid !important;
-    grid-template-columns:18mm minmax(0,1fr) 18mm !important;
+    grid-template-columns:14mm minmax(0,1fr) 14mm !important;
     align-items:center !important; gap:2mm !important;
     background:#fff !important; color:#000 !important; z-index:9999 !important;
   }
   body.preview-mode #previewContent .preview-letterhead .preview-logo {
-    display:block !important; width:16mm !important; height:19mm !important;
+    display:block !important; width:12mm !important; height:13mm !important;
     object-fit:contain !important; filter:none !important;
     visibility:visible !important; opacity:1 !important;
   }
   body.preview-mode #previewContent .preview-letterhead-text,
   body.preview-mode #previewContent .preview-letterhead-text div {
-    display:block !important; color:#000 !important; font-size:7pt !important;
-    line-height:1.08 !important; text-align:center !important; white-space:nowrap !important;
+    display:block !important; color:#000 !important; font-size:5.8pt !important;
+    line-height:1.02 !important; text-align:center !important; white-space:nowrap !important;
   }
   body.preview-mode #previewContent .preview-footer {
     position:fixed !important;
     top:auto !important; bottom:0 !important; left:0 !important; right:0 !important;
-    display:block !important; margin:0 !important; padding:2mm 0 0 !important;
+    display:block !important; margin:0 !important; padding:0.8mm 0 0 !important;
     background:#fff !important; color:#000 !important; border-top:.3mm solid #777 !important;
-    text-align:center !important; font-size:7pt !important; line-height:1.1 !important;
+    text-align:center !important; font-size:5.5pt !important; line-height:1 !important;
     z-index:9999 !important;
   }
   body.preview-mode #previewContent .preview-footer .page-current:after { content:counter(page) !important; }
