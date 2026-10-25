@@ -234,43 +234,110 @@
 
 
 
-/* IMPRESSÃO CPAIG — regras unificadas, sem alterar o JavaScript */
+/* IMPRESSÃO CPAIG — posição estável: cabeçalho e rodapé nos limites da página */
 @media print {
-  @page { size: A4 portrait; margin: 27mm 18mm 18mm 18mm; }
-  html, body { margin:0 !important; padding:0 !important; width:auto !important; height:auto !important; overflow:visible !important; background:#fff !important; color:#000 !important; }
+  @page { size: A4 portrait; margin: 11mm 12mm 9mm 12mm; }
+  html, body { margin:0 !important; padding:0 !important; }
+  body.preview-mode #previewPanel {
+    display:block !important; margin:0 !important; padding:0 !important;
+    border:0 !important; box-shadow:none !important;
+  }
+  body.preview-mode #previewContent { display:block !important; }
+  body.preview-mode #previewPanel .preview-actions { display:none !important; }
+  body.preview-mode .preview-document {
+    width:90% !important; max-width:90% !important; margin:0 auto !important;
+    padding:0 !important; overflow:visible !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead {
+    position:fixed !important;
+    top:0 !important; left:0 !important; right:0 !important;
+    height:14mm !important; margin:0 !important; padding:0 !important;
+    display:grid !important;
+    grid-template-columns:14mm minmax(0,1fr) 14mm !important;
+    align-items:center !important; gap:2mm !important;
+    background:#fff !important; color:#000 !important; z-index:9999 !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead .preview-logo {
+    display:block !important; width:12mm !important; height:13mm !important;
+    object-fit:contain !important; filter:none !important;
+    visibility:visible !important; opacity:1 !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead-text,
+  body.preview-mode #previewContent .preview-letterhead-text div {
+    display:block !important; color:#000 !important; font-size:5.8pt !important;
+    line-height:1.02 !important; text-align:center !important; white-space:nowrap !important;
+  }
+  body.preview-mode #previewContent .preview-footer {
+    position:fixed !important;
+    top:auto !important; bottom:0 !important; left:0 !important; right:0 !important;
+    display:block !important; margin:0 !important; padding:0.8mm 0 0 !important;
+    background:#fff !important; color:#000 !important; border-top:.3mm solid #777 !important;
+    text-align:center !important; font-size:5.5pt !important; line-height:1 !important;
+    z-index:9999 !important;
+  }
+  body.preview-mode #previewContent .preview-footer .page-current:after { content:counter(page) !important; }
+  body.preview-mode #previewContent .preview-footer .page-total:after { content:counter(pages) !important; }
+  body.preview-mode .preview-return-wrap { display:none !important; }
+  body.preview-mode .movement-page { min-height:0 !important; }
+}
+
+
+/* IMPRESSAO: manter o mesmo layout e tipografia da visualizacao do relatorio */
+@media print {
+  @page { size: A4 portrait; margin: 2cm 2cm 1.8cm 2.5cm; }
+  html, body { background:#fff !important; color:#000 !important; margin:0 !important; padding:0 !important; }
   body.preview-mode #editor,
   body.preview-mode #reportsPanel,
   body.preview-mode .preview-actions,
   body.preview-mode .toolbar,
   body.preview-mode .status,
   body.preview-mode .no-print { display:none !important; }
-  body.preview-mode #previewPanel { display:block !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; background:#fff !important; overflow:visible !important; }
-  body.preview-mode #previewContent { display:block !important; margin:0 !important; padding:0 !important; overflow:visible !important; }
-  body.preview-mode .wrap { width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; }
-  body.preview-mode .preview-document { display:block !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; overflow:visible !important; font-family:"Times New Roman",Times,serif !important; font-size:10pt !important; line-height:1.12 !important; color:#000 !important; }
-  /* O cabeçalho fica na margem superior; a margem da página reserva espaço para o texto. */
-  body.preview-mode #previewContent .preview-letterhead { position:fixed !important; top:2mm !important; left:0 !important; right:0 !important; width:100% !important; height:20mm !important; min-height:20mm !important; margin:0 !important; padding:0 18mm !important; box-sizing:border-box !important; display:grid !important; grid-template-columns:15mm minmax(0,1fr) 15mm !important; gap:3mm !important; align-items:center !important; background:#fff !important; color:#000 !important; z-index:10 !important; }
-  body.preview-mode #previewContent .preview-letterhead .preview-logo { display:block !important; width:14mm !important; height:17mm !important; max-height:17mm !important; object-fit:contain !important; visibility:visible !important; opacity:1 !important; filter:none !important; }
-  body.preview-mode #previewContent .preview-letterhead-text,
-  body.preview-mode #previewContent .preview-letterhead-text div { display:block !important; color:#000 !important; font-size:6pt !important; line-height:1.05 !important; text-align:center !important; white-space:normal !important; letter-spacing:0 !important; }
-  body.preview-mode .preview-archive { position:static !important; margin:0 0 9mm !important; padding:0 !important; font-size:7pt !important; line-height:1.1 !important; text-align:right !important; }
-  body.preview-mode .preview-title { margin:0 0 5mm !important; padding:0 !important; text-align:left !important; }
-  body.preview-mode .preview-title h2 { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; margin:0 !important; line-height:1.15 !important; }
-  body.preview-mode .preview-section { color:#000 !important; margin:0 0 5px !important; break-inside:auto !important; page-break-inside:auto !important; }
-  body.preview-mode .preview-section h3 { font-family:"Times New Roman",Times,serif !important; font-size:9.5pt !important; line-height:1.1 !important; margin:0 0 2px !important; text-decoration:underline !important; break-after:avoid-page !important; page-break-after:avoid !important; }
-  body.preview-mode .preview-section .preview-text { font-family:"Times New Roman",Times,serif !important; font-size:9.5pt !important; line-height:1.12 !important; white-space:pre-wrap !important; overflow-wrap:anywhere !important; }
-  /* Rodapé repetido na margem inferior; margem @page mantém o conteúdo acima dele. */
-  body.preview-mode #previewContent .preview-footer { position:fixed !important; left:0 !important; right:0 !important; bottom:2mm !important; width:100% !important; margin:0 !important; padding:1.5mm 18mm 0 !important; box-sizing:border-box !important; border-top:.25mm solid #777 !important; background:#fff !important; color:#000 !important; text-align:center !important; font-size:5.5pt !important; line-height:1.05 !important; z-index:10 !important; }
-  body.preview-mode #previewContent .preview-footer .page-number { margin-top:1mm !important; text-align:right !important; font-size:6pt !important; }
-  /* O Chrome não oferece suporte consistente a counter(page/pages) em todos os layouts. */
-  body.preview-mode .preview-footer .page-current:after,
-  body.preview-mode .preview-footer .page-total:after { content:"" !important; }
-  body.preview-mode .preview-return-wrap { display:none !important; }
-  body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; min-height:0 !important; width:100% !important; max-width:100% !important; }
+  body.preview-mode #previewPanel { display:block !important; background:#fff !important; border:0 !important; box-shadow:none !important; margin:0 !important; padding:0 !important; }
+  body.preview-mode #previewContent { display:block !important; }
+  body.preview-mode .wrap { max-width:none !important; width:100% !important; margin:0 !important; padding:0 !important; }
+  body.preview-mode .preview-document { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; color:#000 !important; width:100% !important; max-width:100% !important; margin:0 auto !important; padding:0 !important; overflow:visible !important; }
+  body.preview-mode .preview-letterhead { position:static !important; inset:auto !important; height:auto !important; min-height:0 !important; width:100% !important; margin:0 0 18px !important; padding:0 !important; display:grid !important; grid-template-columns:48px minmax(0,1fr) 48px !important; gap:3px !important; align-items:center !important; background:#fff !important; color:#000 !important; font-size:10.5pt !important; line-height:1.15 !important; }
+  body.preview-mode .preview-letterhead-text,
+  body.preview-mode .preview-letterhead-text div { font-size:inherit !important; white-space:normal !important; letter-spacing:normal !important; }
+  body.preview-mode .preview-logo { width:42px !important; height:auto !important; max-height:48px !important; }
+  body.preview-mode .preview-archive { position:static !important; font-size:10pt !important; margin:0 0 18px !important; }
+  body.preview-mode .preview-title { text-align:center !important; margin:0 0 18px !important; padding:0 !important; }
+  body.preview-mode .preview-title h2 { font-family:"Times New Roman",Times,serif !important; font-size:12pt !important; margin:0 !important; }
+  body.preview-mode .preview-section { color:#000 !important; margin:0 0 11px !important; break-inside:auto !important; page-break-inside:auto !important; }
+  body.preview-mode .preview-section h3 { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; margin:0 0 4px !important; text-decoration:underline !important; }
+  body.preview-mode .preview-section .preview-text { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; white-space:pre-wrap !important; overflow-wrap:anywhere !important; }
+  body.preview-mode .preview-footer { position:static !important; inset:auto !important; width:100% !important; margin:22px 0 0 !important; padding-top:5px !important; border-top:1px solid #777 !important; font-size:8.5pt !important; }
+  body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; width:100% !important; max-width:100% !important; }
+  body.preview-mode .movement-closing { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.3 !important; }
   body.preview-mode .movement-signature { text-align:center !important; break-inside:avoid !important; page-break-inside:avoid !important; }
   body.preview-mode table { max-width:100% !important; }
-  body.preview-mode tr { break-inside:avoid !important; page-break-inside:avoid !important; }
   * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+}
+
+/* IMPRESSAO INICIAL SIMPLIFICADA: cabecalho somente no inicio e rodape no final do documento */
+@media print {
+  @page { size: A4 portrait; margin: 18mm 18mm 16mm 18mm; }
+  html, body { margin:0 !important; padding:0 !important; height:auto !important; overflow:visible !important; }
+  body.preview-mode #previewPanel, body.preview-mode #previewContent, body.preview-mode .preview-document {
+    display:block !important; position:static !important; height:auto !important; min-height:0 !important; max-height:none !important;
+    overflow:visible !important; transform:none !important; margin:0 !important; padding:0 !important;
+    width:100% !important; max-width:100% !important; border:0 !important; box-shadow:none !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead {
+    position:static !important; inset:auto !important; float:none !important; display:grid !important;
+    width:100% !important; height:auto !important; min-height:0 !important; margin:0 0 8mm !important; padding:0 !important;
+    break-after:avoid-page !important; page-break-after:avoid !important; z-index:auto !important; background:#fff !important;
+  }
+  body.preview-mode #previewContent .preview-archive, body.preview-mode #previewContent .preview-title { position:static !important; float:none !important; }
+  body.preview-mode #previewContent .preview-footer {
+    position:static !important; inset:auto !important; float:none !important; display:block !important;
+    width:100% !important; height:auto !important; margin:8mm 0 0 !important; padding:2mm 0 0 !important;
+    break-inside:avoid !important; page-break-inside:avoid !important; border-top:1px solid #777 !important;
+    background:#fff !important; z-index:auto !important;
+  }
+  body.preview-mode #previewContent .preview-footer .page-number { display:none !important; }
+  body.preview-mode .preview-return-wrap { display:none !important; }
+  body.preview-mode .movement-page { min-height:0 !important; }
 }
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
