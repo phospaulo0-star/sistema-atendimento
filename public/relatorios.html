@@ -1526,7 +1526,27 @@ function exportarWord(){
   const conteudo=$('previewContent')?.innerHTML;
   if(!conteudo){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
   const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}</style></head><body>'+conteudo+'</body></html>';
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}
+/* AJUSTE REFEITO A PARTIR DO ÚLTIMO CÓDIGO APROVADO: impressão acompanha a visualização */
+@media print {
+  @page { size: A4 portrait; margin: 18mm 18mm 18mm 18mm; }
+  html, body { width:100% !important; margin:0 !important; padding:0 !important; }
+  body.preview-mode #previewPanel,
+  body.preview-mode #previewContent { display:block !important; width:100% !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; overflow:visible !important; }
+  body.preview-mode .preview-document { width:100% !important; max-width:100% !important; margin:0 auto !important; padding:0 !important; overflow:visible !important; box-sizing:border-box !important; }
+  body.preview-mode .preview-section { margin-bottom:11px !important; break-inside:auto !important; page-break-inside:auto !important; }
+  body.preview-mode .preview-section h3 { break-after:avoid-page !important; page-break-after:avoid !important; }
+  body.preview-mode .preview-section .preview-text { overflow:visible !important; white-space:pre-wrap !important; overflow-wrap:anywhere !important; word-break:normal !important; }
+  body.preview-mode .team-leader-signatures,
+  body.preview-mode .team-leader-signature { break-inside:avoid !important; page-break-inside:avoid !important; }
+  body.preview-mode table { max-width:100% !important; }
+  body.preview-mode tr { break-inside:avoid !important; page-break-inside:avoid !important; }
+  body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; min-height:0 !important; }
+  body.preview-mode .preview-return-wrap { display:none !important; }
+  body.preview-mode #previewPanel .preview-actions { display:none !important; }
+}
+
+</style></head><body>'+conteudo+'</body></html>';
   const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download='Relatorio_CPAIG.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
