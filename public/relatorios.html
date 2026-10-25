@@ -234,68 +234,60 @@
 
 
 
-/* IMPRESSÃO CPAIG — regras consolidadas para cabeçalho e rodapé */
+/* IMPRESSÃO CPAIG — cabeçalho e rodapé no lugar correto */
 @media print {
-  @page { size: A4 portrait; margin: 27mm 18mm 22mm 18mm; }
+  @page { size: A4 portrait; margin: 32mm 18mm 24mm 18mm; }
 
   html, body { margin: 0 !important; padding: 0 !important; }
   body.preview-mode #previewPanel {
-    display: block !important;
-    padding: 0 !important; margin: 0 !important;
+    display: block !important; margin: 0 !important; padding: 0 !important;
     border: 0 !important; box-shadow: none !important;
   }
   body.preview-mode #previewContent { display: block !important; }
   body.preview-mode #previewPanel .preview-actions { display: none !important; }
   body.preview-mode .preview-document {
     width: 100% !important; max-width: none !important;
-    margin: 0 !important; padding: 0 !important;
-    overflow: visible !important;
+    margin: 0 !important; padding: 0 !important; overflow: visible !important;
   }
 
-  /* Cabeçalho: fica no espaço reservado no alto e se repete na impressão. */
-  body.preview-mode .preview-letterhead {
+  /* Fixed elements repeat on every printed page in Chrome. */
+  body.preview-mode #previewContent .preview-letterhead {
     position: fixed !important;
-    top: -24mm !important;
+    top: -29mm !important;
     left: 0 !important; right: 0 !important;
-    height: 20mm !important;
+    height: 24mm !important;
     margin: 0 !important; padding: 0 !important;
     display: grid !important;
     grid-template-columns: 18mm minmax(0,1fr) 18mm !important;
     align-items: center !important; gap: 2mm !important;
     background: #fff !important; color: #000 !important;
-    z-index: 1000 !important;
+    z-index: 9999 !important;
   }
-  body.preview-mode .preview-letterhead .preview-logo {
-    display: block !important;
-    width: 16mm !important; height: 18mm !important;
-    object-fit: contain !important;
-    filter: none !important;
-    visibility: visible !important;
+  body.preview-mode #previewContent .preview-letterhead .preview-logo {
+    display: block !important; width: 16mm !important; height: 19mm !important;
+    object-fit: contain !important; filter: none !important;
+    visibility: visible !important; opacity: 1 !important;
   }
-  body.preview-mode .preview-letterhead-text,
-  body.preview-mode .preview-letterhead-text div {
-    display: block !important;
-    font-size: 7pt !important; line-height: 1.08 !important;
+  body.preview-mode #previewContent .preview-letterhead-text,
+  body.preview-mode #previewContent .preview-letterhead-text div {
+    display: block !important; visibility: visible !important; opacity: 1 !important;
+    color: #000 !important; font-size: 7pt !important; line-height: 1.08 !important;
     text-align: center !important; white-space: nowrap !important;
-    color: #000 !important; visibility: visible !important;
   }
 
-  /* Rodapé institucional no espaço inferior reservado. */
-  body.preview-mode .preview-footer {
+  body.preview-mode #previewContent .preview-footer {
     position: fixed !important;
-    top: auto !important; bottom: -19mm !important;
+    top: auto !important; bottom: -21mm !important;
     left: 0 !important; right: 0 !important;
-    display: block !important;
-    margin: 0 !important; padding: 2mm 0 0 !important;
+    display: block !important; margin: 0 !important;
+    padding: 2mm 0 0 !important;
     background: #fff !important; color: #000 !important;
     border-top: .3mm solid #777 !important;
     text-align: center !important; font-size: 7pt !important;
-    line-height: 1.1 !important; z-index: 1000 !important;
-    break-inside: avoid !important; page-break-inside: avoid !important;
+    line-height: 1.1 !important; z-index: 9999 !important;
   }
-  body.preview-mode .preview-footer .page-current:after { content: counter(page) !important; }
-  body.preview-mode .preview-footer .page-total:after { content: counter(pages) !important; }
-
+  body.preview-mode #previewContent .preview-footer .page-current:after { content: counter(page) !important; }
+  body.preview-mode #previewContent .preview-footer .page-total:after { content: counter(pages) !important; }
   body.preview-mode .preview-return-wrap { display: none !important; }
   body.preview-mode .movement-page { min-height: 0 !important; }
 }
