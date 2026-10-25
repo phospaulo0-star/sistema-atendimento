@@ -284,7 +284,7 @@
 
 /* IMPRESSAO: manter o mesmo layout e tipografia da visualizacao do relatorio */
 @media print {
-  @page { size: A4 portrait; margin: 2cm 2cm 1.8cm 2.5cm; }
+  @page { size: A4 portrait; margin: 3cm 2cm 1.8cm 2.5cm; }
   html, body { background:#fff !important; color:#000 !important; margin:0 !important; padding:0 !important; }
   body.preview-mode #editor,
   body.preview-mode #reportsPanel,
@@ -312,53 +312,6 @@
   body.preview-mode .movement-signature { text-align:center !important; break-inside:avoid !important; page-break-inside:avoid !important; }
   body.preview-mode table { max-width:100% !important; }
   * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-}
-
-/* IMPRESSAO INICIAL SIMPLIFICADA: cabecalho somente no inicio e rodape no final do documento */
-@media print {
-  @page { size: A4 portrait; margin: 18mm 18mm 16mm 18mm; }
-  html, body { margin:0 !important; padding:0 !important; height:auto !important; overflow:visible !important; }
-  body.preview-mode #previewPanel, body.preview-mode #previewContent, body.preview-mode .preview-document {
-    display:block !important; position:static !important; height:auto !important; min-height:0 !important; max-height:none !important;
-    overflow:visible !important; transform:none !important; margin:0 !important; padding:0 !important;
-    width:100% !important; max-width:100% !important; border:0 !important; box-shadow:none !important;
-  }
-  body.preview-mode #previewContent .preview-letterhead {
-    position:static !important; inset:auto !important; float:none !important; display:grid !important;
-    width:100% !important; height:auto !important; min-height:0 !important; margin:0 0 8mm !important; padding:0 !important;
-    break-after:avoid-page !important; page-break-after:avoid !important; z-index:auto !important; background:#fff !important;
-  }
-  body.preview-mode #previewContent .preview-archive, body.preview-mode #previewContent .preview-title { position:static !important; float:none !important; }
-  body.preview-mode #previewContent .preview-footer {
-    position:static !important; inset:auto !important; float:none !important; display:block !important;
-    width:100% !important; height:auto !important; margin:8mm 0 0 !important; padding:2mm 0 0 !important;
-    break-inside:avoid !important; page-break-inside:avoid !important; border-top:1px solid #777 !important;
-    background:#fff !important; z-index:auto !important;
-  }
-  body.preview-mode #previewContent .preview-footer .page-number { display:none !important; }
-  body.preview-mode .preview-return-wrap { display:none !important; }
-  body.preview-mode .movement-page { min-height:0 !important; }
-}
-
-/* AJUSTE INICIAL DE PAGINACAO: primeira pagina preservada; paginas seguintes com area de texto delimitada */
-@media print {
-  @page { size: A4 portrait; margin: 26mm 18mm 24mm 18mm !important; }
-  @page:first { margin-top: 10mm !important; margin-right: 18mm !important; margin-bottom: 24mm !important; margin-left: 18mm !important; }
-  html, body { height: auto !important; overflow: visible !important; }
-  body.preview-mode #previewPanel,
-  body.preview-mode #previewContent,
-  body.preview-mode .preview-document {
-    position: static !important; height: auto !important; max-height: none !important;
-    overflow: visible !important; transform: none !important;
-  }
-  body.preview-mode .preview-letterhead {
-    position: static !important; inset: auto !important;
-    break-after: avoid-page !important; page-break-after: avoid !important;
-  }
-  body.preview-mode .preview-footer {
-    position: static !important; inset: auto !important;
-    break-inside: avoid !important; page-break-inside: avoid !important;
-  }
 }
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
