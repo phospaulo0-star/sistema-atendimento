@@ -306,14 +306,7 @@
   body.preview-mode .preview-section { color:#000 !important; margin:0 0 11px !important; break-inside:auto !important; page-break-inside:auto !important; }
   body.preview-mode .preview-section h3 { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; margin:0 0 4px !important; text-decoration:underline !important; }
   body.preview-mode .preview-section .preview-text { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.15 !important; white-space:pre-wrap !important; overflow-wrap:anywhere !important; }
-  body.preview-mode .preview-footer { position:static !important; inset:auto !important; width:100% !important; margin:22px 0 0 !important; padding-top:5px !important; border-top:1px solid #777 !important; font-size:8.5pt !important; break-inside:avoid !important; page-break-inside:avoid !important; }
-  /* Não imprimir a numeração 0 de 0: o Chrome não calcula esses contadores neste rodapé em fluxo normal. */
-  body.preview-mode .preview-footer .page-number { display:none !important; }
-  /* Evita que blocos pequenos, títulos e linhas de tabelas sejam cortados no meio da página. */
-  body.preview-mode .preview-section h3 { break-after:avoid-page !important; page-break-after:avoid !important; }
-  body.preview-mode .preview-section table tr { break-inside:avoid !important; page-break-inside:avoid !important; }
-  body.preview-mode .preview-section img { max-width:100% !important; height:auto !important; }
-  body.preview-mode .preview-section { overflow:visible !important; max-width:100% !important; }
+  body.preview-mode .preview-footer { position:static !important; inset:auto !important; width:100% !important; margin:22px 0 0 !important; padding-top:5px !important; border-top:1px solid #777 !important; font-size:8.5pt !important; }
   body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; width:100% !important; max-width:100% !important; }
   body.preview-mode .movement-closing { font-family:"Times New Roman",Times,serif !important; font-size:11pt !important; line-height:1.3 !important; }
   body.preview-mode .movement-signature { text-align:center !important; break-inside:avoid !important; page-break-inside:avoid !important; }
@@ -1565,72 +1558,7 @@ function exportarWord(){
   const conteudo=$('previewContent')?.innerHTML;
   if(!conteudo){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
   const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}
-
-/* CORRECAO DE IMPRESSAO: restaurar titulo e manter itens completos com quebras A4 naturais */
-@media print {
-  @page { size: A4 portrait; margin: 16mm 15mm 16mm 15mm; }
-  html, body { width:auto !important; height:auto !important; overflow:visible !important; }
-  body.preview-mode #previewPanel,
-  body.preview-mode #previewContent,
-  body.preview-mode .preview-document {
-    display:block !important; position:static !important; float:none !important;
-    width:100% !important; max-width:100% !important; height:auto !important;
-    min-height:0 !important; overflow:visible !important; transform:none !important;
-    margin:0 !important; padding:0 !important; border:0 !important;
-  }
-  body.preview-mode #previewContent .preview-letterhead {
-    display:grid !important; position:static !important; inset:auto !important;
-    width:100% !important; height:auto !important; min-height:0 !important;
-    margin:0 0 8mm !important; padding:0 !important; z-index:auto !important;
-    break-after:avoid-page !important; page-break-after:avoid !important;
-  }
-  body.preview-mode .preview-logo { display:block !important; visibility:visible !important; opacity:1 !important; }
-  body.preview-mode .preview-archive {
-    display:block !important; visibility:visible !important; position:static !important;
-    color:#000 !important; font-size:8pt !important; margin:0 0 5mm !important;
-    break-after:avoid-page !important; page-break-after:avoid !important;
-  }
-  body.preview-mode .preview-title {
-    display:block !important; visibility:visible !important; position:static !important;
-    color:#000 !important; margin:0 0 7mm !important; padding:0 !important;
-    break-after:avoid-page !important; page-break-after:avoid !important;
-  }
-  body.preview-mode .preview-title h2 {
-    display:block !important; visibility:visible !important; color:#000 !important;
-    font-family:Arial,Helvetica,sans-serif !important; font-size:12pt !important;
-    line-height:1.2 !important; text-align:left !important; text-decoration:underline !important;
-    margin:0 !important; overflow:visible !important;
-  }
-  body.preview-mode .preview-section {
-    display:block !important; position:static !important; overflow:visible !important;
-    max-width:100% !important; height:auto !important; margin:0 0 3mm !important;
-    break-inside:avoid-page !important; page-break-inside:avoid !important;
-  }
-  /* Tabelas ou seções longas podem fluir entre páginas; cada linha continua inteira. */
-  body.preview-mode .preview-section:has(table),
-  body.preview-mode .preview-section:has(.custody-preview-table),
-  body.preview-mode .preview-section:has(.material-carga-print-table) {
-    break-inside:auto !important; page-break-inside:auto !important;
-  }
-  body.preview-mode .preview-section h3 {
-    break-after:avoid-page !important; page-break-after:avoid !important;
-  }
-  body.preview-mode .preview-section table { width:100% !important; max-width:100% !important; border-collapse:collapse !important; }
-  body.preview-mode .preview-section tr { break-inside:avoid !important; page-break-inside:avoid !important; }
-  body.preview-mode .preview-section .preview-text { overflow:visible !important; white-space:pre-wrap !important; }
-  body.preview-mode .preview-footer {
-    display:block !important; position:static !important; inset:auto !important;
-    width:100% !important; margin:8mm 0 0 !important; padding-top:2mm !important;
-    background:#fff !important; color:#000 !important; z-index:auto !important;
-  }
-  body.preview-mode .preview-footer .page-number { display:none !important; }
-  body.preview-mode .movement-page { break-before:page !important; page-break-before:always !important; min-height:0 !important; height:auto !important; padding-bottom:0 !important; }
-  body.preview-mode .movement-signature { break-inside:avoid !important; page-break-inside:avoid !important; }
-  body.preview-mode .no-print, body.preview-mode .preview-actions { display:none !important; }
-}
-
-</style></head><body>'+conteudo+'</body></html>';
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}</style></head><body>'+conteudo+'</body></html>';
   const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download='Relatorio_CPAIG.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
