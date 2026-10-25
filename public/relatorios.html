@@ -1074,6 +1074,7 @@ async function carregarNomesHE() {
     );
 
     heNamesCache = result.names || [];
+    if (typeof preencherOpcoesItem40 === 'function') preencherOpcoesItem40();
     const escalaNomes = $('escalaDiurnaNomes');
     if (escalaNomes) { escalaNomes.innerHTML = ''; heNamesCache.forEach(item => { const option = document.createElement('option'); option.value = item.name; escalaNomes.appendChild(option); }); }
     // Atualiza também os seletores visíveis do Item 10 depois que a lista compartilhada carregar.
@@ -1476,7 +1477,39 @@ $('heSelectBtn').addEventListener('click', selecionarNomeHE);
 $('heSeedBtn').addEventListener('click', cadastrarListaPadraoEquipeC);function renderList(){const root=$('reportsList');if(!reports.length){root.innerHTML='<p class="small">Nenhum relatório cadastrado para esta equipe.</p>';return}root.innerHTML=reports.map(r=>`<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="abrir('${esc(r.id)}')">${r.id===current?.id?'ABERTO':'ABRIR'}</button></div>`).join('')}
 async function api(url,options={}){const res=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let j={};try{j=await res.json()}catch{}if(!res.ok){const e=new Error(j.message||'Falha na comunicação com o servidor.');e.status=res.status;e.data=j;throw e}return j}
 function numeroPorExtensoEncerramento(valor){const n=Number(valor);if(!Number.isFinite(n)||n<0)return '';if(typeof numeroPorExtenso==='function')return numeroPorExtenso(n);return String(n)}
-function preencherOpcoesItem40(){for(const id of ['item40Entrega','item40Recebe']){const el=$(id);if(!el||el.options.length>1)continue;const origem=$('recebePlantao');if(origem){[...origem.options].slice(1).forEach(o=>{const op=document.createElement('option');op.value=o.value;op.textContent=o.textContent;el.appendChild(op)})}const origem2=$('entregaPlantao');if(origem2){[...origem2.options].slice(1).forEach(o=>{if(![...el.options].some(x=>x.value===o.value)){const op=document.createElement('option');op.value=o.value;op.textContent=o.textContent;el.appendChild(op)}})}}}
+function preencherOpcoesItem40(){
+  const nomes = Array.isArray(heNamesCache) ? heNamesCache : [];
+  for (const id of ['item40Entrega','item40Recebe']) {
+    const el = $(id);
+    if (!el) continue;
+    const selecionado = el.value || el.dataset.pendingName || '';
+    const nomesUnicos = new Map();
+    nomes.forEach(item => {
+      const nome = String(item?.name || '').trim();
+      if (nome) nomesUnicos.set(nome.toLocaleLowerCase('pt-BR'), nome);
+    });
+    // Fallback para os campos do Item 01 caso a lista compartilhada ainda não tenha carregado.
+    for (const origemId of ['recebePlantao','entregaPlantao']) {
+      const origem = $(origemId);
+      if (origem) [...origem.options].slice(1).forEach(o => {
+        const nome = String(o.textContent || o.value || '').trim();
+        if (nome) nomesUnicos.set(nome.toLocaleLowerCase('pt-BR'), nome);
+      });
+    }
+    el.innerHTML = '<option value="">Selecione um policial</option>';
+    [...nomesUnicos.values()].sort((a,b) => a.localeCompare(b, 'pt-BR', {sensitivity:'base'})).forEach(nome => {
+      const op = document.createElement('option');
+      op.value = nome;
+      op.textContent = nome;
+      el.appendChild(op);
+    });
+    if (selecionado && [...el.options].some(o => o.value === selecionado)) {
+      el.value = selecionado;
+    } else if (selecionado) {
+      el.dataset.pendingName = selecionado;
+    }
+  }
+}
 function dataEncerramentoFormatada(){const d=$('reportDate').value;if(!d)return 'DATA NÃO INFORMADA';const dt=new Date(d+'T12:00:00');dt.setDate(dt.getDate()+1);return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}
 function textoEncerramentoItem40(){const entrega=$('item40Entrega')?.value||$('entregaPlantao')?.value||$('entregaPlantao')?.dataset.pendingName||'________________';const recebe=$('item40Recebe')?.value||$('recebePlantao')?.value||$('recebePlantao')?.dataset.pendingName||'________________';const substitui=$('item40Substitui')?.value==='sim';const nomeSub=($('item40Substituido')?.value||'').trim();const qtd=(window.cpaigSaldoFinalMovimentacao!==undefined&&window.cpaigSaldoFinalMovimentacao!==null&&window.cpaigSaldoFinalMovimentacao!=='')?Number(window.cpaigSaldoFinalMovimentacao):Number($('quantidadeCustodiados')?.value||0);const ext=numeroPorExtensoEncerramento(qtd);const fraseSub=substitui?`, em substituição a ${nomeSub||'________________'}`:'';return `Eu, ${entrega}${fraseSub}, encerro o plantão e passo para ${recebe}, em ${dataEncerramentoFormatada()}, às 08h, com o efetivo carcerário de ${qtd} (${ext}) custodiados, já incluídos os custodiados em trânsitos, com material carga completo e sem alteração.`}
 function atualizarItem40(){if(!$('item40Texto'))return;preencherOpcoesItem40();$('item40SubstituidoWrap').style.display=$('item40Substitui').value==='sim'?'block':'none';const texto=textoEncerramentoItem40();$('item40Texto').textContent=texto;$('s39').value=texto;window.cpaigTextoEncerramento=texto;}
