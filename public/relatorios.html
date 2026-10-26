@@ -282,19 +282,51 @@
 }
 
 
-/* VISUALIZAÇÃO A4 PAGINADA NA TELA — preserva cabeçalho, cinzas e CSS de impressão existentes */
-body.preview-mode #previewPanel{background:#e7e9ec!important;border:0!important;padding:14px!important;box-shadow:none!important;border-radius:0!important}
-body.preview-mode #previewContent{display:flex;flex-direction:column;align-items:center;gap:18px;overflow:visible}
-body.preview-mode .preview-a4-page{width:210mm;min-height:297mm;height:auto;min-height:297mm;flex:0 0 auto;box-sizing:border-box;background:#fff;color:#000;padding:18mm 20mm 16mm 25mm;box-shadow:0 2px 12px rgba(0,0,0,.18);position:relative;overflow:visible;font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.15}
-body.preview-mode .preview-a4-page .preview-page-body{width:100%;min-height:0}
-body.preview-mode .preview-a4-page .preview-footer{position:absolute;bottom:10mm;left:25mm;right:20mm;margin:0;padding-top:4px;border-top:1px solid #777;font-size:8pt;background:#fff}
-body.preview-mode .preview-a4-page .preview-letterhead{margin-top:0}
-body.preview-mode .preview-a4-page table{max-width:100%;break-inside:auto;page-break-inside:auto}
-body.preview-mode .preview-a4-page tr{break-inside:avoid;page-break-inside:avoid}
-body.preview-mode .preview-a4-page th{background:#c6c6c6!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body.preview-mode .preview-a4-page td:has(strong),body.preview-mode .preview-a4-page th{background:#d0d0d0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-@media(max-width:850px){body.preview-mode #previewPanel{padding:8px!important;overflow-x:auto}body.preview-mode #previewContent{align-items:flex-start}body.preview-mode .preview-a4-page{transform-origin:top left;width:210mm;min-width:210mm}}
-@media print{body.preview-mode #previewPanel{background:#fff!important;padding:0!important}body.preview-mode #previewContent{display:block!important}body.preview-mode .preview-a4-page{width:auto!important;min-width:0!important;height:auto!important;min-height:0!important;overflow:visible!important;box-shadow:none!important;padding:0!important;margin:0!important;break-after:page;page-break-after:always}body.preview-mode .preview-a4-page:last-child{break-after:auto;page-break-after:auto}body.preview-mode .preview-a4-page .preview-footer{position:static!important;margin-top:18px!important}body.preview-mode .preview-a4-page th,body.preview-mode .preview-a4-page td:has(strong){background:#c6c6c6!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+/* CORREÇÃO CONSOLIDADA DE IMPRESSÃO CPAIG — cabeçalho na primeira página, rodapé no final,
+   células em negrito cinzas e tabelas quebrando apenas entre linhas. */
+@media print {
+  @page { size: A4 portrait; margin: 15mm 12mm 14mm 12mm; }
+  html, body { margin:0 !important; padding:0 !important; }
+  body.preview-mode #previewPanel { display:block !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; }
+  body.preview-mode #previewContent { display:block !important; }
+  body.preview-mode #previewPanel .preview-actions { display:none !important; }
+  body.preview-mode .preview-document { width:100% !important; max-width:100% !important; margin:0 auto !important; padding:0 !important; overflow:visible !important; }
+  /* O cabeçalho fica no fluxo do documento: aparece no começo, sem cobrir conteúdo em páginas seguintes. */
+  body.preview-mode #previewContent .preview-letterhead {
+    position:static !important; inset:auto !important; top:auto !important; left:auto !important; right:auto !important; bottom:auto !important;
+    height:auto !important; margin:0 0 8mm !important; padding:0 !important; display:grid !important;
+    grid-template-columns:14mm minmax(0,1fr) 14mm !important; align-items:center !important; gap:2mm !important;
+    background:#fff !important; color:#000 !important; z-index:auto !important; break-inside:avoid !important; page-break-inside:avoid !important;
+  }
+  body.preview-mode #previewContent .preview-letterhead .preview-logo { display:block !important; width:12mm !important; height:13mm !important; object-fit:contain !important; filter:none !important; visibility:visible !important; opacity:1 !important; }
+  body.preview-mode #previewContent .preview-letterhead-text,
+  body.preview-mode #previewContent .preview-letterhead-text div { display:block !important; color:#000 !important; font-size:6.5pt !important; line-height:1.05 !important; text-align:center !important; white-space:normal !important; }
+  /* O rodapé fica depois do conteúdo, não fixo sobre as tabelas. */
+  body.preview-mode #previewContent .preview-footer { position:static !important; inset:auto !important; top:auto !important; bottom:auto !important; left:auto !important; right:auto !important; display:block !important; margin:8mm 0 0 !important; padding:2mm 0 0 !important; background:#fff !important; color:#000 !important; border-top:.3mm solid #777 !important; text-align:center !important; font-size:6.5pt !important; line-height:1.1 !important; z-index:auto !important; break-inside:avoid !important; page-break-inside:avoid !important; }
+  body.preview-mode #previewContent .preview-footer .page-current:after,
+  body.preview-mode #previewContent .preview-footer .page-total:after { content:none !important; }
+  body.preview-mode .preview-return-wrap { display:none !important; }
+  body.preview-mode .movement-page { min-height:0 !important; }
+  /* Aplicar a TODAS as tabelas do relatório e da movimentação carcerária. */
+  body.preview-mode #previewContent table { border-collapse:collapse !important; break-inside:auto !important; page-break-inside:auto !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  body.preview-mode #previewContent table thead { display:table-header-group !important; }
+  body.preview-mode #previewContent table tfoot { display:table-footer-group !important; }
+  body.preview-mode #previewContent table tr { break-inside:avoid !important; page-break-inside:avoid !important; }
+  body.preview-mode #previewContent table th,
+  body.preview-mode #previewContent table th strong,
+  body.preview-mode #previewContent table th b { background-color:#d2d2d2 !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  body.preview-mode #previewContent table td:has(strong),
+  body.preview-mode #previewContent table td:has(b) { background-color:#d2d2d2 !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  /* Colunas identificadoras dos Itens 16 e 17 também permanecem cinzas. */
+  body.preview-mode #previewContent #materialCargaTabela tr > :first-child,
+  body.preview-mode #previewContent .material-carga-tabela tr > :first-child,
+  body.preview-mode #previewContent table[data-section*="MATERIAL CARGA"] tr > :first-child,
+  body.preview-mode #previewContent #viaturasTabela tr > :first-child,
+  body.preview-mode #previewContent #tabelaViaturas tr > :first-child,
+  body.preview-mode #previewContent .viaturas-tabela tr > :first-child,
+  body.preview-mode #previewContent table[data-section*="VIATURAS"] tr > :first-child { background-color:#d2d2d2 !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+}
+
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1802,36 +1834,11 @@ function visualizarRelatorio(targetId=null){
   const rodape=`<div class="preview-footer"><div>Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS<br>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</div><div class="page-number">Página <span class="page-current"></span> de <span class="page-total"></span></div></div></div>`;
   const botaoRetorno=targetId?`<div class="preview-return-wrap" style="margin:12px 0;text-align:center"><button type="button" class="primary" onclick="voltarEdicaoItem('${targetId}')">✏️ VOLTAR À EDIÇÃO DESTE ITEM</button></div>`:'';
   $('previewContent').innerHTML=cabecalho+corpo+paginaMovimentacao+botaoRetorno+rodape;
-  paginarVisualizacaoA4();
   $('editor').classList.add('hidden');
   $('previewPanel').classList.remove('hidden');
   document.body.classList.add('preview-mode');
   $('previewPanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function paginarVisualizacaoA4(){
- const root=document.getElementById('previewContent');if(!root)return;
- // Evita embrulhar novamente quando a visualização é atualizada.
- const orig=Array.from(root.childNodes);root.innerHTML='';
- const pageHeightPx=980;let page=null,body=null,used=0,first=true;
- const makePage=()=>{page=document.createElement('div');page.className='preview-a4-page';body=document.createElement('div');body.className='preview-page-body';page.appendChild(body);root.appendChild(page);used=0;first=false;return page;};
- makePage();
- for(const node of orig){
-   if(node.nodeType===1&&node.classList.contains('preview-footer'))continue;
-   body.appendChild(node);
-   // A altura real após anexar permite distribuir seções completas pelas folhas A4.
-   const h=body.scrollHeight;
-   if(h>pageHeightPx && body.childNodes.length>1){
-     body.removeChild(node);makePage();body.appendChild(node);
-     // O cabeçalho institucional e o título permanecem somente na primeira folha.
-   }
- }
- const footer=orig.find(n=>n.nodeType===1&&n.classList.contains('preview-footer'));
- if(footer){const pages=root.querySelectorAll('.preview-a4-page');(pages[pages.length-1]||page).appendChild(footer);}
- // Cabeçalho institucional somente na primeira página; número de páginas visuais atualizado.
- const pages=Array.from(root.querySelectorAll('.preview-a4-page'));
- pages.forEach((pg,i)=>{pg.dataset.page=String(i+1);const num=pg.querySelector('.page-number');if(num)num.textContent=`Página ${i+1} de ${pages.length}`;});
-}
-
 function voltarEdicao(){
   document.body.classList.remove('preview-mode');
   $('previewPanel').classList.add('hidden');
