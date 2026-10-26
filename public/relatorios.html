@@ -1559,7 +1559,42 @@ function exportarWord(){
   const conteudo=$('previewContent')?.innerHTML;
   if(!conteudo){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
   const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}</style></head><body>'+conteudo+'</body></html>';
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}
+
+/* PAGINACAO DAS TABELAS: permitir que a tabela continue na pagina seguinte,
+   mas nunca cortar uma linha ao meio. Repetir o cabecalho da tabela quando suportado. */
+@media print {
+  body.preview-mode .preview-section {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+  body.preview-mode .preview-section table,
+  body.preview-mode .preview-section .viaturas-print-table,
+  body.preview-mode .preview-section .custody-preview-table,
+  body.preview-mode .preview-section .licenca-judicial-preview-table,
+  body.preview-mode .preview-section .retorno-licenca-judicial-preview-table {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    overflow: visible !important;
+  }
+  body.preview-mode .preview-section table thead {
+    display: table-header-group !important;
+  }
+  body.preview-mode .preview-section table tfoot {
+    display: table-footer-group !important;
+  }
+  body.preview-mode .preview-section table tr,
+  body.preview-mode .preview-section table th,
+  body.preview-mode .preview-section table td {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  body.preview-mode .preview-section h3 {
+    break-after: avoid-page !important;
+    page-break-after: avoid !important;
+  }
+}
+</style></head><body>'+conteudo+'</body></html>';
   const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download='Relatorio_CPAIG.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
