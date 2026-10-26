@@ -282,31 +282,36 @@
 }
 
 
-
-/* IMPRESSÃO: células com texto em negrito recebem fundo cinza.
-   Itens 16 (Material Carga) e 17 (Viaturas): primeira coluna cinza também na impressão. */
+/* CORREÇÃO SEGURA DE IMPRESSÃO: cabeçalho no início e rodapé após o conteúdo.
+   Evita position:fixed, que estava sobrepondo tabelas e mostrando Página 0 de 0. */
 @media print {
-  body.preview-mode .preview-document table td:has(strong),
-  body.preview-mode .preview-document table td:has(b),
-  body.preview-mode .preview-document table th:has(strong),
-  body.preview-mode .preview-document table th:has(b) {
-    background-color: #d6d6d6 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  body.preview-mode .material-carga-print-table tbody tr > td:first-child,
-  body.preview-mode .viaturas-print-table tbody tr > td:first-child {
-    background-color: #d6d6d6 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  /* Também cobre a tabela de edição, caso ela seja impressa fora da visualização final. */
-  #materialCargaTabela table tbody tr > td:first-child,
-  #viaturasTabela table tbody tr > td:first-child {
-    background-color: #d6d6d6 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
+  @page { size: A4 portrait; margin: 18mm 18mm 18mm 18mm; }
+  html, body { margin: 0 !important; padding: 0 !important; }
+  body.preview-mode #previewPanel { display:block !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; }
+  body.preview-mode #previewContent { display:block !important; }
+  body.preview-mode #previewPanel .preview-actions { display:none !important; }
+  body.preview-mode .preview-document { width:100% !important; max-width:100% !important; margin:0 auto !important; padding:0 !important; overflow:visible !important; }
+  body.preview-mode #previewContent .preview-letterhead { position:static !important; top:auto !important; left:auto !important; right:auto !important; height:auto !important; margin:0 0 10mm !important; padding:0 !important; display:grid !important; grid-template-columns:14mm minmax(0,1fr) 14mm !important; align-items:center !important; gap:2mm !important; background:#fff !important; color:#000 !important; z-index:auto !important; break-after:avoid-page; page-break-after:avoid; }
+  body.preview-mode #previewContent .preview-letterhead .preview-logo { display:block !important; width:12mm !important; height:13mm !important; object-fit:contain !important; filter:none !important; visibility:visible !important; opacity:1 !important; }
+  body.preview-mode #previewContent .preview-letterhead-text, body.preview-mode #previewContent .preview-letterhead-text div { display:block !important; color:#000 !important; font-size:5.8pt !important; line-height:1.02 !important; text-align:center !important; white-space:nowrap !important; }
+  body.preview-mode #previewContent .preview-footer { position:static !important; top:auto !important; bottom:auto !important; left:auto !important; right:auto !important; display:block !important; margin:10mm 0 0 !important; padding:2mm 0 0 !important; background:#fff !important; color:#000 !important; border-top:.3mm solid #777 !important; text-align:center !important; font-size:7pt !important; line-height:1.15 !important; z-index:auto !important; break-inside:avoid !important; page-break-inside:avoid !important; }
+  /* Remover contagem CSS não suportada, que exibia 0 de 0. */
+  body.preview-mode #previewContent .preview-footer .page-current:after,
+  body.preview-mode #previewContent .preview-footer .page-total:after { content:none !important; }
+  body.preview-mode .preview-section { break-inside:auto !important; page-break-inside:auto !important; }
+  body.preview-mode .preview-section h3 { break-after:avoid-page !important; page-break-after:avoid !important; }
+  body.preview-mode .preview-section table tr { break-inside:avoid; page-break-inside:avoid; }
+  body.preview-mode .movement-page { min-height:0 !important; }
+  /* Cinza para células em negrito e colunas de identificação dos itens 16 e 17. */
+  body.preview-mode #previewContent td:has(strong), body.preview-mode #previewContent th { background-color:#d0d0d0 !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  body.preview-mode #previewContent #materialCargaTabela td:first-child,
+  body.preview-mode #previewContent .material-carga-print td:first-child,
+  body.preview-mode #previewContent .material-carga-print-table td:first-child,
+  body.preview-mode #previewContent #viaturasTabela tr > :first-child,
+  body.preview-mode #previewContent #tabelaViaturas tr > :first-child,
+  body.preview-mode #previewContent .viaturas-tabela tr > :first-child,
+  body.preview-mode #previewContent .viaturas-print-table tr > :first-child,
+  body.preview-mode #previewContent table[data-section*="VIATURAS"] tr > :first-child { background-color:#d0d0d0 !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
 }
 
 </style></head><body>
