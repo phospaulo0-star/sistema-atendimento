@@ -281,39 +281,6 @@
   body.preview-mode .movement-page { min-height:0 !important; }
 }
 
-
-/* CORREÇÃO SEGURA DE IMPRESSÃO: cabeçalho no início e rodapé após o conteúdo.
-   Evita position:fixed, que estava sobrepondo tabelas e mostrando Página 0 de 0. */
-@media print {
-  @page { size: A4 portrait; margin: 18mm 18mm 18mm 18mm; }
-  html, body { margin: 0 !important; padding: 0 !important; }
-  body.preview-mode #previewPanel { display:block !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; }
-  body.preview-mode #previewContent { display:block !important; }
-  body.preview-mode #previewPanel .preview-actions { display:none !important; }
-  body.preview-mode .preview-document { width:100% !important; max-width:100% !important; margin:0 auto !important; padding:0 !important; overflow:visible !important; }
-  body.preview-mode #previewContent .preview-letterhead { position:static !important; top:auto !important; left:auto !important; right:auto !important; height:auto !important; margin:0 0 10mm !important; padding:0 !important; display:grid !important; grid-template-columns:14mm minmax(0,1fr) 14mm !important; align-items:center !important; gap:2mm !important; background:#fff !important; color:#000 !important; z-index:auto !important; break-after:avoid-page; page-break-after:avoid; }
-  body.preview-mode #previewContent .preview-letterhead .preview-logo { display:block !important; width:12mm !important; height:13mm !important; object-fit:contain !important; filter:none !important; visibility:visible !important; opacity:1 !important; }
-  body.preview-mode #previewContent .preview-letterhead-text, body.preview-mode #previewContent .preview-letterhead-text div { display:block !important; color:#000 !important; font-size:5.8pt !important; line-height:1.02 !important; text-align:center !important; white-space:nowrap !important; }
-  body.preview-mode #previewContent .preview-footer { position:static !important; top:auto !important; bottom:auto !important; left:auto !important; right:auto !important; display:block !important; margin:10mm 0 0 !important; padding:2mm 0 0 !important; background:#fff !important; color:#000 !important; border-top:.3mm solid #777 !important; text-align:center !important; font-size:7pt !important; line-height:1.15 !important; z-index:auto !important; break-inside:avoid !important; page-break-inside:avoid !important; }
-  /* Remover contagem CSS não suportada, que exibia 0 de 0. */
-  body.preview-mode #previewContent .preview-footer .page-current:after,
-  body.preview-mode #previewContent .preview-footer .page-total:after { content:none !important; }
-  body.preview-mode .preview-section { break-inside:auto !important; page-break-inside:auto !important; }
-  body.preview-mode .preview-section h3 { break-after:avoid-page !important; page-break-after:avoid !important; }
-  body.preview-mode .preview-section table tr { break-inside:avoid; page-break-inside:avoid; }
-  body.preview-mode .movement-page { min-height:0 !important; }
-  /* Cinza para células em negrito e colunas de identificação dos itens 16 e 17. */
-  body.preview-mode #previewContent td:has(strong), body.preview-mode #previewContent th { background-color:#d0d0d0 !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-  body.preview-mode #previewContent #materialCargaTabela td:first-child,
-  body.preview-mode #previewContent .material-carga-print td:first-child,
-  body.preview-mode #previewContent .material-carga-print-table td:first-child,
-  body.preview-mode #previewContent #viaturasTabela tr > :first-child,
-  body.preview-mode #previewContent #tabelaViaturas tr > :first-child,
-  body.preview-mode #previewContent .viaturas-tabela tr > :first-child,
-  body.preview-mode #previewContent .viaturas-print-table tr > :first-child,
-  body.preview-mode #previewContent table[data-section*="VIATURAS"] tr > :first-child { background-color:#d0d0d0 !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-}
-
 </style></head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1559,42 +1526,7 @@ function exportarWord(){
   const conteudo=$('previewContent')?.innerHTML;
   if(!conteudo){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
   const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}
-
-/* PAGINACAO DAS TABELAS: permitir que a tabela continue na pagina seguinte,
-   mas nunca cortar uma linha ao meio. Repetir o cabecalho da tabela quando suportado. */
-@media print {
-  body.preview-mode .preview-section {
-    break-inside: auto !important;
-    page-break-inside: auto !important;
-  }
-  body.preview-mode .preview-section table,
-  body.preview-mode .preview-section .viaturas-print-table,
-  body.preview-mode .preview-section .custody-preview-table,
-  body.preview-mode .preview-section .licenca-judicial-preview-table,
-  body.preview-mode .preview-section .retorno-licenca-judicial-preview-table {
-    break-inside: auto !important;
-    page-break-inside: auto !important;
-    overflow: visible !important;
-  }
-  body.preview-mode .preview-section table thead {
-    display: table-header-group !important;
-  }
-  body.preview-mode .preview-section table tfoot {
-    display: table-footer-group !important;
-  }
-  body.preview-mode .preview-section table tr,
-  body.preview-mode .preview-section table th,
-  body.preview-mode .preview-section table td {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-  body.preview-mode .preview-section h3 {
-    break-after: avoid-page !important;
-    page-break-after: avoid !important;
-  }
-}
-</style></head><body>'+conteudo+'</body></html>';
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}</style></head><body>'+conteudo+'</body></html>';
   const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
   const url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download='Relatorio_CPAIG.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
