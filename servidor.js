@@ -9,6 +9,7 @@ const { promisify } = require('util');
 const { Pool } = require('pg');
 const ExcelJS = require('exceljs');
 const archiver = require('archiver');
+const HTMLtoDOCX = require('html-to-docx');
 
 const scryptAsync = promisify(crypto.scrypt);
 const app = express();
@@ -51,10 +52,10 @@ app.use((req, res, next) => {
   if (metodosAlteracao.has(req.method) && origem) {
     try {
       if (new URL(origem).host !== req.get('host')) {
-        return res.status(403).json({ ok: false, message: 'Origem da solicitaÃ§Ã£o nÃ£o autorizada.' });
+        return res.status(403).json({ ok: false, message: 'Origem da solicitaÃÂ§ÃÂ£o nÃÂ£o autorizada.' });
       }
     } catch {
-      return res.status(403).json({ ok: false, message: 'Origem da solicitaÃ§Ã£o invÃ¡lida.' });
+      return res.status(403).json({ ok: false, message: 'Origem da solicitaÃÂ§ÃÂ£o invÃÂ¡lida.' });
     }
   }
   next();
@@ -115,7 +116,7 @@ function perfilValido(role, canal) {
   if (role === 'admin') return canal === 'sender' || canal === 'receiver';
   if (role === 'guiche') return canal === 'sender';
   if (role === 'mesa') return canal === 'receiver';
-  return false; // chefe/auxiliar acessam somente os relatórios, não o WebSocket de atendimentos.
+  return false; // chefe/auxiliar acessam somente os relatÃ³rios, nÃ£o o WebSocket de atendimentos.
 }
 function enviar(ws, dados) {
   if (!ws || ws.readyState !== WebSocket.OPEN) return false;
@@ -193,8 +194,8 @@ async function verificarSenha(senha, armazenada) {
   } catch { return false; }
 }
 function exigirBanco(req, res, next) {
-  if (!pool) return res.status(503).json({ ok: false, message: 'O banco Neon ainda nÃ£o estÃ¡ configurado no Render (variÃ¡vel DATABASE_URL).' });
-  if (!dbReady) return res.status(503).json({ ok: false, message: dbErrorMessage || 'O banco de dados estÃ¡ inicializando. Tente novamente em instantes.' });
+  if (!pool) return res.status(503).json({ ok: false, message: 'O banco Neon ainda nÃÂ£o estÃÂ¡ configurado no Render (variÃÂ¡vel DATABASE_URL).' });
+  if (!dbReady) return res.status(503).json({ ok: false, message: dbErrorMessage || 'O banco de dados estÃÂ¡ inicializando. Tente novamente em instantes.' });
   next();
 }
 async function usuarioDaRequisicao(req) {
@@ -221,13 +222,13 @@ function exigirAutenticacao(req, res, next) {
     usuarioDaRequisicao(req).then(user => {
       if (!user) {
         limparCookie(res, req);
-        return res.status(401).json({ ok: false, message: 'SessÃ£o encerrada. Entre novamente.' });
+        return res.status(401).json({ ok: false, message: 'SessÃÂ£o encerrada. Entre novamente.' });
       }
       req.user = user;
       next();
     }).catch(err => {
-      console.error('Falha na autenticaÃ§Ã£o:', err.message);
-      res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel validar a sessÃ£o.' });
+      console.error('Falha na autenticaÃÂ§ÃÂ£o:', err.message);
+      res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel validar a sessÃÂ£o.' });
     });
   });
 }
@@ -242,7 +243,7 @@ async function registrarAuditoria(actorId, acao, alvoId = null, detalhes = {}) {
     [actorId || null, acao, alvoId, JSON.stringify(detalhes || {})]
   );
 }
-function encerrarConexoesUsuario(userId, motivo = 'SessÃ£o encerrada pelo administrador') {
+function encerrarConexoesUsuario(userId, motivo = 'SessÃÂ£o encerrada pelo administrador') {
   for (const [ws, cliente] of clientes.entries()) {
     if (cliente.user && cliente.user.id === userId) {
       try { ws.close(1008, motivo); } catch {}
@@ -268,7 +269,7 @@ function dadosAtendimento(row) {
   };
 }
 
-// A data de referÃªncia do backup semanal Ã© a data agendada no formulÃ¡rio,
+// A data de referÃÂªncia do backup semanal ÃÂ© a data agendada no formulÃÂ¡rio,
 // independente de quando o atendimento foi criado ou atualizado.
 const DATA_AGENDADA_SQL = `CASE
   WHEN COALESCE(record->>'dataAtendimento', '') ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
@@ -288,7 +289,7 @@ function lerPeriodoSemanal(req, res) {
     return Number.isFinite(d.getTime()) && d.toISOString().slice(0, 10) === valor;
   };
   if (!dataValida(inicio) || !dataValida(fim)) {
-    res.status(400).json({ ok: false, message: 'Informe inÃ­cio e fim da semana no formato AAAA-MM-DD.' });
+    res.status(400).json({ ok: false, message: 'Informe inÃÂ­cio e fim da semana no formato AAAA-MM-DD.' });
     return null;
   }
   const inicioMs = Date.parse(`${inicio}T00:00:00.000Z`);
@@ -298,7 +299,7 @@ function lerPeriodoSemanal(req, res) {
     res.status(400).json({ ok: false, message: 'O backup semanal precisa cobrir uma semana completa, de segunda-feira a domingo.' });
     return null;
   }
-  return { from: inicio, to: fim, basis: 'dataAtendimento', basisLabel: 'Data do Atendimento do formulÃ¡rio (data agendada)' };
+  return { from: inicio, to: fim, basis: 'dataAtendimento', basisLabel: 'Data do Atendimento do formulÃÂ¡rio (data agendada)' };
 }
 
 function dataAgendadaParaExcel(valor) {
@@ -320,7 +321,7 @@ function statusParaExcel(row) {
   if (status === 'recebido') return 'Recebido';
   if (status === 'recusado') return 'Recusado';
   if (status === 'guardado') return 'Guardado';
-  return status || 'NÃ£o informado';
+  return status || 'NÃÂ£o informado';
 }
 function nomeArquivoSeguro(valor) {
   const seguro = String(valor || 'conta').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -358,14 +359,14 @@ async function criarPlanilhaAtendimentos({ periodo, rows, titulo, escopo }) {
   resumo.mergeCells('A1:B1');
   resumo.getRow(1).font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
   resumo.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF20252B' } };
-  resumo.addRow(['PerÃ­odo pela Data do Atendimento', `${periodo.from} a ${periodo.to}`]);
-  resumo.addRow(['CritÃ©rio', 'Data agendada no formulÃ¡rio; nÃ£o Ã© a data de envio.']);
-  resumo.addRow(['Escopo da cÃ³pia', escopo]);
+  resumo.addRow(['PerÃÂ­odo pela Data do Atendimento', `${periodo.from} a ${periodo.to}`]);
+  resumo.addRow(['CritÃÂ©rio', 'Data agendada no formulÃÂ¡rio; nÃÂ£o ÃÂ© a data de envio.']);
+  resumo.addRow(['Escopo da cÃÂ³pia', escopo]);
   resumo.addRow(['Gerado em', new Date()]);
   resumo.getCell('B5').numFmt = 'dd/mm/yyyy hh:mm';
   resumo.addRow(['Total de atendimentos', rows.length]);
   resumo.addRow([]);
-  resumo.addRow(['SituaÃ§Ã£o', 'Quantidade']);
+  resumo.addRow(['SituaÃÂ§ÃÂ£o', 'Quantidade']);
   resumo.getRow(8).font = { bold: true, color: { argb: 'FFFFFFFF' } };
   resumo.getRow(8).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF46515C' } };
   const contagem = new Map();
@@ -378,9 +379,9 @@ async function criarPlanilhaAtendimentos({ periodo, rows, titulo, escopo }) {
 
   const sheet = workbook.addWorksheet('Atendimentos', { views: [{ state: 'frozen', ySplit: 1 }] });
   const headers = [
-    'Data do Atendimento', 'Nome do Interno', 'RGI', 'PavilhÃ£o', 'Cela', 'Atendimento', 'Assunto',
-    'SituaÃ§Ã£o', 'Login de origem', 'Nome do GuichÃª', 'Enviado em', 'Recebido em', 'Recusado em',
-    'Motivo da recusa', 'Guardado no GuichÃª', 'Guardado na Mesa', 'ID do registro'
+    'Data do Atendimento', 'Nome do Interno', 'RGI', 'PavilhÃÂ£o', 'Cela', 'Atendimento', 'Assunto',
+    'SituaÃÂ§ÃÂ£o', 'Login de origem', 'Nome do GuichÃÂª', 'Enviado em', 'Recebido em', 'Recusado em',
+    'Motivo da recusa', 'Guardado no GuichÃÂª', 'Guardado na Mesa', 'ID do registro'
   ];
   sheet.columns = [
     { width: 18 }, { width: 32 }, { width: 18 }, { width: 14 }, { width: 10 }, { width: 24 },
@@ -400,11 +401,11 @@ async function criarPlanilhaAtendimentos({ periodo, rows, titulo, escopo }) {
       dataAgendadaParaExcel(record.dataAtendimento) || '',
       String(record.nome || ''), String(record.rgi || record.identificacao || ''),
       String(record.pavilhao || ''), String(record.cela || ''), String(record.atendimento || ''),
-      String(record.assunto || ''), statusParaExcel(row), String(row.owner_username || '(conta excluÃ­da)'),
+      String(record.assunto || ''), statusParaExcel(row), String(row.owner_username || '(conta excluÃÂ­da)'),
       String(row.owner_full_name || ''), dataHoraParaExcel(row.created_at),
       dataHoraParaExcel(row.received_at), dataHoraParaExcel(row.refused_at),
-      String(row.refusal_reason || record.motivoRecusa || ''), row.guiche_archived_at ? 'Sim' : 'NÃ£o',
-      row.mesa_archived_at ? 'Sim' : 'NÃ£o', String(row.record_id || '')
+      String(row.refusal_reason || record.motivoRecusa || ''), row.guiche_archived_at ? 'Sim' : 'NÃÂ£o',
+      row.mesa_archived_at ? 'Sim' : 'NÃÂ£o', String(row.record_id || '')
     ]);
   }
   sheet.autoFilter = { from: { row: 1, column: 1 }, to: { row: Math.max(1, rows.length + 1), column: headers.length } };
@@ -499,7 +500,7 @@ async function inicializarBanco() {
     CREATE UNIQUE INDEX IF NOT EXISTS users_one_report_role_per_team_idx ON users(team, role) WHERE role IN ('chefe','auxiliar') AND is_active=TRUE AND deleted_at IS NULL;
     CREATE TABLE IF NOT EXISTS shift_reports (
       id TEXT PRIMARY KEY, team TEXT NOT NULL CHECK (team IN ('A','B','C','D')),
-      report_date DATE NOT NULL, shift_name TEXT NOT NULL DEFAULT 'Plantão',
+      report_date DATE NOT NULL, shift_name TEXT NOT NULL DEFAULT 'PlantÃ£o',
       title TEXT NOT NULL DEFAULT '', content JSONB NOT NULL DEFAULT '{}'::jsonb,
       status TEXT NOT NULL DEFAULT 'aberto' CHECK (status IN ('aberto','encerrado')),
       revision INTEGER NOT NULL DEFAULT 1, created_by TEXT REFERENCES users(id),
@@ -539,11 +540,11 @@ async function garantirAdministradorInicial() {
   const username = textoSeguro(process.env.BOOTSTRAP_ADMIN_USERNAME, 80);
   const password = String(process.env.BOOTSTRAP_ADMIN_PASSWORD || '');
   if (!username || !password) {
-    console.warn('BOOTSTRAP_ADMIN_USERNAME/BOOTSTRAP_ADMIN_PASSWORD nÃ£o configurados. Se nÃ£o houver administrador no banco, configure-os no Render.');
+    console.warn('BOOTSTRAP_ADMIN_USERNAME/BOOTSTRAP_ADMIN_PASSWORD nÃÂ£o configurados. Se nÃÂ£o houver administrador no banco, configure-os no Render.');
     return;
   }
   if (password.length < 10) {
-    console.warn('A senha inicial do administrador precisa ter pelo menos 10 caracteres; conta inicial nÃ£o criada.');
+    console.warn('A senha inicial do administrador precisa ter pelo menos 10 caracteres; conta inicial nÃÂ£o criada.');
     return;
   }
   const normalizado = normalizarUsuario(username);
@@ -556,7 +557,7 @@ async function garantirAdministradorInicial() {
      VALUES ($1, $2, $3, $4, 'admin', $5)`,
     [id, username, normalizado, textoSeguro(process.env.BOOTSTRAP_ADMIN_FULL_NAME || 'Administrador do Sistema', 120), hash]
   );
-  console.log('Conta inicial de administrador criada a partir das variÃ¡veis de ambiente.');
+  console.log('Conta inicial de administrador criada a partir das variÃÂ¡veis de ambiente.');
 }
 async function restaurarFilasDoBanco() {
   const result = await pool.query('SELECT * FROM attendances');
@@ -573,7 +574,7 @@ async function restaurarFilasDoBanco() {
     } else if (row.status === 'recusado' && !row.refusal_confirmed_at) {
       recusasPendentes.set(row.record_id, {
         recordId: row.record_id, ownerId: row.owner_id, record: item.record,
-        reason: row.refusal_reason || item.record.motivoRecusa || 'Motivo nÃ£o informado',
+        reason: row.refusal_reason || item.record.motivoRecusa || 'Motivo nÃÂ£o informado',
         refusedAt: row.refused_at || row.updated_at
       });
     }
@@ -649,7 +650,7 @@ app.post('/api/auth/login', exigirBanco, async (req, res) => {
   const ip = String(req.ip || req.socket.remoteAddress || 'unknown');
   const username = textoSeguro(req.body?.username, 80);
   const password = String(req.body?.password || '');
-  if (!username || !password) return res.status(400).json({ ok: false, message: 'Informe o usuÃ¡rio e a senha.' });
+  if (!username || !password) return res.status(400).json({ ok: false, message: 'Informe o usuÃÂ¡rio e a senha.' });
   try {
     const result = await pool.query(
       `SELECT * FROM users WHERE username_normalized=$1 AND is_active=TRUE AND deleted_at IS NULL`,
@@ -664,7 +665,7 @@ app.post('/api/auth/login', exigirBanco, async (req, res) => {
         motivo: user ? 'senha_invalida' : 'usuario_inexistente'
       });
       await new Promise(resolve => setTimeout(resolve, 250));
-      return res.status(401).json({ ok: false, message: 'UsuÃ¡rio ou senha invÃ¡lidos.' });
+      return res.status(401).json({ ok: false, message: 'UsuÃÂ¡rio ou senha invÃÂ¡lidos.' });
     }
     const token = crypto.randomBytes(32).toString('base64url');
     const expires = new Date(Date.now() + SESSION_HORAS * 60 * 60 * 1000);
@@ -675,15 +676,15 @@ app.post('/api/auth/login', exigirBanco, async (req, res) => {
     res.json({ ok: true, user: usuarioPublico({ ...user, last_login_at: new Date().toISOString() }) });
   } catch (e) {
     console.error('Erro no login:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel entrar. Verifique a configuraÃ§Ã£o do banco.' });
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel entrar. Verifique a configuraÃÂ§ÃÂ£o do banco.' });
   }
 });
 app.get('/api/auth/me', exigirBanco, async (req, res) => {
   try {
     const user = await usuarioDaRequisicao(req);
-    if (!user) { limparCookie(res, req); return res.status(401).json({ ok: false, message: 'SessÃ£o nÃ£o encontrada.' }); }
+    if (!user) { limparCookie(res, req); return res.status(401).json({ ok: false, message: 'SessÃÂ£o nÃÂ£o encontrada.' }); }
     res.json({ ok: true, user: usuarioPublico(user) });
-  } catch (e) { res.status(500).json({ ok: false, message: 'Erro ao consultar a sessÃ£o.' }); }
+  } catch (e) { res.status(500).json({ ok: false, message: 'Erro ao consultar a sessÃÂ£o.' }); }
 });
 app.post('/api/auth/logout', exigirBanco, async (req, res) => {
   const token = extrairCookie(req, SESSION_COOKIE);
@@ -694,12 +695,12 @@ app.post('/api/auth/logout', exigirBanco, async (req, res) => {
       await pool.query('DELETE FROM sessions WHERE token_hash=$1', [tokenHash]);
       for (const [ws, cliente] of clientes.entries()) {
         if (cliente.sessionHash === tokenHash) {
-          try { ws.close(1000, 'SessÃ£o encerrada'); } catch {}
+          try { ws.close(1000, 'SessÃÂ£o encerrada'); } catch {}
           clientes.delete(ws);
         }
       }
       if (sessao.rows[0]) await registrarAuditoria(sessao.rows[0].user_id, 'logout', sessao.rows[0].user_id, {});
-    } catch (e) { console.error('Erro ao encerrar sessÃ£o:', e.message); }
+    } catch (e) { console.error('Erro ao encerrar sessÃÂ£o:', e.message); }
   }
   limparCookie(res, req);
   res.json({ ok: true });
@@ -710,12 +711,12 @@ app.get('/api/internals/base', exigirBanco, exigirAutenticacao, async (_req, res
     const result = await pool.query(`SELECT b.items, b.updated_at, u.username AS updated_by FROM internal_base b LEFT JOIN users u ON u.id=b.updated_by WHERE b.singleton_id=1`);
     const row = result.rows[0];
     res.json({ ok: true, items: row?.items || [], updatedAt: row?.updated_at || null, updatedBy: row?.updated_by || null });
-  } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel carregar a base de internos.' }); }
+  } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel carregar a base de internos.' }); }
 });
 app.put('/api/internals/base', exigirBanco, exigirAutenticacao, async (req, res) => {
   // Qualquer conta autenticada pode atualizar a base comum, conforme requisito do sistema.
   const items = req.body?.items;
-  if (!Array.isArray(items)) return res.status(400).json({ ok: false, message: 'A lista de internos nÃ£o tem formato vÃ¡lido.' });
+  if (!Array.isArray(items)) return res.status(400).json({ ok: false, message: 'A lista de internos nÃÂ£o tem formato vÃÂ¡lido.' });
   if (items.length > 100000) return res.status(413).json({ ok: false, message: 'A planilha ultrapassa o limite de 100.000 registros.' });
   const limpos = [];
   const vistos = new Set();
@@ -756,11 +757,11 @@ app.get('/api/me/attendances', exigirBanco, exigirAutenticacao, async (req, res)
       status: row.guiche_archived_at ? 'guardado' : row.status,
       record: normalizarRegistro(row.record), sentAt: row.created_at
     })) });
-  } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel carregar o histÃ³rico desta conta.' }); }
+  } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel carregar o histÃÂ³rico desta conta.' }); }
 });
 app.get('/api/me/backup-data', exigirBanco, exigirAutenticacao, async (req, res) => {
   if (!['guiche', 'mesa', 'admin'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Esta conta nÃ£o pode gerar backup de atendimentos.' });
+    return res.status(403).json({ ok: false, message: 'Esta conta nÃÂ£o pode gerar backup de atendimentos.' });
   }
   const periodo = lerPeriodoSemanal(req, res);
   if (!periodo) return;
@@ -790,9 +791,9 @@ app.get('/api/me/backup-data', exigirBanco, exigirAutenticacao, async (req, res)
       generatedAt: agoraISO(),
       account: { username: req.user.username, fullName: req.user.full_name, role: req.user.role },
       scope: req.user.role === 'guiche'
-        ? 'Somente atendimentos pertencentes a esta conta do GuichÃª.'
+        ? 'Somente atendimentos pertencentes a esta conta do GuichÃÂª.'
         : req.user.role === 'mesa'
-          ? 'Atendimentos nÃ£o recusados visÃ­veis Ã  Mesa.'
+          ? 'Atendimentos nÃÂ£o recusados visÃÂ­veis Ã  Mesa.'
           : 'Atendimentos de todas as contas, conforme acesso administrativo.',
       period: periodo,
       count: attendances.length,
@@ -800,18 +801,18 @@ app.get('/api/me/backup-data', exigirBanco, exigirAutenticacao, async (req, res)
     });
   } catch (e) {
     console.error('Erro gerando backup da conta:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o backup semanal desta conta.' });
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel gerar o backup semanal desta conta.' });
   }
 });
 
 app.post('/api/me/import-legacy', exigirBanco, exigirAutenticacao, async (req, res) => {
-  if (!['guiche', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Somente contas do GuichÃª podem importar o histÃ³rico local.' });
+  if (!['guiche', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Somente contas do GuichÃÂª podem importar o histÃÂ³rico local.' });
   const lista = req.body?.attendances;
-  if (!Array.isArray(lista)) return res.status(400).json({ ok: false, message: 'Formato do histÃ³rico local invÃ¡lido.' });
-  if (lista.length > 10000) return res.status(413).json({ ok: false, message: 'O histÃ³rico local ultrapassa 10.000 registros; faÃ§a a migraÃ§Ã£o em partes.' });
+  if (!Array.isArray(lista)) return res.status(400).json({ ok: false, message: 'Formato do histÃÂ³rico local invÃÂ¡lido.' });
+  if (lista.length > 10000) return res.status(413).json({ ok: false, message: 'O histÃÂ³rico local ultrapassa 10.000 registros; faÃÂ§a a migraÃÂ§ÃÂ£o em partes.' });
   try {
     const count = await pool.query('SELECT COUNT(*)::int AS total FROM attendances WHERE owner_id=$1', [req.user.id]);
-    if (count.rows[0].total > 0) return res.json({ ok: true, skipped: true, imported: 0, message: 'Esta conta jÃ¡ tem histÃ³rico no servidor; a importaÃ§Ã£o local foi ignorada para evitar misturar contas.' });
+    if (count.rows[0].total > 0) return res.json({ ok: true, skipped: true, imported: 0, message: 'Esta conta jÃÂ¡ tem histÃÂ³rico no servidor; a importaÃÂ§ÃÂ£o local foi ignorada para evitar misturar contas.' });
     const client = await pool.connect();
     let imported = 0;
     try {
@@ -847,13 +848,13 @@ app.post('/api/me/import-legacy', exigirBanco, exigirAutenticacao, async (req, r
     await restaurarFilasDoBanco();
     res.json({ ok: true, imported, message: `${imported} registro(s) local(is) importado(s).` });
   } catch (e) {
-    console.error('Erro importando histÃ³rico local:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel migrar o histÃ³rico local para o Neon.' });
+    console.error('Erro importando histÃÂ³rico local:', e.message);
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel migrar o histÃÂ³rico local para o Neon.' });
   }
 });
 
 app.get('/api/mesa/attendances', exigirBanco, exigirAutenticacao, async (req, res) => {
-  if (!['mesa', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Acesso restrito Ã  Mesa.' });
+  if (!['mesa', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Acesso restrito Ã  Mesa.' });
   try {
     const result = await pool.query("SELECT * FROM attendances WHERE status <> 'recusado' ORDER BY created_at DESC LIMIT 10000");
     res.json({ ok: true, attendances: result.rows.map(row => ({
@@ -867,7 +868,7 @@ app.get('/api/mesa/attendances', exigirBanco, exigirAutenticacao, async (req, re
       guardadoEm: normalizarRegistro(row.record).guardadoEm || null,
       ownerId: row.owner_id
     })) });
-  } catch (e) { console.error('Erro carregando histÃ³rico da Mesa:', e.message); res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel carregar os atendimentos da Mesa.' }); }
+  } catch (e) { console.error('Erro carregando histÃÂ³rico da Mesa:', e.message); res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel carregar os atendimentos da Mesa.' }); }
 });
 
 app.get('/api/admin/overview', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
@@ -878,13 +879,13 @@ app.get('/api/admin/overview', exigirBanco, exigirAutenticacao, exigirAdmin, asy
       pool.query('SELECT jsonb_array_length(items) AS count, updated_at FROM internal_base WHERE singleton_id=1')
     ]);
     res.json({ ok: true, users: users.rows[0], attendances: records.rows[0], base: base.rows[0] || { count: 0, updated_at: null }, version: VERSAO });
-  } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel carregar o resumo administrativo.' }); }
+  } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel carregar o resumo administrativo.' }); }
 });
 app.get('/api/admin/users', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users ORDER BY CASE role WHEN \'admin\' THEN 1 WHEN \'chefe\' THEN 2 WHEN \'auxiliar\' THEN 3 WHEN \'mesa\' THEN 4 ELSE 5 END, username_normalized');
     res.json({ ok: true, users: result.rows.map(usuarioPublico) });
-  } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel listar as contas.' }); }
+  } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel listar as contas.' }); }
 });
 app.post('/api/admin/users', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
   const username = textoSeguro(req.body?.username, 80);
@@ -893,10 +894,10 @@ app.post('/api/admin/users', exigirBanco, exigirAutenticacao, exigirAdmin, async
   const role = String(req.body?.role || 'guiche');
   const team = ['chefe','auxiliar'].includes(role) ? String(req.body?.team || '').toUpperCase() : null;
   const normalized = normalizarUsuario(username);
-  if (!/^[\p{L}\p{N}._-]{3,80}$/u.test(username)) return res.status(400).json({ ok: false, message: 'O login deve ter de 3 a 80 caracteres, usando letras, nÃºmeros, ponto, hÃ­fen ou sublinhado.' });
-  if (!fullName) return res.status(400).json({ ok: false, message: 'Informe o nome do usuÃ¡rio.' });
+  if (!/^[\p{L}\p{N}._-]{3,80}$/u.test(username)) return res.status(400).json({ ok: false, message: 'O login deve ter de 3 a 80 caracteres, usando letras, nÃÂºmeros, ponto, hÃÂ­fen ou sublinhado.' });
+  if (!fullName) return res.status(400).json({ ok: false, message: 'Informe o nome do usuÃÂ¡rio.' });
   if (password.length < 8) return res.status(400).json({ ok: false, message: 'A senha deve ter pelo menos 8 caracteres.' });
-  if (!['guiche', 'mesa', 'admin', 'pertences', 'chefe', 'auxiliar'].includes(role)) return res.status(400).json({ ok: false, message: 'Tipo de conta invÃ¡lido.' });
+  if (!['guiche', 'mesa', 'admin', 'pertences', 'chefe', 'auxiliar'].includes(role)) return res.status(400).json({ ok: false, message: 'Tipo de conta invÃÂ¡lido.' });
   if (['chefe','auxiliar'].includes(role) && !['A','B','C','D'].includes(team)) return res.status(400).json({ ok: false, message: 'Selecione a equipe A, B, C ou D.' });
   try {
     const id = criarId();
@@ -906,12 +907,12 @@ app.post('/api/admin/users', exigirBanco, exigirAutenticacao, exigirAdmin, async
     const user = (await pool.query('SELECT * FROM users WHERE id=$1', [id])).rows[0];
     res.status(201).json({ ok: true, user: usuarioPublico(user) });
   } catch (e) {
-    if (e.code === '23505' && String(e.constraint || '').includes('users_one_report_role_per_team_idx')) return res.status(409).json({ ok: false, message: 'Já existe uma conta ativa desse perfil nesta equipe. Cada equipe pode ter um chefe e um auxiliar ativos.' });
-    if (e.code === '23505' && String(e.constraint || '').includes('pertences')) return res.status(409).json({ ok: false, message: 'JÃ¡ existe um login ativo de Pertences e Visitas. Desative a conta existente antes de criar outra.' });
-    if (e.code === '23505' && String(e.constraint || '').includes('mesa')) return res.status(409).json({ ok: false, message: 'JÃ¡ existe um login ativo da Mesa. Edite ou desative a conta existente antes de criar outra.' });
-    if (e.code === '23505') return res.status(409).json({ ok: false, message: 'Este nome de usuÃ¡rio jÃ¡ existe.' });
+    if (e.code === '23505' && String(e.constraint || '').includes('users_one_report_role_per_team_idx')) return res.status(409).json({ ok: false, message: 'JÃ¡ existe uma conta ativa desse perfil nesta equipe. Cada equipe pode ter um chefe e um auxiliar ativos.' });
+    if (e.code === '23505' && String(e.constraint || '').includes('pertences')) return res.status(409).json({ ok: false, message: 'JÃÂ¡ existe um login ativo de Pertences e Visitas. Desative a conta existente antes de criar outra.' });
+    if (e.code === '23505' && String(e.constraint || '').includes('mesa')) return res.status(409).json({ ok: false, message: 'JÃÂ¡ existe um login ativo da Mesa. Edite ou desative a conta existente antes de criar outra.' });
+    if (e.code === '23505') return res.status(409).json({ ok: false, message: 'Este nome de usuÃÂ¡rio jÃÂ¡ existe.' });
     console.error('Erro criando conta:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel criar a conta.' });
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel criar a conta.' });
   }
 });
 app.patch('/api/admin/users/:id', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
@@ -920,16 +921,16 @@ app.patch('/api/admin/users/:id', exigirBanco, exigirAutenticacao, exigirAdmin, 
   const username = req.body?.username == null ? null : textoSeguro(req.body.username, 80);
   const isActive = typeof req.body?.isActive === 'boolean' ? req.body.isActive : null;
   const team = req.body?.team == null ? null : String(req.body.team).toUpperCase();
-  if (fullName !== null && !fullName) return res.status(400).json({ ok: false, message: 'O nome nÃ£o pode ficar vazio.' });
-  if (username !== null && !/^[\p{L}\p{N}._-]{3,80}$/u.test(username)) return res.status(400).json({ ok: false, message: 'Nome de usuÃ¡rio invÃ¡lido.' });
-  if (isActive === false && id === req.user.id) return res.status(400).json({ ok: false, message: 'NÃ£o Ã© possÃ­vel bloquear a prÃ³pria conta administrativa.' });
+  if (fullName !== null && !fullName) return res.status(400).json({ ok: false, message: 'O nome nÃÂ£o pode ficar vazio.' });
+  if (username !== null && !/^[\p{L}\p{N}._-]{3,80}$/u.test(username)) return res.status(400).json({ ok: false, message: 'Nome de usuÃÂ¡rio invÃÂ¡lido.' });
+  if (isActive === false && id === req.user.id) return res.status(400).json({ ok: false, message: 'NÃÂ£o ÃÂ© possÃÂ­vel bloquear a prÃÂ³pria conta administrativa.' });
   try {
     const before = await pool.query('SELECT * FROM users WHERE id=$1', [id]);
-    if (!before.rowCount) return res.status(404).json({ ok: false, message: 'Conta nÃ£o encontrada.' });
+    if (!before.rowCount) return res.status(404).json({ ok: false, message: 'Conta nÃÂ£o encontrada.' });
     const old = before.rows[0];
     if (isActive === false && old.role === 'admin' && old.is_active) {
       const count = await pool.query(`SELECT COUNT(*)::int AS n FROM users WHERE role='admin' AND is_active=TRUE AND deleted_at IS NULL`);
-      if (count.rows[0].n <= 1) return res.status(400).json({ ok: false, message: 'NÃ£o Ã© possÃ­vel bloquear o Ãºltimo administrador ativo.' });
+      if (count.rows[0].n <= 1) return res.status(400).json({ ok: false, message: 'NÃÂ£o ÃÂ© possÃÂ­vel bloquear o ÃÂºltimo administrador ativo.' });
     }
     const updated = await pool.query(
       `UPDATE users SET full_name=COALESCE($2,full_name), username=COALESCE($3,username), username_normalized=COALESCE($4,username_normalized), is_active=COALESCE($5,is_active), team=CASE WHEN $6::text IS NULL THEN team ELSE $6 END, updated_at=NOW(), deleted_at=CASE WHEN $5=FALSE THEN COALESCE(deleted_at,NOW()) WHEN $5=TRUE THEN NULL ELSE deleted_at END WHERE id=$1 RETURNING *`,
@@ -939,9 +940,9 @@ app.patch('/api/admin/users/:id', exigirBanco, exigirAutenticacao, exigirAdmin, 
     await registrarAuditoria(req.user.id, 'conta_atualizada', id, { username: updated.rows[0].username, isActive });
     res.json({ ok: true, user: usuarioPublico(updated.rows[0]) });
   } catch (e) {
-    if (e.code === '23505') return res.status(409).json({ ok: false, message: 'Este nome de usuÃ¡rio jÃ¡ existe.' });
+    if (e.code === '23505') return res.status(409).json({ ok: false, message: 'Este nome de usuÃÂ¡rio jÃÂ¡ existe.' });
     console.error('Erro atualizando conta:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel atualizar a conta.' });
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel atualizar a conta.' });
   }
 });
 app.post('/api/admin/users/:id/reset-password', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
@@ -950,32 +951,32 @@ app.post('/api/admin/users/:id/reset-password', exigirBanco, exigirAutenticacao,
   if (password.length < 8) return res.status(400).json({ ok: false, message: 'A nova senha deve ter pelo menos 8 caracteres.' });
   try {
     const user = await pool.query('SELECT id, username FROM users WHERE id=$1 AND deleted_at IS NULL', [id]);
-    if (!user.rowCount) return res.status(404).json({ ok: false, message: 'Conta nÃ£o encontrada.' });
+    if (!user.rowCount) return res.status(404).json({ ok: false, message: 'Conta nÃÂ£o encontrada.' });
     const hash = await criarHashSenha(password);
     await pool.query('UPDATE users SET password_hash=$2, updated_at=NOW() WHERE id=$1', [id, hash]);
     await pool.query('DELETE FROM sessions WHERE user_id=$1', [id]);
     encerrarConexoesUsuario(id, 'Senha redefinida pelo administrador');
     await registrarAuditoria(req.user.id, 'senha_redefinida', id, { username: user.rows[0].username });
-    res.json({ ok: true, message: 'Senha redefinida. O usuÃ¡rio deverÃ¡ entrar novamente.' });
-  } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel redefinir a senha.' }); }
+    res.json({ ok: true, message: 'Senha redefinida. O usuÃÂ¡rio deverÃÂ¡ entrar novamente.' });
+  } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel redefinir a senha.' }); }
 });
 app.delete('/api/admin/users/:id', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
   const id = textoSeguro(req.params.id, 100);
-  if (id === req.user.id) return res.status(400).json({ ok: false, message: 'NÃ£o Ã© possÃ­vel excluir a prÃ³pria conta.' });
+  if (id === req.user.id) return res.status(400).json({ ok: false, message: 'NÃÂ£o ÃÂ© possÃÂ­vel excluir a prÃÂ³pria conta.' });
   try {
     const result = await pool.query('SELECT id, username, role, is_active FROM users WHERE id=$1 AND deleted_at IS NULL', [id]);
-    if (!result.rowCount) return res.status(404).json({ ok: false, message: 'Conta nÃ£o encontrada.' });
+    if (!result.rowCount) return res.status(404).json({ ok: false, message: 'Conta nÃÂ£o encontrada.' });
     const user = result.rows[0];
     if (user.role === 'admin' && user.is_active) {
       const count = await pool.query(`SELECT COUNT(*)::int AS n FROM users WHERE role='admin' AND is_active=TRUE AND deleted_at IS NULL`);
-      if (count.rows[0].n <= 1) return res.status(400).json({ ok: false, message: 'NÃ£o Ã© possÃ­vel excluir o Ãºltimo administrador ativo.' });
+      if (count.rows[0].n <= 1) return res.status(400).json({ ok: false, message: 'NÃÂ£o ÃÂ© possÃÂ­vel excluir o ÃÂºltimo administrador ativo.' });
     }
     await pool.query('UPDATE users SET is_active=FALSE, deleted_at=NOW(), updated_at=NOW() WHERE id=$1', [id]);
     await pool.query('DELETE FROM sessions WHERE user_id=$1', [id]);
-    encerrarConexoesUsuario(id, 'Conta excluÃ­da pelo administrador');
+    encerrarConexoesUsuario(id, 'Conta excluÃÂ­da pelo administrador');
     await registrarAuditoria(req.user.id, 'conta_excluida', id, { username: user.username, role: user.role });
-    res.json({ ok: true, message: 'Conta desativada e mantida no histÃ³rico para preservar os atendimentos anteriores.' });
-  } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel excluir a conta.' }); }
+    res.json({ ok: true, message: 'Conta desativada e mantida no histÃÂ³rico para preservar os atendimentos anteriores.' });
+  } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel excluir a conta.' }); }
 });
 app.get('/api/admin/attendances', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
   try {
@@ -985,17 +986,17 @@ app.get('/api/admin/attendances', exigirBanco, exigirAutenticacao, exigirAdmin, 
         ORDER BY a.created_at DESC LIMIT 5000`
     );
     res.json({ ok: true, attendances: result.rows.map(row => ({
-      ...dadosAtendimento(row), ownerUsername: row.owner_username || '(conta excluÃ­da)', ownerFullName: row.owner_full_name || ''
+      ...dadosAtendimento(row), ownerUsername: row.owner_username || '(conta excluÃÂ­da)', ownerFullName: row.owner_full_name || ''
     })) });
-  } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel carregar os atendimentos.' }); }
+  } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel carregar os atendimentos.' }); }
 });
 
 function exigirPerfilRelatorio(req, res, next) {
   if (!req.user || !['chefe','auxiliar','admin'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Acesso restrito às contas de relatório.' });
+    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã s contas de relatÃ³rio.' });
   }
   if (req.user.role !== 'admin' && !['A','B','C','D'].includes(req.user.team)) {
-    return res.status(403).json({ ok: false, message: 'Esta conta não possui equipe A, B, C ou D configurada.' });
+    return res.status(403).json({ ok: false, message: 'Esta conta nÃ£o possui equipe A, B, C ou D configurada.' });
   }
   next();
 }
@@ -1015,7 +1016,7 @@ app.get('/relatorios.html', async (req, res) => {
   } catch { return res.redirect('/login.html'); }
 });
 
-/* LISTA COMPARTILHADA DE NOMES — PLANTÃO EXTRAORDINÁRIO (HE) */
+/* LISTA COMPARTILHADA DE NOMES â PLANTÃO EXTRAORDINÃRIO (HE) */
 
 app.get('/api/relatorios/he-nomes',
   exigirBanco, exigirAutenticacao, exigirPerfilRelatorio,
@@ -1028,7 +1029,7 @@ app.get('/api/relatorios/he-nomes',
       if (!['A', 'B', 'C', 'D'].includes(team)) {
         return res.status(400).json({
           ok: false,
-          message: 'Informe uma equipe válida.'
+          message: 'Informe uma equipe vÃ¡lida.'
         });
       }
 
@@ -1045,7 +1046,7 @@ app.get('/api/relatorios/he-nomes',
       console.error('Erro ao consultar nomes de HE:', e.message);
       return res.status(500).json({
         ok: false,
-        message: 'Não foi possível carregar os nomes de HE.'
+        message: 'NÃ£o foi possÃ­vel carregar os nomes de HE.'
       });
     }
   }
@@ -1087,7 +1088,7 @@ app.post('/api/relatorios/he-nomes',
       if (!result.rowCount) {
         return res.status(409).json({
           ok: false,
-          message: 'Esse nome já existe na lista da equipe.'
+          message: 'Esse nome jÃ¡ existe na lista da equipe.'
         });
       }
 
@@ -1099,7 +1100,7 @@ app.post('/api/relatorios/he-nomes',
       console.error('Erro ao adicionar nome de HE:', e.message);
       return res.status(500).json({
         ok: false,
-        message: 'Não foi possível adicionar o nome.'
+        message: 'NÃ£o foi possÃ­vel adicionar o nome.'
       });
     }
   }
@@ -1121,7 +1122,7 @@ app.patch('/api/relatorios/he-nomes/:id',
     if (!Number.isSafeInteger(id) || id < 1 || !name) {
       return res.status(400).json({
         ok: false,
-        message: 'Informe um nome válido.'
+        message: 'Informe um nome vÃ¡lido.'
       });
     }
 
@@ -1143,7 +1144,7 @@ app.patch('/api/relatorios/he-nomes/:id',
       if (!result.rowCount) {
         return res.status(404).json({
           ok: false,
-          message: 'Nome não encontrado nesta equipe.'
+          message: 'Nome nÃ£o encontrado nesta equipe.'
         });
       }
 
@@ -1152,14 +1153,14 @@ app.patch('/api/relatorios/he-nomes/:id',
       if (e.code === '23505') {
         return res.status(409).json({
           ok: false,
-          message: 'Esse nome já existe na lista da equipe.'
+          message: 'Esse nome jÃ¡ existe na lista da equipe.'
         });
       }
 
       console.error('Erro ao editar nome de HE:', e.message);
       return res.status(500).json({
         ok: false,
-        message: 'Não foi possível editar o nome.'
+        message: 'NÃ£o foi possÃ­vel editar o nome.'
       });
     }
   }
@@ -1180,7 +1181,7 @@ app.delete('/api/relatorios/he-nomes/:id',
     if (!Number.isSafeInteger(id) || id < 1) {
       return res.status(400).json({
         ok: false,
-        message: 'Identificador inválido.'
+        message: 'Identificador invÃ¡lido.'
       });
     }
 
@@ -1195,7 +1196,7 @@ app.delete('/api/relatorios/he-nomes/:id',
       if (!result.rowCount) {
         return res.status(404).json({
           ok: false,
-          message: 'Nome não encontrado nesta equipe.'
+          message: 'Nome nÃ£o encontrado nesta equipe.'
         });
       }
 
@@ -1204,7 +1205,7 @@ app.delete('/api/relatorios/he-nomes/:id',
       console.error('Erro ao excluir nome de HE:', e.message);
       return res.status(500).json({
         ok: false,
-        message: 'Não foi possível excluir o nome.'
+        message: 'NÃ£o foi possÃ­vel excluir o nome.'
       });
     }
   }
@@ -1212,50 +1213,73 @@ app.delete('/api/relatorios/he-nomes/:id',
 
 /* FIM DA LISTA COMPARTILHADA DE HE */
 
+// ExportaÃ§Ã£o de Word gerada no servidor, sem depender de bibliotecas externas no navegador.
+app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
+  const html = req.body?.html;
+  if (typeof html !== 'string' || !html.trim() || html.length > 12000000) {
+    return res.status(400).json({ ok: false, message: 'O conteÃºdo do relatÃ³rio Ã© invÃ¡lido ou muito grande.' });
+  }
+  try {
+    const docx = await HTMLtoDOCX(html, null, {
+      orientation: 'portrait',
+      font: 'Times New Roman',
+      fontSize: 22,
+      margins: { top: 850, right: 900, bottom: 850, left: 900 },
+      table: { row: { cantSplit: true } }
+    });
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', 'attachment; filename="Relatorio_CPAIG.docx"');
+    res.send(Buffer.from(docx));
+  } catch (e) {
+    console.error('Erro ao gerar DOCX do relatÃ³rio:', e);
+    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o arquivo Word no servidor.' });
+  }
+});
+
 app.get('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
   try {
     const params = []; let where = '';
     if (req.user.role !== 'admin') { params.push(req.user.team); where = 'WHERE r.team=$1'; }
     const q = await pool.query(`SELECT r.*, c.username AS created_username, u.username AS updated_username, cl.username AS closed_username FROM shift_reports r LEFT JOIN users c ON c.id=r.created_by LEFT JOIN users u ON u.id=r.updated_by LEFT JOIN users cl ON cl.id=r.closed_by ${where} ORDER BY r.report_date DESC, r.team, r.shift_name`, params);
     res.json({ ok: true, reports: q.rows.map(r => ({ ...relatorioPublico(r), createdUsername:r.created_username, updatedUsername:r.updated_username, closedUsername:r.closed_username })), readOnly: req.user.role === 'admin', team: req.user.team || null });
-  } catch (e) { console.error('Falha ao listar relatórios:', e.message); res.status(500).json({ ok:false, message:'Não foi possível carregar os relatórios.' }); }
+  } catch (e) { console.error('Falha ao listar relatÃ³rios:', e.message); res.status(500).json({ ok:false, message:'NÃ£o foi possÃ­vel carregar os relatÃ³rios.' }); }
 });
 app.post('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
   if (req.user.role === 'admin') return res.status(403).json({ok:false,message:'O administrador possui acesso somente para consulta.'});
   const reportDate = String(req.body?.reportDate || '').slice(0,10);
-  const shiftName = textoSeguro(req.body?.shiftName || 'Plantão', 80);
+  const shiftName = textoSeguro(req.body?.shiftName || 'PlantÃ£o', 80);
   const title = textoSeguro(req.body?.title || '', 180);
   const content = req.body?.content && typeof req.body.content === 'object' && !Array.isArray(req.body.content) ? req.body.content : {};
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return res.status(400).json({ok:false,message:'Informe uma data válida para o relatório.'});
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return res.status(400).json({ok:false,message:'Informe uma data vÃ¡lida para o relatÃ³rio.'});
   const id = criarId();
   try {
     const q = await pool.query(`INSERT INTO shift_reports(id,team,report_date,shift_name,title,content,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7,$7) RETURNING *`, [id, req.user.team, reportDate, shiftName, title, JSON.stringify(content), req.user.id]);
     await pool.query(`INSERT INTO shift_report_history(report_id,actor_user_id,action,revision,new_content,details) VALUES($1,$2,'criado',1,$3::jsonb,$4::jsonb)`, [id,req.user.id,JSON.stringify(content),JSON.stringify({title,reportDate,shiftName,team:req.user.team})]);
     await registrarAuditoria(req.user.id,'relatorio_criado',id,{team:req.user.team,reportDate,shiftName});
     res.status(201).json({ok:true,report:relatorioPublico(q.rows[0])});
-  } catch(e) { if(e.code==='23505') return res.status(409).json({ok:false,message:'Já existe um relatório dessa equipe para essa data e turno.'}); console.error('Falha ao criar relatório:',e.message); res.status(500).json({ok:false,message:'Não foi possível criar o relatório.'}); }
+  } catch(e) { if(e.code==='23505') return res.status(409).json({ok:false,message:'JÃ¡ existe um relatÃ³rio dessa equipe para essa data e turno.'}); console.error('Falha ao criar relatÃ³rio:',e.message); res.status(500).json({ok:false,message:'NÃ£o foi possÃ­vel criar o relatÃ³rio.'}); }
 });
 app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req,res) => {
   if(req.user.role==='admin') return res.status(403).json({ok:false,message:'O administrador possui acesso somente para consulta.'});
   const id=textoSeguro(req.params.id,100); const expected=Number(req.body?.revision);
   const title=textoSeguro(req.body?.title ?? '',180);
   const reportDate=String(req.body?.reportDate || '').slice(0,10);
-  const shiftName=textoSeguro(req.body?.shiftName || 'Plantão',80);
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return res.status(400).json({ok:false,message:'Informe uma data válida para o relatório.'});
+  const shiftName=textoSeguro(req.body?.shiftName || 'PlantÃ£o',80);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return res.status(400).json({ok:false,message:'Informe uma data vÃ¡lida para o relatÃ³rio.'});
   const content=req.body?.content && typeof req.body.content==='object' && !Array.isArray(req.body.content)?req.body.content:{};
   const action=String(req.body?.action||'salvar');
-  if(!Number.isInteger(expected)||expected<1) return res.status(400).json({ok:false,message:'Versão do relatório ausente. Atualize a lista antes de salvar.'});
-  if(!['salvar','encerrar','reabrir'].includes(action)) return res.status(400).json({ok:false,message:'Ação inválida.'});
+  if(!Number.isInteger(expected)||expected<1) return res.status(400).json({ok:false,message:'VersÃ£o do relatÃ³rio ausente. Atualize a lista antes de salvar.'});
+  if(!['salvar','encerrar','reabrir'].includes(action)) return res.status(400).json({ok:false,message:'AÃ§Ã£o invÃ¡lida.'});
   const client=await pool.connect();
   try {
     await client.query('BEGIN');
     const current=await client.query('SELECT * FROM shift_reports WHERE id=$1 FOR UPDATE',[id]);
-    if(!current.rowCount){await client.query('ROLLBACK');return res.status(404).json({ok:false,message:'Relatório não encontrado.'});}
+    if(!current.rowCount){await client.query('ROLLBACK');return res.status(404).json({ok:false,message:'RelatÃ³rio nÃ£o encontrado.'});}
     const old=current.rows[0];
-    if(old.team!==req.user.team){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Este relatório pertence a outra equipe.'});}
-    if(old.revision!==expected){await client.query('ROLLBACK');return res.status(409).json({ok:false,conflict:true, message:'Este relatório foi alterado por outra pessoa. Os dados do servidor foram preservados; atualize e compare antes de continuar.', report:relatorioPublico(old)});}
-    if(old.status==='encerrado' && action!=='reabrir'){await client.query('ROLLBACK');return res.status(409).json({ok:false,message:'O relatório está encerrado. Reabra-o para fazer alterações.'});}
-    if(action==='reabrir' && req.user.role!=='chefe'){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Somente o chefe da equipe pode reabrir um relatório encerrado.'});}
+    if(old.team!==req.user.team){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Este relatÃ³rio pertence a outra equipe.'});}
+    if(old.revision!==expected){await client.query('ROLLBACK');return res.status(409).json({ok:false,conflict:true, message:'Este relatÃ³rio foi alterado por outra pessoa. Os dados do servidor foram preservados; atualize e compare antes de continuar.', report:relatorioPublico(old)});}
+    if(old.status==='encerrado' && action!=='reabrir'){await client.query('ROLLBACK');return res.status(409).json({ok:false,message:'O relatÃ³rio estÃ¡ encerrado. Reabra-o para fazer alteraÃ§Ãµes.'});}
+    if(action==='reabrir' && req.user.role!=='chefe'){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Somente o chefe da equipe pode reabrir um relatÃ³rio encerrado.'});}
     const status=action==='encerrar'?'encerrado':action==='reabrir'?'aberto':old.status;
     const revision=old.revision+1;
     const updated=await client.query(`UPDATE shift_reports SET report_date=$2,shift_name=$3,title=$4,content=$5::jsonb,status=$6,revision=$7,updated_by=$8,updated_at=NOW(),closed_at=CASE WHEN $6='encerrado' THEN NOW() WHEN $6='aberto' THEN NULL ELSE closed_at END,closed_by=CASE WHEN $6='encerrado' THEN $8 WHEN $6='aberto' THEN NULL ELSE closed_by END,reopened_at=CASE WHEN $9 THEN NOW() ELSE reopened_at END,reopened_by=CASE WHEN $9 THEN $8 ELSE reopened_by END WHERE id=$1 RETURNING *`,[id,reportDate,shiftName,title,JSON.stringify(content),status,revision,req.user.id,action==='reabrir']);
@@ -1263,24 +1287,24 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     await client.query('COMMIT');
     await registrarAuditoria(req.user.id,'relatorio_'+action,id,{team:old.team,revision,previousStatus:old.status,status});
     res.json({ok:true,report:relatorioPublico(updated.rows[0])});
-  } catch(e){try{await client.query('ROLLBACK')}catch{} console.error('Falha ao salvar relatório:',e.message);res.status(500).json({ok:false,message:'Não foi possível salvar o relatório.'});} finally{client.release();}
+  } catch(e){try{await client.query('ROLLBACK')}catch{} console.error('Falha ao salvar relatÃ³rio:',e.message);res.status(500).json({ok:false,message:'NÃ£o foi possÃ­vel salvar o relatÃ³rio.'});} finally{client.release();}
 });
 app.get('/api/relatorios/:id/historico', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async(req,res)=>{
   try{
     const id=textoSeguro(req.params.id,100); const report=await pool.query('SELECT id,team FROM shift_reports WHERE id=$1',[id]);
-    if(!report.rowCount)return res.status(404).json({ok:false,message:'Relatório não encontrado.'});
-    if(req.user.role!=='admin'&&report.rows[0].team!==req.user.team)return res.status(403).json({ok:false,message:'Acesso restrito à equipe do relatório.'});
+    if(!report.rowCount)return res.status(404).json({ok:false,message:'RelatÃ³rio nÃ£o encontrado.'});
+    if(req.user.role!=='admin'&&report.rows[0].team!==req.user.team)return res.status(403).json({ok:false,message:'Acesso restrito Ã  equipe do relatÃ³rio.'});
     const q=await pool.query(`SELECT h.id,h.action,h.revision,h.previous_content,h.new_content,h.details,h.created_at,u.username,u.full_name FROM shift_report_history h LEFT JOIN users u ON u.id=h.actor_user_id WHERE h.report_id=$1 ORDER BY h.created_at DESC LIMIT 300`,[id]);
     res.json({ok:true,history:q.rows,readOnly:true});
-  }catch(e){console.error('Falha no histórico de relatório:',e.message);res.status(500).json({ok:false,message:'Não foi possível carregar o histórico.'});}
+  }catch(e){console.error('Falha no histÃ³rico de relatÃ³rio:',e.message);res.status(500).json({ok:false,message:'NÃ£o foi possÃ­vel carregar o histÃ³rico.'});}
 });
 app.get('/api/admin/shift-reports', exigirBanco, exigirAutenticacao, exigirAdmin, async(_req,res)=>{
   try{const q=await pool.query(`SELECT r.*,u.username AS updated_username,u.full_name AS updated_full_name FROM shift_reports r LEFT JOIN users u ON u.id=r.updated_by ORDER BY r.report_date DESC,r.team,r.shift_name`);res.json({ok:true,reports:q.rows.map(r=>({...relatorioPublico(r),updatedUsername:r.updated_username,updatedFullName:r.updated_full_name}))});}
-  catch(e){console.error('Falha no painel de relatórios:',e.message);res.status(500).json({ok:false,message:'Não foi possível consultar os relatórios de plantão.'});}
+  catch(e){console.error('Falha no painel de relatÃ³rios:',e.message);res.status(500).json({ok:false,message:'NÃ£o foi possÃ­vel consultar os relatÃ³rios de plantÃ£o.'});}
 });
 app.get('/api/admin/shift-reports/:id/history', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
   try{const q=await pool.query(`SELECT h.id,h.action,h.revision,h.previous_content,h.new_content,h.details,h.created_at,u.username,u.full_name FROM shift_report_history h LEFT JOIN users u ON u.id=h.actor_user_id WHERE h.report_id=$1 ORDER BY h.created_at DESC LIMIT 500`,[textoSeguro(req.params.id,100)]);res.json({ok:true,history:q.rows});}
-  catch(e){res.status(500).json({ok:false,message:'Não foi possível carregar o histórico do relatório.'});}
+  catch(e){res.status(500).json({ok:false,message:'NÃ£o foi possÃ­vel carregar o histÃ³rico do relatÃ³rio.'});}
 });
 
 app.get('/api/admin/events', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
@@ -1291,11 +1315,11 @@ app.get('/api/admin/events', exigirBanco, exigirAutenticacao, exigirAdmin, async
         ORDER BY a.created_at DESC LIMIT 300`
     );
     res.json({ ok: true, events: result.rows });
-  } catch (e) { res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel carregar o registro administrativo.' }); }
+  } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel carregar o registro administrativo.' }); }
 });
 app.get('/api/me/backup-weekly.xlsx', exigirBanco, exigirAutenticacao, async (req, res) => {
   if (!['guiche', 'mesa'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Use o backup do painel administrativo para exportar a cÃ³pia geral.' });
+    return res.status(403).json({ ok: false, message: 'Use o backup do painel administrativo para exportar a cÃÂ³pia geral.' });
   }
   const periodo = lerPeriodoSemanal(req, res);
   if (!periodo) return;
@@ -1303,8 +1327,8 @@ app.get('/api/me/backup-weekly.xlsx', exigirBanco, exigirAutenticacao, async (re
     const rows = await consultarAtendimentosSemana(periodo, req.user.role === 'guiche' ? req.user.id : null);
     const escopo = req.user.role === 'guiche'
       ? `Somente os atendimentos da conta ${req.user.username}.`
-      : 'Todos os atendimentos do sistema no perÃ­odo, de todos os GuichÃªs e todas as situaÃ§Ãµes, inclusive recusados.';
-    const buffer = await criarPlanilhaAtendimentos({ periodo, rows, titulo: req.user.role === 'guiche' ? `Backup semanal â ${req.user.username}` : 'Backup semanal total â Mesa', escopo });
+      : 'Todos os atendimentos do sistema no perÃÂ­odo, de todos os GuichÃÂªs e todas as situaÃÂ§ÃÂµes, inclusive recusados.';
+    const buffer = await criarPlanilhaAtendimentos({ periodo, rows, titulo: req.user.role === 'guiche' ? `Backup semanal Ã¢ÂÂ ${req.user.username}` : 'Backup semanal total Ã¢ÂÂ Mesa', escopo });
     await registrarAuditoria(req.user.id, 'backup_excel_semanal_gerado', null, { from: periodo.from, to: periodo.to, count: rows.length, role: req.user.role });
     const login = nomeArquivoSeguro(req.user.username);
     const nome = req.user.role === 'guiche'
@@ -1318,7 +1342,7 @@ app.get('/api/me/backup-weekly.xlsx', exigirBanco, exigirAutenticacao, async (re
     res.send(buffer);
   } catch (e) {
     console.error('Erro gerando Excel semanal da conta:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o Excel semanal.' });
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel gerar o Excel semanal.' });
   }
 });
 
@@ -1328,8 +1352,8 @@ app.get('/api/admin/backup-weekly.xlsx', exigirBanco, exigirAutenticacao, exigir
   try {
     const rows = await consultarAtendimentosSemana(periodo);
     const buffer = await criarPlanilhaAtendimentos({
-      periodo, rows, titulo: 'Backup semanal total â Administrador',
-      escopo: 'Todos os atendimentos do sistema no perÃ­odo, de todos os GuichÃªs e todas as situaÃ§Ãµes, inclusive recusados.'
+      periodo, rows, titulo: 'Backup semanal total Ã¢ÂÂ Administrador',
+      escopo: 'Todos os atendimentos do sistema no perÃÂ­odo, de todos os GuichÃÂªs e todas as situaÃÂ§ÃÂµes, inclusive recusados.'
     });
     await registrarAuditoria(req.user.id, 'backup_excel_semanal_geral_gerado', null, { from: periodo.from, to: periodo.to, count: rows.length });
     const nome = `Backup_Administrador_Total_${periodo.from}_a_${periodo.to}.xlsx`;
@@ -1339,13 +1363,13 @@ app.get('/api/admin/backup-weekly.xlsx', exigirBanco, exigirAutenticacao, exigir
     res.send(buffer);
   } catch (e) {
     console.error('Erro gerando Excel semanal total:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o Excel semanal total.' });
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel gerar o Excel semanal total.' });
   }
 });
 
-// Para a tarefa semanal automÃ¡tica: um arquivo Excel por conta GuichÃª e cÃ³pias gerais
-// para a Mesa e para o administrador. O ZIP Ã© gerado sob demanda, sem gravar arquivos
-// sensÃ­veis no disco efÃªmero do serviÃ§o Render.
+// Para a tarefa semanal automÃÂ¡tica: um arquivo Excel por conta GuichÃÂª e cÃÂ³pias gerais
+// para a Mesa e para o administrador. O ZIP ÃÂ© gerado sob demanda, sem gravar arquivos
+// sensÃÂ­veis no disco efÃÂªmero do serviÃÂ§o Render.
 app.get('/api/admin/backup-weekly-bundle.zip', exigirBanco, exigirAutenticacao, exigirAdmin, async (req, res) => {
   const periodo = lerPeriodoSemanal(req, res);
   if (!periodo) return;
@@ -1358,8 +1382,8 @@ app.get('/api/admin/backup-weekly-bundle.zip', exigirBanco, exigirAutenticacao, 
     for (const user of usersResult.rows) {
       const propios = rows.filter(row => row.owner_id === user.id);
       const buffer = await criarPlanilhaAtendimentos({
-        periodo, rows: propios, titulo: `Backup semanal â ${user.username}`,
-        escopo: `Somente os atendimentos da conta GuichÃª ${user.username}.`
+        periodo, rows: propios, titulo: `Backup semanal Ã¢ÂÂ ${user.username}`,
+        escopo: `Somente os atendimentos da conta GuichÃÂª ${user.username}.`
       });
       entries.push({
         name: `Guiches/Backup_Guiche_${nomeArquivoSeguro(user.username)}_${periodo.from}_a_${periodo.to}.xlsx`,
@@ -1367,13 +1391,13 @@ app.get('/api/admin/backup-weekly-bundle.zip', exigirBanco, exigirAutenticacao, 
       });
     }
     const totalMesa = await criarPlanilhaAtendimentos({
-      periodo, rows, titulo: 'Backup semanal total â Mesa',
-      escopo: 'Todos os atendimentos do sistema no perÃ­odo, de todos os GuichÃªs e todas as situaÃ§Ãµes, inclusive recusados.'
+      periodo, rows, titulo: 'Backup semanal total Ã¢ÂÂ Mesa',
+      escopo: 'Todos os atendimentos do sistema no perÃÂ­odo, de todos os GuichÃÂªs e todas as situaÃÂ§ÃÂµes, inclusive recusados.'
     });
     entries.push({ name: `Mesa/Backup_Mesa_Total_${periodo.from}_a_${periodo.to}.xlsx`, buffer: totalMesa });
     const totalAdmin = await criarPlanilhaAtendimentos({
-      periodo, rows, titulo: 'Backup semanal total â Administrador',
-      escopo: 'Todos os atendimentos do sistema no perÃ­odo, de todos os GuichÃªs e todas as situaÃ§Ãµes, inclusive recusados.'
+      periodo, rows, titulo: 'Backup semanal total Ã¢ÂÂ Administrador',
+      escopo: 'Todos os atendimentos do sistema no perÃÂ­odo, de todos os GuichÃÂªs e todas as situaÃÂ§ÃÂµes, inclusive recusados.'
     });
     entries.push({ name: `Administrador/Backup_Administrador_Total_${periodo.from}_a_${periodo.to}.xlsx`, buffer: totalAdmin });
     await registrarAuditoria(req.user.id, 'backup_excel_semanal_automatico_gerado', null, { from: periodo.from, to: periodo.to, count: rows.length, workbooks: entries.length });
@@ -1383,8 +1407,8 @@ app.get('/api/admin/backup-weekly-bundle.zip', exigirBanco, exigirAutenticacao, 
     res.setHeader('X-Backup-Count', String(rows.length));
     res.send(zipBuffer);
   } catch (e) {
-    console.error('Erro montando pacote automÃ¡tico de backups Excel:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel preparar o pacote automÃ¡tico de backups Excel.' });
+    console.error('Erro montando pacote automÃÂ¡tico de backups Excel:', e.message);
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel preparar o pacote automÃÂ¡tico de backups Excel.' });
   }
 });
 
@@ -1407,14 +1431,14 @@ app.get('/api/admin/backup-weekly', exigirBanco, exigirAutenticacao, exigirAdmin
     res.json({
       format: 'sistema-atendimento-backup', version: VERSAO, generatedAt: agoraISO(),
       backupType: 'semanal', period: periodo, count: attendance.rows.length,
-      notice: 'Backup semanal: a seleÃ§Ã£o dos atendimentos considera a Data do Atendimento (data agendada), nÃ£o a data de envio. ContÃ©m dados operacionais sensÃ­veis.',
+      notice: 'Backup semanal: a seleÃÂ§ÃÂ£o dos atendimentos considera a Data do Atendimento (data agendada), nÃÂ£o a data de envio. ContÃÂ©m dados operacionais sensÃÂ­veis.',
       users: users.rows, attendances: attendance.rows,
       internalBase: base.rows[0] || { items: [], updated_at: null, updated_by: null },
       auditLog: events.rows
     });
   } catch (e) {
     console.error('Erro no backup semanal:', e.message);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o backup semanal.' });
+    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel gerar o backup semanal.' });
   }
 });
 
@@ -1428,11 +1452,11 @@ app.get('/api/admin/backup-data', exigirBanco, exigirAutenticacao, exigirAdmin, 
     ]);
     res.json({
       format: 'sistema-atendimento-backup', version: VERSAO, generatedAt: agoraISO(),
-      notice: 'CÃ³pia de dados sem hashes de senha e sem sessÃµes ativas. Depois de uma restauraÃ§Ã£o, redefina as senhas dos usuÃ¡rios.',
+      notice: 'CÃÂ³pia de dados sem hashes de senha e sem sessÃÂµes ativas. Depois de uma restauraÃÂ§ÃÂ£o, redefina as senhas dos usuÃÂ¡rios.',
       users: users.rows, attendances: attendance.rows,
       internalBase: base.rows[0] || { items: [], updated_at: null, updated_by: null }, auditLog: events.rows
     });
-  } catch (e) { console.error('Erro no backup:', e.message); res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o backup.' }); }
+  } catch (e) { console.error('Erro no backup:', e.message); res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel gerar o backup.' }); }
 });
 
 async function registrarCliente(ws, dados) {
@@ -1440,8 +1464,8 @@ async function registrarCliente(ws, dados) {
   if (!cliente || !cliente.user) return;
   const canal = dados.role === 'receiver' ? 'receiver' : dados.role === 'sender' ? 'sender' : null;
   if (!canal || !perfilValido(cliente.user.role, canal)) {
-    responderErro(ws, 'error', 'Esta conta nÃ£o tem permissÃ£o para acessar esta Ã¡rea.');
-    ws.close(1008, 'Perfil nÃ£o autorizado');
+    responderErro(ws, 'error', 'Esta conta nÃÂ£o tem permissÃÂ£o para acessar esta ÃÂ¡rea.');
+    ws.close(1008, 'Perfil nÃÂ£o autorizado');
     return;
   }
   cliente.canal = canal;
@@ -1452,9 +1476,9 @@ async function registrarCliente(ws, dados) {
 }
 async function receberNovoAtendimento(ws, dados) {
   const cliente = clientes.get(ws);
-  if (!cliente || cliente.canal !== 'sender') return responderErro(ws, 'send_result', 'Somente um login autorizado do GUICHÃ pode enviar atendimentos.', dados.recordId);
+  if (!cliente || cliente.canal !== 'sender') return responderErro(ws, 'send_result', 'Somente um login autorizado do GUICHÃÂ pode enviar atendimentos.', dados.recordId);
   const recordId = textoSeguro(dados.recordId, 180);
-  if (!recordId) return responderErro(ws, 'send_result', 'recordId nÃ£o informado.');
+  if (!recordId) return responderErro(ws, 'send_result', 'recordId nÃÂ£o informado.');
   const result = await pool.query('SELECT * FROM attendances WHERE record_id=$1', [recordId]);
   const row = result.rows[0] || null;
   const refusal = recusasPendentes.get(recordId);
@@ -1498,7 +1522,7 @@ async function confirmarRecebimento(ws, dados) {
   const cliente = clientes.get(ws);
   if (!cliente || cliente.canal !== 'receiver') return responderErro(ws, 'confirm_result', 'Somente a MESA pode confirmar recebimentos.', dados.recordId);
   const recordId = textoSeguro(dados.recordId, 180);
-  if (!recordId) return responderErro(ws, 'confirm_result', 'recordId nÃ£o informado.');
+  if (!recordId) return responderErro(ws, 'confirm_result', 'recordId nÃÂ£o informado.');
   const pending = pendentes.get(recordId);
   if (!pending) {
     const row = await pool.query('SELECT owner_id,status,received_at FROM attendances WHERE record_id=$1', [recordId]);
@@ -1507,7 +1531,7 @@ async function confirmarRecebimento(ws, dados) {
       enviar(ws, { type: 'confirm_result', ok: true, recordId, alreadyConfirmed: true, receivedAt: existing.received_at });
       return;
     }
-    return responderErro(ws, 'confirm_result', 'Atendimento nÃ£o estÃ¡ mais pendente.', recordId);
+    return responderErro(ws, 'confirm_result', 'Atendimento nÃÂ£o estÃÂ¡ mais pendente.', recordId);
   }
   const receivedAt = dados.receivedAt || agoraISO();
   const registro = { ...pending.record, status: 'recebido', recebidoEm: receivedAt };
@@ -1524,7 +1548,7 @@ async function recusarAtendimento(ws, dados) {
   const cliente = clientes.get(ws);
   if (!cliente || cliente.canal !== 'receiver') return responderErro(ws, 'refuse_result', 'Somente a MESA pode recusar atendimentos.', dados.recordId);
   const recordId = textoSeguro(dados.recordId, 180);
-  if (!recordId) return responderErro(ws, 'refuse_result', 'recordId da recusa nÃ£o informado.');
+  if (!recordId) return responderErro(ws, 'refuse_result', 'recordId da recusa nÃÂ£o informado.');
   const pending = pendentes.get(recordId);
   if (!pending) {
     const old = recusasPendentes.get(recordId);
@@ -1533,7 +1557,7 @@ async function recusarAtendimento(ws, dados) {
       enviar(ws, { type: 'refuse_result', ok: true, recordId, refusedAt: old.refusedAt, deliveredToGuiche: delivered });
       return;
     }
-    return responderErro(ws, 'refuse_result', 'Atendimento nÃ£o estÃ¡ mais pendente.', recordId);
+    return responderErro(ws, 'refuse_result', 'Atendimento nÃÂ£o estÃÂ¡ mais pendente.', recordId);
   }
   const registro = { ...pending.record, ...normalizarRegistro(dados.record), recordId };
   const reason = textoSeguro(dados.reason ?? dados.motivoRecusa ?? registro.motivoRecusa, 2000);
@@ -1551,7 +1575,7 @@ async function recusarAtendimento(ws, dados) {
 }
 async function confirmarRecebimentoRecusa(ws, dados) {
   const cliente = clientes.get(ws);
-  if (!cliente || cliente.canal !== 'sender') return responderErro(ws, 'confirm_refusal_result', 'Somente o GUICHÃ pode confirmar o recebimento da recusa.', dados.recordId);
+  if (!cliente || cliente.canal !== 'sender') return responderErro(ws, 'confirm_refusal_result', 'Somente o GUICHÃÂ pode confirmar o recebimento da recusa.', dados.recordId);
   const recordId = textoSeguro(dados.recordId, 180);
   const refusal = recusasPendentes.get(recordId);
   if (!refusal) {
@@ -1593,13 +1617,13 @@ async function atualizarStatusRegistro(ws, dados) {
 async function tratarMensagem(ws, raw) {
   let dados;
   try { dados = JSON.parse(raw.toString()); }
-  catch { return responderErro(ws, 'error', 'Mensagem invÃ¡lida. Envie um JSON vÃ¡lido.'); }
-  if (!dados || typeof dados !== 'object' || Array.isArray(dados)) return responderErro(ws, 'error', 'Formato de mensagem invÃ¡lido.');
+  catch { return responderErro(ws, 'error', 'Mensagem invÃÂ¡lida. Envie um JSON vÃÂ¡lido.'); }
+  if (!dados || typeof dados !== 'object' || Array.isArray(dados)) return responderErro(ws, 'error', 'Formato de mensagem invÃÂ¡lido.');
   const cliente = clientes.get(ws);
   if (!cliente) return;
   if (dados.type === 'ping') return enviar(ws, { type: 'pong', time: agoraISO() });
   if (dados.type === 'pong') return;
-  if (!cliente.user) return responderErro(ws, 'error', 'SessÃ£o WebSocket nÃ£o autenticada.');
+  if (!cliente.user) return responderErro(ws, 'error', 'SessÃÂ£o WebSocket nÃÂ£o autenticada.');
   try {
     switch (dados.type) {
       case 'register': return await registrarCliente(ws, dados);
@@ -1608,7 +1632,7 @@ async function tratarMensagem(ws, raw) {
       case 'refuse_record': return await recusarAtendimento(ws, dados);
       case 'confirm_refusal_received': return await confirmarRecebimentoRecusa(ws, dados);
       case 'record_status': return await atualizarStatusRegistro(ws, dados);
-      default: return responderErro(ws, 'error', 'Tipo de mensagem nÃ£o reconhecido.');
+      default: return responderErro(ws, 'error', 'Tipo de mensagem nÃÂ£o reconhecido.');
     }
   } catch (e) {
     console.error('Erro processando WebSocket:', e.message);
@@ -1620,11 +1644,11 @@ wss.on('connection', (ws, req) => {
   if (origem) {
     try {
       if (new URL(origem).host !== req.headers.host) {
-        ws.close(1008, 'Origem nÃ£o autorizada');
+        ws.close(1008, 'Origem nÃÂ£o autorizada');
         return;
       }
     } catch {
-      ws.close(1008, 'Origem invÃ¡lida');
+      ws.close(1008, 'Origem invÃÂ¡lida');
       return;
     }
   }
@@ -1633,24 +1657,24 @@ wss.on('connection', (ws, req) => {
   cliente.authPromise = (async () => {
     try {
       const token = extrairCookie(req, SESSION_COOKIE);
-      if (!token || !pool || !dbReady) throw new Error('SessÃ£o nÃ£o disponÃ­vel');
+      if (!token || !pool || !dbReady) throw new Error('SessÃÂ£o nÃÂ£o disponÃÂ­vel');
       const result = await pool.query(
         `SELECT u.id,u.username,u.full_name,u.role,u.is_active,u.deleted_at,s.expires_at AS session_expires_at
            FROM sessions s JOIN users u ON u.id=s.user_id
           WHERE s.token_hash=$1 AND s.expires_at>NOW() AND u.is_active=TRUE AND u.deleted_at IS NULL`,
         [hashToken(token)]
       );
-      if (!result.rowCount || ws.readyState !== WebSocket.OPEN) throw new Error('SessÃ£o invÃ¡lida');
+      if (!result.rowCount || ws.readyState !== WebSocket.OPEN) throw new Error('SessÃÂ£o invÃÂ¡lida');
       cliente.user = result.rows[0];
       cliente.userId = cliente.user.id;
       cliente.sessionHash = hashToken(token);
       const restante = new Date(cliente.user.session_expires_at).getTime() - Date.now();
       cliente.authExpiryTimer = setTimeout(() => {
-        try { ws.close(1008, 'SessÃ£o expirada; entre novamente'); } catch {}
+        try { ws.close(1008, 'SessÃÂ£o expirada; entre novamente'); } catch {}
       }, Math.max(1, restante));
       enviar(ws, { type: 'connected', version: VERSAO });
     } catch {
-      if (ws.readyState === WebSocket.OPEN) ws.close(1008, 'AutenticaÃ§Ã£o necessÃ¡ria');
+      if (ws.readyState === WebSocket.OPEN) ws.close(1008, 'AutenticaÃÂ§ÃÂ£o necessÃÂ¡ria');
     }
   })();
   ws.on('message', async raw => {
@@ -1672,13 +1696,13 @@ function hojeCampoGrande() {
 }
 function acessoModulo(req, res, next) {
   if (!req.user || !['admin', 'pertences'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã  Ã¡rea Pertences e Visitas.' });
+    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã  ÃÂ¡rea Pertences e Visitas.' });
   }
   next();
 }
 function acessoListasMesa(req, res, next) {
   if (!req.user || !['admin', 'pertences', 'mesa'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã s listas de visitas.' });
+    return res.status(403).json({ ok: false, message: 'Acesso restrito Ã s listas de visitas.' });
   }
   next();
 }
@@ -1738,7 +1762,7 @@ function montarRotasPertencesVisitas(config) {
   app.get('/api/pertences-visitas/belongings/check', exigirBanco, exigirAutenticacao, acessoModulo, async (req, res) => {
     const rgi = texto(req.query.rgi, 80);
     const nome = texto(req.query.nome, 200);
-    if (!rgi && !nome) return res.status(400).json({ ok: false, message: 'Selecione um interno para verificar o histÃ³rico.' });
+    if (!rgi && !nome) return res.status(400).json({ ok: false, message: 'Selecione um interno para verificar o histÃÂ³rico.' });
     try {
       const result = await pool.query(
         "SELECT record_id AS id, internal_name AS \"internalName\", rgi, pavilion, cell, deliverer_name AS \"delivererName\", relationship, received_at AS \"receivedAt\" " +
@@ -1749,12 +1773,12 @@ function montarRotasPertencesVisitas(config) {
         "ORDER BY received_at DESC LIMIT 1", [rgi, nome]
       );
       res.json({ ok: true, previous: result.rows[0] || null });
-    } catch (e) { formatarErro(res, e, 'NÃ£o foi possÃ­vel consultar os recebimentos de pertences deste mÃªs.'); }
+    } catch (e) { formatarErro(res, e, 'NÃÂ£o foi possÃÂ­vel consultar os recebimentos de pertences deste mÃÂªs.'); }
   });
 
   app.get('/api/pertences-visitas/belongings', exigirBanco, exigirAutenticacao, acessoModulo, async (req, res) => {
     const day = texto(req.query.day || hojeCampoGrande(), 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return res.status(400).json({ ok: false, message: 'Data invÃ¡lida.' });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return res.status(400).json({ ok: false, message: 'Data invÃÂ¡lida.' });
     try {
       const result = await pool.query(
         "SELECT record_id AS id, internal_name AS \"internalName\", rgi, pavilion, cell, deliverer_name AS \"delivererName\", relationship, received_at AS \"receivedAt\" " +
@@ -1762,7 +1786,7 @@ function montarRotasPertencesVisitas(config) {
         "AND received_at < ((($1::date + 1)::timestamp) AT TIME ZONE 'America/Campo_Grande') ORDER BY received_at, internal_name", [day]
       );
       res.json({ ok: true, day, records: result.rows });
-    } catch (e) { formatarErro(res, e, 'NÃ£o foi possÃ­vel carregar a lista de pertences.'); }
+    } catch (e) { formatarErro(res, e, 'NÃÂ£o foi possÃÂ­vel carregar a lista de pertences.'); }
   });
 
   app.post('/api/pertences-visitas/belongings', exigirBanco, exigirAutenticacao, acessoModulo, async (req, res) => {
@@ -1781,7 +1805,7 @@ function montarRotasPertencesVisitas(config) {
       );
       try { await registrarAuditoria(req.user.id, 'pertences_registrado', null, { recordId: id, internalName, rgi, delivererName }); } catch (e) { console.error('Falha ao registrar auditoria de pertences:', e.message); }
       res.status(201).json({ ok: true, record: result.rows[0] });
-    } catch (e) { formatarErro(res, e, 'NÃ£o foi possÃ­vel salvar o recebimento de pertences.'); }
+    } catch (e) { formatarErro(res, e, 'NÃÂ£o foi possÃÂ­vel salvar o recebimento de pertences.'); }
   });
 
   // This read-only endpoint is also consumed by the Mesa; polling keeps its view up to date.
@@ -1790,7 +1814,7 @@ function montarRotasPertencesVisitas(config) {
       const lists = await pool.query('SELECT list_number AS "listNumber", status, created_at AS "createdAt", closed_at AS "closedAt" FROM pv_visit_lists ORDER BY list_number');
       const entries = await pool.query('SELECT entry_id AS id, list_number AS "listNumber", internal_name AS "internalName", rgi, pavilion, cell, created_at AS "createdAt" FROM pv_visit_entries ORDER BY list_number, created_at, internal_name');
       res.json({ ok: true, lists: lists.rows, entries: entries.rows, serverTime: new Date().toISOString() });
-    } catch (e) { formatarErro(res, e, 'NÃ£o foi possÃ­vel carregar as listas de visitas.'); }
+    } catch (e) { formatarErro(res, e, 'NÃÂ£o foi possÃÂ­vel carregar as listas de visitas.'); }
   });
 
   app.post('/api/pertences-visitas/visits/entries', exigirBanco, exigirAutenticacao, acessoModulo, async (req, res) => {
@@ -1815,7 +1839,7 @@ function montarRotasPertencesVisitas(config) {
       res.status(201).json({ ok: true, entry: result.rows[0] });
     } catch (e) {
       try { await client.query('ROLLBACK'); } catch {}
-      formatarErro(res, e, 'NÃ£o foi possÃ­vel incluir o interno na lista de visitas.');
+      formatarErro(res, e, 'NÃÂ£o foi possÃÂ­vel incluir o interno na lista de visitas.');
     } finally { client.release(); }
   });
 
@@ -1838,7 +1862,7 @@ function montarRotasPertencesVisitas(config) {
       res.json({ ok: true, closedListNumber: closedNumber, nextListNumber: next.rows[0].list_number });
     } catch (e) {
       try { await client.query('ROLLBACK'); } catch {}
-      formatarErro(res, e, 'NÃ£o foi possÃ­vel fechar a lista e abrir a prÃ³xima.');
+      formatarErro(res, e, 'NÃÂ£o foi possÃÂ­vel fechar a lista e abrir a prÃÂ³xima.');
     } finally { client.release(); }
   });
 
@@ -1846,11 +1870,11 @@ function montarRotasPertencesVisitas(config) {
     try {
       const data = await pool.query("SELECT a.record_id, a.created_at, a.received_at, a.status, a.refusal_reason, a.record, u.username AS owner_username FROM attendances a LEFT JOIN users u ON u.id=a.owner_id ORDER BY a.created_at DESC");
       const workbook = new ExcelJS.Workbook();
-      workbook.creator = 'Sistema Atendimento CPAIG'; workbook.subject = 'ExportaÃ§Ã£o geral de atendimentos'; workbook.title = 'Atendimentos CPAIG';
+      workbook.creator = 'Sistema Atendimento CPAIG'; workbook.subject = 'ExportaÃÂ§ÃÂ£o geral de atendimentos'; workbook.title = 'Atendimentos CPAIG';
       const sheet = workbook.addWorksheet('Atendimentos');
       sheet.columns = [
         { header: 'Enviado em', key: 'createdAt', width: 22 }, { header: 'Nome do interno', key: 'nome', width: 30 },
-        { header: 'RGI', key: 'rgi', width: 18 }, { header: 'PavilhÃ£o', key: 'pavilhao', width: 16 },
+        { header: 'RGI', key: 'rgi', width: 18 }, { header: 'PavilhÃÂ£o', key: 'pavilhao', width: 16 },
         { header: 'Cela', key: 'cela', width: 12 }, { header: 'Atendimento', key: 'atendimento', width: 24 },
         { header: 'Assunto', key: 'assunto', width: 40 }, { header: 'Status', key: 'status', width: 20 },
         { header: 'Conta de origem', key: 'owner', width: 22 }, { header: 'Recebido em', key: 'receivedAt', width: 22 },
@@ -1867,7 +1891,7 @@ function montarRotasPertencesVisitas(config) {
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename="Atendimentos_CPAIG.xlsx"');
       res.setHeader('X-Export-Count', String(data.rowCount)); res.send(buffer);
-    } catch (e) { formatarErro(res, e, 'NÃ£o foi possÃ­vel gerar o Excel dos atendimentos.'); }
+    } catch (e) { formatarErro(res, e, 'NÃÂ£o foi possÃÂ­vel gerar o Excel dos atendimentos.'); }
   });
 
   app.get('/api/pertences-visitas/backup', exigirBanco, exigirAutenticacao, acessoModulo, async (_req, res) => {
@@ -1878,11 +1902,11 @@ function montarRotasPertencesVisitas(config) {
         pool.query('SELECT entry_id AS id, list_number AS "listNumber", internal_name AS "internalName", rgi, pavilion, cell, created_at AS "createdAt", created_by AS "createdBy" FROM pv_visit_entries ORDER BY list_number, created_at'),
         pool.query('SELECT items, updated_at AS "updatedAt", updated_by AS "updatedBy" FROM internal_base WHERE singleton_id=1')
       ]);
-      const payload = { exportedAt: new Date().toISOString(), note: 'Backup de Pertences e Visitas e cÃ³pia de referÃªncia da base compartilhada. Os atendimentos sÃ£o baixados separadamente pelo botÃ£o Excel.', belongings: results[0].rows, visitLists: results[1].rows, visitEntries: results[2].rows, internalBase: results[3].rows[0] || { items: [], updatedAt: null, updatedBy: null } };
+      const payload = { exportedAt: new Date().toISOString(), note: 'Backup de Pertences e Visitas e cÃÂ³pia de referÃÂªncia da base compartilhada. Os atendimentos sÃÂ£o baixados separadamente pelo botÃÂ£o Excel.', belongings: results[0].rows, visitLists: results[1].rows, visitEntries: results[2].rows, internalBase: results[3].rows[0] || { items: [], updatedAt: null, updatedBy: null } };
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename="Backup_Pertences_Visitas_' + hojeCampoGrande() + '.json"');
       res.send(JSON.stringify(payload, null, 2));
-    } catch (e) { formatarErro(res, e, 'NÃ£o foi possÃ­vel gerar o backup de Pertences e Visitas.'); }
+    } catch (e) { formatarErro(res, e, 'NÃÂ£o foi possÃÂ­vel gerar o backup de Pertences e Visitas.'); }
   });
 }
 
@@ -1897,7 +1921,7 @@ app.use((err, _req, res, _next) => {
 
 async function iniciar() {
   if (!pool) {
-    dbErrorMessage = 'O banco Neon ainda nÃ£o estÃ¡ configurado no Render (variÃ¡vel DATABASE_URL).';
+    dbErrorMessage = 'O banco Neon ainda nÃÂ£o estÃÂ¡ configurado no Render (variÃÂ¡vel DATABASE_URL).';
     console.warn(dbErrorMessage);
   } else {
     try {
@@ -1906,7 +1930,7 @@ async function iniciar() {
       dbErrorMessage = null;
       console.log('Banco Neon conectado; tabelas verificadas e filas restauradas.');
     } catch (e) {
-      dbErrorMessage = 'NÃ£o foi possÃ­vel inicializar o Neon. Confira DATABASE_URL e as permissÃµes do banco.';
+      dbErrorMessage = 'NÃÂ£o foi possÃÂ­vel inicializar o Neon. Confira DATABASE_URL e as permissÃÂµes do banco.';
       console.error(dbErrorMessage, e.message);
     }
   }
