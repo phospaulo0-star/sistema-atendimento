@@ -1568,14 +1568,27 @@ function sincronizarDadosItem40(){[['item40Entrega','item40EntregaData'],['item4
 function restaurarDadosItem40(){[['item40Entrega','item40EntregaData'],['item40Recebe','item40RecebeData'],['item40Substitui','item40SubstituiData'],['item40Substituido','item40SubstituidoData']].forEach(([a,b])=>{const el=$(a),data=$(b);if(!el||!data)return;const v=String(data.value||'').trim();if(!v)return;if(el.tagName==='SELECT'){el.dataset.pendingName=v;preencherOpcoesItem40();if([...el.options].some(o=>o.value===v))el.value=v}else el.value=v});if($('item40Substitui'))$('item40SubstituidoWrap').style.display=$('item40Substitui').value==='sim'?'block':'none'}
 function instalarItem40(){['item40Entrega','item40Recebe','item40Substitui','item40Substituido','reportDate','recebePlantao','entregaPlantao','quantidadeCustodiados'].forEach(id=>{const el=$(id);if(el&&!el.dataset.item40Bound){el.addEventListener('input',()=>{sincronizarDadosItem40();atualizarItem40();if(typeof changed==='function')changed()});el.addEventListener('change',()=>{sincronizarDadosItem40();atualizarItem40();if(typeof changed==='function')changed()});el.dataset.item40Bound='1'}});restaurarDadosItem40();atualizarItem40()}
 function instalarCamposAssinatura(){[['assinaturaNomeInput','assinaturaNomeData'],['assinaturaFuncaoInput','assinaturaFuncaoData'],['assinaturaUnidadeInput','assinaturaUnidadeData'],['assinaturaMatriculaInput','assinaturaMatriculaData'],['passaNomeInput','passaNomeData'],['passaMatriculaInput','passaMatriculaData'],['recebeNomeAssInput','recebeNomeAssData'],['recebeMatriculaInput','recebeMatriculaData']].forEach(([vis,data])=>{const a=$(vis),b=$(data);if(!a||!b||a.dataset.assinaturaBound)return;a.value=b.value||a.value||'';const sync=()=>{b.value=a.value;if(typeof changed==='function')changed()};a.addEventListener('input',sync);a.addEventListener('change',sync);a.dataset.assinaturaBound='1'})}
-function exportarWord(){
+async function exportarWord(){
   const conteudo=$('previewContent')?.innerHTML;
   if(!conteudo){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
   const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\nbody{background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}</style></head><body>'+conteudo+'</body></html>';
-  const blob=new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'});
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='Relatorio_CPAIG.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\n@page{size:A4;margin:1.7cm 1.8cm}body{background:#fff!important;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none;margin:0;padding:0;box-shadow:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}table{border-collapse:collapse;max-width:100%}img{max-width:100%;height:auto}</style></head><body>'+conteudo+'</body></html>';
+  try{
+    if(!window.htmlDocx||typeof window.htmlDocx.asBlob!=='function'){
+      await new Promise((resolve,reject)=>{
+        const existente=document.querySelector('script[data-html-docx="1"]');
+        if(existente){existente.addEventListener('load',resolve,{once:true});existente.addEventListener('error',reject,{once:true});return;}
+        const script=document.createElement('script');
+        script.src='https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js';
+        script.dataset.htmlDocx='1';script.onload=resolve;script.onerror=()=>reject(new Error('Não foi possível carregar o conversor de Word. Verifique a conexão com a internet e tente novamente.'));
+        document.head.appendChild(script);
+      });
+    }
+    if(!window.htmlDocx||typeof window.htmlDocx.asBlob!=='function')throw new Error('O conversor de Word não ficou disponível.');
+    const blob=window.htmlDocx.asBlob(html,{orientation:'portrait',margins:{top:850,bottom:850,left:900,right:900}});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='Relatorio_CPAIG.docx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }catch(e){console.error('Erro ao exportar DOCX:',e);alert('Não foi possível gerar o arquivo Word. '+(e&&e.message?e.message:'Tente novamente.'));}
 }
 function exportarPDF(){
   if(!$('previewContent')?.innerHTML){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
