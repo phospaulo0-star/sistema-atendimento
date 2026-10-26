@@ -12,7 +12,8 @@
     "ws": "^8.18.0",
     "pg": "^8.16.3",
     "exceljs": "^4.4.0",
-    "archiver": "^7.0.1"
+    "archiver": "^7.0.1",
+    "html-to-docx": "^1.8.0"
   },
   "engines": {
     "node": ">=20"
