@@ -1213,14 +1213,49 @@ app.delete('/api/relatorios/he-nomes/:id',
 
 /* FIM DA LISTA COMPARTILHADA DE HE */
 
-// ExportaÃ§Ã£o de Word gerada no servidor, sem depender de bibliotecas externas no navegador.
+// Remove regras CSS iniciadas por @ antes da conversÃ£o para DOCX. Alguns conversores
+// tentam interpretar regras como @page/@media como nomes XML e falham com "Invalid XML name: @w".
+function limparRegrasAtCss(css) {
+  let resultado = '';
+  let posicao = 0;
+  while (posicao < css.length) {
+    const at = css.indexOf('@', posicao);
+    if (at === -1) { resultado += css.slice(posicao); break; }
+    resultado += css.slice(posicao, at);
+    let abre = css.indexOf('{', at);
+    const pontoVirgula = css.indexOf(';', at);
+    if (pontoVirgula !== -1 && (abre === -1 || pontoVirgula < abre)) {
+      posicao = pontoVirgula + 1;
+      continue;
+    }
+    if (abre === -1) { break; }
+    let profundidade = 1;
+    let fim = abre + 1;
+    while (fim < css.length && profundidade > 0) {
+      if (css[fim] === '{') profundidade++;
+      else if (css[fim] === '}') profundidade--;
+      fim++;
+    }
+    posicao = fim;
+  }
+  return resultado;
+}
+
+function prepararHtmlParaDocx(html) {
+  return html.replace(/<style\b([^>]*)>([\s\S]*?)<\/style>/gi, (tag, atributos, css) =>
+    '<style' + atributos + '>' + limparRegrasAtCss(css) + '</style>'
+  );
+}
+
+// ExportaÃ§Ã£o de Word gerada no servidor.
 app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
   const html = req.body?.html;
   if (typeof html !== 'string' || !html.trim() || html.length > 12000000) {
     return res.status(400).json({ ok: false, message: 'O conteÃºdo do relatÃ³rio Ã© invÃ¡lido ou muito grande.' });
   }
   try {
-    const docx = await HTMLtoDOCX(html, null, {
+    const htmlSeguro = prepararHtmlParaDocx(html);
+    const docx = await HTMLtoDOCX(htmlSeguro, null, {
       orientation: 'portrait',
       font: 'Times New Roman',
       fontSize: 22,
@@ -1231,7 +1266,7 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
     res.setHeader('Content-Disposition', 'attachment; filename="Relatorio_CPAIG.docx"');
     res.send(Buffer.from(docx));
   } catch (e) {
-    console.error('Erro ao gerar DOCX do relatÃ³rio:', e);
+    console.error('Erro ao gerar DOCX do relatÃ³rio:', e && e.stack ? e.stack : e);
     res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o arquivo Word no servidor.' });
   }
 });
