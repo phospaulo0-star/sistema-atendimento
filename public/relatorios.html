@@ -1574,22 +1574,19 @@ async function exportarWord(){
   const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
   const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\n@page{size:A4;margin:1.7cm 1.8cm}body{background:#fff!important;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none;margin:0;padding:0;box-shadow:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}table{border-collapse:collapse;max-width:100%}img{max-width:100%;height:auto}</style></head><body>'+conteudo+'</body></html>';
   try{
-    if(!window.htmlDocx||typeof window.htmlDocx.asBlob!=='function'){
-      await new Promise((resolve,reject)=>{
-        const existente=document.querySelector('script[data-html-docx="1"]');
-        if(existente){existente.addEventListener('load',resolve,{once:true});existente.addEventListener('error',reject,{once:true});return;}
-        const script=document.createElement('script');
-        script.src='https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js';
-        script.dataset.htmlDocx='1';
-        script.onload=resolve;
-        script.onerror=()=>reject(new Error('Não foi possível carregar o conversor de Word. Verifique a conexão com a internet e tente novamente.'));
-        document.head.appendChild(script);
-      });
+    const resposta=await fetch('/api/relatorios/export-docx',{
+      method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({html})
+    });
+    if(!resposta.ok){
+      const erro=await resposta.json().catch(()=>({}));
+      throw new Error(erro.message||'Falha na exportação do Word (HTTP '+resposta.status+').');
     }
-    if(!window.htmlDocx||typeof window.htmlDocx.asBlob!=='function')throw new Error('O conversor de Word não ficou disponível.');
-    const blob=window.htmlDocx.asBlob(html,{orientation:'portrait',margins:{top:850,bottom:850,left:900,right:900}});
+    const blob=await resposta.blob();
+    if(!blob.size)throw new Error('O servidor retornou um arquivo vazio.');
     const url=URL.createObjectURL(blob),a=document.createElement('a');
-    a.href=url;a.download='Relatorio_CPAIG.docx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+    a.href=url;a.download='Relatorio_CPAIG.docx';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
   }catch(e){console.error('Erro ao exportar DOCX:',e);alert('Não foi possível gerar o arquivo Word. '+(e&&e.message?e.message:'Tente novamente.'));}
 }
 function exportarPDF(){
