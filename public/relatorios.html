@@ -236,17 +236,7 @@
 
 /* IMPRESSÃO CPAIG — posição estável: cabeçalho e rodapé nos limites da página */
 @media print {
-  @page {
-    size: A4 portrait;
-    margin: 11mm 12mm 12mm 12mm;
-    /* Contagem nativa do navegador: não depende de spans no conteúdo. */
-    @bottom-right {
-      content: "Página " counter(page) " de " counter(pages);
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 7pt;
-      color: #000;
-    }
-  }
+  @page { size: A4 portrait; margin: 11mm 12mm 9mm 12mm; }
   html, body { margin:0 !important; padding:0 !important; }
   body.preview-mode #previewPanel {
     display:block !important; margin:0 !important; padding:0 !important;
@@ -258,16 +248,14 @@
     width:90% !important; max-width:90% !important; margin:0 auto !important;
     padding:0 !important; overflow:visible !important;
   }
-  /* Cabeçalho somente no início do documento: não usar fixed, que o repetia em todas as páginas. */
   body.preview-mode #previewContent .preview-letterhead {
-    position:static !important;
-    top:auto !important; left:auto !important; right:auto !important; bottom:auto !important;
-    height:auto !important; margin:0 0 8mm !important; padding:0 !important;
+    position:fixed !important;
+    top:0 !important; left:0 !important; right:0 !important;
+    height:14mm !important; margin:0 !important; padding:0 !important;
     display:grid !important;
     grid-template-columns:14mm minmax(0,1fr) 14mm !important;
     align-items:center !important; gap:2mm !important;
-    background:#fff !important; color:#000 !important; z-index:auto !important;
-    break-after:avoid-page; page-break-after:avoid;
+    background:#fff !important; color:#000 !important; z-index:9999 !important;
   }
   body.preview-mode #previewContent .preview-letterhead .preview-logo {
     display:block !important; width:12mm !important; height:13mm !important;
@@ -279,20 +267,46 @@
     display:block !important; color:#000 !important; font-size:5.8pt !important;
     line-height:1.02 !important; text-align:center !important; white-space:nowrap !important;
   }
-  /* Rodapé no fluxo normal, após o conteúdo: aparece apenas no final, na última página. */
   body.preview-mode #previewContent .preview-footer {
-    position:static !important;
-    top:auto !important; bottom:auto !important; left:auto !important; right:auto !important;
-    display:block !important; margin:8mm 0 0 !important; padding:1.5mm 0 0 !important;
+    position:fixed !important;
+    top:auto !important; bottom:0 !important; left:0 !important; right:0 !important;
+    display:block !important; margin:0 !important; padding:0.8mm 0 0 !important;
     background:#fff !important; color:#000 !important; border-top:.3mm solid #777 !important;
-    text-align:center !important; font-size:5.5pt !important; line-height:1.1 !important;
-    z-index:auto !important; break-inside:avoid-page; page-break-inside:avoid;
+    text-align:center !important; font-size:5.5pt !important; line-height:1 !important;
+    z-index:9999 !important;
   }
-  /* A numeração fica no rodapé nativo de cada página. Oculta o contador antigo,
-     que em navegadores sem suporte resultava em Página 0 de 0. */
-  body.preview-mode #previewContent .preview-footer .page-number { display:none !important; }
+  body.preview-mode #previewContent .preview-footer .page-current:after { content:counter(page) !important; }
+  body.preview-mode #previewContent .preview-footer .page-total:after { content:counter(pages) !important; }
   body.preview-mode .preview-return-wrap { display:none !important; }
   body.preview-mode .movement-page { min-height:0 !important; }
+}
+
+
+
+/* IMPRESSÃO: células com texto em negrito recebem fundo cinza.
+   Itens 16 (Material Carga) e 17 (Viaturas): primeira coluna cinza também na impressão. */
+@media print {
+  body.preview-mode .preview-document table td:has(strong),
+  body.preview-mode .preview-document table td:has(b),
+  body.preview-mode .preview-document table th:has(strong),
+  body.preview-mode .preview-document table th:has(b) {
+    background-color: #d6d6d6 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body.preview-mode .material-carga-print-table tbody tr > td:first-child,
+  body.preview-mode .viaturas-print-table tbody tr > td:first-child {
+    background-color: #d6d6d6 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* Também cobre a tabela de edição, caso ela seja impressa fora da visualização final. */
+  #materialCargaTabela table tbody tr > td:first-child,
+  #viaturasTabela table tbody tr > td:first-child {
+    background-color: #d6d6d6 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
 </style></head><body>
