@@ -993,7 +993,7 @@ app.get('/api/admin/attendances', exigirBanco, exigirAutenticacao, exigirAdmin, 
 
 function exigirPerfilRelatorio(req, res, next) {
   if (!req.user || !['chefe','auxiliar','admin'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Acesso restrito ÃÂ s contas de relatÃÂ³rio.' });
+    return res.status(403).json({ ok: false, message: 'Acesso restrito ÃÂ s contas de relatÃÂ³rio.' });
   }
   if (req.user.role !== 'admin' && !['A','B','C','D'].includes(req.user.team)) {
     return res.status(403).json({ ok: false, message: 'Esta conta nÃÂ£o possui equipe A, B, C ou D configurada.' });
@@ -1012,7 +1012,7 @@ function estadoPlantaoRelatorio(agora = new Date()) {
     const anterior = new Date(Date.UTC(ano, mes - 1, dia) - 86400000);
     ano = anterior.getUTCFullYear(); mes = anterior.getUTCMonth() + 1; dia = anterior.getUTCDate();
   }
-  const dataBase = Date.UTC(2026, 9, 16); // 16/10/2026 ÃÂ s 08h: equipe C
+  const dataBase = Date.UTC(2026, 9, 16); // 16/10/2026 ÃÂ s 08h: equipe C
   const dataPlantao = Date.UTC(ano, mes - 1, dia);
   const dias = Math.floor((dataPlantao - dataBase) / 86400000);
   const ciclo = ((dias % 4) + 4) % 4;
@@ -1325,7 +1325,14 @@ app.post('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelator
   try {
     const q = await pool.query(`INSERT INTO shift_reports(id,team,report_date,shift_name,title,content,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7,$7) RETURNING *`, [id, req.user.team, reportDate, shiftName, title, JSON.stringify(content), req.user.id]);
     await pool.query(`INSERT INTO shift_report_history(report_id,actor_user_id,action,revision,new_content,details) VALUES($1,$2,'criado',1,$3::jsonb,$4::jsonb)`, [id,req.user.id,JSON.stringify(content),JSON.stringify({title,reportDate,shiftName,team:req.user.team})]);
-    await registrarAuditoria(req.user.id,'relatorio_criado',id,{team:req.user.team,reportDate,shiftName});
+    // A auditoria usa target_user_id, que referencia users.id. O ID do relatório
+    // não pode ser passado nesse campo; registre-o em details e não bloqueie
+    // a resposta se a auditoria falhar depois da gravação principal.
+    try {
+      await registrarAuditoria(req.user.id,'relatorio_criado',null,{reportId:id,team:req.user.team,reportDate,shiftName});
+    } catch (auditError) {
+      console.error('Falha ao registrar auditoria de criação de relatório:', auditError && auditError.stack ? auditError.stack : auditError);
+    }
     res.status(201).json({ok:true,report:relatorioPublico(q.rows[0])});
   } catch(e) { if(e.code==='23505') return res.status(409).json({ok:false,message:'JÃÂ¡ existe um relatÃÂ³rio dessa equipe para essa data e turno.'}); console.error('Falha ao criar relatÃÂ³rio:',e.message); res.status(500).json({ok:false,message:'NÃÂ£o foi possÃÂ­vel criar o relatÃÂ³rio.'}); }
 });
@@ -1362,15 +1369,26 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     const updated=await client.query(`UPDATE shift_reports SET report_date=$2,shift_name=$3,title=$4,content=$5::jsonb,status=$6,revision=$7,updated_by=$8,updated_at=NOW(),closed_at=CASE WHEN $6='encerrado' THEN NOW() WHEN $6='aberto' THEN NULL ELSE closed_at END,closed_by=CASE WHEN $6='encerrado' THEN $8 WHEN $6='aberto' THEN NULL ELSE closed_by END,reopened_at=CASE WHEN $9 THEN NOW() ELSE reopened_at END,reopened_by=CASE WHEN $9 THEN $8 ELSE reopened_by END WHERE id=$1 RETURNING *`,[id,reportDate,shiftName,title,JSON.stringify(content),status,revision,req.user.id,action==='reabrir']);
     await client.query(`INSERT INTO shift_report_history(report_id,actor_user_id,action,revision,previous_content,new_content,details) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb)`,[id,req.user.id,action,revision,JSON.stringify(old.content||{}),JSON.stringify(content),JSON.stringify({previousTitle:old.title,title,previousDate:old.report_date,reportDate,previousShiftName:old.shift_name,shiftName,previousStatus:old.status,status,team:old.team})]);
     await client.query('COMMIT');
-    await registrarAuditoria(req.user.id,'relatorio_'+action,id,{team:old.team,revision,previousStatus:old.status,status});
+    // target_user_id referencia users.id, não shift_reports.id. O ID do
+    // relatório fica em details. Falha na auditoria não deve transformar um
+    // salvamento já confirmado pelo COMMIT em uma resposta de erro ao navegador.
+    try {
+      await registrarAuditoria(req.user.id,'relatorio_'+action,null,{reportId:id,team:old.team,revision,previousStatus:old.status,status});
+    } catch (auditError) {
+      console.error('Falha ao registrar auditoria de salvamento de relatório:', auditError && auditError.stack ? auditError.stack : auditError);
+    }
     res.json({ok:true,report:relatorioPublico(updated.rows[0])});
-  } catch(e){try{await client.query('ROLLBACK')}catch{} console.error('Falha ao salvar relatÃÂ³rio:',e.message);res.status(500).json({ok:false,message:'NÃÂ£o foi possÃÂ­vel salvar o relatÃÂ³rio.'});} finally{client.release();}
+  } catch(e){
+    try{await client.query('ROLLBACK')}catch{}
+    console.error('Falha ao salvar relatório:', e && e.stack ? e.stack : e);
+    res.status(500).json({ok:false,message:'Não foi possível salvar o relatório.'});
+  } finally{client.release();}
 });
 app.get('/api/relatorios/:id/historico', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async(req,res)=>{
   try{
     const id=textoSeguro(req.params.id,100); const report=await pool.query('SELECT id,team FROM shift_reports WHERE id=$1',[id]);
     if(!report.rowCount)return res.status(404).json({ok:false,message:'RelatÃÂ³rio nÃÂ£o encontrado.'});
-    if(req.user.role!=='admin'&&report.rows[0].team!==req.user.team)return res.status(403).json({ok:false,message:'Acesso restrito ÃÂ  equipe do relatÃÂ³rio.'});
+    if(req.user.role!=='admin'&&report.rows[0].team!==req.user.team)return res.status(403).json({ok:false,message:'Acesso restrito ÃÂ  equipe do relatÃÂ³rio.'});
     const q=await pool.query(`SELECT h.id,h.action,h.revision,h.previous_content,h.new_content,h.details,h.created_at,u.username,u.full_name FROM shift_report_history h LEFT JOIN users u ON u.id=h.actor_user_id WHERE h.report_id=$1 ORDER BY h.created_at DESC LIMIT 300`,[id]);
     res.json({ok:true,history:q.rows,readOnly:true});
   }catch(e){console.error('Falha no histÃÂ³rico de relatÃÂ³rio:',e.message);res.status(500).json({ok:false,message:'NÃÂ£o foi possÃÂ­vel carregar o histÃÂ³rico.'});}
