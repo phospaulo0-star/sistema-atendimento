@@ -416,33 +416,6 @@
   }
 }
 </style>
-
-<style id="paginacao-estilo-word-v7">
-/* Impressao: manter cada linha inteira, sem repetir cabecalho de tabela nas paginas seguintes. */
-@media print {
-  body.preview-mode #previewContent table {
-    break-inside: auto !important;
-    page-break-inside: auto !important;
-    overflow: visible !important;
-  }
-  body.preview-mode #previewContent table thead {
-    display: table-row-group !important;
-  }
-  body.preview-mode #previewContent table tr {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-  body.preview-mode #previewContent table th,
-  body.preview-mode #previewContent table td {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    -webkit-column-break-inside: avoid !important;
-    box-decoration-break: clone !important;
-    -webkit-box-decoration-break: clone !important;
-    vertical-align: top !important;
-  }
-}
-</style>
 </head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1155,7 +1128,7 @@ function localSave(){try{localStorage.setItem(localKey(),JSON.stringify({id:curr
 function loadLocal(){try{return JSON.parse(localStorage.getItem(localKey())||'null')}catch{return null}}
 function limparRascunhosSincronizados(){try{if(current?.id)localStorage.removeItem('cpaig_shift_report_'+current.id);if(me?.team)localStorage.removeItem('cpaig_shift_report_new_'+me.team)}catch{}}
 function podeEditarRelatorioAtual(){return !!(current&&current.status==='aberto'&&current.reopenedAt&&current.reopenedBy);}
-function inputsDisabled(disabled){const podeEditar=canWork||podeEditarRelatorioAtual();disabled=readOnly||disabled||!podeEditar;document.querySelectorAll('#editor textarea,#editor select,#editor input,#title,#reportDate,#shiftName').forEach(el=>el.disabled=disabled);const escalaAdd=$('escalaDiurnaAddBtn');if(escalaAdd)escalaAdd.disabled=disabled;document.querySelectorAll('#escalaDiurnaRows button,#escalaNoturnaRows button').forEach(el=>el.disabled=disabled||el.disabled);document.querySelectorAll('.escala-noturna-field .toolbar button').forEach(el=>el.disabled=disabled);$('saveBtn').disabled=disabled||!current;$('closeBtn').disabled=disabled||!current||current.status==='encerrado';$('reopenBtn').disabled=readOnly||!current||me?.role!=='chefe'||(current.status!=='encerrado'&&String(current.reportDate||'').slice(0,10)>=String(currentShiftDate||'').slice(0,10));$('newBtn').disabled=disabled}
+function inputsDisabled(disabled){const podeEditar=canWork||podeEditarRelatorioAtual();disabled=readOnly||disabled||!podeEditar;document.querySelectorAll('#editor textarea,#editor select,#editor input,#title,#reportDate,#shiftName').forEach(el=>el.disabled=disabled);const escalaAdd=$('escalaDiurnaAddBtn');if(escalaAdd)escalaAdd.disabled=disabled;document.querySelectorAll('#escalaDiurnaRows button,#escalaNoturnaRows button').forEach(el=>el.disabled=disabled||el.disabled);document.querySelectorAll('.escala-noturna-field .toolbar button').forEach(el=>el.disabled=disabled);$('saveBtn').disabled=disabled||!current;$('closeBtn').disabled=disabled||!current||current.status==='encerrado';$('reopenBtn').disabled=readOnly||!current||me?.role!=='chefe'||(current.status!=='encerrado'&&String(current.reportDate||'').slice(0,10)>=String(currentShiftDate||'').slice(0,10));$('newBtn').disabled=disabled;if(typeof atualizarPermissoesBotoesHE==='function')atualizarPermissoesBotoesHE()}
 
 let heNamesCache = [];
 
@@ -1226,6 +1199,30 @@ function atualizarRelatorioHE(nomes) {
   changed();
 }
 
+function atualizarPermissoesBotoesHE() {
+  const perfilPodeGerenciarLista =
+    !readOnly && ['chefe', 'auxiliar'].includes(me?.role);
+  const relatorioPodeEditar =
+    perfilPodeGerenciarLista &&
+    !!current &&
+    current.status !== 'encerrado' &&
+    (canWork || podeEditarRelatorioAtual());
+
+  // Inclusão/retirada dentro do relatório exige um relatório editável.
+  $('heSelectBtn').disabled = !relatorioPodeEditar;
+  $('heDeleteBtn').disabled = !relatorioPodeEditar;
+
+  // A lista compartilhada pode ser gerenciada mesmo sem abrir um relatório.
+  $('heAddBtn').disabled = !perfilPodeGerenciarLista;
+  $('heDeleteSharedBtn').disabled = !perfilPodeGerenciarLista;
+  $('heSeedBtn').disabled = !(perfilPodeGerenciarLista && me?.team === 'C');
+
+  const status = $('heStatus');
+  if (status && me && perfilPodeGerenciarLista && !current) {
+    status.textContent = 'Lista compartilhada disponível para gerenciamento. Para incluir ou retirar nomes de um plantão, abra um relatório editável.';
+  }
+}
+
 async function carregarNomesHE() {
   if (!me) return;
 
@@ -1285,20 +1282,7 @@ async function carregarNomesHE() {
         select.appendChild(option);
       });
 
-    const podeEditar =
-      !readOnly &&
-      ['chefe', 'auxiliar'].includes(me.role) &&
-      current &&
-      current.status !== 'encerrado';
-
-    $('heSelectBtn').disabled = !podeEditar;
-    $('heAddBtn').disabled = !podeEditar;
-    $('heDeleteBtn').disabled = !podeEditar;
-    $('heDeleteSharedBtn').disabled = !podeEditar;
-
-    $('heSeedBtn').disabled =
-      !podeEditar ||
-      me.team !== 'C';
+    atualizarPermissoesBotoesHE();
 
     heStatus(
       heNamesCache.length +
@@ -1320,13 +1304,10 @@ async function cadastrarListaPadraoEquipeC() {
   if (
     readOnly ||
     !['chefe', 'auxiliar'].includes(me?.role) ||
-    me.team !== 'C' ||
-    !current ||
-    current.status === 'encerrado'
+    me.team !== 'C'
   ) {
     heStatus(
-      'Esta operação está disponível para chefe ou auxiliar da equipe C, ' +
-      'em um relatório aberto.'
+      'Esta operação está disponível para chefe ou auxiliar da equipe C.'
     );
     return;
   }
@@ -1395,11 +1376,6 @@ async function cadastrarListaPadraoEquipeC() {
  */
 async function adicionarNomeHE() {
   if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) {
-    return;
-  }
-
-  if (!current || current.status === 'encerrado') {
-    heStatus('Abra um relatório em edição antes de adicionar nomes à lista compartilhada.');
     return;
   }
 
@@ -1500,11 +1476,6 @@ function excluirNomeHE() {
  */
 async function excluirNomeListaCompartilhadaHE() {
   if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) return;
-
-  if (!current || current.status === 'encerrado') {
-    heStatus('Abra um relatório em edição antes de excluir nomes da lista compartilhada.');
-    return;
-  }
 
   const select = $('heNames');
   const item = heNamesCache.find(n => String(n.id) === select.value);
