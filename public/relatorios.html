@@ -341,21 +341,17 @@
 #previewContent .hospitalizado-preview-table th:nth-child(2){ text-align:center!important; }
 </style>
 
-/* Impressão: preservar as tabelas e evitar que linhas/células sejam cortadas entre páginas. */
+<style id="impressao-tabelas-relatorio">
+/* Impressão: mantém cada linha inteira e permite que tabelas longas continuem na página seguinte. */
 @media print {
-  body.preview-mode .preview-document table,
-  body.preview-mode .preview-document .custody-preview-table,
-  body.preview-mode .preview-document .viaturas-print-table,
-  body.preview-mode .preview-document .material-carga-print table,
-  body.preview-mode .preview-document .hospitalizado-preview-table,
-  body.preview-mode .preview-document .licenca-judicial-preview-table,
-  body.preview-mode .preview-document .retorno-licenca-judicial-preview-table {
-    break-inside: avoid-page !important;
-    page-break-inside: avoid !important;
+  body.preview-mode .preview-document table {
+    width: 100% !important;
     border-collapse: collapse !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
   }
-  body.preview-mode .preview-document thead { display: table-header-group; }
-  body.preview-mode .preview-document tfoot { display: table-footer-group; }
+  body.preview-mode .preview-document thead { display: table-header-group !important; }
+  body.preview-mode .preview-document tfoot { display: table-footer-group !important; }
   body.preview-mode .preview-document tr {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
@@ -365,7 +361,17 @@
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
+  body.preview-mode .preview-document .material-carga-print,
+  body.preview-mode .preview-document .viaturas-print-table,
+  body.preview-mode .preview-document .custody-preview-table,
+  body.preview-mode .preview-document .hospitalizado-preview-table,
+  body.preview-mode .preview-document .licenca-judicial-preview-table,
+  body.preview-mode .preview-document .retorno-licenca-judicial-preview-table {
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
 }
+</style>
 </head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -555,7 +561,7 @@
 <button type="button" onclick="adicionarVistoriaCela('mesmo')">＋ VÁRIAS CELAS DO MESMO PAVILHÃO</button>
 <button type="button" onclick="adicionarVistoriaCela('diferentes')">＋ PAVILHÕES DIFERENTES</button>
 </div>
-<div id="vistoriaCelasVisual"></div>
+<div id="vistoriaCelasVisual"><div class="vistoria-print-row">• N/C.</div></div>
 <textarea id="s23" data-section="24 – VISTORIA EM CELA" rows="4" class="no-print" style="display:none">N/C.</textarea>
 </section>
 <section class="field hospitalizado-field">
@@ -1843,6 +1849,7 @@ function visualizarRelatorio(targetId=null){
     const is02=titulo.startsWith('02');
     const numerar=['04','05','06','08','09'].some(n=>titulo.startsWith(n));
     let textoFinal=item.texto;
+    if(titulo.startsWith('24 – VISTORIA EM CELA') && (!String(textoFinal||'').trim() || /^N\/C\.?$/i.test(String(textoFinal).trim()))) textoFinal='• N/C.';
     if(titulo.startsWith('30 – AUTORIZAÇÕES CUMPRIDAS') && !String(textoFinal||'').trim()) textoFinal='N/C.';
     if(titulo.startsWith('33 – CI SETOR TRABALHO')){
       const numero=String(item.texto||'').trim();
