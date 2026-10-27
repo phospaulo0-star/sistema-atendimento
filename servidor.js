@@ -1213,38 +1213,17 @@ app.delete('/api/relatorios/he-nomes/:id',
 
 /* FIM DA LISTA COMPARTILHADA DE HE */
 
-// Remove regras CSS iniciadas por @ antes da conversÃ£o para DOCX. Alguns conversores
-// tentam interpretar regras como @page/@media como nomes XML e falham com "Invalid XML name: @w".
-function limparRegrasAtCss(css) {
-  let resultado = '';
-  let posicao = 0;
-  while (posicao < css.length) {
-    const at = css.indexOf('@', posicao);
-    if (at === -1) { resultado += css.slice(posicao); break; }
-    resultado += css.slice(posicao, at);
-    let abre = css.indexOf('{', at);
-    const pontoVirgula = css.indexOf(';', at);
-    if (pontoVirgula !== -1 && (abre === -1 || pontoVirgula < abre)) {
-      posicao = pontoVirgula + 1;
-      continue;
-    }
-    if (abre === -1) { break; }
-    let profundidade = 1;
-    let fim = abre + 1;
-    while (fim < css.length && profundidade > 0) {
-      if (css[fim] === '{') profundidade++;
-      else if (css[fim] === '}') profundidade--;
-      fim++;
-    }
-    posicao = fim;
-  }
-  return resultado;
-}
-
+// Prepara o HTML para o conversor DOCX. O html-to-docx pode interpretar incorretamente
+// regras CSS modernas (@page, @media etc.) como nomes XML invÃ¡lidos. Para evitar isso,
+// removemos as folhas de estilo incorporadas no HTML exportado; a estrutura, o texto,
+// as tabelas e os estilos inline presentes no conteÃºdo sÃ£o mantidos.
 function prepararHtmlParaDocx(html) {
-  return html.replace(/<style\b([^>]*)>([\s\S]*?)<\/style>/gi, (tag, atributos, css) =>
-    '<style' + atributos + '>' + limparRegrasAtCss(css) + '</style>'
-  );
+  return html
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '')
+    .replace(/<meta\b[^>]*>/gi, '')
+    .replace(/<link\b[^>]*>/gi, '');
 }
 
 // ExportaÃ§Ã£o de Word gerada no servidor.
@@ -1259,15 +1238,14 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
       orientation: 'portrait',
       font: 'Times New Roman',
       fontSize: 22,
-      margins: { top: 850, right: 900, bottom: 850, left: 900 },
-      table: { row: { cantSplit: true } }
+      margins: { top: 850, right: 900, bottom: 850, left: 900 }
     });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     res.setHeader('Content-Disposition', 'attachment; filename="Relatorio_CPAIG.docx"');
     res.send(Buffer.from(docx));
   } catch (e) {
     console.error('Erro ao gerar DOCX do relatÃ³rio:', e && e.stack ? e.stack : e);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o arquivo Word no servidor.' });
+    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o arquivo Word no servidor. Consulte os logs para identificar o detalhe tÃ©cnico.' });
   }
 });
 
