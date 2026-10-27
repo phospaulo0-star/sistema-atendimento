@@ -340,6 +340,32 @@
 #previewContent .retorno-licenca-judicial-preview-table th:nth-child(2),
 #previewContent .hospitalizado-preview-table th:nth-child(2){ text-align:center!important; }
 </style>
+
+/* Impressão: preservar as tabelas e evitar que linhas/células sejam cortadas entre páginas. */
+@media print {
+  body.preview-mode .preview-document table,
+  body.preview-mode .preview-document .custody-preview-table,
+  body.preview-mode .preview-document .viaturas-print-table,
+  body.preview-mode .preview-document .material-carga-print table,
+  body.preview-mode .preview-document .hospitalizado-preview-table,
+  body.preview-mode .preview-document .licenca-judicial-preview-table,
+  body.preview-mode .preview-document .retorno-licenca-judicial-preview-table {
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+    border-collapse: collapse !important;
+  }
+  body.preview-mode .preview-document thead { display: table-header-group; }
+  body.preview-mode .preview-document tfoot { display: table-footer-group; }
+  body.preview-mode .preview-document tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  body.preview-mode .preview-document th,
+  body.preview-mode .preview-document td {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
 </head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1817,6 +1843,7 @@ function visualizarRelatorio(targetId=null){
     const is02=titulo.startsWith('02');
     const numerar=['04','05','06','08','09'].some(n=>titulo.startsWith(n));
     let textoFinal=item.texto;
+    if(titulo.startsWith('30 – AUTORIZAÇÕES CUMPRIDAS') && !String(textoFinal||'').trim()) textoFinal='N/C.';
     if(titulo.startsWith('33 – CI SETOR TRABALHO')){
       const numero=String(item.texto||'').trim();
       if(!numero || /^N\/C\.?$/i.test(numero)) textoFinal='• N/C.';
@@ -2091,7 +2118,7 @@ function renderVistoriasCela(){
  }).join('');
  renderTextoVistoriasCela();
 }
-function renderTextoVistoriasCela(){const v=document.getElementById('vistoriaCelasVisual');if(v)v.innerHTML=vistoriasCela.map(x=>`<div class="vistoria-print-row">• ${escVistoria(textoVistoria(x))}</div>`).join('');}
+function renderTextoVistoriasCela(){const v=document.getElementById('vistoriaCelasVisual');if(!v)return;const registros=vistoriasCela.filter(x=>x.tipo!=='nc'&&(String(x.celas||'').trim()||String(x.pavilhao||'').trim()));v.innerHTML=registros.length?registros.map(x=>`<div class="vistoria-print-row">• ${escVistoria(textoVistoria(x))}</div>`).join(''):'<div class="vistoria-print-row">• N/C.</div>';}
 function sincronizarVistoriasCela(redesenhar=true){const c=document.getElementById('s23');if(c){c.value=vistoriasCela.map(textoVistoria).join('\n');c.dispatchEvent(new Event('input',{bubbles:true}));c.dispatchEvent(new Event('change',{bubbles:true}));}if(redesenhar)renderVistoriasCela();}
 function carregarVistoriasCela(texto){
  vistoriasCela=[];const linhas=String(texto||'N/C.').split(/\n+/).map(x=>x.replace(/^\s*[•\-]\s*/,'').trim()).filter(Boolean);
