@@ -1000,6 +1000,40 @@ function exigirPerfilRelatorio(req, res, next) {
   }
   next();
 }
+function estadoPlantaoRelatorio(agora = new Date()) {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Campo_Grande', year: 'numeric', month: '2-digit',
+    day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+  }).formatToParts(agora);
+  const p = Object.fromEntries(partes.map(x => [x.type, x.value]));
+  let ano = Number(p.year), mes = Number(p.month), dia = Number(p.day);
+  const hora = Number(p.hour);
+  if (hora < 8) {
+    const anterior = new Date(Date.UTC(ano, mes - 1, dia) - 86400000);
+    ano = anterior.getUTCFullYear(); mes = anterior.getUTCMonth() + 1; dia = anterior.getUTCDate();
+  }
+  const dataBase = Date.UTC(2026, 9, 16); // 16/10/2026 Ã s 08h: equipe C
+  const dataPlantao = Date.UTC(ano, mes - 1, dia);
+  const dias = Math.floor((dataPlantao - dataBase) / 86400000);
+  const ciclo = ((dias % 4) + 4) % 4;
+  const equipes = ['C', 'D', 'A', 'B'];
+  return {
+    onDutyTeam: equipes[ciclo],
+    shiftDate: `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
+  };
+}
+
+function exigirEquipeDePlantao(req, res) {
+  const escala = estadoPlantaoRelatorio();
+  if (req.user?.team === escala.onDutyTeam) return true;
+  res.status(403).json({
+    ok: false, code: 'FORA_DO_PLANTAO',
+    message: `Abertura bloqueada. A equipe de plantÃ£o neste momento Ã© a Equipe ${escala.onDutyTeam}. VocÃª pode consultar relatÃ³rios antigos, mas nÃ£o criar nem alterar relatÃ³rios fora do seu plantÃ£o.`,
+    onDutyTeam: escala.onDutyTeam, shiftDate: escala.shiftDate
+  });
+  return false;
+}
+
 function relatorioPublico(row) {
   return { id: row.id, team: row.team, reportDate: row.report_date, shiftName: row.shift_name,
     title: row.title, content: row.content || {}, status: row.status, revision: row.revision,
@@ -1213,17 +1247,38 @@ app.delete('/api/relatorios/he-nomes/:id',
 
 /* FIM DA LISTA COMPARTILHADA DE HE */
 
-// Prepara o HTML para o conversor DOCX. O html-to-docx pode interpretar incorretamente
-// regras CSS modernas (@page, @media etc.) como nomes XML invÃ¡lidos. Para evitar isso,
-// removemos as folhas de estilo incorporadas no HTML exportado; a estrutura, o texto,
-// as tabelas e os estilos inline presentes no conteÃºdo sÃ£o mantidos.
+// Remove regras CSS iniciadas por @ antes da conversÃ£o para DOCX. Alguns conversores
+// tentam interpretar regras como @page/@media como nomes XML e falham com "Invalid XML name: @w".
+function limparRegrasAtCss(css) {
+  let resultado = '';
+  let posicao = 0;
+  while (posicao < css.length) {
+    const at = css.indexOf('@', posicao);
+    if (at === -1) { resultado += css.slice(posicao); break; }
+    resultado += css.slice(posicao, at);
+    let abre = css.indexOf('{', at);
+    const pontoVirgula = css.indexOf(';', at);
+    if (pontoVirgula !== -1 && (abre === -1 || pontoVirgula < abre)) {
+      posicao = pontoVirgula + 1;
+      continue;
+    }
+    if (abre === -1) { break; }
+    let profundidade = 1;
+    let fim = abre + 1;
+    while (fim < css.length && profundidade > 0) {
+      if (css[fim] === '{') profundidade++;
+      else if (css[fim] === '}') profundidade--;
+      fim++;
+    }
+    posicao = fim;
+  }
+  return resultado;
+}
+
 function prepararHtmlParaDocx(html) {
-  return html
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '')
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, '')
-    .replace(/<meta\b[^>]*>/gi, '')
-    .replace(/<link\b[^>]*>/gi, '');
+  return html.replace(/<style\b([^>]*)>([\s\S]*?)<\/style>/gi, (tag, atributos, css) =>
+    '<style' + atributos + '>' + limparRegrasAtCss(css) + '</style>'
+  );
 }
 
 // ExportaÃ§Ã£o de Word gerada no servidor.
@@ -1238,14 +1293,15 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
       orientation: 'portrait',
       font: 'Times New Roman',
       fontSize: 22,
-      margins: { top: 850, right: 900, bottom: 850, left: 900 }
+      margins: { top: 850, right: 900, bottom: 850, left: 900 },
+      table: { row: { cantSplit: true } }
     });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     res.setHeader('Content-Disposition', 'attachment; filename="Relatorio_CPAIG.docx"');
     res.send(Buffer.from(docx));
   } catch (e) {
     console.error('Erro ao gerar DOCX do relatÃ³rio:', e && e.stack ? e.stack : e);
-    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o arquivo Word no servidor. Consulte os logs para identificar o detalhe tÃ©cnico.' });
+    res.status(500).json({ ok: false, message: 'NÃ£o foi possÃ­vel gerar o arquivo Word no servidor.' });
   }
 });
 
@@ -1254,16 +1310,20 @@ app.get('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatori
     const params = []; let where = '';
     if (req.user.role !== 'admin') { params.push(req.user.team); where = 'WHERE r.team=$1'; }
     const q = await pool.query(`SELECT r.*, c.username AS created_username, u.username AS updated_username, cl.username AS closed_username FROM shift_reports r LEFT JOIN users c ON c.id=r.created_by LEFT JOIN users u ON u.id=r.updated_by LEFT JOIN users cl ON cl.id=r.closed_by ${where} ORDER BY r.report_date DESC, r.team, r.shift_name`, params);
-    res.json({ ok: true, reports: q.rows.map(r => ({ ...relatorioPublico(r), createdUsername:r.created_username, updatedUsername:r.updated_username, closedUsername:r.closed_username })), readOnly: req.user.role === 'admin', team: req.user.team || null });
+    const escala = estadoPlantaoRelatorio();
+    res.json({ ok: true, reports: q.rows.map(r => ({ ...relatorioPublico(r), createdUsername:r.created_username, updatedUsername:r.updated_username, closedUsername:r.closed_username })), readOnly: req.user.role === 'admin', team: req.user.team || null, onDutyTeam: escala.onDutyTeam, shiftDate: escala.shiftDate, canWork: req.user.role === 'admin' || req.user.team === escala.onDutyTeam });
   } catch (e) { console.error('Falha ao listar relatÃ³rios:', e.message); res.status(500).json({ ok:false, message:'NÃ£o foi possÃ­vel carregar os relatÃ³rios.' }); }
 });
 app.post('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
   if (req.user.role === 'admin') return res.status(403).json({ok:false,message:'O administrador possui acesso somente para consulta.'});
+  if (!exigirEquipeDePlantao(req, res)) return;
   const reportDate = String(req.body?.reportDate || '').slice(0,10);
   const shiftName = textoSeguro(req.body?.shiftName || 'PlantÃ£o', 80);
   const title = textoSeguro(req.body?.title || '', 180);
   const content = req.body?.content && typeof req.body.content === 'object' && !Array.isArray(req.body.content) ? req.body.content : {};
   if (!/^\d{4}-\d{2}-\d{2}$/.test(reportDate)) return res.status(400).json({ok:false,message:'Informe uma data vÃ¡lida para o relatÃ³rio.'});
+  const escalaAtual = estadoPlantaoRelatorio();
+  if (reportDate !== escalaAtual.shiftDate) return res.status(400).json({ok:false,code:'DATA_FORA_DO_PLANTAO',message:`A data do relatÃ³rio Ã© definida pelo inÃ­cio do plantÃ£o vigente (${escalaAtual.shiftDate}). NÃ£o Ã© permitido alterar a data para abrir outro plantÃ£o.`});
   const id = criarId();
   try {
     const q = await pool.query(`INSERT INTO shift_reports(id,team,report_date,shift_name,title,content,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7,$7) RETURNING *`, [id, req.user.team, reportDate, shiftName, title, JSON.stringify(content), req.user.id]);
@@ -1274,6 +1334,7 @@ app.post('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelator
 });
 app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req,res) => {
   if(req.user.role==='admin') return res.status(403).json({ok:false,message:'O administrador possui acesso somente para consulta.'});
+  if (!exigirEquipeDePlantao(req, res)) return;
   const id=textoSeguro(req.params.id,100); const expected=Number(req.body?.revision);
   const title=textoSeguro(req.body?.title ?? '',180);
   const reportDate=String(req.body?.reportDate || '').slice(0,10);
