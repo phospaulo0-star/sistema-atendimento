@@ -1091,7 +1091,8 @@ const VIATURAS_PADRAO=[
 function escaparViatura(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function sincronizarViaturas(){
  const validas=viaturas.filter(r=>String(r.item||'').trim()||String(r.situacao||'').trim());
- $('s16').value=validas.length?validas.map(r=>String(r.item||'').trim()+'\t'+String(r.situacao||'').trim()).join('\n'):'N/C.';
+ $('s16').value=validas.length?validas.map(r=>String(r.item||'').trim()+'\t'+String(r.situacao||'').trim().replace(/\r?\n/g,'; ')).join('\n'):'N/C.';
+
  changed();
 }
 function renderViaturas(){
