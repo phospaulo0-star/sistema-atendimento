@@ -416,6 +416,33 @@
   }
 }
 </style>
+
+<style id="paginacao-estilo-word-v7">
+/* Impressao: manter cada linha inteira, sem repetir cabecalho de tabela nas paginas seguintes. */
+@media print {
+  body.preview-mode #previewContent table {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    overflow: visible !important;
+  }
+  body.preview-mode #previewContent table thead {
+    display: table-row-group !important;
+  }
+  body.preview-mode #previewContent table tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  body.preview-mode #previewContent table th,
+  body.preview-mode #previewContent table td {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    -webkit-column-break-inside: avoid !important;
+    box-decoration-break: clone !important;
+    -webkit-box-decoration-break: clone !important;
+    vertical-align: top !important;
+  }
+}
+</style>
 </head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="novoRelatorio()">＋ NOVO RELATÓRIO</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" disabled>HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
@@ -1665,42 +1692,7 @@ async function exportarWord(){
   const conteudo=$('previewContent')?.innerHTML;
   if(!conteudo){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
   const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\ntable th,table td{text-align:center;vertical-align:middle}table th{ text-align:center!important } .custody-preview-table td:nth-child(2),.licenca-judicial-preview-table td:nth-child(2),.retorno-licenca-judicial-preview-table td:nth-child(2),.hospitalizado-preview-table td:nth-child(2){text-align:left!important}.custody-preview-table td:nth-child(2){text-align:left!important}.custody-preview-table th:nth-child(2),.licenca-judicial-preview-table th:nth-child(2),.retorno-licenca-judicial-preview-table th:nth-child(2),.hospitalizado-preview-table th:nth-child(2){text-align:center!important}\n@page{size:A4;margin:1.7cm 1.8cm}body{background:#fff!important;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none;margin:0;padding:0;box-shadow:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}table{border-collapse:collapse;max-width:100%}img{max-width:100%;height:auto}
-/* Ajuste de paginação estilo Word: não dividir uma linha/célula entre páginas.
-   As tabelas podem continuar na página seguinte, sem repetir o cabeçalho da tabela. */
-@media print {
-  body.preview-mode #previewContent table {
-    break-inside: auto !important;
-    page-break-inside: auto !important;
-    overflow: visible !important;
-  }
-  body.preview-mode #previewContent table thead,
-  body.preview-mode #previewContent table tbody {
-    display: table-row-group !important;
-  }
-  body.preview-mode #previewContent table tr,
-  body.preview-mode #previewContent table tr > th,
-  body.preview-mode #previewContent table tr > td {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    -webkit-column-break-inside: avoid !important;
-  }
-  body.preview-mode #previewContent table th,
-  body.preview-mode #previewContent table td {
-    box-decoration-break: clone !important;
-    -webkit-box-decoration-break: clone !important;
-    border-top: 1px solid #222 !important;
-    border-bottom: 1px solid #222 !important;
-    vertical-align: top !important;
-  }
-  body.preview-mode #previewContent table p,
-  body.preview-mode #previewContent table div,
-  body.preview-mode #previewContent table span {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-}
-</style></head><body>'+conteudo+'</body></html>';
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\ntable th,table td{text-align:center;vertical-align:middle}table th{ text-align:center!important } .custody-preview-table td:nth-child(2),.licenca-judicial-preview-table td:nth-child(2),.retorno-licenca-judicial-preview-table td:nth-child(2),.hospitalizado-preview-table td:nth-child(2){text-align:left!important}.custody-preview-table td:nth-child(2){text-align:left!important}.custody-preview-table th:nth-child(2),.licenca-judicial-preview-table th:nth-child(2),.retorno-licenca-judicial-preview-table th:nth-child(2),.hospitalizado-preview-table th:nth-child(2){text-align:center!important}\n@page{size:A4;margin:1.7cm 1.8cm}body{background:#fff!important;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none;margin:0;padding:0;box-shadow:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}table{border-collapse:collapse;max-width:100%}img{max-width:100%;height:auto}</style></head><body>'+conteudo+'</body></html>';
   try{
     const resposta=await fetch('/api/relatorios/export-docx',{
       method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
