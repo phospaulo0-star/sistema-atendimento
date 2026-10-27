@@ -1056,11 +1056,9 @@ app.get('/api/relatorios/he-nomes',
   exigirBanco, exigirAutenticacao, exigirPerfilRelatorio,
   async (req, res) => {
     try {
-      const team = req.user.role === 'admin'
-        ? String(req.query.team || '')
-        : req.user.team;
+      const team = req.user.role === 'admin' ? String(req.query.team || '') : req.user.team;
 
-      if (!['A', 'B', 'C', 'D'].includes(team)) {
+      if (team && !['A', 'B', 'C', 'D'].includes(team)) {
         return res.status(400).json({
           ok: false,
           message: 'Informe uma equipe vÃÂ¡lida.'
@@ -1068,11 +1066,11 @@ app.get('/api/relatorios/he-nomes',
       }
 
       const result = await pool.query(
-        `SELECT id, name
+        `SELECT MIN(id) AS id, name, MIN(normalized_name) AS normalized_name
          FROM shift_he_names
-         WHERE team = $1
+         GROUP BY normalized_name, name
          ORDER BY name ASC`,
-        [team]
+        []
       );
 
       return res.json({ ok: true, names: result.rows });
@@ -1111,12 +1109,12 @@ app.post('/api/relatorios/he-nomes',
 
     try {
       const result = await pool.query(
-        `INSERT INTO shift_he_names
-          (team, name, normalized_name, created_by, updated_by)
-         VALUES ($1, $2, $3, $4, $4)
-         ON CONFLICT (team, normalized_name) DO NOTHING
+        `INSERT INTO shift_he_names (team, name, normalized_name, created_by, updated_by)
+         SELECT equipes.team, $1, $2, $3, $3
+         FROM (VALUES ('A'),('B'),('C'),('D')) AS equipes(team)
+         ON CONFLICT (team, normalized_name) DO UPDATE SET name=EXCLUDED.name, updated_by=EXCLUDED.updated_by, updated_at=NOW()
          RETURNING id, name`,
-        [req.user.team, name, normalizedName, req.user.id]
+        [name, normalizedName, req.user.id]
       );
 
       if (!result.rowCount) {
@@ -1168,11 +1166,10 @@ app.patch('/api/relatorios/he-nomes/:id',
     try {
       const result = await pool.query(
         `UPDATE shift_he_names
-         SET name = $3, normalized_name = $4,
-             updated_by = $5, updated_at = NOW()
-         WHERE id = $1 AND team = $2
+         SET name = $2, normalized_name = $3, updated_by = $4, updated_at = NOW()
+         WHERE normalized_name = (SELECT normalized_name FROM shift_he_names WHERE id=$1)
          RETURNING id, name`,
-        [id, req.user.team, name, normalizedName, req.user.id]
+        [id, name, normalizedName, req.user.id]
       );
 
       if (!result.rowCount) {
@@ -1222,9 +1219,9 @@ app.delete('/api/relatorios/he-nomes/:id',
     try {
       const result = await pool.query(
         `DELETE FROM shift_he_names
-         WHERE id = $1 AND team = $2
+         WHERE normalized_name = (SELECT normalized_name FROM shift_he_names WHERE id=$1)
          RETURNING id`,
-        [id, req.user.team]
+        [id]
       );
 
       if (!result.rowCount) {
@@ -1351,7 +1348,7 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     const old=current.rows[0];
     if(old.team!==req.user.team){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Este relatÃÂ³rio pertence a outra equipe.'});}
     const escalaAtual = estadoPlantaoRelatorio();
-    const chefeReabrindo = action==='reabrir' && req.user.role==='chefe';
+    const chefeReabrindo = action==='reabrir' && req.user.role==='chefe' && (old.status==='encerrado' || String(old.report_date).slice(0,10) < escalaAtual.shiftDate);
     const correcaoDeRelatorioReaberto = old.status==='aberto' && Boolean(old.reopened_at) && Boolean(old.reopened_by);
     if(req.user.team!==escalaAtual.onDutyTeam && !chefeReabrindo && !correcaoDeRelatorioReaberto){
       await client.query('ROLLBACK');
