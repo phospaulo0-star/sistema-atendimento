@@ -1809,11 +1809,19 @@ function aplicarDadosMesmaEquipeNoNovoRelatorio(){
  const rel=dadosHerdadosRelatorio?.sameTeamReport;
  const c=rel?.content;
  if(!c)return;
+ // Item 02: restaurar o texto e reconstruir os campos editáveis da equipe de plantão.
+ const equipe02=String(c['02 – EQUIPE DE PLANTÃO (24x72h)']||'').trim();
+ if(equipe02&&!/^N\/C\.?$/i.test(equipe02)){
+  $('s1').value=equipe02;
+  carregarEquipe02(equipe02);
+ }
+ // Item 10: restaurar os postos, nomes e marcações HE da mesma equipe.
  const escala=String(c['10 – ESCALA DIURNA']||'').trim();
  if(escala&&!/^N\/C\.?$/i.test(escala)){
   $('s9').value=escala;
   carregarEscalaDiurna(escala);
  }
+ // Item 12: copiar literalmente o expediente salvo, inclusive quando o valor é N/C.
  const expediente=String(c['12 – EXPEDIENTE']||'').trim();
  if(expediente)$('s11').value=expediente;
 }
