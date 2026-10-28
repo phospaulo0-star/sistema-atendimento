@@ -1341,7 +1341,7 @@ app.get('/api/relatorios/dados-herdados', exigirBanco, exigirAutenticacao, exigi
       [equipeAnteriorMaterial, escala.shiftDate]
     ) : {rows:[]};
     const allowed = [
-      '01 – RECEBIMENTO','02 – EQUIPE DE PLANTÃO (24x72h)',
+      '01 – RECEBIMENTO','31 – ENTRADA DE CUSTODIADOS','32 – SAÍDA DE CUSTODIADOS','02 – EQUIPE DE PLANTÃO (24x72h)',
       '07 – FÉRIAS','10 – ESCALA DIURNA','11 – ESCALA NOTURNA (MONITORAMENTO)',
       '12 – EXPEDIENTE','38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE',
       '39 – INFORMAÇÕES','40 – ENCERRAMENTO',
