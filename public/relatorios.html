@@ -1709,7 +1709,7 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  const dataAnterior=dataISOAnterior(dataAtual);
  const equipe=String(me?.team||$('team')?.value||'').toUpperCase();
  if(!dataAnterior||!equipe||!Array.isArray(reports))return;
- const anterior=(dadosRelatorioDiaAnterior&&String(dadosRelatorioDiaAnterior.reportDate||'').slice(0,10)===dataAnterior)?dadosRelatorioDiaAnterior:reports.filter(r=>String(r.team||'').toUpperCase()===equipe&&String(r.reportDate||'').slice(0,10)===dataAnterior)
+ const anterior=(dadosRelatorioDiaAnterior&&String(dadosRelatorioDiaAnterior.reportDate||'').slice(0,10)<dataAtual)?dadosRelatorioDiaAnterior:reports.filter(r=>String(r.team||'').toUpperCase()===equipe&&String(r.reportDate||'').slice(0,10)===dataAnterior)
    .sort((a,b)=>Number(b.revision||0)-Number(a.revision||0))[0];
  if(!anterior||!anterior.content)return;
  const origem=anterior.content;
