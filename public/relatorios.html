@@ -1722,7 +1722,7 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  const dataAnterior=dataISOAnterior(dataAtual);
  const equipe=String(me?.team||$('team')?.value||'').toUpperCase();
  if(!dataAtual||!dataAnterior||!equipe||!Array.isArray(reports))return;
- const mesmaEquipe=relatorioMaisRecenteDaEquipe(equipe,dataAtual,true);
+ const mesmaEquipe=dadosHerdadosRelatorio?.sameTeamReport||relatorioMaisRecenteDaEquipe(equipe,dataAtual,true);
  const equipeAnterior=equipeAnteriorRelatorio(equipe);
  const relEquipeAnterior=equipeAnterior?relatorioMaisRecenteDaEquipe(equipeAnterior,dataAtual,true):null;
  const relOntem=dadosHerdadosRelatorio?.report||relatorioDoDia(dataAnterior);
