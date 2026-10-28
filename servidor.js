@@ -1318,8 +1318,8 @@ app.get('/api/relatorios/dados-herdados', exigirBanco, exigirAutenticacao, exigi
     const q = await pool.query(
       `SELECT team, report_date, shift_name, title, content, revision
        FROM shift_reports
-       WHERE report_date < $1::date
-       ORDER BY report_date DESC, revision DESC, team
+       WHERE report_date = ($1::date - INTERVAL '1 day')::date
+       ORDER BY revision DESC, team
        LIMIT 1`,
       [escala.shiftDate]
     );
