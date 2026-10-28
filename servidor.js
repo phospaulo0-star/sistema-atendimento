@@ -1355,7 +1355,7 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     const old=current.rows[0];
     if(old.team!==req.user.team){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Este relatÃÂ³rio pertence a outra equipe.'});}
     const escalaAtual = estadoPlantaoRelatorio();
-    const chefeReabrindo = action==='reabrir' && req.user.role==='chefe' && (old.status==='encerrado' || String(old.report_date).slice(0,10) < escalaAtual.shiftDate);
+    const chefeReabrindo = action==='reabrir' && req.user.role==='chefe';
     const correcaoDeRelatorioReaberto = old.status==='aberto' && Boolean(old.reopened_at) && Boolean(old.reopened_by);
     if(req.user.team!==escalaAtual.onDutyTeam && !chefeReabrindo && !correcaoDeRelatorioReaberto){
       await client.query('ROLLBACK');
