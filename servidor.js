@@ -1331,6 +1331,15 @@ app.get('/api/relatorios/dados-herdados', exigirBanco, exigirAutenticacao, exigi
        LIMIT 1`,
       [req.user.team, escala.shiftDate]
     );
+    const equipeAnteriorMaterial = ({A:'D',B:'A',C:'B',D:'C'})[String(req.user.team||'').toUpperCase()];
+    const materialAnterior = equipeAnteriorMaterial ? await pool.query(
+      `SELECT team, report_date, shift_name, title, content, revision
+       FROM shift_reports
+       WHERE team = $1 AND report_date < $2::date
+       ORDER BY report_date DESC, revision DESC
+       LIMIT 1`,
+      [equipeAnteriorMaterial, escala.shiftDate]
+    ) : {rows:[]};
     const allowed = [
       '01 – RECEBIMENTO','02 – EQUIPE DE PLANTÃO (24x72h)',
       '07 – FÉRIAS','10 – ESCALA DIURNA','11 – ESCALA NOTURNA (MONITORAMENTO)',
@@ -1356,7 +1365,7 @@ app.get('/api/relatorios/dados-herdados', exigirBanco, exigirAutenticacao, exigi
       for (const key of allowed) if (Object.prototype.hasOwnProperty.call(original, key)) content[key] = original[key];
       return {team:row.team,reportDate:String(row.report_date).slice(0,10),shiftName:row.shift_name,title:row.title,content,revision:row.revision};
     };
-    return res.json({ok:true,report:safeReport(q.rows[0]||null),sameTeamReport:safeReport(sameTeam.rows[0]||null)});
+    const materialRow=materialAnterior.rows[0]||null;const materialSafe=materialRow?{team:materialRow.team,reportDate:String(materialRow.report_date).slice(0,10),shiftName:materialRow.shift_name,title:materialRow.title,revision:materialRow.revision,content:Object.prototype.hasOwnProperty.call(materialRow.content||{},'16 – MATERIAL CARGA')?{'16 – MATERIAL CARGA':materialRow.content['16 – MATERIAL CARGA']}:{}}:null;return res.json({ok:true,report:safeReport(q.rows[0]||null),sameTeamReport:safeReport(sameTeam.rows[0]||null),materialTeamReport:materialSafe});
   } catch (e) {
     console.error('Falha ao buscar dados herdados do plantão anterior:', e.message);
     return res.status(500).json({ok:false,message:'Não foi possível recuperar os dados necessários do plantão anterior.'});
