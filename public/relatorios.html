@@ -1727,25 +1727,32 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  const relEquipeAnterior=equipeAnterior?relatorioMaisRecenteDaEquipe(equipeAnterior,dataAtual,true):null;
  const relOntem=relatorioDoDia(dataAnterior);
  const atualizado={...formContent()};
- // Item 01: copiar o quantitativo FINAL / PASSO do relatório salvo do dia anterior.
- // FINAL / PASSO pode estar em outro campo do relatório, não no texto do Item 01.
+ // Item 01: usar o FINAL / PASSO calculado no relatório salvo do dia anterior.
+ // FINAL / PASSO = quantitativo inicial do Item 01 + entradas (Item 31) - saídas (Item 32).
  if(relOntem?.content){
-  const campos=Object.entries(relOntem.content);
-  const prioritarios=campos.filter(([chave])=>/movimenta|final|passo|encerramento|quantitativo/i.test(chave));
-  const restantes=campos.filter(([chave])=>!prioritarios.some(([k])=>k===chave));
-  let quantidade='';
-  for(const [chave,valor] of [...prioritarios,...restantes]){
-   const texto=String(valor||'');
-   const m=texto.match(/FINAL\s*\/\s*PASSO\s*:?\s*([\d.]+)/i)
-    ||texto.match(/QUANTIDADE_CUSTODIADOS:\s*([\d.]+)/i);
-   if(m){quantidade=String(m[1]).replace(/\./g,'').trim();break;}
+  const conteudoOntem=relOntem.content;
+  const textoItem01=String(conteudoOntem['01 – RECEBIMENTO']||'');
+  const matchInicial=textoItem01.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*([\d.]+)\s*$/im);
+  let inicialOntem=matchInicial?Number(String(matchInicial[1]).replace(/\./g,'')):NaN;
+  if(!Number.isFinite(inicialOntem)){
+   const m=textoItem01.match(/QUANTITATIVO CARCERÁRIO[^\n]*?([\d.]+)/i);
+   if(m)inicialOntem=Number(String(m[1]).replace(/\./g,''));
   }
-  if(quantidade){
+  const contarRegistros=(valor)=>{
+   try{
+    const lista=Array.isArray(valor)?valor:JSON.parse(String(valor||'[]'));
+    return Array.isArray(lista)?lista.filter(r=>r&&(r.nome||r.rgi||r.procedencia||r.documento)).length:0;
+   }catch{return 0;}
+  };
+  const entradasOntem=contarRegistros(conteudoOntem['31 – ENTRADA DE CUSTODIADOS']);
+  const saidasOntem=contarRegistros(conteudoOntem['32 – SAÍDA DE CUSTODIADOS']);
+  if(Number.isFinite(inicialOntem)){
+   const quantidade=Math.max(0,inicialOntem+entradasOntem-saidasOntem);
    const atual01=String(atualizado['01 – RECEBIMENTO']||'');
    const semQtd=atual01.split(/\r?\n/).filter(l=>!/^[\s]*QUANTIDADE_CUSTODIADOS:/i.test(l));
    semQtd.push('QUANTIDADE_CUSTODIADOS: '+quantidade);
    atualizado['01 – RECEBIMENTO']=semQtd.join('\n');
-   $('quantidadeCustodiados').value=quantidade;
+   $('quantidadeCustodiados').value=String(quantidade);
    atualizarQuantidadeExtenso();
   }
  }
