@@ -1727,17 +1727,22 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  const relEquipeAnterior=equipeAnterior?relatorioMaisRecenteDaEquipe(equipeAnterior,dataAtual,true):null;
  const relOntem=relatorioDoDia(dataAnterior);
  const atualizado={...formContent()};
- // Item 01: o quantitativo vem do relatório da data imediatamente anterior,
- // nunca do relatório anterior da mesma equipe (que pode ser de quatro dias antes).
+ // Item 01: copiar o quantitativo FINAL / PASSO do relatório salvo do dia anterior.
+ // FINAL / PASSO pode estar em outro campo do relatório, não no texto do Item 01.
  if(relOntem?.content){
-  const texto01=String(relOntem.content['01 – RECEBIMENTO']||'');
-  const mq=texto01.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*([\d.]+)\s*$/im)
-   ||texto01.match(/(?:efetivo carcerário|quantitativo carcerário|quantidade(?: final)? de custodiados)[^\d\n]{0,80}([\d.]+)/i)
-   ||texto01.match(/^\s*QUANTITATIVO CARCERÁRIO(?: \(FINAL \/ PASSO\))?:\s*([\d.]+)\s*$/im);
-  if(mq){
-   const quantidade=String(mq[1]).replace(/\./g,'').trim();
+  const campos=Object.entries(relOntem.content);
+  const prioritarios=campos.filter(([chave])=>/movimenta|final|passo|encerramento|quantitativo/i.test(chave));
+  const restantes=campos.filter(([chave])=>!prioritarios.some(([k])=>k===chave));
+  let quantidade='';
+  for(const [chave,valor] of [...prioritarios,...restantes]){
+   const texto=String(valor||'');
+   const m=texto.match(/FINAL\s*\/\s*PASSO\s*:?\s*([\d.]+)/i)
+    ||texto.match(/QUANTIDADE_CUSTODIADOS:\s*([\d.]+)/i);
+   if(m){quantidade=String(m[1]).replace(/\./g,'').trim();break;}
+  }
+  if(quantidade){
    const atual01=String(atualizado['01 – RECEBIMENTO']||'');
-   const semQtd=atual01.split(/\r?\n/).filter(l=>!/^\s*QUANTIDADE_CUSTODIADOS:/i.test(l));
+   const semQtd=atual01.split(/\r?\n/).filter(l=>!/^[\s]*QUANTIDADE_CUSTODIADOS:/i.test(l));
    semQtd.push('QUANTIDADE_CUSTODIADOS: '+quantidade);
    atualizado['01 – RECEBIMENTO']=semQtd.join('\n');
    $('quantidadeCustodiados').value=quantidade;
