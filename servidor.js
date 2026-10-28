@@ -1311,6 +1311,44 @@ app.get('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatori
     res.json({ ok: true, reports: q.rows.map(r => ({ ...relatorioPublico(r), createdUsername:r.created_username, updatedUsername:r.updated_username, closedUsername:r.closed_username })), readOnly: req.user.role === 'admin', team: req.user.team || null, onDutyTeam: escala.onDutyTeam, shiftDate: escala.shiftDate, canWork: req.user.role === 'admin' || req.user.team === escala.onDutyTeam });
   } catch (e) { console.error('Falha ao listar relatÃÂ³rios:', e.message); res.status(500).json({ ok:false, message:'NÃÂ£o foi possÃÂ­vel carregar os relatÃÂ³rios.' }); }
 });
+app.get('/api/relatorios/dados-herdados', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
+  if (req.user.role === 'admin') return res.status(403).json({ok:false,message:'Rota destinada ao preenchimento de relatórios das equipes.'});
+  try {
+    const escala = estadoPlantaoRelatorio();
+    const q = await pool.query(
+      `SELECT team, report_date, shift_name, title, content, revision
+       FROM shift_reports
+       WHERE report_date < $1::date
+       ORDER BY report_date DESC, revision DESC, team
+       LIMIT 1`,
+      [escala.shiftDate]
+    );
+    if (!q.rows.length) return res.json({ok:true, report:null});
+    const row = q.rows[0];
+    const original = row.content && typeof row.content === 'object' ? row.content : {};
+    const allowed = [
+      '01 – RECEBIMENTO','02 – EQUIPE DE PLANTÃO (24x72h)',
+      '07 – FÉRIAS','10 – ESCALA DIURNA','11 – ESCALA NOTURNA (MONITORAMENTO)',
+      '12 – EXPEDIENTE','38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE',
+      '39 – INFORMAÇÕES','40 – ENCERRAMENTO',
+      'ITEM 40 – QUEM ENCERRA O PLANTÃO','ITEM 40 – QUEM RECEBE O PLANTÃO',
+      'ITEM 40 – SUBSTITUIÇÃO','ITEM 40 – POLICIAL SUBSTITUÍDO',
+      'ASSINATURA – NOME COMPLETO DO POLICIAL','ASSINATURA – FUNÇÃO',
+      'ASSINATURA – UNIDADE PENAL','ASSINATURA – MATRÍCULA',
+      'ASSINATURA CHEFE DE EQUIPE — PASSA — NOME',
+      'ASSINATURA CHEFE DE EQUIPE — PASSA — MATRÍCULA',
+      'ASSINATURA CHEFE DE EQUIPE — RECEBE — NOME',
+      'ASSINATURA CHEFE DE EQUIPE — RECEBE — MATRÍCULA'
+    ];
+    const content = {};
+    for (const key of allowed) if (Object.prototype.hasOwnProperty.call(original, key)) content[key] = original[key];
+    return res.json({ok:true,report:{team:row.team,reportDate:String(row.report_date).slice(0,10),shiftName:row.shift_name,title:row.title,content,revision:row.revision}});
+  } catch (e) {
+    console.error('Falha ao buscar dados herdados do plantão anterior:', e.message);
+    return res.status(500).json({ok:false,message:'Não foi possível recuperar os dados necessários do plantão anterior.'});
+  }
+});
+
 app.post('/api/relatorios', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
   if (req.user.role === 'admin') return res.status(403).json({ok:false,message:'O administrador possui acesso somente para consulta.'});
   if (!exigirEquipeDePlantao(req, res)) return;
