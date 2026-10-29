@@ -1810,10 +1810,11 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
    const p=l.split(/\t+/);
    const nome=p[0]||'',saida=p[1]||'',retornoPrevisto=p[2]||'',retornoReal=p[3]||'';
    if(!nome.trim())return;
-   if(retornoPrevisto===dataAtual){
-    retornos.push([nome,saida,dataAtual].join('\t'));
+   const retornoCalculado=calcularRetornoTemporaria(saida);
+   if(retornoCalculado===dataAtual||retornoPrevisto===dataAtual){
+    retornos.push([nome,saida,retornoCalculado,retornoCalculado].join('\t'));
    }else{
-    emLicenca.push([nome,saida,retornoPrevisto,retornoReal].join('\t'));
+    emLicenca.push([nome,saida,retornoCalculado||retornoPrevisto,retornoReal].join('\t'));
    }
   });
   atualizado[chave29]=emLicenca.length?emLicenca.join('\n'):'N/C.';
@@ -2402,8 +2403,9 @@ let listaLicencaTemporaria=[], listaRetornoTemporaria=[], seqTemporaria=0;
 function dataHojeTemporaria(){const el=document.getElementById('reportDate');return el&&el.value?el.value:dataISOdeHojeLJ();}
 function serializarTemporaria(lista){const arr=lista.filter(r=>!r.nc);if(!arr.length)return 'N/C.';return arr.map(r=>[r.nome||'',r.saida||'',r.retornoPrevisto||'',r.retornoReal||''].join('\t')).join('\n');}
 function sincronizarTemporaria(){const a=document.getElementById('s28'),b=document.getElementById('s29a');if(a){a.value=serializarTemporaria(listaLicencaTemporaria);a.dispatchEvent(new Event('input',{bubbles:true}));a.dispatchEvent(new Event('change',{bubbles:true}));}if(b){b.value=serializarTemporaria(listaRetornoTemporaria);b.dispatchEvent(new Event('input',{bubbles:true}));b.dispatchEvent(new Event('change',{bubbles:true}));}renderVisualTemporaria();}
+function calcularRetornoTemporaria(saida){if(!saida)return '';const m=/^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(saida));if(!m)return '';const d=new Date(Date.UTC(Number(m[1]),Number(m[2])-1,Number(m[3])+6));return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;}
 function adicionarLicencaTemporaria(){listaLicencaTemporaria=listaLicencaTemporaria.filter(r=>!r.nc);listaLicencaTemporaria.push({id:++seqTemporaria,nome:'',saida:'',retornoPrevisto:'',retornoReal:''});renderLicencaTemporaria();sincronizarTemporaria();}
-function alterarLicencaTemporaria(id,campo,valor){const r=listaLicencaTemporaria.find(x=>x.id===id);if(!r)return;r[campo]=valor;sincronizarTemporaria();}
+function alterarLicencaTemporaria(id,campo,valor){const r=listaLicencaTemporaria.find(x=>x.id===id);if(!r)return;r[campo]=valor;if(campo==='saida'){const retorno=calcularRetornoTemporaria(valor);r.retornoPrevisto=retorno;r.retornoReal=retorno;renderLicencaTemporaria();renderRetornoTemporaria();}sincronizarTemporaria();}
 function excluirLicencaTemporaria(id){listaLicencaTemporaria=listaLicencaTemporaria.filter(x=>x.id!==id);renderLicencaTemporaria();sincronizarTemporaria();}
 function transferirTemporaria(id,automatico=false){const r=listaLicencaTemporaria.find(x=>x.id===id);if(!r||r.nc||!String(r.nome||'').trim())return false;if(listaRetornoTemporaria.some(x=>normalizarNomeInterno(x.nome)===normalizarNomeInterno(r.nome)&&x.saida===r.saida)){if(!automatico)alert('Este cadastro já consta no item 29.1.');return false;}listaRetornoTemporaria.push({id:++seqTemporaria,nome:r.nome,saida:r.saida||'',retornoReal:dataHojeTemporaria(),retornoPrevisto:r.retornoPrevisto||''});listaLicencaTemporaria=listaLicencaTemporaria.filter(x=>x.id!==id);renderLicencaTemporaria();renderRetornoTemporaria();sincronizarTemporaria();return true;}
 function verificarRetornosTemporaria(){const data=dataHojeTemporaria();if(!data)return;listaLicencaTemporaria.slice().forEach(r=>{if(!r.nc&&r.retornoPrevisto&&r.retornoPrevisto<=data)transferirTemporaria(r.id,true);});}
