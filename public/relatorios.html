@@ -1745,7 +1745,7 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  if(!dataAtual||!dataAnterior||!equipe||!Array.isArray(reports))return;
  const mesmaEquipe=dadosHerdadosRelatorio?.sameTeamReport||relatorioAnteriorDaMesmaEquipe(equipe,dataAtual);
  const equipeAnterior=equipeAnteriorRelatorio(equipe);
- const relEquipeAnterior=equipeAnterior?relatorioMaisRecenteDaEquipe(equipeAnterior,dataAtual,true):null;
+ const relEquipeAnterior=dadosHerdadosRelatorio?.previousTeamReport||(equipeAnterior?relatorioMaisRecenteDaEquipe(equipeAnterior,dataAtual,true):null);
  const relOntem=dadosHerdadosRelatorio?.report||relatorioDoDia(dataAnterior);
  const atualizado={...formContent()};
  // Item 01: usar o FINAL / PASSO calculado no relatório salvo do dia anterior.
