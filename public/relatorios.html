@@ -1148,7 +1148,7 @@ function localSave(){try{localStorage.setItem(localKey(),JSON.stringify({id:curr
 function loadLocal(){try{return JSON.parse(localStorage.getItem(localKey())||'null')}catch{return null}}
 function limparRascunhosSincronizados(){try{if(current?.id)localStorage.removeItem('cpaig_shift_report_'+current.id);if(me?.team)localStorage.removeItem('cpaig_shift_report_new_'+me.team)}catch{}}
 function podeEditarRelatorioAtual(){return !!(current&&current.status==='aberto'&&current.reopenedAt&&current.reopenedBy);}
-function inputsDisabled(disabled){const podeEditar=canWork||podeEditarRelatorioAtual();disabled=readOnly||disabled||!podeEditar;document.querySelectorAll('#editor textarea,#editor select,#editor input,#title,#reportDate,#shiftName').forEach(el=>el.disabled=disabled);const escalaAdd=$('escalaDiurnaAddBtn');if(escalaAdd)escalaAdd.disabled=disabled;document.querySelectorAll('#escalaDiurnaRows button,#escalaNoturnaRows button').forEach(el=>el.disabled=disabled||el.disabled);document.querySelectorAll('.escala-noturna-field .toolbar button').forEach(el=>el.disabled=disabled);$('saveBtn').disabled=disabled||!current;$('closeBtn').disabled=disabled||!current||current.status==='encerrado';$('reopenBtn').disabled=readOnly||!current||me?.role!=='chefe'||(current.status!=='encerrado'&&String(current.reportDate||'').slice(0,10)>=String(currentShiftDate||'').slice(0,10));$('newBtn').disabled=disabled}
+function inputsDisabled(disabled){const podeEditar=canWork||podeEditarRelatorioAtual();disabled=readOnly||disabled||!podeEditar;document.querySelectorAll('#editor textarea,#editor select,#editor input,#title,#reportDate,#shiftName').forEach(el=>el.disabled=disabled);const escalaAdd=$('escalaDiurnaAddBtn');if(escalaAdd)escalaAdd.disabled=disabled;document.querySelectorAll('#escalaDiurnaRows button,#escalaNoturnaRows button').forEach(el=>el.disabled=disabled||el.disabled);document.querySelectorAll('.escala-noturna-field .toolbar button').forEach(el=>el.disabled=disabled);$('saveBtn').disabled=disabled||!current;$('closeBtn').disabled=disabled||!current||current.status==='encerrado';$('reopenBtn').disabled=readOnly||!current||!['chefe','auxiliar'].includes(me?.role)||(current.status!=='encerrado'&&String(current.reportDate||'').slice(0,10)>=String(currentShiftDate||'').slice(0,10));$('newBtn').disabled=disabled}
 
 let heNamesCache = [];
 
@@ -1885,7 +1885,7 @@ function mesclarConflitoComServidor(serverReport, localContent, localMeta){
 async function salvar(action='salvar',automatic=false){
  if(readOnly||saving)return;
  const correcaoReaberta=podeEditarRelatorioAtual();
- if(!canWork&&!correcaoReaberta&&!(action==='reabrir'&&me?.role==='chefe'&&current&&String(current.reportDate||'').slice(0,10)<String(currentShiftDate||'').slice(0,10))){msg(`Salvamento bloqueado. A equipe de plantão é a Equipe ${onDutyTeam}. Somente relatórios reabertos pelo chefe podem ser corrigidos fora do plantão.`, 'bad');return;}
+ if(!canWork&&!correcaoReaberta&&!(action==='reabrir'&&['chefe','auxiliar'].includes(me?.role)&&current&&String(current.reportDate||'').slice(0,10)<String(currentShiftDate||'').slice(0,10))){msg(`Salvamento bloqueado. A equipe de plantão é a Equipe ${onDutyTeam}. Somente relatórios reabertos pelo chefe podem ser corrigidos fora do plantão.`, 'bad');return;}
  if(!navigator.onLine){localSave();state('Offline · cópia local guardada');msg('Sem conexão. O conteúdo está guardado neste dispositivo e será possível tentar sincronizar quando a conexão voltar.','bad');return}
  saving=true;
  const localContent=formContent();
