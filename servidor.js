@@ -1323,11 +1323,13 @@ app.get('/api/relatorios/dados-herdados', exigirBanco, exigirAutenticacao, exigi
        LIMIT 1`,
       [escala.shiftDate]
     );
+    // Dados da mesma equipe: o plantão anterior ocorre exatamente quatro dias antes.
+    // Não selecionar relatórios intermediários abertos fora da sequência oficial.
     const sameTeam = await pool.query(
       `SELECT team, report_date, shift_name, title, content, revision
        FROM shift_reports
-       WHERE team = $1 AND report_date < $2::date
-       ORDER BY report_date DESC, revision DESC
+       WHERE team = $1 AND report_date = ($2::date - INTERVAL '4 days')::date
+       ORDER BY revision DESC
        LIMIT 1`,
       [req.user.team, escala.shiftDate]
     );
