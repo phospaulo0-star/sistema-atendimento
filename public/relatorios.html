@@ -1803,7 +1803,7 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  const chave29='29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)';
  const chave291='29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)';
  if(relEquipeAnterior?.content){
-  const linhas29=String(relOntem.content[chave29]||'N/C.').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const linhas29=String(relEquipeAnterior.content[chave29]||'N/C.').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const emLicenca=[],retornos=[];
   linhas29.forEach(l=>{
    if(/^N\/C\.?$/i.test(l))return;
