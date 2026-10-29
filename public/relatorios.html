@@ -519,13 +519,14 @@
     <div class="field"><label for="trocaRecebe">Policial penal que recebe o plantão</label><select id="trocaRecebe"><option value="">Selecione um nome</option></select></div>
   </div>
   <div class="field" style="margin-top:10px"><label for="trocaHorario">Horário da troca</label>
-    <select id="trocaHorario">
-      <option value="a partir das 18h">a partir das 18h</option>
-      <option value="até as 18h">até as 18h</option>
-      <option value="24h">24h</option>
-      <option value="a partir das 19h">a partir das 19h</option>
-      <option value="até as 19h">até as 19h</option>
-    </select>
+    <input id="trocaHorario" list="trocaHorarioOpcoes" type="text" value="a partir das 18h" placeholder="Escolha uma opção ou digite outro horário" autocomplete="off">
+    <datalist id="trocaHorarioOpcoes">
+      <option value="a partir das 18h"></option>
+      <option value="até as 18h"></option>
+      <option value="24h"></option>
+      <option value="a partir das 19h"></option>
+      <option value="até as 19h"></option>
+    </datalist>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
     <button type="button" id="trocaAddBtn">Adicionar troca</button>
