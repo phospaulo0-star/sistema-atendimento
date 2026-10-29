@@ -1068,16 +1068,18 @@ function preencherMaterialCarga(){
   if(!materiaisCarga.length)materiaisCarga=[{item:'',quant:''}];renderMaterialCarga();
 }
 function copiarMaterialCargaEquipeAnterior(){
-  // Prioriza o relatório da equipe que entregou o plantão, fornecido pela rota segura do servidor.
-  const herdado=dadosHerdadosRelatorio?.materialTeamReport;
-  if(herdado?.content&&String(herdado.content['16 – MATERIAL CARGA']||'').trim()&&!/^N\/C\.?$/i.test(String(herdado.content['16 – MATERIAL CARGA']).trim())){
-    $('s15').value=herdado.content['16 – MATERIAL CARGA'];
+  // Item 16: usar o relatório da data imediatamente anterior (dia anterior do calendário),
+  // seguindo a regra de herança do plantão anterior e sem filtrar por equipe.
+  const dataAtual=String($('reportDate')?.value||currentShiftDate||'').slice(0,10);
+  const dataAnterior=dataISOAnterior(dataAtual);
+  const rel=dadosHerdadosRelatorio?.report?.reportDate===dataAnterior
+    ? dadosHerdadosRelatorio.report
+    : relatorioDoDia(dataAnterior);
+  const valor=String(rel?.content?.['16 – MATERIAL CARGA']||'').trim();
+  if(valor){
+    $('s15').value=valor;
     preencherMaterialCarga();
-    return;
   }
-  const ordem={A:'D',B:'A',C:'B',D:'C'};const equipe=String(me?.team||$('team')?.value||'').toUpperCase();const anterior=ordem[equipe];if(!anterior)return;
-  const rel=reports.filter(r=>String(r.team||'').toUpperCase()===anterior&&r.content&&String(r.content['16 – MATERIAL CARGA']||'').trim()&&!/^N\/C\.?$/i.test(String(r.content['16 – MATERIAL CARGA']).trim())).sort((a,b)=>String(b.reportDate||'').slice(0,10).localeCompare(String(a.reportDate||'').slice(0,10))||Number(b.revision||0)-Number(a.revision||0))[0];
-  if(rel){$('s15').value=rel.content['16 – MATERIAL CARGA'];preencherMaterialCarga();}
 }
 let viaturas=[];
 let viaturaSelecionada=-1;
@@ -1784,23 +1786,25 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  // Item 11: recuperar a escala noturna do relatório anterior da mesma equipe.
  const chave11='11 – ESCALA NOTURNA (MONITORAMENTO)';
  if(mesmaEquipe?.content&&String(mesmaEquipe.content[chave11]||'').trim())atualizado[chave11]=mesmaEquipe.content[chave11];
- // Itens 25, 25.1, 27 e 28 vêm da equipe que entrega o plantão.
- const chavesEquipeAnterior=[
+ // Itens que devem herdar do relatório do dia anterior (data de calendário).
+ const chavesDiaAnterior=[
+  '16 – MATERIAL CARGA',
+  '17 – VIATURAS',
   '25 – HOSPITALIZADO',
   '25.1 – HOSPITALIZADO A CONFIRMAR',
   '27 – ÓBITO',
   '28 – LICENÇA JUDICIAL'
  ];
- if(relEquipeAnterior?.content)chavesEquipeAnterior.forEach(k=>{
-  if(Object.prototype.hasOwnProperty.call(relEquipeAnterior.content,k))atualizado[k]=relEquipeAnterior.content[k];
+ if(relOntem?.content)chavesDiaAnterior.forEach(k=>{
+  if(Object.prototype.hasOwnProperty.call(relOntem.content,k))atualizado[k]=relOntem.content[k];
  });
- // Item 29: copiar os registros ativos do Item 29 da equipe anterior.
+ // Itens 29 e 29.1: usar registros do relatório do dia anterior.
  // O formato é NOME, DATA DE SAÍDA, RETORNO PREVISTO, RETORNO REAL.
  // Retornos previstos para a data de abertura migram para o Item 29.1.
  const chave29='29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)';
  const chave291='29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)';
- if(relEquipeAnterior?.content){
-  const linhas29=String(relEquipeAnterior.content[chave29]||'N/C.').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ if(relOntem?.content){
+  const linhas29=String(relOntem.content[chave29]||'N/C.').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const emLicenca=[],retornos=[];
   linhas29.forEach(l=>{
    if(/^N\/C\.?$/i.test(l))return;
