@@ -1333,17 +1333,15 @@ app.get('/api/relatorios/dados-herdados', exigirBanco, exigirAutenticacao, exigi
        LIMIT 1`,
       [req.user.team, escala.shiftDate]
     );
-    const dataDiaAnterior = new Date(`${escala.shiftDate}T00:00:00Z`);
-    dataDiaAnterior.setUTCDate(dataDiaAnterior.getUTCDate() - 1);
-    const dataDiaAnteriorISO = dataDiaAnterior.toISOString().slice(0,10);
-    const materialAnterior = await pool.query(
+    const equipeAnteriorMaterial = ({A:'D',B:'A',C:'B',D:'C'})[String(req.user.team||'').toUpperCase()];
+    const materialAnterior = equipeAnteriorMaterial ? await pool.query(
       `SELECT team, report_date, shift_name, title, content, revision
        FROM shift_reports
-       WHERE report_date = $1::date
-       ORDER BY revision DESC, updated_at DESC NULLS LAST
+       WHERE team = $1 AND report_date < $2::date
+       ORDER BY report_date DESC, revision DESC
        LIMIT 1`,
-      [dataDiaAnteriorISO]
-    );
+      [equipeAnteriorMaterial, escala.shiftDate]
+    ) : {rows:[]};
     const allowed = [
       '01 – RECEBIMENTO','31 – ENTRADA DE CUSTODIADOS','32 – SAÍDA DE CUSTODIADOS','02 – EQUIPE DE PLANTÃO (24x72h)',
       '07 – FÉRIAS','10 – ESCALA DIURNA','11 – ESCALA NOTURNA (MONITORAMENTO)',
