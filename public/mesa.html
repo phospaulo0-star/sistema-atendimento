@@ -3609,7 +3609,7 @@ const auth=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store
 if(!auth.ok){location.replace("/login.html");return;}
 const authData=await auth.json();
 usuarioLogadoMesa=authData.user;
-if(!usuarioLogadoMesa||!["mesa","admin"].includes(usuarioLogadoMesa.role)){location.replace(usuarioLogadoMesa&&usuarioLogadoMesa.role==="guiche"?"/index.html":"/login.html");return;}
+if(!usuarioLogadoMesa||!["mesa","admin","chefe","auxiliar"].includes(usuarioLogadoMesa.role)){location.replace(usuarioLogadoMesa&&usuarioLogadoMesa.role==="guiche"?"/index.html":"/login.html");return;}
 criarBarraContaMesa(usuarioLogadoMesa);
 carregarTudo();
 await sincronizarBaseMesa();
