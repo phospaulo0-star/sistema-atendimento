@@ -488,7 +488,7 @@ CPAIG
 <div class="section-body">
 <p style="margin:0 0 12px;color:#475569;line-height:1.45">Consulta das listas do m&#243;dulo Pertences e Visitas. As informa&#231;&#245;es s&#227;o atualizadas automaticamente a cada 5 segundos enquanto este painel estiver aberto. A Mesa pode consultar e imprimir; somente o m&#243;dulo Pertences e Visitas pode incluir internos ou fechar listas.</p>
 <div class="toolbar" style="align-items:center">
-<label for="visitasMesaListaSelecionada" style="font-weight:bold">Lista para imprimir:</label>
+<label for="visitasMesaDiaSelecionado" style="font-weight:bold">Visualizar listas do dia:</label><select id="visitasMesaDiaSelecionado" onchange="renderizarListasVisitasMesa()" style="padding:10px;border:1px solid #cbd5e1;border-radius:7px;min-width:150px"><option value="">Hoje</option></select><label for="visitasMesaListaSelecionada" style="font-weight:bold">Lista para imprimir:</label>
 <select id="visitasMesaListaSelecionada" style="padding:10px;border:1px solid #cbd5e1;border-radius:7px;min-width:150px;max-width:100%"><option value="">Carregando listas...</option></select>
 <button class="btn-gray" type="button" onclick="carregarListasVisitasMesa()">&#x1F504; ATUALIZAR AGORA</button>
 <button class="btn-blue" type="button" onclick="imprimirListaVisitasMesaSelecionada()">&#x1F5A8;&#xFE0F; IMPRIMIR LISTA SELECIONADA</button>
@@ -3751,32 +3751,34 @@ async function carregarListasVisitasMesa(opcoes = {}) {
 function corListaVisitasMesa(n){const cores=['#dbeafe','#dcfce7','#fef3c7','#fce7f3','#ede9fe','#ffedd5','#cffafe','#f1f5f9'];return cores[(Math.max(1,Number(n)||1)-1)%cores.length]}
 function dataDiaVisitasMesa(d){if(!d)return '';const p=String(d).slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d}
 function renderizarListasVisitasMesa() {
-  const select=$('visitasMesaListaSelecionada'),container=$('listasVisitasMesaContainer'),contador=$('visitasMesaContador');
+  const select=$('visitasMesaListaSelecionada'),diaSelect=$('visitasMesaDiaSelecionado'),container=$('listasVisitasMesaContainer'),contador=$('visitasMesaContador');
   if(!select||!container)return;
-  const valorAnterior=select.value;
+  const hoje=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Campo_Grande',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   const listasOrdenadas=[...listasVisitasMesaCache].sort((a,b)=>String(b.visitDay).localeCompare(String(a.visitDay))||Number(b.dayListNumber)-Number(a.dayListNumber));
-  select.innerHTML=listasOrdenadas.map(lista=>'<option value="'+escapeHtml(lista.listNumber)+'">Lista '+escapeHtml(lista.dayListNumber)+' — '+dataDiaVisitasMesa(lista.visitDay)+(lista.status==='open'?' (ABERTA)':' (FECHADA)')+'</option>').join('');
-  if(listasOrdenadas.some(lista=>String(lista.listNumber)===String(valorAnterior)))select.value=String(valorAnterior);
-  else{const hoje=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Campo_Grande',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());const aberta=listasOrdenadas.find(lista=>lista.status==='open'&&String(lista.visitDay).slice(0,10)===hoje);if(aberta)select.value=String(aberta.listNumber);else if(listasOrdenadas.length)select.value=String(listasOrdenadas[0].listNumber)}
-  if(contador)contador.textContent=listasOrdenadas.length+(listasOrdenadas.length===1?' lista':' listas');
-  if(!listasOrdenadas.length){select.innerHTML='<option value="">Nenhuma lista disponível</option>';container.innerHTML='<div style="padding:15px;color:#64748b">Ainda não há listas de visitas cadastradas.</div>';return}
   const dias=[...new Set(listasOrdenadas.map(l=>String(l.visitDay).slice(0,10)))];
+  const diaAnterior=diaSelect?.value||hoje;
+  if(diaSelect){diaSelect.innerHTML=[hoje,...dias.filter(d=>d!==hoje)].map(d=>'<option value="'+escapeHtml(d)+'">'+(d===hoje?'HOJE — ':'')+dataDiaVisitasMesa(d)+'</option>').join('');diaSelect.value=dias.includes(diaAnterior)?diaAnterior:hoje;}
+  const diaExibido=diaSelect?.value||hoje;
+  const listasDia=listasOrdenadas.filter(l=>String(l.visitDay).slice(0,10)===diaExibido);
+  const valorAnterior=select.value;
+  select.innerHTML=listasDia.map(lista=>'<option value="'+escapeHtml(lista.listNumber)+'">Lista '+escapeHtml(lista.dayListNumber)+' — '+(lista.status==='open'?'ABERTA':'FECHADA')+'</option>').join('');
+  if(listasDia.some(lista=>String(lista.listNumber)===String(valorAnterior)))select.value=String(valorAnterior);
+  else if(listasDia.length)select.value=String(listasDia.find(l=>l.status==='open')?.listNumber||listasDia[0].listNumber);
+  if(contador)contador.textContent=listasDia.length+(listasDia.length===1?' lista':' listas')+' em '+dataDiaVisitasMesa(diaExibido);
+  if(!listasDia.length){select.innerHTML='<option value="">Nenhuma lista neste dia</option>';container.innerHTML='<div style="padding:15px;color:#64748b">Não há listas de visitas para este dia.</div>';return}
   const resumoDias=Array.isArray(window.__visitasDiasMesa)?window.__visitasDiasMesa:[];
   const resumos=Array.isArray(window.__visitasResumoMesa)?window.__visitasResumoMesa:[];
-  container.innerHTML=dias.map(dia=>{
-    const day=resumoDias.find(x=>String(x.visitDay).slice(0,10)===dia);
-    const pessoas=resumos.filter(x=>String(x.visitDay).slice(0,10)===dia);
-    const resumo=day&&day.status==='closed'?'<div style="padding:10px 13px;background:#f1f5f9;border-bottom:1px solid #e2e8f0"><strong>DIA ENCERRADO — '+dataDiaVisitasMesa(dia)+' · '+(day.totalInmates||pessoas.length)+' internos distintos</strong>'+(pessoas.length?'<div style="margin-top:8px">'+pessoas.map(p=>escapeHtml(p.internalName)+' — Pavilhão '+escapeHtml(p.pavilion||'—')+', Cela '+escapeHtml(p.cell||'—')).join('<br>')+'</div>':'')+'</div>':'';
-    const cards=listasOrdenadas.filter(l=>String(l.visitDay).slice(0,10)===dia).sort((a,b)=>a.dayListNumber-b.dayListNumber).map(lista=>{
-      const registros=entradasVisitasMesaCache.filter(r=>String(r.listNumber)===String(lista.listNumber));
-      const linhas=registros.length?registros.map(r=>'<tr><td>Lista '+escapeHtml(lista.dayListNumber)+'</td><td>'+escapeHtml(r.internalName||'')+'</td><td>'+escapeHtml(r.rgi||'')+'</td><td style="text-align:center;font-size:15px;font-weight:bold">'+escapeHtml(r.pavilion||'—')+'</td><td style="text-align:center;font-size:15px;font-weight:bold">'+escapeHtml(r.cell||'—')+'</td></tr>').join(''):'<tr><td colspan="5" style="text-align:center;color:#64748b">Esta lista ainda não tem internos.</td></tr>';
-      const cor=corListaVisitasMesa(lista.dayListNumber),status=lista.status==='open'?'ABERTA':'FECHADA',statusCor=lista.status==='open'?'#166534':'#475569';
-      return '<section style="border:1px solid #e2e8f0;border-left:7px solid '+cor+';border-radius:9px;margin:0 0 14px;overflow:hidden"><div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0"><h3 style="margin:0;font-size:17px;background:'+cor+';padding:6px 10px;border-radius:7px">LISTA '+escapeHtml(lista.dayListNumber)+'</h3><span style="font-size:12px;font-weight:bold;color:'+statusCor+';background:#e2e8f0;padding:5px 9px;border-radius:20px">'+status+'</span><span style="font-size:12px;color:#64748b">'+(lista.closedAt?'Fechada em '+escapeHtml(formatarDataHora(lista.closedAt)):'')+'</span></div><div class="table-wrap"><table style="min-width:720px"><thead><tr><th>Lista</th><th>Nome do interno</th><th>RGI</th><th style="text-align:center">PAVILHÃO</th><th style="text-align:center">CELA</th></tr></thead><tbody>'+linhas+'</tbody></table></div></section>';
-    }).join('');
-    return '<h3 style="margin:18px 0 8px">VISITAS DE '+dataDiaVisitasMesa(dia)+'</h3>'+resumo+cards;
+  const day=resumoDias.find(x=>String(x.visitDay).slice(0,10)===diaExibido);
+  const pessoas=resumos.filter(x=>String(x.visitDay).slice(0,10)===diaExibido);
+  const resumo=day&&day.status==='closed'?'<div style="padding:10px 13px;background:#f1f5f9;border-bottom:1px solid #e2e8f0"><strong>DIA ENCERRADO — '+dataDiaVisitasMesa(diaExibido)+' · '+(day.totalInmates||pessoas.length)+' internos distintos</strong>'+(pessoas.length?'<div style="margin-top:8px">'+pessoas.map(p=>escapeHtml(p.internalName)+' — Pavilhão '+escapeHtml(p.pavilion||'—')+', Cela '+escapeHtml(p.cell||'—')).join('<br>')+'</div>':'')+'</div>':'';
+  const cards=listasDia.sort((a,b)=>a.dayListNumber-b.dayListNumber).map(lista=>{
+    const registros=entradasVisitasMesaCache.filter(r=>String(r.listNumber)===String(lista.listNumber));
+    const linhas=registros.length?registros.map(r=>'<tr><td>Lista '+escapeHtml(lista.dayListNumber)+'</td><td>'+escapeHtml(r.internalName||'')+'</td><td>'+escapeHtml(r.rgi||'')+'</td><td style="text-align:center;font-size:15px;font-weight:bold">'+escapeHtml(r.pavilion||'—')+'</td><td style="text-align:center;font-size:15px;font-weight:bold">'+escapeHtml(r.cell||'—')+'</td></tr>').join(''):'<tr><td colspan="5" style="text-align:center;color:#64748b">Esta lista ainda não tem internos.</td></tr>';
+    const cor=corListaVisitasMesa(lista.dayListNumber),status=lista.status==='open'?'ABERTA':'FECHADA',statusCor=lista.status==='open'?'#166534':'#475569';
+    return '<section style="border:1px solid #e2e8f0;border-left:7px solid '+cor+';border-radius:9px;margin:0 0 14px;overflow:hidden"><div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0"><h3 style="margin:0;font-size:17px;background:'+cor+';padding:6px 10px;border-radius:7px">LISTA '+escapeHtml(lista.dayListNumber)+'</h3><span style="font-size:12px;font-weight:bold;color:'+statusCor+';background:#e2e8f0;padding:5px 9px;border-radius:20px">'+status+'</span><span style="font-size:12px;color:#64748b">'+(lista.closedAt?'Fechada em '+escapeHtml(formatarDataHora(lista.closedAt)):'')+'</span></div><div class="table-wrap"><table style="min-width:720px"><thead><tr><th>Lista</th><th>Nome do interno</th><th>RGI</th><th style="text-align:center">PAVILHÃO</th><th style="text-align:center">CELA</th></tr></thead><tbody>'+linhas+'</tbody></table></div></section>';
   }).join('');
+  container.innerHTML='<h3 style="margin:18px 0 8px">VISITAS DE '+dataDiaVisitasMesa(diaExibido)+'</h3>'+resumo+cards;
 }
-
 function htmlImpressaoListaVisitasMesa(lista,entradas){
   const registros=entradas.filter(r=>String(r.listNumber)===String(lista.listNumber));
   const linhas=registros.length?registros.map(r=>'<tr><td>'+escapeHtml(r.internalName||'')+'</td><td>'+escapeHtml(r.rgi||'')+'</td><td class="pavcela">'+escapeHtml(r.pavilion||'—')+'</td><td class="pavcela">'+escapeHtml(r.cell||'—')+'</td></tr>').join(''):'<tr><td colspan="4" style="text-align:center">Nenhum interno cadastrado nesta lista.</td></tr>';
@@ -3788,7 +3790,7 @@ async function abrirImpressaoListasVisitasMesa(todas){
   const janela=window.open('','_blank');if(!janela){alert('O navegador bloqueou a janela de impressão. Permita janelas pop-up para este site e tente novamente.');return}
   try{
     const dados=await obterDadosListasVisitasMesa(),listas=Array.isArray(dados.lists)?dados.lists:[],entradas=Array.isArray(dados.entries)?dados.entries:[];
-    let escolhidas=listas,titulo='Todas as Listas de Visitas';
+    const diaSelecionado=$('visitasMesaDiaSelecionado')?.value||new Intl.DateTimeFormat('en-CA',{timeZone:'America/Campo_Grande',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());let escolhidas=listas.filter(l=>String(l.visitDay).slice(0,10)===diaSelecionado),titulo='Todas as Listas de Visitas — '+dataDiaVisitasMesa(diaSelecionado);
     if(!todas){const numero=$('visitasMesaListaSelecionada')?.value,escolhida=listas.find(l=>String(l.listNumber)===String(numero));if(!escolhida)throw new Error('Selecione uma lista válida para imprimir.');escolhidas=[escolhida];titulo='Lista de Visitas '+escolhida.dayListNumber}
     if(!escolhidas.length)throw new Error('Não há listas de visitas para imprimir.');
     const dias=[...new Set(escolhidas.map(l=>String(l.visitDay).slice(0,10)))];
