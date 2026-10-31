@@ -483,10 +483,12 @@ body.preview-mode #previewContent .material-carga-tabela td:first-child { text-a
 
     <select
       id="heNames"
-      aria-label="Nomes de HE"
-      size="6"
+      aria-label="Nomes de HE — selecione um ou mais servidores"
+      multiple
+      size="8"
       style="width:100%;margin-top:8px"
     ></select>
+    <p class="small">Para selecionar vários nomes, mantenha pressionada a tecla Ctrl (ou Command no Mac) enquanto clica nos nomes desejados.</p>
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
       <button type="button" id="heSelectBtn">Incluir no plantão</button>
@@ -1524,9 +1526,7 @@ async function excluirNomeListaCompartilhadaHE() {
  * Inclui o nome selecionado da lista padrão no relatório aberto.
  */
 function selecionarNomeHE() {
-  if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) {
-    return;
-  }
+  if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) return;
 
   if (!current || current.status === 'encerrado') {
     heStatus('Abra um relatório em edição antes de incluir nomes.');
@@ -1534,31 +1534,39 @@ function selecionarNomeHE() {
   }
 
   const select = $('heNames');
-  const item = heNamesCache.find(
-    n => String(n.id) === select.value
-  );
+  const selecionados = Array.from(select.selectedOptions || [])
+    .map(option => heNamesCache.find(n => String(n.id) === option.value))
+    .filter(Boolean);
 
-  if (!item) {
-    heStatus('Selecione um nome na lista padrão.');
+  if (!selecionados.length) {
+    heStatus('Selecione um ou mais nomes na lista padrão. Use Ctrl (ou Command no Mac) para marcar vários.');
     return;
   }
 
   const nomes = nomesDoRelatorioHE();
+  const existentes = new Set(nomes.map(normalizarNomeHE));
+  const novos = [];
+  let repetidos = 0;
 
-  if (
-    nomes.some(n => normalizarNomeHE(n) === normalizarNomeHE(item.name))
-  ) {
-    heStatus('Esse nome já está no relatório atual.');
-    return;
+  selecionados.forEach(item => {
+    const chave = normalizarNomeHE(item.name);
+    if (!chave || existentes.has(chave)) {
+      repetidos++;
+      return;
+    }
+    existentes.add(chave);
+    novos.push(item.name);
+  });
+
+  if (novos.length) atualizarRelatorioHE([...nomes, ...novos]);
+
+  if (novos.length && repetidos) {
+    heStatus(novos.length + ' nome(s) incluído(s) neste relatório. ' + repetidos + ' já constavam e não foram duplicados.');
+  } else if (novos.length) {
+    heStatus(novos.length + ' nome(s) incluído(s) somente neste relatório.');
+  } else {
+    heStatus('Todos os nomes selecionados já constavam no relatório atual. Nenhum nome foi duplicado.');
   }
-
-  nomes.push(item.name);
-  atualizarRelatorioHE(nomes);
-
-  heStatus(
-    '"' + item.name +
-    '" foi incluído somente neste relatório.'
-  );
 }
 
 function nomesDoRelatorioFerias(){
