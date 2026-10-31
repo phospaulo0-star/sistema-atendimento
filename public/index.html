@@ -458,7 +458,7 @@ async function consultarSessao(){
 const resp=await fetch("/api/auth/me",{credentials:"same-origin",cache:"no-store"});
 if(!resp.ok){location.replace("/login.html");return null;}
 const dados=await resp.json();
-if(!dados.user||!["guiche","admin"].includes(dados.user.role)){
+if(!dados.user||!["guiche","admin","chefe","auxiliar"].includes(dados.user.role)){
 location.replace(dados.user&&dados.user.role==="mesa"?"/mesa.html":"/login.html");return null;
 }
 usuarioLogado=dados.user;
