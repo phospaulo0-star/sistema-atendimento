@@ -1910,7 +1910,7 @@ async function inicializarPertencesVisitas(pool) {
     ");",
     "CREATE INDEX IF NOT EXISTS pv_visit_entries_list_idx ON pv_visit_entries(list_number, created_at);",
     "INSERT INTO pv_visit_days(visit_day,status) VALUES ((NOW() AT TIME ZONE 'America/Campo_Grande')::date,'open') ON CONFLICT (visit_day) DO NOTHING;",
-    "INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT (NOW() AT TIME ZONE 'America/Campo_Grande')::date,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') AND EXISTS (SELECT 1 FROM pv_visit_days WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open');"
+    "INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT (NOW() AT TIME ZONE 'America/Campo_Grande')::date,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') AND EXISTS (SELECT 1 FROM pv_visit_days WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') ON CONFLICT (visit_day) WHERE status='open' DO NOTHING;"
   ].join('\n'));
 
   // Executa a limpeza e a criação do índice em comandos separados.
