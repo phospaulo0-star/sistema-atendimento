@@ -2021,15 +2021,12 @@ function montarRotasPertencesVisitas(config) {
 
   async function atualizarFechamentoAutomaticoVisitas(client) {
     const hoje = hojeCampoGrande();
-    const hora = new Intl.DateTimeFormat('en-GB',{timeZone:'America/Campo_Grande',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
+    // O dia de visitas só é encerrado pelo botão explícito "Fechar visitas do dia".
+    // Fechar uma lista individual deve apenas abrir a próxima lista do mesmo dia.
     await client.query("INSERT INTO pv_visit_days(visit_day,status) VALUES ($1,'open') ON CONFLICT (visit_day) DO NOTHING",[hoje]);
-    if (hora >= '12:00') {
-      await client.query("UPDATE pv_visit_lists SET status='closed',closed_at=COALESCE(closed_at,NOW()) WHERE visit_day=$1 AND status='open' AND EXISTS (SELECT 1 FROM pv_visit_days d WHERE d.visit_day=$1 AND d.status='open' AND d.reopened_at IS NULL)",[hoje]);
-      await client.query("UPDATE pv_visit_days SET status='closed',closed_at=COALESCE(closed_at,NOW()) WHERE visit_day=$1 AND status='open' AND reopened_at IS NULL",[hoje]);
-    }
     const day = await client.query("SELECT status,reopened_at FROM pv_visit_days WHERE visit_day=$1",[hoje]);
     if (day.rows[0] && day.rows[0].status==='open') {
-      await client.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT $1,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=$1 AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=$1 AND status='open')",[hoje]);
+      await client.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT $1,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=$1 AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=$1 AND status='open') ON CONFLICT (visit_day) WHERE status='open' DO NOTHING",[hoje]);
     }
   }
 
