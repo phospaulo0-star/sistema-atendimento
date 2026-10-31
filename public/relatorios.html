@@ -570,7 +570,7 @@ body.preview-mode #previewContent .material-carga-tabela td:first-child { text-a
   <div class="toolbar" style="margin-top:8px"><button type="button" class="primary" onclick="adicionarLinhaEscalaNoturna()">＋ ADICIONAR TURNO</button></div>
   <textarea id="s10" data-section="11 – ESCALA NOTURNA (MONITORAMENTO)" rows="3" style="display:none" aria-hidden="true"></textarea>
 </section>
-<section class="field"><label for="s11">12 – EXPEDIENTE</label><p class="small">O conteúdo começa com o Item 12 do relatório anterior da mesma equipe. Edite, corrija, acrescente ou remova informações conforme necessário; o relatório anterior permanece preservado no histórico.</p><textarea id="s11" data-section="12 – EXPEDIENTE" rows="3" placeholder="Informações do expediente..."></textarea></section>
+<section class="field item12-field"><label>12 – EXPEDIENTE</label><p class="small">Marque os nomes que devem aparecer em cada setor. Você pode cadastrar nomes adicionais e criar novos setores. Os nomes selecionados ficam gravados no relatório.</p><div id="item12Setores"></div><div class="toolbar no-print" style="margin:10px 0"><input id="item12NovoSetor" type="text" placeholder="Nome do novo setor" style="max-width:260px;padding:9px;border:1px solid #bbc3cc;border-radius:6px"><button type="button" class="primary" onclick="adicionarSetorItem12()">＋ CADASTRAR SETOR</button></div><textarea id="s11" data-section="12 – EXPEDIENTE" rows="3" placeholder="Informações do expediente..." style="display:none" aria-hidden="true"></textarea></section>
 <section class="field custodia-hospitalar-field">
   <label>13 – CUSTÓDIA HOSPITALAR</label>
   <p class="small">Inclua quantos registros forem necessários. Selecione um servidor da lista do Item 05 ou digite manualmente; cada registro tem complemento próprio. Excluir aqui não remove o nome da lista compartilhada.</p>
@@ -1137,7 +1137,111 @@ function preencherViaturas(){
  if(!viaturas.length)viaturas=VIATURAS_PADRAO.map(r=>({...r}));
  renderViaturas();sincronizarViaturas();
 }
-function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});if(typeof carregarAutorizacoesCumpridas==='function')carregarAutorizacoesCumpridas($('s29').value);carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof atualizarItem40==='function')atualizarItem40();if(typeof renderListaTroca==='function')renderListaTroca();if(typeof carregarLicencaJudicial==='function')carregarLicencaJudicial($('s27').value);if(typeof carregarRetornoLicencaJudicial==='function')carregarRetornoLicencaJudicial($('s28a').value);if(typeof carregarHospitalizados==='function'){carregarHospitalizados('hospitalizado',$('s24').value);carregarHospitalizados('confirmar',$('s24a').value)}if(typeof carregarObitos==='function')carregarObitos($('s26').value);if(typeof carregarTemporaria==='function'){carregarTemporaria($('s28').value,false);carregarTemporaria($('s29a').value,true);renderLicencaTemporaria();renderRetornoTemporaria();renderVisualTemporaria()}if(typeof carregarItem36DoTexto==='function')carregarItem36DoTexto($('s35').value);if(typeof carregarItem37DoTexto==='function')carregarItem37DoTexto($('s36').value);if(typeof carregarItem38DoTexto==='function')carregarItem38DoTexto($('s37').value);if(typeof carregarItem39DoTexto==='function')carregarItem39DoTexto($('s38').value);if(typeof lerDocumentosManuaisItem35==='function'){lerDocumentosManuaisItem35();renderEditorItem35()}[['assinaturaNomeInput','assinaturaNomeData'],['assinaturaFuncaoInput','assinaturaFuncaoData'],['assinaturaUnidadeInput','assinaturaUnidadeData'],['assinaturaMatriculaInput','assinaturaMatriculaData'],['passaNomeInput','passaNomeData'],['passaMatriculaInput','passaMatriculaData'],['recebeNomeAssInput','recebeNomeAssData'],['recebeMatriculaInput','recebeMatriculaData']].forEach(([vis,data])=>{if($(vis)&&$(data))$(vis).value=$(data).value||''});if(typeof restaurarDadosItem40==='function')restaurarDadosItem40();if(typeof instalarCamposAssinatura==='function')instalarCamposAssinatura();if(typeof atualizarItem40==='function')atualizarItem40()}
+
+// Item 12 — expediente por setores, com seleção múltipla e cadastro personalizado.
+const ITEM12_PADRAO = [
+ {name:'Diretor da Unidade',names:['PP Marcos Moisés de Santana Junior']},
+ {name:'Diretor Adjunto',names:['PP Odair']},
+ {name:'Secretária Diretor da Unidade',names:[]},
+ {name:'Chefe de Segurança',names:[]},
+ {name:'Chefe de Disciplina',names:['PP Fúlvio']},
+ {name:'Chefe de Vigilância',names:['PP Lafrank']},
+ {name:'Chefe de Setor de Trabalho',names:['PP Giorgio']},
+ {name:'Auxiliares do Trabalho',names:['PP Rogerio','PP Belit']},
+ {name:'Setor Jurídico',names:['PP Arielly','PP Saturnina','PP Josiane']},
+ {name:'Setor Comissão Disciplinar',names:['PP Deja ir']},
+ {name:'Chefe Setor ADM',names:['PP Pompeu']},
+ {name:'Auxiliares do Setor ADM',names:['PP João Bonfim']},
+ {name:'Setor de Identificação',names:[]},
+ {name:'Manutenção',names:['PP Nobre']},
+ {name:'Psicossocial',names:['PP Lucinéia']},
+ {name:'Educação',names:['PP Gisele']},
+ {name:'Médico',names:[]},
+ {name:'Setor de Saúde',names:['Enfermeira Dayana']},
+ {name:'Cirurgião Dentista',names:['Dr. Guilherme']},
+ {name:'Auxiliar de Dentista',names:[]},
+ {name:'Enfermaria',names:[]},
+ {name:'Motorista da UP',names:['PP Sérgio']},
+ {name:'Horta',names:[]},
+ {name:'Projeto Revitalizando',names:[]},
+ {name:'Manutenção Escolas',names:['PP Éder','PP Amorim']},
+ {name:'Padaria',names:[]}
+];
+let item12Setores = [];
+let item12Selecionados = {};
+function item12Chave(){return 'cpaig_item12_setores_'+String(me?.team||'geral').toUpperCase();}
+function item12Esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function item12Normalizar(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR');}
+function carregarCadastroItem12(){
+ let salvos=null;try{salvos=JSON.parse(localStorage.getItem(item12Chave())||'null')}catch{}
+ item12Setores=Array.isArray(salvos)&&salvos.length?salvos:ITEM12_PADRAO.map(x=>({name:x.name,names:[...x.names]}));
+ item12Setores.forEach(s=>{if(!Array.isArray(s.names))s.names=[];});
+}
+function salvarCadastroItem12(){try{localStorage.setItem(item12Chave(),JSON.stringify(item12Setores));}catch{}}
+function lerTextoItem12(valor){
+ const selecionados={};
+ String(valor||'').split(/\n+/).forEach(linha=>{
+  const p=linha.indexOf(':');if(p<0)return;
+  const setor=linha.slice(0,p).trim(),resto=linha.slice(p+1).trim().replace(/[;.]$/,'').trim();
+  if(!resto||/^N\/C\.?$/i.test(resto))return;
+  selecionados[item12Normalizar(setor)]=resto.split(/\s*,\s*|\s+e\s+/i).map(x=>x.trim()).filter(Boolean);
+ });
+ return selecionados;
+}
+function formatarNomesItem12(nomes){
+ const lista=nomes.map(x=>String(x||'').trim()).filter(Boolean);
+ if(!lista.length)return 'N/C';
+ if(lista.length===1)return lista[0];
+ return lista.slice(0,-1).join(', ')+' e '+lista[lista.length-1];
+}
+function sincronizarItem12(){
+ const linhas=item12Setores.map(setor=>{
+  const nomes=item12Selecionados[item12Normalizar(setor.name)]||[];
+  return setor.name+': '+formatarNomesItem12(nomes)+';';
+ });
+ const campo=$('s11');if(!campo)return;
+ campo.value=linhas.join('\n');
+ campo.dispatchEvent(new Event('input',{bubbles:true}));
+ campo.dispatchEvent(new Event('change',{bubbles:true}));
+}
+function renderItem12(){
+ const box=$('item12Setores');if(!box)return;
+ box.innerHTML='';
+ item12Setores.forEach((setor,indice)=>{
+  const card=document.createElement('div');card.style.cssText='border:1px solid #d7dce2;border-radius:7px;padding:10px;margin:8px 0;background:#fff';
+  const titulo=document.createElement('strong');titulo.textContent=setor.name;card.appendChild(titulo);
+  const nomes=[...new Set(setor.names||[])];
+  const selecionados=item12Selecionados[item12Normalizar(setor.name)]||[];
+  nomes.forEach(nome=>{
+   const linha=document.createElement('label');linha.style.cssText='display:flex;align-items:center;gap:8px;margin:7px 0;font-weight:normal';
+   const cb=document.createElement('input');cb.type='checkbox';cb.checked=selecionados.some(x=>item12Normalizar(x)===item12Normalizar(nome));cb.disabled=readOnly||(!canWork&&!podeEditarRelatorioAtual());
+   cb.addEventListener('change',()=>{let atual=item12Selecionados[item12Normalizar(setor.name)]||[];atual=atual.filter(x=>item12Normalizar(x)!==item12Normalizar(nome));if(cb.checked)atual.push(nome);item12Selecionados[item12Normalizar(setor.name)]=atual;sincronizarItem12();});
+   linha.append(cb,document.createTextNode(nome));card.appendChild(linha);
+  });
+  const adicionar=document.createElement('div');adicionar.className='toolbar no-print';adicionar.style.cssText='gap:6px;margin-top:8px';
+  const input=document.createElement('input');input.type='text';input.placeholder='Adicionar nome neste setor';input.style.cssText='padding:8px;border:1px solid #bbc3cc;border-radius:6px;max-width:260px';
+  const btn=document.createElement('button');btn.type='button';btn.textContent='＋ ADICIONAR NOME';btn.disabled=readOnly||(!canWork&&!podeEditarRelatorioAtual());
+  btn.addEventListener('click',()=>{const nome=input.value.trim();if(!nome)return;if(!setor.names.some(x=>item12Normalizar(x)===item12Normalizar(nome)))setor.names.push(nome);const atual=item12Selecionados[item12Normalizar(setor.name)]||[];if(!atual.some(x=>item12Normalizar(x)===item12Normalizar(nome)))atual.push(nome);item12Selecionados[item12Normalizar(setor.name)]=atual;salvarCadastroItem12();sincronizarItem12();renderItem12();});
+  input.disabled=btn.disabled;adicionar.append(input,btn);card.appendChild(adicionar);
+  if(!setor.names.length){const aviso=document.createElement('div');aviso.className='small';aviso.textContent='Nenhum nome cadastrado. O relatório mostrará N/C.';card.appendChild(aviso);}
+  box.appendChild(card);
+ });
+}
+function carregarItem12(valor){
+ carregarCadastroItem12();
+ item12Selecionados=lerTextoItem12(valor);
+ // Mantém no cadastro nomes antigos que já estejam gravados no relatório.
+ item12Setores.forEach(setor=>{const nomes=item12Selecionados[item12Normalizar(setor.name)]||[];nomes.forEach(nome=>{if(!setor.names.some(x=>item12Normalizar(x)===item12Normalizar(nome)))setor.names.push(nome);});});
+ renderItem12();
+}
+function adicionarSetorItem12(){
+ const input=$('item12NovoSetor'),nome=String(input?.value||'').trim();if(!nome)return;
+ if(item12Setores.some(x=>item12Normalizar(x.name)===item12Normalizar(nome))){alert('Esse setor já está cadastrado.');return;}
+ item12Setores.push({name:nome,names:[]});item12Selecionados[item12Normalizar(nome)]=[];
+ salvarCadastroItem12();if(input)input.value='';renderItem12();sincronizarItem12();
+}
+
+function preencherContent(obj){document.querySelectorAll('[data-section]').forEach(el=>{const secao=el.dataset.section;let valor=(obj||{})[secao];if(secao==='03 – TRANSPORTE DE SERVIDORES'&&(!String(valor??'').trim()||/^N\/C\.?$/i.test(String(valor).trim())))valor='SEM ALTERAÇÃO.';el.value=(valor!==undefined&&valor!==null&&String(valor).trim()!=='')?valor:(PADROES_RELATORIO[secao]||'')});if(typeof carregarItem12==='function')carregarItem12($('s11')?.value||'');if(typeof carregarAutorizacoesCumpridas==='function')carregarAutorizacoesCumpridas($('s29').value);carregarEquipe02($('s1').value);carregarEscalaDiurna($('s9').value);carregarEscalaNoturna($('s10').value);preencherCamposReforco();preencherCamposCustodia();preencherMaterialCarga();preencherViaturas();lerItem01DoTexto();if(typeof atualizarItem40==='function')atualizarItem40();if(typeof renderListaTroca==='function')renderListaTroca();if(typeof carregarLicencaJudicial==='function')carregarLicencaJudicial($('s27').value);if(typeof carregarRetornoLicencaJudicial==='function')carregarRetornoLicencaJudicial($('s28a').value);if(typeof carregarHospitalizados==='function'){carregarHospitalizados('hospitalizado',$('s24').value);carregarHospitalizados('confirmar',$('s24a').value)}if(typeof carregarObitos==='function')carregarObitos($('s26').value);if(typeof carregarTemporaria==='function'){carregarTemporaria($('s28').value,false);carregarTemporaria($('s29a').value,true);renderLicencaTemporaria();renderRetornoTemporaria();renderVisualTemporaria()}if(typeof carregarItem36DoTexto==='function')carregarItem36DoTexto($('s35').value);if(typeof carregarItem37DoTexto==='function')carregarItem37DoTexto($('s36').value);if(typeof carregarItem38DoTexto==='function')carregarItem38DoTexto($('s37').value);if(typeof carregarItem39DoTexto==='function')carregarItem39DoTexto($('s38').value);if(typeof lerDocumentosManuaisItem35==='function'){lerDocumentosManuaisItem35();renderEditorItem35()}[['assinaturaNomeInput','assinaturaNomeData'],['assinaturaFuncaoInput','assinaturaFuncaoData'],['assinaturaUnidadeInput','assinaturaUnidadeData'],['assinaturaMatriculaInput','assinaturaMatriculaData'],['passaNomeInput','passaNomeData'],['passaMatriculaInput','passaMatriculaData'],['recebeNomeAssInput','recebeNomeAssData'],['recebeMatriculaInput','recebeMatriculaData']].forEach(([vis,data])=>{if($(vis)&&$(data))$(vis).value=$(data).value||''});if(typeof restaurarDadosItem40==='function')restaurarDadosItem40();if(typeof instalarCamposAssinatura==='function')instalarCamposAssinatura();if(typeof atualizarItem40==='function')atualizarItem40()}
 function lerItem01DoTexto(){const texto=$('s0').value||'';let recebe='',entrega='',quantidade='';const extras=[];texto.split('\n').forEach(linha=>{const m1=linha.match(/^\s*QUEM RECEBE O PLANTÃO:\s*(.*)$/i);const m2=linha.match(/^\s*QUEM ENTREGA O PLANTÃO:\s*(.*)$/i);const mq=linha.match(/^\s*QUANTIDADE_CUSTODIADOS:\s*(\d*)\s*$/i);if(m1)recebe=m1[1].trim();else if(m2)entrega=m2[1].trim();else if(mq)quantidade=mq[1];else if(linha.trim())extras.push(linha)});$('recebePlantao').dataset.pendingName=recebe;$('entregaPlantao').dataset.pendingName=entrega;$('quantidadeCustodiados').value=quantidade;$('s0Extra').value=extras.join('\n');atualizarQuantidadeExtenso();aplicarSelecoesItem01()}
 function aplicarSelecoesItem01(){for(const id of ['recebePlantao','entregaPlantao']){const el=$(id);const pending=el.dataset.pendingName||'';if(pending&&![...el.options].some(o=>o.value===pending)){const op=document.createElement('option');op.value=pending;op.textContent=pending+' (nome salvo anteriormente)';el.appendChild(op)}if(pending)el.value=pending;delete el.dataset.pendingName}}
 function numeroPorExtenso(n){n=Number(n);if(!Number.isInteger(n)||n<0||n>999999999)return '';if(n===0)return 'zero';const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove'];const teen=['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];function a999(x){if(x===0)return '';if(x===100)return 'cem';if(x<10)return u[x];if(x<20)return teen[x-10];if(x<100)return d[Math.floor(x/10)]+(x%10?' e '+u[x%10]:'');return c[Math.floor(x/100)]+(x%100?' e '+a999(x%100):'')}const grupos=[];let x=n;while(x>0){grupos.unshift(x%1000);x=Math.floor(x/1000)}const partes=[];for(let i=0;i<grupos.length;i++){const g=grupos[i];if(!g)continue;const ordem=grupos.length-1-i;let parte=a999(g);if(ordem===1)parte=g===1?'mil':parte+' mil';else if(ordem===2)parte=g===1?'um milhão':parte+' milhões';else if(ordem===3)parte=g===1?'um bilhão':parte+' bilhões';partes.push(parte)}return partes.join(', ')}
