@@ -1267,15 +1267,16 @@ const items=Array.isArray(data.items)?data.items:[];
 localStorage.setItem(STORAGE_BASE_EXCEL,JSON.stringify(items));
 preencherPavilhoesImpressao();
 return true;
-}catch(e){console.warn("Base compartilhada indispon&#xED;vel na Mesa:",e);return false;}
+}catch(e){console.warn("Base compartilhada indisponível na Mesa:",e);return false;}
 }
 async function sincronizarAtendimentosMesa(){
 try{
 const resp=await fetch("/api/mesa/attendances",{credentials:"same-origin",cache:"no-store"});
 if(!resp.ok)return false;const data=await resp.json();
 const locais=new Map();[...pendentes,...historico,...arquivo].forEach(x=>{if(x&&x.recordId)locais.set(String(x.recordId),x)});
-const central=(data.attendances||[]).map(x=>({...locais.get(String(x.recordId)),...x,recordId:String(x.recordId)}));
-const ids=new Set(central.map(x=>String(x.recordId)));
+const excluidos=new Set((data.deletedRecordIds||[]).map(id=>String(id)));
+const central=(data.attendances||[]).filter(x=>!excluidos.has(String(x.recordId))).map(x=>({...locais.get(String(x.recordId)),...x,recordId:String(x.recordId)}));
+const ids=new Set([...central.map(x=>String(x.recordId)),...excluidos]);
 const apenasLocal=[...locais.values()].filter(x=>!ids.has(String(x.recordId)));
 pendentes=central.filter(x=>x.status==="aguardando_mesa").map(x=>({...x,status:"aguardando_recebimento"}));
 historico=central.filter(x=>["recebido"].includes(x.status));
@@ -1287,7 +1288,7 @@ else historico.push(x);
 });
 pendentes=pendentes.filter(x=>!estaRecusadoLocalmente(x.recordId));
 salvarTudo();renderPendentes();renderHistorico();renderGuardados();return true;
-}catch(e){console.warn("Hist&#xF3;rico central da Mesa indispon&#xED;vel:",e);return false;}
+}catch(e){console.warn("Histórico central da Mesa indisponível:",e);return false;}
 }
 function atualizarStatusCentralMesa(registro,status){
 if(!registro||!registro.recordId)return;
@@ -2109,7 +2110,7 @@ historico.length;
 if(!historico.length){
 container.innerHTML=`
       <div class="empty">
-        Nenhum atendimento no hist&#xF3;rico.
+        Nenhum atendimento no histórico.
       </div>
     `;
 return;
@@ -2495,14 +2496,14 @@ registro.recordId
 );
 if(!elegiveis.length){
 mostrarToast(
-"N&#xE3;o h&#xE1; atendimentos recebidos no hist&#xF3;rico para guardar.",
+"N&#xE3;o h&#xE1; atendimentos recebidos no histórico para guardar.",
 "warning"
 );
 return;
 }
 if(!confirm(
 "Deseja guardar todos os " + elegiveis.length +
-" atendimentos recebidos do hist&#xF3;rico da Mesa? Eles ser&#xE3;o movidos para Atendimentos Guardados."
+" atendimentos recebidos do histórico da Mesa? Eles ser&#xE3;o movidos para Atendimentos Guardados."
 )){
 return;
 }
@@ -2526,75 +2527,50 @@ elegiveis.length + " atendimentos guardados.",
 "success"
 );
 }
-function guardarAtendimento(recordId){
-const indice=
-historico.findIndex(
-item=>
-String(item.recordId)===
-String(recordId)
-);
-if(indice<0){
+async function guardarAtendimento(recordId){
+const indice=historico.findIndex(item=>String(item.recordId)===String(recordId));
+if(indice<0)return;
+const registro=historico[indice];
+if(registro.status!=="recebido"){
+mostrarToast("Somente atendimentos recebidos podem ser guardados.","warning");
 return;
 }
-const registro=
-historico[indice];
-if(
-registro.status!==
-"recebido"
-){
-mostrarToast(
-"Somente atendimentos recebidos podem ser guardados.",
-"warning"
-);
-return;
+try{
+const resposta=await fetch("/api/mesa/attendances/"+encodeURIComponent(recordId)+"/archive",{
+method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({})
+});
+const dados=await resposta.json().catch(()=>({}));
+if(!resposta.ok)throw new Error(dados.message||"Não foi possível guardar o atendimento no servidor.");
+const atualizado={...registro,status:"guardado",guardadoEm:dados.guardadoEm||new Date().toISOString()};
+historico.splice(indice,1);
+arquivo=arquivo.filter(item=>String(item.recordId)!==String(recordId));
+arquivo.push(atualizado);
+salvarTudo();renderHistorico();renderGuardados();
+mostrarToast("Atendimento guardado e confirmado pelo servidor.","success");
+}catch(erro){
+console.error("Falha ao guardar atendimento:",erro);
+mostrarToast(erro.message||"Falha ao guardar. Tente novamente.","error");
 }
-registro.status=
-"guardado";
-registro.guardadoEm=
-new Date().toISOString();
-atualizarStatusCentralMesa(registro,"guardado");
-historico.splice(
-indice,
-1
-);
-arquivo.push(
-registro
-);
-salvarTudo();
-renderHistorico();
-renderGuardados();
-mostrarToast(
-"Atendimento guardado.",
-"success"
-);
 }
-function excluirHistorico(recordId){
-const indice=
-historico.findIndex(
-item=>
-String(item.recordId)===
-String(recordId)
-);
-if(indice<0){
-return;
+async function excluirHistorico(recordId){
+const indice=historico.findIndex(item=>String(item.recordId)===String(recordId));
+if(indice<0)return;
+if(!confirm("Deseja realmente retirar este atendimento do histórico da Mesa? O registro será preservado no banco de dados para consulta administrativa e backups."))return;
+try{
+const resposta=await fetch("/api/mesa/attendances/"+encodeURIComponent(recordId)+"/hide",{
+method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({})
+});
+const dados=await resposta.json().catch(()=>({}));
+if(!resposta.ok)throw new Error(dados.message||"Não foi possível excluir o atendimento do histórico.");
+historico=historico.filter(item=>String(item.recordId)!==String(recordId));
+pendentes=pendentes.filter(item=>String(item.recordId)!==String(recordId));
+arquivo=arquivo.filter(item=>String(item.recordId)!==String(recordId));
+salvarTudo();renderPendentes();renderHistorico();renderGuardados();
+mostrarToast("Atendimento retirado do histórico da Mesa. Registro preservado para consulta e backup.","success");
+}catch(erro){
+console.error("Falha ao excluir atendimento do histórico:",erro);
+mostrarToast(erro.message||"Falha ao excluir. Tente novamente.","error");
 }
-if(
-!confirm(
-"Deseja realmente excluir este atendimento do hist&#xF3;rico?"
-)
-){
-return;
-}
-historico.splice(
-indice,
-1
-);
-salvarTudo();
-renderHistorico();
-mostrarToast(
-"Atendimento exclu&#xED;do do hist&#xF3;rico.",
-"success"
-);
 }
 function abrirGuardados(){
 renderGuardados();
