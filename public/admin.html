@@ -60,8 +60,8 @@
 <div class="stat"><span>Entradas</span><strong id="stEntries">0</strong><small>Item 31</small></div>
 <div class="stat"><span>Saídas</span><strong id="stExits">0</strong><small>Item 32</small></div>
 <div class="stat"><span>Saldo de movimentação</span><strong id="stBalance">0</strong><small>Entradas menos saídas</small></div>
-<div class="stat"><span>População inicial</span><strong id="stInitial">—</strong><small>Primeiro relatório do período</small></div>
-<div class="stat"><span>População final</span><strong id="stFinal">—</strong><small>Último relatório do período</small></div>
+<div class="stat"><span>População inicial</span><strong id="stInitial">—</strong><small>Item 01 do primeiro relatório do período</small></div>
+<div class="stat"><span>População final</span><strong id="stFinal">—</strong><small>FINAL / PASSO do último relatório do período (Item 40)</small></div>
 <div class="stat"><span>Hospitalizados</span><strong id="stHospital">0</strong><small>Item 25</small></div>
 <div class="stat"><span>Óbitos</span><strong id="stDeaths">0</strong><small>Item 27</small></div>
 </section>
@@ -117,6 +117,17 @@ function contarItemStats(r,chave,tipo){
  return linhasStats(raw).length;
 }
 function numeroItem01Stats(r){const raw=valorItemStats(r,'01 – RECEBIMENTO');const m=raw.match(/QUANTIDADE_CUSTODIADOS:\s*(\d+)/i);return m?Number(m[1]):null}
+function numeroFinalPassoStats(r){
+ const raw=valorItemStats(r,'40 – ENCERRAMENTO');
+ if(!raw)return null;
+ const padroes=[
+  /efetivo carcerário de\\s*(\\d+)\\s*\\(/i,
+  /efetivo carcerário de\\s*(\\d+)\\b/i,
+  /FINAL\\s*\\/\\s*PASSO\\s*:\\s*(\\d+)/i
+ ];
+ for(const p of padroes){const m=raw.match(p);if(m)return Number(m[1]);}
+ return null;
+}
 function somarStats(rs,fn){return rs.reduce((n,r)=>n+fn(r),0)}
 function calcularDadosStats(rs){
  const ordered=[...rs].sort((a,b)=>String(a.report_date).localeCompare(String(b.report_date))||String(a.team).localeCompare(String(b.team)));
@@ -130,9 +141,10 @@ function calcularDadosStats(rs){
  'Saídas temporárias':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.temporarias,'tab')),
  'Autorizações cumpridas':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.autorizacoes,'autorizacoes'))
  };
+ // População inicial: quantidade informada no Item 01 do primeiro relatório do período.
  const inicial=ordered.length?numeroItem01Stats(ordered[0]):null;
- let final=null;
- if(ordered.length){const last=ordered[ordered.length-1],ini=numeroItem01Stats(last);if(ini!==null)final=ini+contarItemStats(last,CHAVES_STATS.entradas,'json')-contarItemStats(last,CHAVES_STATS.saidas,'json');}
+ // População final: quantitativo FINAL / PASSO gravado no Item 40 do último relatório do período.
+ const final=ordered.length?numeroFinalPassoStats(ordered[ordered.length-1]):null;
  const teams=['A','B','C','D'].map(team=>{const a=ordered.filter(r=>r.team===team),e=somarStats(a,r=>contarItemStats(r,CHAVES_STATS.entradas,'json')),s=somarStats(a,r=>contarItemStats(r,CHAVES_STATS.saidas,'json'));return {team,reports:a.length,entries:e,exits:s,balance:e-s}});
  return {counts,inicial,final,teams,entries:counts.Entradas,exits:counts.Saídas};
 }
