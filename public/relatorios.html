@@ -1157,25 +1157,27 @@ function preencherViaturas(){
 const ITEM12_PADRAO = [
  {name:'Diretor da Unidade',names:['PP Marcos Moisés de Santana Junior']},
  {name:'Diretor Adjunto',names:['PP Odair']},
- {name:'Secretária Diretor da Unidade',names:[]},
- {name:'Chefe de Segurança',names:[]},
+ {name:'Secretária Diretor da Unidade',names:['PP Fabiana']},
+ {name:'Chefe de Segurança',names:['PP Henrique']},
  {name:'Chefe de Disciplina',names:['PP Fúlvio']},
  {name:'Chefe de Vigilância',names:['PP Lafrank']},
  {name:'Chefe de Setor de Trabalho',names:['PP Giorgio']},
  {name:'Auxiliares do Trabalho',names:['PP Rogerio','PP Belit']},
- {name:'Setor Jurídico',names:['PP Arielly','PP Saturnina','PP Josiane']},
- {name:'Setor Comissão Disciplinar',names:['PP Deja ir']},
+ {name:'Chefe do Setor Jurídico',names:['PP Arielly']},
+ {name:'Setor Jurídico',names:['PP Saturnina','PP Josiane','PP Miguel']},
+ {name:'Chefe do Setor de Comissão Disciplinar',names:['PP Aurora']},
+ {name:'Setor Comissão Disciplinar',names:['PP Dejair']},
  {name:'Chefe Setor ADM',names:['PP Pompeu']},
  {name:'Auxiliares do Setor ADM',names:['PP João Bonfim']},
  {name:'Setor de Identificação',names:[]},
  {name:'Manutenção',names:['PP Nobre']},
- {name:'Psicossocial',names:['PP Lucinéia']},
+ {name:'Psicossocial',names:['PP Lucinéia','PP Rosanir']},
  {name:'Educação',names:['PP Gisele']},
- {name:'Médico',names:[]},
+ {name:'Médico',names:['Dr. Adriano']},
  {name:'Setor de Saúde',names:['Enfermeira Dayana']},
  {name:'Cirurgião Dentista',names:['Dr. Guilherme']},
- {name:'Auxiliar de Dentista',names:[]},
- {name:'Enfermaria',names:[]},
+ {name:'Auxiliar de Dentista',names:['Anne']},
+ {name:'Enfermaria',names:['Téc. Enfermagem Tânia']},
  {name:'Motorista da UP',names:['PP Sérgio']},
  {name:'Horta',names:[]},
  {name:'Projeto Revitalizando',names:[]},
@@ -1191,6 +1193,21 @@ function carregarCadastroItem12(){
  let salvos=null;try{salvos=JSON.parse(localStorage.getItem(item12Chave())||'null')}catch{}
  item12Setores=Array.isArray(salvos)&&salvos.length?salvos:ITEM12_PADRAO.map(x=>({name:x.name,names:[...x.names]}));
  item12Setores.forEach(s=>{if(!Array.isArray(s.names))s.names=[];});
+ // Mescla as opções novas sem apagar nomes personalizados já cadastrados.
+ ITEM12_PADRAO.forEach(padrao=>{
+  let setor=item12Setores.find(s=>item12Normalizar(s.name)===item12Normalizar(padrao.name));
+  if(!setor){setor={name:padrao.name,names:[]};item12Setores.push(setor);}
+  padrao.names.forEach(nome=>{if(!setor.names.some(x=>item12Normalizar(x)===item12Normalizar(nome)))setor.names.push(nome);});
+ });
+ // Corrige opções antigas nos cadastros locais existentes.
+ const juridico=item12Setores.find(s=>item12Normalizar(s.name)==='setor juridico');
+ if(juridico)juridico.names=juridico.names.filter(n=>item12Normalizar(n)!=='pp arielly');
+ const comissao=item12Setores.find(s=>item12Normalizar(s.name)==='setor comissao disciplinar');
+ if(comissao){
+  comissao.names=comissao.names.filter(n=>!['pp aurora','pp deja ir'].includes(item12Normalizar(n)));
+  if(!comissao.names.some(n=>item12Normalizar(n)==='pp dejair'))comissao.names.push('PP Dejair');
+ }
+ salvarCadastroItem12();
 }
 function salvarCadastroItem12(){try{localStorage.setItem(item12Chave(),JSON.stringify(item12Setores));}catch{}}
 function lerTextoItem12(valor){
@@ -1246,8 +1263,25 @@ function renderItem12(){
 }function carregarItem12(valor){
  carregarCadastroItem12();
  item12Selecionados=lerTextoItem12(valor);
- // Mantém no cadastro nomes antigos que já estejam gravados no relatório.
+ // Migra seleções antigas para os setores corrigidos, sem perder a seleção do relatório.
+ const mover=(origem,destino,nomeAntigo,nomeNovo=nomeAntigo)=>{
+  const o=item12Normalizar(origem),d=item12Normalizar(destino);
+  const lista=item12Selecionados[o]||[];
+  const encontrados=lista.filter(n=>item12Normalizar(n)===item12Normalizar(nomeAntigo));
+  if(encontrados.length){
+   item12Selecionados[o]=lista.filter(n=>item12Normalizar(n)!==item12Normalizar(nomeAntigo));
+   const alvo=item12Selecionados[d]||[];
+   if(!alvo.some(n=>item12Normalizar(n)===item12Normalizar(nomeNovo)))alvo.push(nomeNovo);
+   item12Selecionados[d]=alvo;
+  }
+ };
+ mover('Setor Jurídico','Chefe do Setor Jurídico','PP Arielly');
+ mover('Setor Comissão Disciplinar','Chefe do Setor de Comissão Disciplinar','PP Aurora');
+ const comissao=item12Normalizar('Setor Comissão Disciplinar');
+ if(item12Selecionados[comissao])item12Selecionados[comissao]=item12Selecionados[comissao].map(n=>item12Normalizar(n)==='pp deja ir'?'PP Dejair':n);
+ // Mantém nomes personalizados já gravados no relatório.
  item12Setores.forEach(setor=>{const nomes=item12Selecionados[item12Normalizar(setor.name)]||[];nomes.forEach(nome=>{if(!setor.names.some(x=>item12Normalizar(x)===item12Normalizar(nome)))setor.names.push(nome);});});
+ salvarCadastroItem12();
  renderItem12();
 }
 function adicionarSetorItem12(){
