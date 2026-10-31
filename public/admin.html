@@ -121,9 +121,9 @@ function numeroFinalPassoStats(r){
  const raw=valorItemStats(r,'40 – ENCERRAMENTO');
  if(!raw)return null;
  const padroes=[
-  /efetivo carcerário de\\s*(\\d+)\\s*\\(/i,
-  /efetivo carcerário de\\s*(\\d+)\\b/i,
-  /FINAL\\s*\\/\\s*PASSO\\s*:\\s*(\\d+)/i
+  /efetivo carcerário de\s*(\d+)\s*\(/i,
+  /efetivo carcerário de\s*(\d+)\b/i,
+  /FINAL\s*\/\s*PASSO\s*:\s*(\d+)/i
  ];
  for(const p of padroes){const m=raw.match(p);if(m)return Number(m[1]);}
  return null;
