@@ -12,7 +12,7 @@
 .admin-area:hover{border-color:var(--gold);transform:translateY(-1px)}
 .admin-area strong{display:block;font-size:15px;margin-bottom:6px}.admin-area small{display:block;color:var(--muted);font-weight:normal;line-height:1.4}
 .area-icon{font-size:24px;line-height:1}.view-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 16px}.view-heading h2{margin:0;font-size:20px}
-.stats-placeholder{padding:26px;border:1px dashed #c8cdd4;border-radius:10px;background:#fff;color:var(--muted)}
+.stats-placeholder{padding:26px;border:1px dashed #c8cdd4;border-radius:10px;background:#fff;color:var(--muted)}.stats-bars{display:grid;gap:12px}.stats-bar-row{display:grid;grid-template-columns:minmax(130px,1fr) 3fr 42px;gap:8px;align-items:center}.stats-bar-track{height:14px;background:#edf0f3;border-radius:10px;overflow:hidden}.stats-bar-fill{height:100%;background:#c7a84b;border-radius:10px}.stats-bar-value{text-align:right;font-weight:bold}.stats .stat strong{font-variant-numeric:tabular-nums}@media print{header,.toolbar,#message,.view-heading button,.view-section:not(.active),#statsFrom,#statsTo,#statsTeam,button{display:none!important}body{background:white}.panel,.stat{box-shadow:none;break-inside:avoid}}
 @media(max-width:650px){.admin-home{grid-template-columns:1fr}}@media(max-width:1000px){.form-grid{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}@media(max-width:600px){header{padding:16px}.form-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat strong{font-size:23px}.panel{padding:12px}}
 </style>
 </head>
@@ -47,14 +47,36 @@
 <section class="panel view-section" data-area="reportsView"><div class="view-heading"><h2>Relatórios de plantão — consulta administrativa</h2><button class="light" onclick="mostrarArea('homeView')">← VOLTAR AO PAINEL</button></div><div class="panel-title"><div><h2>Relatórios de plantão — consulta administrativa</h2><p>Consulta somente leitura dos relatórios das equipes A, B, C e D. As alterações são feitas pelos chefes e auxiliares da respectiva equipe.</p></div><button class="light" onclick="carregarRelatoriosPlantao()">ATUALIZAR RELATÓRIOS</button></div><div class="filters"><input id="searchShiftReports" placeholder="Buscar título ou equipe" oninput="renderRelatoriosPlantao()"><select id="filterShiftTeam" onchange="renderRelatoriosPlantao()"><option value="">Todas as equipes</option><option>A</option><option>B</option><option>C</option><option>D</option></select><select id="filterShiftStatus" onchange="renderRelatoriosPlantao()"><option value="">Todos os status</option><option value="aberto">Aberto</option><option value="encerrado">Encerrado</option></select></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Equipe / Turno</th><th>Relatório</th><th>Status</th><th>Última alteração</th><th>Consulta</th></tr></thead><tbody id="shiftReportsBody"><tr><td colspan="6">Carregando...</td></tr></tbody></table></div><div id="shiftReportDetail" class="panel" hidden></div></section>
 <div class="two-col view-section" data-area="auditView"><section class="panel"><div class="view-heading"><h2>Auditoria administrativa</h2><button class="light" onclick="mostrarArea('homeView')">← VOLTAR AO PAINEL</button></div><div class="panel-title"><div><h2>Auditoria administrativa</h2><p>Eventos recentes de contas, base e atendimentos.</p></div></div><div class="table-wrap"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr></thead><tbody id="eventsBody"><tr><td colspan="4">Carregando...</td></tr></tbody></table></div></section>
 <section class="panel"><div class="panel-title"><div><h2>Backup e manutenção</h2></div></div><p>O backup JSON contém contas sem hashes de senha, atendimentos, base de internos e auditoria. Os botões permitem baixar o Excel semanal total e cópias JSON. O agendamento automático semanal ainda precisa ser configurado e testado separadamente no computador escolhido para guardar os arquivos.</p><p class="muted">Recomendação: guarde cópias em local restrito e mantenha uma cópia adicional protegida. Não compartilhe backups por e-mail ou mensageiros sem autorização.</p><p class="muted">Os arquivos JSON e Excel baixados por estes botões não são criptografados. Eles contêm dados operacionais sensíveis; guarde-os em uma pasta com acesso restrito. Não considere a rotina semanal automática ativa até que o agendamento seja configurado e testado.</p><button class="primary" onclick="baixarBackup()">GERAR E BAIXAR CÓPIA</button></section></div>
-<section id="statisticsView" class="view-section"><div class="view-heading"><h2>Estatísticas e Movimentação Carcerária</h2><button class="light" onclick="mostrarArea('homeView')">← VOLTAR AO PAINEL</button></div><div class="stats-placeholder"><strong>Área em preparação.</strong><p>Esta seção será alimentada pelos relatórios CPAIG salvos e permitirá consultar entradas, saídas, população carcerária, licenças judiciais, saídas temporárias, óbitos, hospitalizações e autorizações cumpridas.</p><p>Os filtros por período e equipe, gráficos e exportações Excel/PDF serão implementados após a validação do formato dos dados históricos. O acesso será exclusivo do administrador.</p></div></section><footer class="footer">Sistema Atendimento CPAIG · Administração · <span id="version">—</span></footer>
+<section id="statisticsView" class="view-section"><div class="view-heading"><h2>Estatísticas e Movimentação Carcerária</h2><button class="light" onclick="mostrarArea('homeView')">← VOLTAR AO PAINEL</button></div><section class="panel">
+<div class="panel-title"><div><h2>Filtros da consulta histórica</h2><p>Os dados são lidos dos relatórios CPAIG já salvos no banco. Relatórios antigos e novos entram na mesma consulta.</p></div><button class="light" onclick="carregarEstatisticas()">ATUALIZAR ESTATÍSTICAS</button></div>
+<div class="filters" style="align-items:end">
+<label>Data inicial <input id="statsFrom" type="date"></label><label>Data final <input id="statsTo" type="date"></label>
+<label>Equipe <select id="statsTeam"><option value="">Todas as equipes</option><option value="A">Equipe A</option><option value="B">Equipe B</option><option value="C">Equipe C</option><option value="D">Equipe D</option></select></label>
+<button class="primary" onclick="aplicarFiltrosEstatisticas()">CONSULTAR</button><button class="light" onclick="limparFiltrosEstatisticas()">LIMPAR FILTROS</button>
+</div><p id="statsStatus" class="muted">Carregue os relatórios para visualizar os indicadores.</p>
+</section>
+<section class="stats">
+<div class="stat"><span>Relatórios no período</span><strong id="stReports">0</strong><small>Relatórios salvos</small></div>
+<div class="stat"><span>Entradas</span><strong id="stEntries">0</strong><small>Item 31</small></div>
+<div class="stat"><span>Saídas</span><strong id="stExits">0</strong><small>Item 32</small></div>
+<div class="stat"><span>Saldo de movimentação</span><strong id="stBalance">0</strong><small>Entradas menos saídas</small></div>
+<div class="stat"><span>População inicial</span><strong id="stInitial">—</strong><small>Primeiro relatório do período</small></div>
+<div class="stat"><span>População final</span><strong id="stFinal">—</strong><small>Último relatório do período</small></div>
+<div class="stat"><span>Hospitalizados</span><strong id="stHospital">0</strong><small>Item 25</small></div>
+<div class="stat"><span>Óbitos</span><strong id="stDeaths">0</strong><small>Item 27</small></div>
+</section>
+<div class="two-col">
+<section class="panel"><div class="panel-title"><div><h2>Indicadores por categoria</h2><p>Quantidade de registros encontrados nos itens dos relatórios.</p></div></div><div id="statsBars" class="stats-bars"></div></section>
+<section class="panel"><div class="panel-title"><div><h2>Resumo por equipe</h2></div></div><div class="table-wrap"><table><thead><tr><th>Equipe</th><th>Relatórios</th><th>Entradas</th><th>Saídas</th><th>Saldo</th></tr></thead><tbody id="statsTeamsBody"><tr><td colspan="5">Carregando...</td></tr></tbody></table></div></section>
+</div>
+<section class="panel"><div class="panel-title"><div><h2>Outros indicadores</h2></div><button class="primary" onclick="exportarEstatisticasExcel()">EXPORTAR EXCEL</button></div><div class="table-wrap"><table><thead><tr><th>Indicador</th><th>Item do relatório</th><th>Total</th></tr></thead><tbody id="statsOtherBody"></tbody></table></div><p class="muted">Para gerar PDF, use o botão “IMPRIMIR / SALVAR EM PDF” e escolha “Salvar como PDF” na janela de impressão.</p><button class="light" onclick="window.print()">IMPRIMIR / SALVAR EM PDF</button></section></section><footer class="footer">Sistema Atendimento CPAIG · Administração · <span id="version">—</span></footer>
 </main>
 <script>
 let me=null, users=[], attendances=[], events=[];
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
 function dt(v){if(!v)return '—';const d=new Date(v);return isNaN(d)?'—':d.toLocaleString('pt-BR')}
-function mostrarArea(id){document.querySelectorAll('[data-area],#homeView,#statisticsView').forEach(v=>v.classList.toggle('active',v.id===id||v.dataset.area===id));window.scrollTo({top:0,behavior:'smooth'});}
+function mostrarArea(id){document.querySelectorAll('[data-area],#homeView,#statisticsView').forEach(v=>v.classList.toggle('active',v.id===id||v.dataset.area===id));if(id==='statisticsView'&&!estatisticasRelatorios.length)carregarEstatisticas();window.scrollTo({top:0,behavior:'smooth'});}
 function statusMsg(text,type='info'){const m=$('message');m.textContent=text;m.className='status-msg show '+type;window.scrollTo({top:0,behavior:'smooth'})}
 async function api(url,options={}){const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...options,headers:{...(options.headers||{}),...(options.body?{'Content-Type':'application/json'}:{})}});let j={};try{j=await r.json()}catch{}if(r.status===401){location.replace('/login.html');throw new Error('Sessão encerrada.');}if(!r.ok||j.ok===false)throw new Error(j.message||'Falha na solicitação.');return j}
 async function validar(){try{const r=await api('/api/auth/me');me=r.user;if(me.role!=='admin'){location.replace(me.role==='mesa'?'/mesa.html':me.role==='pertences'?'/pertences.html':'/index.html');return false}$('currentUser').textContent=me.fullName+' ('+me.username+')';return true}catch(e){if(e.message!=='Sessão encerrada.')statusMsg(e.message);return false}}
@@ -77,6 +99,67 @@ async function carregarRelatoriosPlantao(){try{const j=await api('/api/admin/shi
 function renderRelatoriosPlantao(){if(!$('shiftReportsBody'))return;const q=($('searchShiftReports').value||'').toLocaleLowerCase('pt-BR');const team=$('filterShiftTeam').value;const status=$('filterShiftStatus').value;const rows=shiftReports.filter(r=>(!team||r.team===team)&&(!status||r.status===status)&&(!q||((r.title||'')+' '+r.team+' '+r.shiftName).toLocaleLowerCase('pt-BR').includes(q)));$('shiftReportsBody').innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.reportDate)}</td><td><strong>Equipe ${esc(r.team)}</strong><span class="sub">${esc(r.shiftName)}</span></td><td>${esc(r.title||'Relatório de plantão')}<span class="sub">Revisão ${r.revision}</span></td><td>${esc(r.status==='encerrado'?'ENCERRADO':'ABERTO')}</td><td>${esc(dt(r.updatedAt))}<span class="sub">${esc(r.updatedUsername||'')}</span></td><td><div class="actions"><button class="blue" onclick="consultarRelatorioPlantao('${esc(r.id)}')">CONSULTAR</button><button class="light" onclick="historicoRelatorioPlantao('${esc(r.id)}')">HISTÓRICO</button></div></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Nenhum relatório encontrado.</td></tr>'}
 async function consultarRelatorioPlantao(id){try{const r=shiftReports.find(x=>x.id===id);if(!r)return;const detail=$('shiftReportDetail');detail.hidden=false;detail.innerHTML=`<div class="panel-title"><h2>${esc(r.title||'Relatório de plantão')} — Equipe ${esc(r.team)}</h2><button class="light" onclick="$('shiftReportDetail').hidden=true">FECHAR</button></div><p><strong>Data:</strong> ${esc(r.reportDate)} &nbsp; <strong>Turno:</strong> ${esc(r.shiftName)} &nbsp; <strong>Status:</strong> ${esc(r.status)} &nbsp; <strong>Revisão:</strong> ${r.revision}</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font:14px Arial;line-height:1.5">${esc(Object.entries(r.content||{}).map(([k,v])=>k+'\n'+(v||'N/C')).join('\n\n'))}</pre>`;detail.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){statusMsg(e.message,'error')}}
 async function historicoRelatorioPlantao(id){try{const j=await api('/api/admin/shift-reports/'+encodeURIComponent(id)+'/history');const detail=$('shiftReportDetail');detail.hidden=false;detail.innerHTML=`<div class="panel-title"><h2>Histórico do relatório</h2><button class="light" onclick="$('shiftReportDetail').hidden=true">FECHAR</button></div>`+(j.history||[]).map(h=>`<div style="border-bottom:1px solid #ddd;padding:10px 0"><strong>${esc(h.action)} · revisão ${h.revision}</strong><div class="muted">${esc(h.full_name||h.username||'Usuário')} · ${esc(dt(h.created_at))}</div><details><summary>Conteúdo anterior e corrigido</summary><pre style="white-space:pre-wrap">${esc(JSON.stringify({anterior:h.previous_content,novo:h.new_content,detalhes:h.details},null,2))}</pre></details></div>`).join('')||'<p>Nenhum evento no histórico.</p>';detail.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){statusMsg(e.message,'error')}}
+let estatisticasRelatorios=[];
+const CHAVES_STATS={
+ entradas:'31 – ENTRADA DE CUSTODIADOS',saidas:'32 – SAÍDA DE CUSTODIADOS',
+ hospital:'25 – HOSPITALIZADO',hospitalConfirmar:'25.1 – HOSPITALIZADO A CONFIRMAR',
+ obitos:'27 – ÓBITO',licencas:'28 – LICENÇA JUDICIAL',
+ temporarias:'29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)',
+ autorizacoes:'30 – AUTORIZAÇÕES CUMPRIDAS'
+};
+function valorItemStats(r,chave){return String((r.content||{})[chave]??'').trim()}
+function linhasStats(v){if(!v||/^N\/C\.?$/i.test(v))return [];return v.split(/\r?\n/).map(x=>x.trim()).filter(x=>x&&!/^N\/C\.?$/i.test(x))}
+function contarItemStats(r,chave,tipo){
+ const raw=valorItemStats(r,chave);if(!raw||/^N\/C\.?$/i.test(raw))return 0;
+ if(tipo==='json'){try{const a=JSON.parse(raw);return Array.isArray(a)?a.filter(x=>x&&[x.nome,x.rgi,x.procedencia,x.documento].some(v=>String(v||'').trim())).length:0}catch{return 0}}
+ if(tipo==='autorizacoes')return linhasStats(raw).filter(x=>/[\p{L}]/u.test(x)).length;
+ if(tipo==='tab')return linhasStats(raw).filter(x=>x.split('\t').some(y=>y.trim())).length;
+ return linhasStats(raw).length;
+}
+function numeroItem01Stats(r){const raw=valorItemStats(r,'01 – RECEBIMENTO');const m=raw.match(/QUANTIDADE_CUSTODIADOS:\s*(\d+)/i);return m?Number(m[1]):null}
+function somarStats(rs,fn){return rs.reduce((n,r)=>n+fn(r),0)}
+function calcularDadosStats(rs){
+ const ordered=[...rs].sort((a,b)=>String(a.report_date).localeCompare(String(b.report_date))||String(a.team).localeCompare(String(b.team)));
+ const counts={
+ Entradas:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.entradas,'json')),
+ Saídas:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.saidas,'json')),
+ Hospitalizados:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.hospital,'tab')),
+ 'Hospitalizados a confirmar':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.hospitalConfirmar,'tab')),
+ Óbitos:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.obitos,'tab')),
+ 'Licenças judiciais':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.licencas,'tab')),
+ 'Saídas temporárias':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.temporarias,'tab')),
+ 'Autorizações cumpridas':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.autorizacoes,'autorizacoes'))
+ };
+ const inicial=ordered.length?numeroItem01Stats(ordered[0]):null;
+ let final=null;
+ if(ordered.length){const last=ordered[ordered.length-1],ini=numeroItem01Stats(last);if(ini!==null)final=ini+contarItemStats(last,CHAVES_STATS.entradas,'json')-contarItemStats(last,CHAVES_STATS.saidas,'json');}
+ const teams=['A','B','C','D'].map(team=>{const a=ordered.filter(r=>r.team===team),e=somarStats(a,r=>contarItemStats(r,CHAVES_STATS.entradas,'json')),s=somarStats(a,r=>contarItemStats(r,CHAVES_STATS.saidas,'json'));return {team,reports:a.length,entries:e,exits:s,balance:e-s}});
+ return {counts,inicial,final,teams,entries:counts.Entradas,exits:counts.Saídas};
+}
+function renderEstatisticas(rs){
+ const d=calcularDadosStats(rs),$s=id=>document.getElementById(id);
+ $s('stReports').textContent=rs.length;$s('stEntries').textContent=d.entries;$s('stExits').textContent=d.exits;$s('stBalance').textContent=d.entries-d.exits;
+ $s('stInitial').textContent=d.inicial===null?'—':d.inicial;$s('stFinal').textContent=d.final===null?'—':d.final;
+ $s('stHospital').textContent=d.counts.Hospitalizados;$s('stDeaths').textContent=d.counts.Óbitos;
+ const max=Math.max(1,...Object.values(d.counts));
+ $s('statsBars').innerHTML=Object.entries(d.counts).map(([k,v])=>'<div class="stats-bar-row"><strong>'+esc(k)+'</strong><div class="stats-bar-track"><div class="stats-bar-fill" style="width:'+(v/max*100)+'%"></div></div><span class="stats-bar-value">'+v+'</span></div>').join('');
+ $s('statsTeamsBody').innerHTML=d.teams.map(t=>'<tr><td>Equipe '+t.team+'</td><td>'+t.reports+'</td><td>'+t.entries+'</td><td>'+t.exits+'</td><td>'+t.balance+'</td></tr>').join('');
+ $s('statsOtherBody').innerHTML=[['Hospitalizados','Item 25',d.counts.Hospitalizados],['Hospitalizados a confirmar','Item 25.1',d.counts['Hospitalizados a confirmar']],['Óbitos','Item 27',d.counts.Óbitos],['Licenças judiciais','Item 28',d.counts['Licenças judiciais']],['Saídas temporárias','Item 29',d.counts['Saídas temporárias']],['Autorizações cumpridas','Item 30',d.counts['Autorizações cumpridas']]].map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+'</td></tr>').join('');
+ $s('statsStatus').textContent='Consulta concluída: '+rs.length+' relatório(s) histórico(s). Os itens sem registro ou marcados N/C não aumentam os totais.';
+}
+async function carregarEstatisticas(){
+ try{const q=new URLSearchParams();if($('statsFrom').value)q.set('from',$('statsFrom').value);if($('statsTo').value)q.set('to',$('statsTo').value);if($('statsTeam').value)q.set('team',$('statsTeam').value);
+ const j=await api('/api/admin/statistics'+(q.toString()?'?'+q.toString():''));estatisticasRelatorios=j.reports||[];renderEstatisticas(estatisticasRelatorios);
+ }catch(e){$('statsStatus').textContent=e.message;statusMsg(e.message,'error')}
+}
+function aplicarFiltrosEstatisticas(){carregarEstatisticas()}
+function limparFiltrosEstatisticas(){$('statsFrom').value='';$('statsTo').value='';$('statsTeam').value='';carregarEstatisticas()}
+async function exportarEstatisticasExcel(){
+ try{const q=new URLSearchParams();if($('statsFrom').value)q.set('from',$('statsFrom').value);if($('statsTo').value)q.set('to',$('statsTo').value);if($('statsTeam').value)q.set('team',$('statsTeam').value);
+ const r=await fetch('/api/admin/statistics.xlsx?'+q.toString(),{credentials:'same-origin',cache:'no-store'});if(!r.ok){let j={};try{j=await r.json()}catch{}throw new Error(j.message||'Falha ao exportar Excel.')}
+ const blob=await r.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Estatisticas_CPAIG.xlsx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);statusMsg('Excel das estatísticas gerado com os relatórios do filtro selecionado.','success');
+ }catch(e){statusMsg(e.message,'error')}
+}
 function formatarDataBackupAdmin(d){return String(d.getFullYear())+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function periodoSemanaBackupAtualAdmin(){const hoje=new Date();hoje.setHours(12,0,0,0);const deslocamento=(hoje.getDay()+6)%7;const inicio=new Date(hoje);inicio.setDate(hoje.getDate()-deslocamento);const fim=new Date(inicio);fim.setDate(inicio.getDate()+6);return {from:formatarDataBackupAdmin(inicio),to:formatarDataBackupAdmin(fim)};}
 async function baixarBackupExcelSemanal(){
