@@ -1494,6 +1494,34 @@ app.get('/api/admin/shift-reports', exigirBanco, exigirAutenticacao, exigirAdmin
   try{const q=await pool.query(`SELECT r.*,u.username AS updated_username,u.full_name AS updated_full_name FROM shift_reports r LEFT JOIN users u ON u.id=r.updated_by ORDER BY r.report_date DESC,r.team,r.shift_name`);res.json({ok:true,reports:q.rows.map(r=>({...relatorioPublico(r),updatedUsername:r.updated_username,updatedFullName:r.updated_full_name}))});}
   catch(e){console.error('Falha no painel de relatÃÂ³rios:',e.message);res.status(500).json({ok:false,message:'NÃÂ£o foi possÃÂ­vel consultar os relatÃÂ³rios de plantÃÂ£o.'});}
 });
+app.get('/api/admin/statistics', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
+  try{
+    const from=String(req.query.from||'').slice(0,10),to=String(req.query.to||'').slice(0,10),team=String(req.query.team||'').toUpperCase();
+    if((from&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(from))||(to&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(to))||(team&&!['A','B','C','D'].includes(team)))return res.status(400).json({ok:false,message:'Filtros de período ou equipe inválidos.'});
+    const params=[];const where=[];
+    if(from){params.push(from);where.push('report_date >= $'+params.length+'::date');}
+    if(to){params.push(to);where.push('report_date <= $'+params.length+'::date');}
+    if(team){params.push(team);where.push('team = $'+params.length);}
+    const q=await pool.query('SELECT id,team,report_date,shift_name,title,status,revision,content,updated_at FROM shift_reports '+(where.length?'WHERE '+where.join(' AND '):'')+' ORDER BY report_date,team,shift_name',params);
+    res.json({ok:true,reports:q.rows.map(r=>({...r,report_date:String(r.report_date).slice(0,10)})),count:q.rowCount});
+  }catch(e){console.error('Falha ao consultar estatísticas CPAIG:',e.message);res.status(500).json({ok:false,message:'Não foi possível carregar os dados estatísticos.'});}
+});
+app.get('/api/admin/statistics.xlsx', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
+  try{
+    const from=String(req.query.from||'').slice(0,10),to=String(req.query.to||'').slice(0,10),team=String(req.query.team||'').toUpperCase();
+    if((from&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(from))||(to&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(to))||(team&&!['A','B','C','D'].includes(team)))return res.status(400).json({ok:false,message:'Filtros de período ou equipe inválidos.'});
+    const params=[];const where=[];
+    if(from){params.push(from);where.push('report_date >= $'+params.length+'::date');}
+    if(to){params.push(to);where.push('report_date <= $'+params.length+'::date');}
+    if(team){params.push(team);where.push('team = $'+params.length);}
+    const q=await pool.query('SELECT team,report_date,shift_name,status,revision,content FROM shift_reports '+(where.length?'WHERE '+where.join(' AND '):'')+' ORDER BY report_date,team,shift_name',params);
+    const wb=new ExcelJS.Workbook();wb.creator='Sistema Atendimento CPAIG';wb.subject='Estatísticas históricas da movimentação carcerária';wb.title='Estatísticas CPAIG';
+    const sh=wb.addWorksheet('Relatórios');sh.columns=[{header:'Data',key:'date',width:14},{header:'Equipe',key:'team',width:12},{header:'Plantão',key:'shift',width:18},{header:'Status',key:'status',width:14},{header:'Revisão',key:'revision',width:10},{header:'Item',key:'item',width:48},{header:'Conteúdo salvo',key:'content',width:90}];
+    for(const r of q.rows){const c=r.content&&typeof r.content==='object'?r.content:{};for(const [item,value] of Object.entries(c)){sh.addRow({date:String(r.report_date).slice(0,10),team:r.team,shift:r.shift_name,status:r.status,revision:r.revision,item,content:typeof value==='string'?value:JSON.stringify(value)});}}
+    sh.getRow(1).font={bold:true,color:{argb:'FFFFFFFF'}};sh.getRow(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF123D2C'}};sh.views=[{state:'frozen',ySplit:1}];
+    const buffer=Buffer.from(await wb.xlsx.writeBuffer());res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');res.setHeader('Content-Disposition','attachment; filename="Estatisticas_CPAIG.xlsx"');res.setHeader('X-Report-Count',String(q.rowCount));res.send(buffer);
+  }catch(e){console.error('Falha ao exportar estatísticas CPAIG:',e.message);res.status(500).json({ok:false,message:'Não foi possível gerar o Excel estatístico.'});}
+});
 app.get('/api/admin/shift-reports/:id/history', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
   try{const q=await pool.query(`SELECT h.id,h.action,h.revision,h.previous_content,h.new_content,h.details,h.created_at,u.username,u.full_name FROM shift_report_history h LEFT JOIN users u ON u.id=h.actor_user_id WHERE h.report_id=$1 ORDER BY h.created_at DESC LIMIT 500`,[textoSeguro(req.params.id,100)]);res.json({ok:true,history:q.rows});}
   catch(e){res.status(500).json({ok:false,message:'NÃÂ£o foi possÃÂ­vel carregar o histÃÂ³rico do relatÃÂ³rio.'});}
