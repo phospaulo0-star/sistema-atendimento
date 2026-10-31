@@ -476,6 +476,7 @@ async function inicializarBanco() {
     ALTER TABLE attendances ADD COLUMN IF NOT EXISTS refusal_confirmed_at TIMESTAMPTZ;
     ALTER TABLE attendances ADD COLUMN IF NOT EXISTS guiche_archived_at TIMESTAMPTZ;
     ALTER TABLE attendances ADD COLUMN IF NOT EXISTS mesa_archived_at TIMESTAMPTZ;
+    ALTER TABLE attendances ADD COLUMN IF NOT EXISTS mesa_deleted_at TIMESTAMPTZ;
     CREATE INDEX IF NOT EXISTS attendances_owner_created_idx ON attendances(owner_id, created_at DESC);
     CREATE INDEX IF NOT EXISTS attendances_status_idx ON attendances(status, updated_at DESC);
     CREATE TABLE IF NOT EXISTS internal_base (
@@ -853,10 +854,13 @@ app.post('/api/me/import-legacy', exigirBanco, exigirAutenticacao, async (req, r
 });
 
 app.get('/api/mesa/attendances', exigirBanco, exigirAutenticacao, async (req, res) => {
-  if (!['mesa', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Acesso restrito ÃÂ  Mesa.' });
+  if (!['mesa', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Acesso restrito à Mesa.' });
   try {
-    const result = await pool.query("SELECT * FROM attendances WHERE status <> 'recusado' ORDER BY created_at DESC LIMIT 10000");
-    res.json({ ok: true, attendances: result.rows.map(row => ({
+    const [result, removidos] = await Promise.all([
+      pool.query("SELECT * FROM attendances WHERE status <> 'recusado' AND mesa_deleted_at IS NULL ORDER BY created_at DESC LIMIT 10000"),
+      pool.query("SELECT record_id FROM attendances WHERE mesa_deleted_at IS NOT NULL")
+    ]);
+    res.json({ ok: true, deletedRecordIds: removidos.rows.map(row => row.record_id), attendances: result.rows.map(row => ({
       ...normalizarRegistro(row.record),
       recordId: row.record_id,
       status: row.mesa_archived_at ? 'guardado' : row.status,
@@ -867,7 +871,38 @@ app.get('/api/mesa/attendances', exigirBanco, exigirAutenticacao, async (req, re
       guardadoEm: normalizarRegistro(row.record).guardadoEm || null,
       ownerId: row.owner_id
     })) });
-  } catch (e) { console.error('Erro carregando histÃÂÃÂ³rico da Mesa:', e.message); res.status(500).json({ ok: false, message: 'NÃÂÃÂ£o foi possÃÂÃÂ­vel carregar os atendimentos da Mesa.' }); }
+  } catch (e) { console.error('Erro carregando histórico da Mesa:', e.message); res.status(500).json({ ok: false, message: 'Não foi possível carregar os atendimentos da Mesa.' }); }
+});
+
+app.patch('/api/mesa/attendances/:id/:action', exigirBanco, exigirAutenticacao, async (req, res) => {
+  if (!['mesa', 'admin'].includes(req.user.role)) return res.status(403).json({ ok: false, message: 'Acesso restrito à Mesa.' });
+  const recordId = textoSeguro(req.params.id, 180);
+  const action = String(req.params.action || '');
+  if (!recordId || !['archive', 'hide'].includes(action)) return res.status(400).json({ ok: false, message: 'Ação inválida.' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const atual = await client.query('SELECT * FROM attendances WHERE record_id=$1 FOR UPDATE', [recordId]);
+    if (!atual.rowCount) { await client.query('ROLLBACK'); return res.status(404).json({ ok: false, message: 'Atendimento não encontrado.' }); }
+    const row = atual.rows[0];
+    if (row.status === 'recusado') { await client.query('ROLLBACK'); return res.status(409).json({ ok: false, message: 'Atendimento recusado não pode ser alterado na Mesa.' }); }
+    if (action === 'archive') {
+      if (row.status !== 'recebido' && !row.mesa_archived_at) { await client.query('ROLLBACK'); return res.status(409).json({ ok: false, message: 'Somente atendimentos recebidos podem ser guardados.' }); }
+      const guardadoEm = row.mesa_archived_at || agoraISO();
+      await client.query('UPDATE attendances SET mesa_archived_at=COALESCE(mesa_archived_at,NOW()),record=jsonb_set(record,\'{guardadoEm}\',to_jsonb($2::text),true),updated_at=NOW() WHERE record_id=$1', [recordId, guardadoEm]);
+      await registrarAuditoria(req.user.id, 'atendimento_guardado_mesa', row.owner_id, { recordId });
+      await client.query('COMMIT');
+      return res.json({ ok: true, status: 'guardado', guardadoEm });
+    }
+    await client.query('UPDATE attendances SET mesa_deleted_at=COALESCE(mesa_deleted_at,NOW()),updated_at=NOW() WHERE record_id=$1', [recordId]);
+    await registrarAuditoria(req.user.id, 'atendimento_ocultado_historico_mesa', row.owner_id, { recordId, preservado: true });
+    await client.query('COMMIT');
+    return res.json({ ok: true, hidden: true, preserved: true });
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Erro alterando atendimento na Mesa:', e.message);
+    return res.status(500).json({ ok: false, message: 'Não foi possível concluir a ação no atendimento.' });
+  } finally { client.release(); }
 });
 
 app.get('/api/admin/overview', exigirBanco, exigirAutenticacao, exigirAdmin, async (_req, res) => {
