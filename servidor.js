@@ -1502,7 +1502,7 @@ app.get('/api/admin/statistics', exigirBanco, exigirAutenticacao, exigirAdmin, a
     if(from){params.push(from);where.push('report_date >= $'+params.length+'::date');}
     if(to){params.push(to);where.push('report_date <= $'+params.length+'::date');}
     if(team){params.push(team);where.push('team = $'+params.length);}
-    const q=await pool.query('SELECT id,team,to_char(report_date,'YYYY-MM-DD') AS report_date,shift_name,title,status,revision,content,created_at,updated_at FROM shift_reports '+(where.length?'WHERE '+where.join(' AND '):'')+' ORDER BY report_date,team,shift_name',params);
+    const q=await pool.query('SELECT id,team,to_char(report_date, $YYYY-MM-DD$) AS report_date,shift_name,title,status,revision,content,created_at,updated_at FROM shift_reports '+(where.length?'WHERE '+where.join(' AND '):'')+' ORDER BY report_date,team,shift_name',params);
     res.json({ok:true,reports:q.rows.map(r=>({...r,report_date:String(r.report_date||'').slice(0,10)})),count:q.rowCount});
   }catch(e){console.error('Falha ao consultar estatísticas CPAIG:',e.message);res.status(500).json({ok:false,message:'Não foi possível carregar os dados estatísticos.'});}
 });
