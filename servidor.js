@@ -1902,6 +1902,7 @@ async function inicializarPertencesVisitas(pool) {
     "CREATE TABLE IF NOT EXISTS pv_visit_days (visit_day DATE PRIMARY KEY, status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')), closed_at TIMESTAMPTZ, closed_by TEXT REFERENCES users(id), reopened_at TIMESTAMPTZ, reopened_by TEXT REFERENCES users(id));",
     "INSERT INTO pv_visit_days(visit_day,status,closed_at) SELECT visit_day,CASE WHEN BOOL_AND(status='closed') THEN 'closed' ELSE 'open' END,MAX(closed_at) FROM pv_visit_lists GROUP BY visit_day ON CONFLICT (visit_day) DO NOTHING;",
     "DROP INDEX IF EXISTS pv_visit_one_open_list;",
+    "WITH ranked_open AS (SELECT list_number, ROW_NUMBER() OVER (PARTITION BY visit_day ORDER BY day_list_number DESC, created_at DESC, list_number DESC) AS rn FROM pv_visit_lists WHERE status='open') UPDATE pv_visit_lists l SET status='closed', closed_at=COALESCE(l.closed_at,NOW()) FROM ranked_open r WHERE l.list_number=r.list_number AND r.rn>1;",
     "CREATE UNIQUE INDEX IF NOT EXISTS pv_visit_one_open_list_per_day ON pv_visit_lists(visit_day) WHERE status='open';",
     "CREATE INDEX IF NOT EXISTS pv_visit_lists_day_idx ON pv_visit_lists(visit_day,day_list_number);",
     "CREATE TABLE IF NOT EXISTS pv_visit_entries (",
