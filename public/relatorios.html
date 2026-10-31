@@ -336,7 +336,22 @@ body.preview-mode #previewContent .material-carga-tabela td:first-child { text-a
   body.preview-mode #previewContent table[data-section*="VIATURAS"] tr > :first-child { background-color:#d2d2d2 !important; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
 }
 
-\n#itemsNavButtons{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:7px}#itemsNavButtons button{text-align:left;white-space:normal}#itemsNavButtons button.active{background:var(--gold);color:#171717}#itemsNavPanel{margin-top:-8px}@media(max-width:600px){#itemsNavButtons{grid-template-columns:1fr 1fr}#itemsNavButtons button{font-size:12px;padding:9px 7px}}\n</style>
+\n#itemsNavButtons{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:7px}#itemsNavButtons button{text-align:left;white-space:normal}#itemsNavButtons button.active{background:var(--gold);color:#171717}#itemsNavPanel{margin-top:-8px}@media(max-width:600px){#itemsNavButtons{grid-template-columns:1fr 1fr}#itemsNavButtons button{font-size:12px;padding:9px 7px}}\n
+/* Item 12 — layout compacto */
+#item12Setores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;align-items:start}
+.item12-card{min-width:0;border:1px solid #d7dce2;border-radius:6px;padding:7px 9px;background:#fff}
+.item12-card-title{display:block;font-size:12px;line-height:1.2;margin-bottom:5px}
+.item12-names{display:flex;flex-wrap:wrap;gap:3px 10px;align-items:center}
+.item12-name-option{display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;gap:5px!important;width:auto!important;max-width:100%;margin:1px 0!important;font-size:12px!important;font-weight:normal!important;line-height:1.2}
+.item12-name-option input[type=checkbox]{width:14px!important;height:14px!important;min-width:14px!important;margin:0!important;padding:0!important;flex:0 0 14px}
+.item12-name-option span{overflow-wrap:anywhere}
+.item12-add{display:flex;gap:5px;margin-top:6px;align-items:center}
+.item12-add input{width:min(100%,190px)!important;min-width:0;padding:6px 7px!important;font-size:12px;border:1px solid #bbc3cc;border-radius:5px}
+.item12-add button{padding:6px 8px;font-size:11px;white-space:nowrap}
+.item12-empty{margin-top:4px}
+@media(max-width:650px){#item12Setores{grid-template-columns:1fr}.item12-add input{flex:1}}
+@media print{#item12Setores{display:block}.item12-card{border:0;border-bottom:1px solid #bbb;border-radius:0;padding:3px 0;margin:0;break-inside:avoid}.item12-card-title{display:inline;font-size:10pt}.item12-names{display:inline-flex;margin-left:6px}.item12-name-option input,.item12-add{display:none!important}}
+</style>
 <style id="alinhamento-tabelas-relatorio">
 #previewContent table th{ text-align:center!important; vertical-align:middle!important; }
 #previewContent table td{ text-align:center!important; vertical-align:middle!important; }
@@ -1207,27 +1222,28 @@ function sincronizarItem12(){
 function renderItem12(){
  const box=$('item12Setores');if(!box)return;
  box.innerHTML='';
- item12Setores.forEach((setor,indice)=>{
-  const card=document.createElement('div');card.style.cssText='border:1px solid #d7dce2;border-radius:7px;padding:10px;margin:8px 0;background:#fff';
-  const titulo=document.createElement('strong');titulo.textContent=setor.name;card.appendChild(titulo);
-  const nomes=[...new Set(setor.names||[])];
-  const selecionados=item12Selecionados[item12Normalizar(setor.name)]||[];
+ item12Setores.forEach(setor=>{
+  const card=document.createElement('div');card.className='item12-card';
+  const titulo=document.createElement('strong');titulo.className='item12-card-title';titulo.textContent=setor.name;card.appendChild(titulo);
+  const nomes=[...new Set(setor.names||[])],selecionados=item12Selecionados[item12Normalizar(setor.name)]||[];
+  const lista=document.createElement('div');lista.className='item12-names';
   nomes.forEach(nome=>{
-   const linha=document.createElement('label');linha.style.cssText='display:flex;align-items:center;gap:8px;margin:7px 0;font-weight:normal';
+   const linha=document.createElement('label');linha.className='item12-name-option';
    const cb=document.createElement('input');cb.type='checkbox';cb.checked=selecionados.some(x=>item12Normalizar(x)===item12Normalizar(nome));cb.disabled=readOnly||(!canWork&&!podeEditarRelatorioAtual());
    cb.addEventListener('change',()=>{let atual=item12Selecionados[item12Normalizar(setor.name)]||[];atual=atual.filter(x=>item12Normalizar(x)!==item12Normalizar(nome));if(cb.checked)atual.push(nome);item12Selecionados[item12Normalizar(setor.name)]=atual;sincronizarItem12();});
-   linha.append(cb,document.createTextNode(nome));card.appendChild(linha);
+   const texto=document.createElement('span');texto.textContent=nome;linha.append(cb,texto);lista.appendChild(linha);
   });
-  const adicionar=document.createElement('div');adicionar.className='toolbar no-print';adicionar.style.cssText='gap:6px;margin-top:8px';
-  const input=document.createElement('input');input.type='text';input.placeholder='Adicionar nome neste setor';input.style.cssText='padding:8px;border:1px solid #bbc3cc;border-radius:6px;max-width:260px';
-  const btn=document.createElement('button');btn.type='button';btn.textContent='＋ ADICIONAR NOME';btn.disabled=readOnly||(!canWork&&!podeEditarRelatorioAtual());
+  card.appendChild(lista);
+  const adicionar=document.createElement('div');adicionar.className='item12-add no-print';
+  const input=document.createElement('input');input.type='text';input.placeholder='Adicionar nome';input.disabled=readOnly||(!canWork&&!podeEditarRelatorioAtual());
+  const btn=document.createElement('button');btn.type='button';btn.textContent='＋ Nome';btn.disabled=input.disabled;
   btn.addEventListener('click',()=>{const nome=input.value.trim();if(!nome)return;if(!setor.names.some(x=>item12Normalizar(x)===item12Normalizar(nome)))setor.names.push(nome);const atual=item12Selecionados[item12Normalizar(setor.name)]||[];if(!atual.some(x=>item12Normalizar(x)===item12Normalizar(nome)))atual.push(nome);item12Selecionados[item12Normalizar(setor.name)]=atual;salvarCadastroItem12();sincronizarItem12();renderItem12();});
-  input.disabled=btn.disabled;adicionar.append(input,btn);card.appendChild(adicionar);
-  if(!setor.names.length){const aviso=document.createElement('div');aviso.className='small';aviso.textContent='Nenhum nome cadastrado. O relatório mostrará N/C.';card.appendChild(aviso);}
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();btn.click();}});
+  adicionar.append(input,btn);card.appendChild(adicionar);
+  if(!nomes.length){const aviso=document.createElement('div');aviso.className='small item12-empty';aviso.textContent='Nenhum nome cadastrado.';card.appendChild(aviso);}
   box.appendChild(card);
  });
-}
-function carregarItem12(valor){
+}function carregarItem12(valor){
  carregarCadastroItem12();
  item12Selecionados=lerTextoItem12(valor);
  // Mantém no cadastro nomes antigos que já estejam gravados no relatório.
