@@ -1891,14 +1891,27 @@ async function inicializarPertencesVisitas(pool) {
     "  list_number BIGSERIAL PRIMARY KEY, status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')),",
     "  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), closed_at TIMESTAMPTZ, created_by TEXT REFERENCES users(id)",
     ");",
-    "CREATE UNIQUE INDEX IF NOT EXISTS pv_visit_one_open_list ON pv_visit_lists((status)) WHERE status='open';",
+    "ALTER TABLE pv_visit_lists ADD COLUMN IF NOT EXISTS visit_day DATE;",
+    "UPDATE pv_visit_lists SET visit_day=(created_at AT TIME ZONE 'America/Campo_Grande')::date WHERE visit_day IS NULL;",
+    "ALTER TABLE pv_visit_lists ADD COLUMN IF NOT EXISTS day_list_number INTEGER;",
+    "WITH numbered AS (SELECT list_number, ROW_NUMBER() OVER (PARTITION BY visit_day ORDER BY created_at,list_number)::integer AS n FROM pv_visit_lists) UPDATE pv_visit_lists l SET day_list_number=numbered.n FROM numbered WHERE l.list_number=numbered.list_number AND l.day_list_number IS NULL;",
+    "ALTER TABLE pv_visit_lists ALTER COLUMN visit_day SET DEFAULT ((NOW() AT TIME ZONE 'America/Campo_Grande')::date);",
+    "ALTER TABLE pv_visit_lists ALTER COLUMN visit_day SET NOT NULL;",
+    "ALTER TABLE pv_visit_lists ALTER COLUMN day_list_number SET DEFAULT 1;",
+    "ALTER TABLE pv_visit_lists ALTER COLUMN day_list_number SET NOT NULL;",
+    "CREATE TABLE IF NOT EXISTS pv_visit_days (visit_day DATE PRIMARY KEY, status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')), closed_at TIMESTAMPTZ, closed_by TEXT REFERENCES users(id), reopened_at TIMESTAMPTZ, reopened_by TEXT REFERENCES users(id));",
+    "INSERT INTO pv_visit_days(visit_day,status,closed_at) SELECT visit_day,CASE WHEN BOOL_AND(status='closed') THEN 'closed' ELSE 'open' END,MAX(closed_at) FROM pv_visit_lists GROUP BY visit_day ON CONFLICT (visit_day) DO NOTHING;",
+    "DROP INDEX IF EXISTS pv_visit_one_open_list;",
+    "CREATE UNIQUE INDEX IF NOT EXISTS pv_visit_one_open_list_per_day ON pv_visit_lists(visit_day) WHERE status='open';",
+    "CREATE INDEX IF NOT EXISTS pv_visit_lists_day_idx ON pv_visit_lists(visit_day,day_list_number);",
     "CREATE TABLE IF NOT EXISTS pv_visit_entries (",
     "  entry_id TEXT PRIMARY KEY, list_number BIGINT NOT NULL REFERENCES pv_visit_lists(list_number),",
     "  internal_name TEXT NOT NULL, rgi TEXT NOT NULL DEFAULT '', pavilion TEXT NOT NULL DEFAULT '', cell TEXT NOT NULL DEFAULT '',",
     "  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), created_by TEXT REFERENCES users(id)",
     ");",
     "CREATE INDEX IF NOT EXISTS pv_visit_entries_list_idx ON pv_visit_entries(list_number, created_at);",
-    "INSERT INTO pv_visit_lists(status) SELECT 'open' WHERE NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE status='open');"
+    "INSERT INTO pv_visit_days(visit_day,status) VALUES ((NOW() AT TIME ZONE 'America/Campo_Grande')::date,'open') ON CONFLICT (visit_day) DO NOTHING;",
+    "INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT (NOW() AT TIME ZONE 'America/Campo_Grande')::date,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') AND EXISTS (SELECT 1 FROM pv_visit_days WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open');"
   ].join('\n'));
 }
 
@@ -1966,62 +1979,92 @@ function montarRotasPertencesVisitas(config) {
     } catch (e) { formatarErro(res, e, 'NÃÂÃÂ£o foi possÃÂÃÂ­vel salvar o recebimento de pertences.'); }
   });
 
-  // This read-only endpoint is also consumed by the Mesa; polling keeps its view up to date.
+  async function atualizarFechamentoAutomaticoVisitas(client) {
+    const hoje = hojeCampoGrande();
+    const hora = new Intl.DateTimeFormat('en-GB',{timeZone:'America/Campo_Grande',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
+    await client.query("INSERT INTO pv_visit_days(visit_day,status) VALUES ($1,'open') ON CONFLICT (visit_day) DO NOTHING",[hoje]);
+    if (hora >= '12:00') {
+      await client.query("UPDATE pv_visit_lists SET status='closed',closed_at=COALESCE(closed_at,NOW()) WHERE visit_day=$1 AND status='open' AND EXISTS (SELECT 1 FROM pv_visit_days d WHERE d.visit_day=$1 AND d.status='open' AND d.reopened_at IS NULL)",[hoje]);
+      await client.query("UPDATE pv_visit_days SET status='closed',closed_at=COALESCE(closed_at,NOW()) WHERE visit_day=$1 AND status='open' AND reopened_at IS NULL",[hoje]);
+    }
+    const day = await client.query("SELECT status,reopened_at FROM pv_visit_days WHERE visit_day=$1",[hoje]);
+    if (day.rows[0] && day.rows[0].status==='open') {
+      await client.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT $1,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=$1 AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=$1 AND status='open')",[hoje]);
+    }
+  }
+
+  // Read-only endpoint used by the Mesa and by the Visitas panel.
   app.get('/api/pertences-visitas/visits', exigirBanco, exigirAutenticacao, acessoListasMesa, async (_req, res) => {
     try {
-      const lists = await pool.query('SELECT list_number AS "listNumber", status, created_at AS "createdAt", closed_at AS "closedAt" FROM pv_visit_lists ORDER BY list_number');
-      const entries = await pool.query('SELECT entry_id AS id, list_number AS "listNumber", internal_name AS "internalName", rgi, pavilion, cell, created_at AS "createdAt" FROM pv_visit_entries ORDER BY list_number, created_at, internal_name');
-      res.json({ ok: true, lists: lists.rows, entries: entries.rows, serverTime: new Date().toISOString() });
-    } catch (e) { formatarErro(res, e, 'NÃÂÃÂ£o foi possÃÂÃÂ­vel carregar as listas de visitas.'); }
+      const client=await pool.connect();
+      try { await client.query('BEGIN'); await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]); await atualizarFechamentoAutomaticoVisitas(client); await client.query('COMMIT'); }
+      catch(e){try{await client.query('ROLLBACK')}catch{} throw e} finally{client.release()}
+      const lists = await pool.query('SELECT list_number AS "listNumber",day_list_number AS "dayListNumber",visit_day AS "visitDay",status,created_at AS "createdAt",closed_at AS "closedAt" FROM pv_visit_lists ORDER BY visit_day DESC,day_list_number');
+      const entries = await pool.query('SELECT e.entry_id AS id,e.list_number AS "listNumber",l.day_list_number AS "dayListNumber",l.visit_day AS "visitDay",e.internal_name AS "internalName",e.rgi,e.pavilion,e.cell,e.created_at AS "createdAt" FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) ORDER BY l.visit_day DESC,l.day_list_number,e.created_at,e.internal_name');
+      const days = await pool.query("SELECT d.visit_day AS "visitDay",d.status,d.closed_at AS "closedAt",d.reopened_at AS "reopenedAt",COUNT(DISTINCT COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name)))::integer AS "totalInmates" FROM pv_visit_days d LEFT JOIN pv_visit_lists l ON l.visit_day=d.visit_day LEFT JOIN pv_visit_entries e ON e.list_number=l.list_number GROUP BY d.visit_day,d.status,d.closed_at,d.reopened_at ORDER BY d.visit_day DESC");
+      const summary = await pool.query("SELECT DISTINCT ON (l.visit_day,COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name))) l.visit_day AS "visitDay",e.internal_name AS "internalName",e.rgi,e.pavilion,e.cell FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) ORDER BY l.visit_day,COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name)),e.created_at");
+      res.json({ok:true,lists:lists.rows,entries:entries.rows,days:days.rows,summary:summary.rows,serverTime:new Date().toISOString()});
+    } catch(e){formatarErro(res,e,'Não foi possível carregar as listas de visitas.')}
   });
 
-  app.post('/api/pertences-visitas/visits/entries', exigirBanco, exigirAutenticacao, acessoModulo, async (req, res) => {
-    const internalName = texto(req.body && req.body.internalName, 200);
-    const rgi = texto(req.body && req.body.rgi, 80);
-    const pavilion = texto(req.body && req.body.pavilion, 100);
-    const cell = texto(req.body && req.body.cell, 30);
-    if (!internalName) return res.status(400).json({ ok: false, message: 'Selecione o nome do interno.' });
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-      await client.query('SELECT pg_advisory_xact_lock($1::bigint)', [26261015]);
-      let current = await client.query("SELECT list_number FROM pv_visit_lists WHERE status='open' ORDER BY list_number DESC LIMIT 1 FOR UPDATE");
-      if (!current.rowCount) current = await client.query("INSERT INTO pv_visit_lists(status,created_by) VALUES ('open',$1) RETURNING list_number", [req.user.id]);
-      const number = current.rows[0].list_number;
-      const result = await client.query(
-        'INSERT INTO pv_visit_entries (entry_id,list_number,internal_name,rgi,pavilion,cell,created_by) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING entry_id AS id, list_number AS "listNumber", internal_name AS "internalName", rgi, pavilion, cell, created_at AS "createdAt"',
-        [crypto.randomUUID(), number, internalName, rgi, pavilion, cell, req.user.id]
-      );
+  app.post('/api/pertences-visitas/visits/entries', exigirBanco, exigirAutenticacao, acessoModulo, async (req,res)=>{
+    const internalName=texto(req.body&&req.body.internalName,200),rgi=texto(req.body&&req.body.rgi,80),pavilion=texto(req.body&&req.body.pavilion,100),cell=texto(req.body&&req.body.cell,30);
+    if(!internalName)return res.status(400).json({ok:false,message:'Selecione o nome do interno.'});
+    const client=await pool.connect();
+    try{
+      await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);await atualizarFechamentoAutomaticoVisitas(client);
+      const hoje=hojeCampoGrande();const day=await client.query("SELECT status FROM pv_visit_days WHERE visit_day=$1 FOR UPDATE",[hoje]);
+      if(!day.rowCount||day.rows[0].status!=='open')throw new Error('As visitas deste dia estão encerradas. Reabra o dia para continuar os registros.');
+      let current=await client.query("SELECT list_number,day_list_number FROM pv_visit_lists WHERE visit_day=$1 AND status='open' ORDER BY day_list_number DESC LIMIT 1 FOR UPDATE",[hoje]);
+      if(!current.rowCount){const next=await client.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status,created_by) SELECT $1,COALESCE(MAX(day_list_number),0)+1,'open',$2 FROM pv_visit_lists WHERE visit_day=$1 RETURNING list_number,day_list_number",[hoje,req.user.id]);current=next;}
+      const number=current.rows[0].list_number;
+      const result=await client.query('INSERT INTO pv_visit_entries(entry_id,list_number,internal_name,rgi,pavilion,cell,created_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING entry_id AS id,list_number AS "listNumber",internal_name AS "internalName",rgi,pavilion,cell,created_at AS "createdAt"',[crypto.randomUUID(),number,internalName,rgi,pavilion,cell,req.user.id]);
       await client.query('COMMIT');
-      try { await registrarAuditoria(req.user.id, 'visita_incluida_lista', null, { listNumber: number, internalName, rgi }); } catch (e) { console.error('Falha ao registrar auditoria de visitas:', e.message); }
-      res.status(201).json({ ok: true, entry: result.rows[0] });
-    } catch (e) {
-      try { await client.query('ROLLBACK'); } catch {}
-      formatarErro(res, e, 'NÃÂÃÂ£o foi possÃÂÃÂ­vel incluir o interno na lista de visitas.');
-    } finally { client.release(); }
+      try{await registrarAuditoria(req.user.id,'visita_incluida_lista',null,{listNumber:number,dayListNumber:current.rows[0].day_list_number,visitDay:hoje,internalName,rgi})}catch(e){console.error('Falha ao registrar auditoria de visitas:',e.message)}
+      res.status(201).json({ok:true,entry:{...result.rows[0],dayListNumber:current.rows[0].day_list_number,visitDay:hoje}});
+    }catch(e){try{await client.query('ROLLBACK')}catch{};if(e.message&&e.message.includes('visitas deste dia'))return res.status(409).json({ok:false,message:e.message});formatarErro(res,e,'Não foi possível incluir o interno na lista de visitas.')}
+    finally{client.release()}
   });
 
-  app.post('/api/pertences-visitas/visits/close', exigirBanco, exigirAutenticacao, acessoModulo, async (req, res) => {
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-      await client.query('SELECT pg_advisory_xact_lock($1::bigint)', [26261015]);
-      const current = await client.query("SELECT list_number FROM pv_visit_lists WHERE status='open' ORDER BY list_number DESC LIMIT 1 FOR UPDATE");
-      if (!current.rowCount) {
-        const next = await client.query("INSERT INTO pv_visit_lists(status,created_by) VALUES ('open',$1) RETURNING list_number", [req.user.id]);
-        await client.query('COMMIT');
-        return res.json({ ok: true, closedListNumber: null, nextListNumber: next.rows[0].list_number });
-      }
-      const closedNumber = current.rows[0].list_number;
-      await client.query("UPDATE pv_visit_lists SET status='closed', closed_at=NOW() WHERE list_number=$1", [closedNumber]);
-      const next = await client.query("INSERT INTO pv_visit_lists(status,created_by) VALUES ('open',$1) RETURNING list_number", [req.user.id]);
-      await client.query('COMMIT');
-      try { await registrarAuditoria(req.user.id, 'visita_lista_fechada', null, { listNumber: closedNumber, nextListNumber: next.rows[0].list_number }); } catch (e) { console.error('Falha ao registrar auditoria de fechamento:', e.message); }
-      res.json({ ok: true, closedListNumber: closedNumber, nextListNumber: next.rows[0].list_number });
-    } catch (e) {
-      try { await client.query('ROLLBACK'); } catch {}
-      formatarErro(res, e, 'NÃÂÃÂ£o foi possÃÂÃÂ­vel fechar a lista e abrir a prÃÂÃÂ³xima.');
-    } finally { client.release(); }
+  app.post('/api/pertences-visitas/visits/close',exigirBanco,exigirAutenticacao,acessoModulo,async(req,res)=>{
+    const client=await pool.connect();
+    try{
+      await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);await atualizarFechamentoAutomaticoVisitas(client);
+      const hoje=hojeCampoGrande();const current=await client.query("SELECT list_number,day_list_number FROM pv_visit_lists WHERE visit_day=$1 AND status='open' ORDER BY day_list_number DESC LIMIT 1 FOR UPDATE",[hoje]);
+      if(!current.rowCount){const day=await client.query("SELECT status FROM pv_visit_days WHERE visit_day=$1",[hoje]);if(!day.rowCount||day.rows[0].status!=='open')throw new Error('O dia de visitas está encerrado. Reabra o dia para continuar.');}
+      let closedNumber=null;
+      if(current.rowCount){closedNumber=current.rows[0].day_list_number;await client.query("UPDATE pv_visit_lists SET status='closed',closed_at=NOW() WHERE list_number=$1",[current.rows[0].list_number]);}
+      const next=await client.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status,created_by) SELECT $1,COALESCE(MAX(day_list_number),0)+1,'open',$2 FROM pv_visit_lists WHERE visit_day=$1 RETURNING day_list_number",[hoje,req.user.id]);
+      await client.query('COMMIT');try{await registrarAuditoria(req.user.id,'visita_lista_fechada',null,{visitDay:hoje,closedListNumber:closedNumber,nextListNumber:next.rows[0].day_list_number})}catch(e){}
+      res.json({ok:true,closedListNumber:closedNumber,nextListNumber:next.rows[0].day_list_number});
+    }catch(e){try{await client.query('ROLLBACK')}catch{};if(e.message&&e.message.includes('dia de visitas'))return res.status(409).json({ok:false,message:e.message});formatarErro(res,e,'Não foi possível fechar a lista e abrir a próxima.')}
+    finally{client.release()}
+  });
+
+  app.post('/api/pertences-visitas/visits/day/close',exigirBanco,exigirAutenticacao,acessoModulo,async(req,res)=>{
+    const client=await pool.connect();
+    try{
+      await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);const hoje=hojeCampoGrande();
+      await client.query("INSERT INTO pv_visit_days(visit_day,status) VALUES($1,'open') ON CONFLICT(visit_day) DO NOTHING",[hoje]);
+      await client.query("UPDATE pv_visit_lists SET status='closed',closed_at=COALESCE(closed_at,NOW()) WHERE visit_day=$1 AND status='open'",[hoje]);
+      await client.query("UPDATE pv_visit_days SET status='closed',closed_at=NOW(),closed_by=$2,reopened_at=NULL,reopened_by=NULL WHERE visit_day=$1",[hoje,req.user.id]);
+      const total=await client.query("SELECT COUNT(DISTINCT COALESCE(NULLIF(rgi,''),LOWER(internal_name)))::integer AS total FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) WHERE l.visit_day=$1",[hoje]);
+      const rows=await client.query("SELECT DISTINCT ON(COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name))) e.internal_name AS "internalName",e.pavilion,e.cell,e.rgi FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) WHERE l.visit_day=$1 ORDER BY COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name)),e.created_at",[hoje]);
+      await client.query('COMMIT');try{await registrarAuditoria(req.user.id,'visitas_dia_fechado',null,{visitDay:hoje,total:total.rows[0].total})}catch(e){}
+      res.json({ok:true,visitDay:hoje,totalInmates:total.rows[0].total,inmates:rows.rows});
+    }catch(e){try{await client.query('ROLLBACK')}catch{};formatarErro(res,e,'Não foi possível fechar as visitas do dia.')}finally{client.release()}
+  });
+
+  app.post('/api/pertences-visitas/visits/day/reopen',exigirBanco,exigirAutenticacao,acessoModulo,async(req,res)=>{
+    const client=await pool.connect();
+    try{
+      await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);const hoje=hojeCampoGrande();
+      await client.query("INSERT INTO pv_visit_days(visit_day,status) VALUES($1,'open') ON CONFLICT(visit_day) DO UPDATE SET status='open',reopened_at=NOW(),reopened_by=$2",[hoje,req.user.id]);
+      let open=await client.query("SELECT list_number,day_list_number FROM pv_visit_lists WHERE visit_day=$1 AND status='open' LIMIT 1 FOR UPDATE",[hoje]);
+      if(!open.rowCount)open=await client.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status,created_by) SELECT $1,COALESCE(MAX(day_list_number),0)+1,'open',$2 FROM pv_visit_lists WHERE visit_day=$1 RETURNING list_number,day_list_number",[hoje,req.user.id]);
+      await client.query('COMMIT');try{await registrarAuditoria(req.user.id,'visitas_dia_reaberto',null,{visitDay:hoje,nextListNumber:open.rows[0].day_list_number})}catch(e){}
+      res.json({ok:true,visitDay:hoje,nextListNumber:open.rows[0].day_list_number});
+    }catch(e){try{await client.query('ROLLBACK')}catch{};formatarErro(res,e,'Não foi possível reabrir as visitas do dia.')}finally{client.release()}
   });
 
   app.get('/api/pertences-visitas/attendances.xlsx', exigirBanco, exigirAutenticacao, acessoModulo, async (_req, res) => {
