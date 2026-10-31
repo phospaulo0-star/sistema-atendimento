@@ -1497,7 +1497,7 @@ app.get('/api/admin/shift-reports', exigirBanco, exigirAutenticacao, exigirAdmin
 app.get('/api/admin/statistics', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
   try{
     const from=String(req.query.from||'').slice(0,10),to=String(req.query.to||'').slice(0,10),team=String(req.query.team||'').toUpperCase();
-    if((from&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(from))||(to&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(to))||(team&&!['A','B','C','D'].includes(team)))return res.status(400).json({ok:false,message:'Filtros de período ou equipe inválidos.'});
+    if((from&&!/^\d{4}-\d{2}-\d{2}$/.test(from))||(to&&!/^\d{4}-\d{2}-\d{2}$/.test(to))||(team&&!['A','B','C','D'].includes(team)))return res.status(400).json({ok:false,message:'Filtros de período ou equipe inválidos.'});
     const params=[];const where=[];
     if(from){params.push(from);where.push('report_date >= $'+params.length+'::date');}
     if(to){params.push(to);where.push('report_date <= $'+params.length+'::date');}
@@ -1509,7 +1509,7 @@ app.get('/api/admin/statistics', exigirBanco, exigirAutenticacao, exigirAdmin, a
 app.get('/api/admin/statistics.xlsx', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
   try{
     const from=String(req.query.from||'').slice(0,10),to=String(req.query.to||'').slice(0,10),team=String(req.query.team||'').toUpperCase();
-    if((from&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(from))||(to&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(to))||(team&&!['A','B','C','D'].includes(team)))return res.status(400).json({ok:false,message:'Filtros de período ou equipe inválidos.'});
+    if((from&&!/^\d{4}-\d{2}-\d{2}$/.test(from))||(to&&!/^\d{4}-\d{2}-\d{2}$/.test(to))||(team&&!['A','B','C','D'].includes(team)))return res.status(400).json({ok:false,message:'Filtros de período ou equipe inválidos.'});
     const params=[];const where=[];
     if(from){params.push(from);where.push('report_date >= $'+params.length+'::date');}
     if(to){params.push(to);where.push('report_date <= $'+params.length+'::date');}
