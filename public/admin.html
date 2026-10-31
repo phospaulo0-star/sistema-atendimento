@@ -14,7 +14,23 @@
 .area-icon{font-size:24px;line-height:1}.view-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 16px}.view-heading h2{margin:0;font-size:20px}
 .stats-placeholder{padding:26px;border:1px dashed #c8cdd4;border-radius:10px;background:#fff;color:var(--muted)}.stats-chart{min-height:300px;display:flex;align-items:center;justify-content:center;padding:12px;overflow:auto}.chart-legend{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}.chart-legend span{display:inline-flex;align-items:center;gap:6px;font-size:13px}.chart-dot{width:11px;height:11px;border-radius:3px;display:inline-block}.chart-bars{width:100%;display:grid;gap:13px}.chart-bar-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(100px,4fr) 44px;gap:10px;align-items:center}.chart-bar-track{height:20px;border-radius:5px;background:#edf0f3;overflow:hidden}.chart-bar-fill{height:100%;border-radius:5px}.chart-svg{width:100%;max-width:760px;height:auto;min-width:320px}.chart-empty{color:var(--muted);padding:36px;text-align:center}.stats-chart svg text{font-family:inherit;fill:var(--text);font-size:12px}@media print{.stats-chart{break-inside:avoid}}.stats-bars{display:grid;gap:12px}.stats-bar-row{display:grid;grid-template-columns:minmax(130px,1fr) 3fr 42px;gap:8px;align-items:center}.stats-bar-track{height:14px;background:#edf0f3;border-radius:10px;overflow:hidden}.stats-bar-fill{height:100%;background:#c7a84b;border-radius:10px}.stats-bar-value{text-align:right;font-weight:bold}.stats .stat strong{font-variant-numeric:tabular-nums}@media print{header,.toolbar,#message,.view-heading button,.view-section:not(.active),#statsFrom,#statsTo,#statsTeam,button{display:none!important}body{background:white}.panel,.stat{box-shadow:none;break-inside:avoid}}
 @media(max-width:650px){.admin-home{grid-template-columns:1fr}}@media(max-width:1000px){.form-grid{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}@media(max-width:600px){header{padding:16px}.form-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat strong{font-size:23px}.panel{padding:12px}}
-</style>
+
+#shiftReportDetail.admin-report-print{padding:0;border:0;box-shadow:none;background:transparent}
+.admin-report-actions{display:flex;gap:8px;justify-content:flex-end;margin:0 0 12px;flex-wrap:wrap}
+.admin-report-paper{background:#fff;color:#111;max-width:950px;margin:0 auto;padding:28px 38px;border:1px solid #d5d5d5;font-family:Arial,Helvetica,sans-serif}
+.admin-report-header{text-align:center;border-bottom:2px solid #222;padding-bottom:14px;margin-bottom:18px}
+.admin-report-brand{font-weight:bold;font-size:13px;letter-spacing:.04em}.admin-report-brand strong{display:block;color:#9b7b24;font-size:17px;margin-top:4px}
+.admin-report-header h1{font-size:19px;margin:18px 0 12px;text-transform:uppercase}
+.admin-report-meta{display:flex;gap:8px 18px;justify-content:center;flex-wrap:wrap;font-size:12px;text-align:left}
+.admin-report-item{margin:0 0 15px;break-inside:avoid;page-break-inside:avoid}
+.admin-report-item h3{font-size:13px;margin:0 0 5px;font-weight:bold;text-transform:uppercase}
+.admin-report-text{font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;padding-left:8px}
+.admin-report-table{width:100%;border-collapse:collapse;table-layout:auto;font-size:10px;margin:6px 0}
+.admin-report-table th,.admin-report-table td{border:1px solid #222;padding:5px;text-align:left;overflow-wrap:anywhere}
+.admin-report-table th{background:#ddd;color:#111;position:static}
+.admin-report-footer{border-top:1px solid #777;margin-top:24px;padding-top:7px;text-align:center;font-size:9px;color:#555}
+@page{size:A4 portrait;margin:14mm}
+@media print{body{background:#fff!important}body *{visibility:hidden!important}#shiftReportDetail.admin-report-print,#shiftReportDetail.admin-report-print *{visibility:visible!important}#shiftReportDetail.admin-report-print{display:block!important;position:absolute!important;left:0!important;top:0!important;width:100%!important;margin:0!important;padding:0!important}.admin-report-actions{display:none!important}.admin-report-paper{max-width:none;border:0;padding:0;margin:0;box-shadow:none}.admin-report-item{break-inside:avoid;page-break-inside:avoid}.admin-report-table th{background:#ddd!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
 </head>
 <body>
 <header><div class="brand"><h1>PAINEL DO ADMINISTRADOR</h1><div>POLÍCIA PENAL DE MATO GROSSO DO SUL</div><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div class="account"><span id="currentUser">Validando sessão...</span><button class="light" onclick="sair()">SAIR</button></div></header>
@@ -104,7 +120,30 @@ async function carregarEventos(){const j=await api('/api/admin/events');events=j
 let shiftReports=[];
 async function carregarRelatoriosPlantao(){try{const j=await api('/api/admin/shift-reports');shiftReports=j.reports||[];renderRelatoriosPlantao()}catch(e){if($('shiftReportsBody'))$('shiftReportsBody').innerHTML='<tr><td colspan="6">'+esc(e.message)+'</td></tr>'}}
 function renderRelatoriosPlantao(){if(!$('shiftReportsBody'))return;const q=($('searchShiftReports').value||'').toLocaleLowerCase('pt-BR');const team=$('filterShiftTeam').value;const status=$('filterShiftStatus').value;const rows=shiftReports.filter(r=>(!team||r.team===team)&&(!status||r.status===status)&&(!q||((r.title||'')+' '+r.team+' '+r.shiftName).toLocaleLowerCase('pt-BR').includes(q)));$('shiftReportsBody').innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.reportDate)}</td><td><strong>Equipe ${esc(r.team)}</strong><span class="sub">${esc(r.shiftName)}</span></td><td>${esc(r.title||'Relatório de plantão')}<span class="sub">Revisão ${r.revision}</span></td><td>${esc(r.status==='encerrado'?'ENCERRADO':'ABERTO')}</td><td>${esc(dt(r.updatedAt))}<span class="sub">${esc(r.updatedUsername||'')}</span></td><td><div class="actions"><button class="blue" onclick="consultarRelatorioPlantao('${esc(r.id)}')">CONSULTAR</button><button class="light" onclick="historicoRelatorioPlantao('${esc(r.id)}')">HISTÓRICO</button></div></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Nenhum relatório encontrado.</td></tr>'}
-async function consultarRelatorioPlantao(id){try{const r=shiftReports.find(x=>x.id===id);if(!r)return;const detail=$('shiftReportDetail');detail.hidden=false;detail.innerHTML=`<div class="panel-title"><h2>${esc(r.title||'Relatório de plantão')} — Equipe ${esc(r.team)}</h2><button class="light" onclick="$('shiftReportDetail').hidden=true">FECHAR</button></div><p><strong>Data:</strong> ${esc(r.reportDate)} &nbsp; <strong>Turno:</strong> ${esc(r.shiftName)} &nbsp; <strong>Status:</strong> ${esc(r.status)} &nbsp; <strong>Revisão:</strong> ${r.revision}</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font:14px Arial;line-height:1.5">${esc(Object.entries(r.content||{}).map(([k,v])=>k+'\n'+(v||'N/C')).join('\n\n'))}</pre>`;detail.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){statusMsg(e.message,'error')}}
+function dataRelatorioAdmin(v){const x=String(v||'').slice(0,10);const m=x.match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:x||'—'}
+function conteudoRelatorioAdmin(r){
+ const itens=Object.entries(r.content||{});
+ return itens.map(([titulo,valor])=>{
+  const bruto=String(valor??'').trim();let corpo='';
+  if(!bruto||/^N\/C\.?$/i.test(bruto))corpo='<div class="admin-report-text">• N/C.</div>';
+  else{let parsed=null;try{parsed=JSON.parse(bruto)}catch{}
+   if(Array.isArray(parsed)&&parsed.length&&parsed.every(x=>x&&typeof x==='object')){
+    const cols=[...new Set(parsed.flatMap(x=>Object.keys(x)))];
+    corpo='<table class="admin-report-table"><thead><tr>'+cols.map(k=>'<th>'+esc(k.replace(/_/g,' ').toLocaleUpperCase('pt-BR'))+'</th>').join('')+'</tr></thead><tbody>'+parsed.map(row=>'<tr>'+cols.map(k=>'<td>'+esc(row[k]??'')+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+   }else corpo='<div class="admin-report-text">'+esc(bruto)+'</div>';
+  }
+  return '<section class="admin-report-item"><h3>'+esc(titulo.replace(/\s*:\s*$/,''))+':</h3>'+corpo+'</section>';
+ }).join('')||'<p>Este relatório não possui conteúdo registrado.</p>';
+}
+async function consultarRelatorioPlantao(id){
+ try{const r=shiftReports.find(x=>x.id===id);if(!r)return;const detail=$('shiftReportDetail');detail.hidden=false;detail.classList.add('admin-report-print');
+ detail.innerHTML='<div class="admin-report-actions no-print"><button class="blue" onclick="imprimirRelatorioAdmin()">IMPRIMIR</button><button class="primary" onclick="imprimirRelatorioAdmin()">BAIXAR PDF</button><button class="light" onclick="fecharRelatorioAdmin()">FECHAR</button></div>'+
+ '<article class="admin-report-paper"><header class="admin-report-header"><div class="admin-report-brand">POLÍCIA PENAL DE MATO GROSSO DO SUL<strong>CPAIG</strong></div><h1>'+esc(r.title||'RELATÓRIO DE PLANTÃO')+'</h1><div class="admin-report-meta"><span><b>Data:</b> '+esc(dataRelatorioAdmin(r.reportDate))+'</span><span><b>Equipe:</b> '+esc(r.team)+'</span><span><b>Turno:</b> '+esc(r.shiftName||'Plantão 24x72h')+'</span><span><b>Status:</b> '+esc(r.status==='encerrado'?'ENCERRADO':'ABERTO')+'</span><span><b>Revisão:</b> '+esc(r.revision)+'</span></div></header><main class="admin-report-content">'+conteudoRelatorioAdmin(r)+'</main><footer class="admin-report-footer">CPAIG — POLÍCIA PENAL DE MATO GROSSO DO SUL</footer></article>';
+ detail.scrollIntoView({behavior:'smooth',block:'start'});
+ }catch(e){statusMsg(e.message,'error')}
+}
+function fecharRelatorioAdmin(){const d=$('shiftReportDetail');d.hidden=true;d.classList.remove('admin-report-print')}
+function imprimirRelatorioAdmin(){window.print()}
 async function historicoRelatorioPlantao(id){try{const j=await api('/api/admin/shift-reports/'+encodeURIComponent(id)+'/history');const detail=$('shiftReportDetail');detail.hidden=false;detail.innerHTML=`<div class="panel-title"><h2>Histórico do relatório</h2><button class="light" onclick="$('shiftReportDetail').hidden=true">FECHAR</button></div>`+(j.history||[]).map(h=>`<div style="border-bottom:1px solid #ddd;padding:10px 0"><strong>${esc(h.action)} · revisão ${h.revision}</strong><div class="muted">${esc(h.full_name||h.username||'Usuário')} · ${esc(dt(h.created_at))}</div><details><summary>Conteúdo anterior e corrigido</summary><pre style="white-space:pre-wrap">${esc(JSON.stringify({anterior:h.previous_content,novo:h.new_content,detalhes:h.details},null,2))}</pre></details></div>`).join('')||'<p>Nenhum evento no histórico.</p>';detail.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){statusMsg(e.message,'error')}}
 let estatisticasRelatorios=[];
 const CHAVES_STATS={
