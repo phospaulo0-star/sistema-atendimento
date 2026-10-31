@@ -2488,44 +2488,31 @@ mostrarToast(
 );
 }
 }
-function guardarTodosHistorico(){
-const elegiveis = historico.filter(registro =>
-registro &&
-registro.status === "recebido" &&
-registro.recordId
-);
+async function guardarTodosHistorico(){
+const elegiveis=historico.filter(registro=>registro&&registro.status==="recebido"&&registro.recordId);
 if(!elegiveis.length){
-mostrarToast(
-"N&#xE3;o h&#xE1; atendimentos recebidos no histórico para guardar.",
-"warning"
-);
+mostrarToast("Não há atendimentos recebidos no histórico para guardar.","warning");
 return;
 }
-if(!confirm(
-"Deseja guardar todos os " + elegiveis.length +
-" atendimentos recebidos do histórico da Mesa? Eles ser&#xE3;o movidos para Atendimentos Guardados."
-)){
-return;
-}
-const agora = new Date().toISOString();
-const idsGuardados = new Set();
-elegiveis.forEach(registro=>{
-registro.status = "guardado";
-registro.guardadoEm = agora;
-atualizarStatusCentralMesa(registro,"guardado");
-if(!arquivo.some(item=>String(item.recordId)===String(registro.recordId))){
-arquivo.push(registro);
-}
-idsGuardados.add(String(registro.recordId));
+if(!confirm("Deseja guardar todos os "+elegiveis.length+" atendimentos recebidos do histórico da Mesa? Eles serão movidos para Atendimentos Guardados."))return;
+let guardados=0, falhas=0;
+for(const registro of elegiveis){
+try{
+const resposta=await fetch("/api/mesa/attendances/"+encodeURIComponent(registro.recordId)+"/archive",{
+method:"PATCH",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({})
 });
-historico = historico.filter(registro=>!idsGuardados.has(String(registro.recordId)));
-salvarTudo();
-renderHistorico();
-renderGuardados();
-mostrarToast(
-elegiveis.length + " atendimentos guardados.",
-"success"
-);
+const dados=await resposta.json().catch(()=>({}));
+if(!resposta.ok)throw new Error(dados.message||"Falha ao guardar");
+const atualizado={...registro,status:"guardado",guardadoEm:dados.guardadoEm||new Date().toISOString()};
+historico=historico.filter(item=>String(item.recordId)!==String(registro.recordId));
+arquivo=arquivo.filter(item=>String(item.recordId)!==String(registro.recordId));
+arquivo.push(atualizado);
+guardados++;
+}catch(erro){falhas++;console.error("Falha ao guardar atendimento "+registro.recordId,erro);}
+}
+salvarTudo();renderHistorico();renderGuardados();
+if(falhas)mostrarToast(guardados+" atendimento(s) guardado(s); "+falhas+" não puderam ser guardados. Permaneceram no histórico.","warning");
+else mostrarToast(guardados+" atendimentos guardados e confirmados pelo servidor.","success");
 }
 async function guardarAtendimento(recordId){
 const indice=historico.findIndex(item=>String(item.recordId)===String(recordId));
