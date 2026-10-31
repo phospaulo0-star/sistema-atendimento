@@ -617,8 +617,7 @@ app.get('/index.html', async (req, res) => {
     const user = await usuarioDaRequisicao(req);
     if (!user) return res.redirect('/login.html');
     if (user.role === 'pertences') return res.redirect('/pertences.html');
-    if (['chefe','auxiliar'].includes(user.role)) return res.redirect('/relatorios.html');
-    if (!['guiche', 'admin'].includes(user.role)) return res.redirect('/mesa.html');
+    if (!['guiche', 'admin', 'chefe', 'auxiliar'].includes(user.role)) return res.redirect('/mesa.html');
     return res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
   } catch { return res.redirect('/login.html'); }
 });
@@ -627,8 +626,7 @@ app.get('/mesa.html', async (req, res) => {
     const user = await usuarioDaRequisicao(req);
     if (!user) return res.redirect('/login.html');
     if (user.role === 'pertences') return res.redirect('/pertences.html');
-    if (['chefe','auxiliar'].includes(user.role)) return res.redirect('/relatorios.html');
-    if (!['mesa', 'admin'].includes(user.role)) return res.redirect('/index.html');
+    if (!['mesa', 'admin', 'chefe', 'auxiliar'].includes(user.role)) return res.redirect('/index.html');
     return res.sendFile(path.join(PUBLIC_DIR, 'mesa.html'));
   } catch { return res.redirect('/login.html'); }
 });
