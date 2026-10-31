@@ -665,7 +665,7 @@ app.post('/api/auth/login', exigirBanco, async (req, res) => {
         motivo: user ? 'senha_invalida' : 'usuario_inexistente'
       });
       await new Promise(resolve => setTimeout(resolve, 250));
-      return res.status(401).json({ ok: false, message: 'UsuÃÂÃÂ¡rio ou senha invÃÂÃÂ¡lidos.' });
+      return res.status(401).json({ ok: false, message: 'Usuário ou senha inválidos.' });
     }
     const token = crypto.randomBytes(32).toString('base64url');
     const expires = new Date(Date.now() + SESSION_HORAS * 60 * 60 * 1000);
