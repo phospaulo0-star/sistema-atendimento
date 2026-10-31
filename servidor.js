@@ -2158,8 +2158,8 @@ async function iniciar() {
       dbErrorMessage = null;
       console.log('Banco Neon conectado; tabelas verificadas e filas restauradas.');
     } catch (e) {
-      dbErrorMessage = 'NÃÂÃÂ£o foi possÃÂÃÂ­vel inicializar o Neon. Confira DATABASE_URL e as permissÃÂÃÂµes do banco.';
-      console.error(dbErrorMessage, e.message);
+      dbErrorMessage = 'Não foi possível inicializar o banco de dados. Consulte os logs do servidor para identificar a causa.';
+      console.error('Falha ao inicializar o banco Neon:', e);
     }
   }
   server.listen(PORT, '0.0.0.0', () => console.log(`Sistema Atendimento V${VERSAO} iniciado na porta ${PORT}`));
