@@ -1894,7 +1894,7 @@ async function inicializarPertencesVisitas(pool) {
     "ALTER TABLE pv_visit_lists ADD COLUMN IF NOT EXISTS visit_day DATE;",
     "UPDATE pv_visit_lists SET visit_day=(created_at AT TIME ZONE 'America/Campo_Grande')::date WHERE visit_day IS NULL;",
     "ALTER TABLE pv_visit_lists ADD COLUMN IF NOT EXISTS day_list_number INTEGER;",
-    "WITH numbered AS (SELECT list_number, ROW_NUMBER() OVER (PARTITION BY visit_day ORDER BY created_at,list_number)::integer AS n FROM pv_visit_lists) UPDATE pv_visit_lists l SET day_list_number=numbered.n FROM numbered WHERE l.list_number=numbered.list_number AND l.day_list_number IS NULL;",
+    "WITH numbered AS (SELECT list_number, ROW_NUMBER() OVER (PARTITION BY visit_day ORDER BY created_at,list_number)::integer AS n FROM pv_visit_lists) UPDATE pv_visit_lists l SET day_list_number=numbered.n FROM numbered WHERE l.list_number=numbered.list_number;",
     "ALTER TABLE pv_visit_lists ALTER COLUMN visit_day SET DEFAULT ((NOW() AT TIME ZONE 'America/Campo_Grande')::date);",
     "ALTER TABLE pv_visit_lists ALTER COLUMN visit_day SET NOT NULL;",
     "ALTER TABLE pv_visit_lists ALTER COLUMN day_list_number SET DEFAULT 1;",
