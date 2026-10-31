@@ -585,7 +585,7 @@ body.preview-mode #previewContent .material-carga-tabela td:first-child { text-a
   <div class="toolbar" style="margin-top:8px"><button type="button" class="primary" onclick="adicionarLinhaEscalaNoturna()">＋ ADICIONAR TURNO</button></div>
   <textarea id="s10" data-section="11 – ESCALA NOTURNA (MONITORAMENTO)" rows="3" style="display:none" aria-hidden="true"></textarea>
 </section>
-<section class="field item12-field"><label>12 – EXPEDIENTE</label><p class="small">Marque os nomes que devem aparecer em cada setor. Você pode cadastrar nomes adicionais e criar novos setores. Os nomes selecionados ficam gravados no relatório.</p><div id="item12Setores"></div><div class="toolbar no-print" style="margin:10px 0"><input id="item12NovoSetor" type="text" placeholder="Nome do novo setor" style="max-width:260px;padding:9px;border:1px solid #bbc3cc;border-radius:6px"><button type="button" class="primary" onclick="adicionarSetorItem12()">＋ CADASTRAR SETOR</button></div><textarea id="s11" data-section="12 – EXPEDIENTE" rows="3" placeholder="Informações do expediente..." style="display:none" aria-hidden="true"></textarea></section>
+<section class="field item12-field"><label>12 – EXPEDIENTE</label><p class="small">Marque os nomes que devem aparecer em cada setor. Você pode cadastrar nomes adicionais e criar novos setores. Os nomes selecionados ficam gravados no relatório.</p><div id="item12Setores"></div><div class="toolbar no-print" style="margin:10px 0"><input id="item12NovoSetor" type="text" placeholder="Nome do novo setor" style="max-width:260px;padding:9px;border:1px solid #bbc3cc;border-radius:6px"><button type="button" class="primary" onclick="adicionarSetorItem12()">＋ CADASTRAR SETOR</button><button type="button" class="red" onclick="limparTodosItem12()">LIMPAR TODOS</button></div><textarea id="s11" data-section="12 – EXPEDIENTE" rows="3" placeholder="Informações do expediente..." style="display:none" aria-hidden="true"></textarea></section>
 <section class="field custodia-hospitalar-field">
   <label>13 – CUSTÓDIA HOSPITALAR</label>
   <p class="small">Inclua quantos registros forem necessários. Selecione um servidor da lista do Item 05 ou digite manualmente; cada registro tem complemento próprio. Excluir aqui não remove o nome da lista compartilhada.</p>
@@ -1282,6 +1282,12 @@ function renderItem12(){
  // Mantém nomes personalizados já gravados no relatório.
  item12Setores.forEach(setor=>{const nomes=item12Selecionados[item12Normalizar(setor.name)]||[];nomes.forEach(nome=>{if(!setor.names.some(x=>item12Normalizar(x)===item12Normalizar(nome)))setor.names.push(nome);});});
  salvarCadastroItem12();
+ renderItem12();
+}
+function limparTodosItem12(){
+ if(!confirm('Deseja desmarcar todos os nomes selecionados no Item 12? Os setores e nomes cadastrados serão mantidos.'))return;
+ item12Selecionados={};
+ sincronizarItem12();
  renderItem12();
 }
 function adicionarSetorItem12(){
