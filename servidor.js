@@ -116,7 +116,8 @@ function perfilValido(role, canal) {
   if (role === 'admin') return canal === 'sender' || canal === 'receiver';
   if (role === 'guiche') return canal === 'sender';
   if (role === 'mesa') return canal === 'receiver';
-  return false; // chefe/auxiliar acessam somente os relatÃÂ³rios, nÃÂ£o o WebSocket de atendimentos.
+  if (role === 'chefe' || role === 'auxiliar') return canal === 'sender' || canal === 'receiver';
+  return false;
 }
 function enviar(ws, dados) {
   if (!ws || ws.readyState !== WebSocket.OPEN) return false;
@@ -1857,8 +1858,8 @@ function acessoModulo(req, res, next) {
   next();
 }
 function acessoListasMesa(req, res, next) {
-  if (!req.user || !['admin', 'pertences', 'mesa'].includes(req.user.role)) {
-    return res.status(403).json({ ok: false, message: 'Acesso restrito ÃÂ s listas de visitas.' });
+  if (!req.user || !['admin', 'pertences', 'mesa', 'chefe', 'auxiliar'].includes(req.user.role)) {
+    return res.status(403).json({ ok: false, message: 'Acesso restrito às listas de visitas.' });
   }
   next();
 }
