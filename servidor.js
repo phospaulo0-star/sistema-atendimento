@@ -1418,7 +1418,7 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     const old=current.rows[0];
     if(old.team!==req.user.team){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Este relatÃÂ³rio pertence a outra equipe.'});}
     const escalaAtual = estadoPlantaoRelatorio();
-    const equipeReabrindoRelatorioAnterior = action==='reabrir' && ['chefe','auxiliar'].includes(req.user.role) && String(old.report_date).slice(0,10)<String(escalaAtual.shiftDate).slice(0,10);
+    const equipeReabrindoRelatorioAnterior = action==='reabrir' && ['chefe','auxiliar'].includes(req.user.role);
     const correcaoDeRelatorioReaberto = old.status==='aberto' && Boolean(old.reopened_at) && Boolean(old.reopened_by);
     if(req.user.team!==escalaAtual.onDutyTeam && !equipeReabrindoRelatorioAnterior && !correcaoDeRelatorioReaberto){
       await client.query('ROLLBACK');
@@ -1426,7 +1426,7 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     }
     if(old.revision!==expected){await client.query('ROLLBACK');return res.status(409).json({ok:false,conflict:true, message:'Este relatÃÂ³rio foi alterado por outra pessoa. Os dados do servidor foram preservados; atualize e compare antes de continuar.', report:relatorioPublico(old)});}
     if(old.status==='encerrado' && action!=='reabrir'){await client.query('ROLLBACK');return res.status(409).json({ok:false,message:'O relatÃÂ³rio estÃÂ¡ encerrado. Reabra-o para fazer alteraÃÂ§ÃÂµes.'});}
-    if(action==='reabrir' && !['chefe','auxiliar'].includes(req.user.role)){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Somente chefe ou auxiliar da equipe podem reabrir um relatÃÂ³rio encerrado após a passagem do plantão.'});} if(action==='reabrir' && String(old.report_date).slice(0,10)>=String(escalaAtual.shiftDate).slice(0,10)){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'A reabertura por chefe ou auxiliar só é permitida após o início do novo plantão, às 08h.'});}
+    if(action==='reabrir' && !['chefe','auxiliar'].includes(req.user.role)){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Somente chefe ou auxiliar da equipe podem reabrir um relatÃÂ³rio encerrado após a passagem do plantão.'});}
     const status=action==='encerrar'?'encerrado':action==='reabrir'?'aberto':old.status;
     const revision=old.revision+1;
     const updated=await client.query(`UPDATE shift_reports SET report_date=$2,shift_name=$3,title=$4,content=$5::jsonb,status=$6,revision=$7,updated_by=$8,updated_at=NOW(),closed_at=CASE WHEN $6='encerrado' THEN NOW() WHEN $6='aberto' THEN NULL ELSE closed_at END,closed_by=CASE WHEN $6='encerrado' THEN $8 WHEN $6='aberto' THEN NULL ELSE closed_by END,reopened_at=CASE WHEN $9 THEN NOW() ELSE reopened_at END,reopened_by=CASE WHEN $9 THEN $8 ELSE reopened_by END WHERE id=$1 RETURNING *`,[id,reportDate,shiftName,title,JSON.stringify(content),status,revision,req.user.id,action==='reabrir']);
