@@ -1979,6 +1979,29 @@ function montarRotasPertencesVisitas(config) {
     } catch (e) { formatarErro(res, e, 'NÃÂÃÂ£o foi possÃÂÃÂ­vel salvar o recebimento de pertences.'); }
   });
 
+  let timerFechamentoVisitasAtivo = false;
+  function iniciarAgendamentoFechamentoVisitas() {
+    if (timerFechamentoVisitasAtivo) return;
+    timerFechamentoVisitasAtivo = true;
+    const verificar = async () => {
+      const hora = new Intl.DateTimeFormat('en-GB',{timeZone:'America/Campo_Grande',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
+      if (hora < '12:00') return;
+      let client;
+      try {
+        client=await pool.connect();
+        await client.query('BEGIN');
+        await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);
+        await atualizarFechamentoAutomaticoVisitas(client);
+        await client.query('COMMIT');
+      } catch(e) {
+        if(client)try{await client.query('ROLLBACK')}catch{}
+        console.error('Falha no fechamento automático das visitas:',e.message);
+      } finally { if(client)client.release(); }
+    };
+    setInterval(verificar,30000);
+    verificar();
+  }
+
   async function atualizarFechamentoAutomaticoVisitas(client) {
     const hoje = hojeCampoGrande();
     const hora = new Intl.DateTimeFormat('en-GB',{timeZone:'America/Campo_Grande',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
@@ -2067,6 +2090,8 @@ function montarRotasPertencesVisitas(config) {
     }catch(e){try{await client.query('ROLLBACK')}catch{};formatarErro(res,e,'Não foi possível reabrir as visitas do dia.')}finally{client.release()}
   });
 
+  iniciarAgendamentoFechamentoVisitas();
+
   app.get('/api/pertences-visitas/attendances.xlsx', exigirBanco, exigirAutenticacao, acessoModulo, async (_req, res) => {
     try {
       const data = await pool.query("SELECT a.record_id, a.created_at, a.received_at, a.status, a.refusal_reason, a.record, u.username AS owner_username FROM attendances a LEFT JOIN users u ON u.id=a.owner_id ORDER BY a.created_at DESC");
@@ -2099,11 +2124,12 @@ function montarRotasPertencesVisitas(config) {
     try {
       const results = await Promise.all([
         pool.query('SELECT record_id AS id, internal_name AS "internalName", rgi, pavilion, cell, deliverer_name AS "delivererName", relationship, received_at AS "receivedAt", created_by AS "createdBy" FROM pv_belongings ORDER BY received_at'),
-        pool.query('SELECT list_number AS "listNumber", status, created_at AS "createdAt", closed_at AS "closedAt", created_by AS "createdBy" FROM pv_visit_lists ORDER BY list_number'),
-        pool.query('SELECT entry_id AS id, list_number AS "listNumber", internal_name AS "internalName", rgi, pavilion, cell, created_at AS "createdAt", created_by AS "createdBy" FROM pv_visit_entries ORDER BY list_number, created_at'),
+        pool.query('SELECT list_number AS "listNumber",day_list_number AS "dayListNumber",visit_day AS "visitDay",status,created_at AS "createdAt",closed_at AS "closedAt",created_by AS "createdBy" FROM pv_visit_lists ORDER BY visit_day,day_list_number'),
+        pool.query('SELECT entry_id AS id,list_number AS "listNumber",internal_name AS "internalName",rgi,pavilion,cell,created_at AS "createdAt",created_by AS "createdBy" FROM pv_visit_entries ORDER BY list_number,created_at'),
+        pool.query('SELECT visit_day AS "visitDay",status,closed_at AS "closedAt",closed_by AS "closedBy",reopened_at AS "reopenedAt",reopened_by AS "reopenedBy" FROM pv_visit_days ORDER BY visit_day'),
         pool.query('SELECT items, updated_at AS "updatedAt", updated_by AS "updatedBy" FROM internal_base WHERE singleton_id=1')
       ]);
-      const payload = { exportedAt: new Date().toISOString(), note: 'Backup de Pertences e Visitas e cÃÂÃÂ³pia de referÃÂÃÂªncia da base compartilhada. Os atendimentos sÃÂÃÂ£o baixados separadamente pelo botÃÂÃÂ£o Excel.', belongings: results[0].rows, visitLists: results[1].rows, visitEntries: results[2].rows, internalBase: results[3].rows[0] || { items: [], updatedAt: null, updatedBy: null } };
+      const payload = { exportedAt: new Date().toISOString(), note: 'Backup de Pertences e Visitas e cÃÂÃÂ³pia de referÃÂÃÂªncia da base compartilhada. Os atendimentos sÃÂÃÂ£o baixados separadamente pelo botÃÂÃÂ£o Excel.', belongings: results[0].rows, visitLists: results[1].rows, visitEntries: results[2].rows, visitDays: results[3].rows, internalBase: results[4].rows[0] || { items: [], updatedAt: null, updatedBy: null } };
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename="Backup_Pertences_Visitas_' + hojeCampoGrande() + '.json"');
       res.send(JSON.stringify(payload, null, 2));
