@@ -1902,8 +1902,6 @@ async function inicializarPertencesVisitas(pool) {
     "CREATE TABLE IF NOT EXISTS pv_visit_days (visit_day DATE PRIMARY KEY, status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')), closed_at TIMESTAMPTZ, closed_by TEXT REFERENCES users(id), reopened_at TIMESTAMPTZ, reopened_by TEXT REFERENCES users(id));",
     "INSERT INTO pv_visit_days(visit_day,status,closed_at) SELECT visit_day,CASE WHEN BOOL_AND(status='closed') THEN 'closed' ELSE 'open' END,MAX(closed_at) FROM pv_visit_lists GROUP BY visit_day ON CONFLICT (visit_day) DO NOTHING;",
     "DROP INDEX IF EXISTS pv_visit_one_open_list;",
-    "WITH ranked_open AS (SELECT list_number, ROW_NUMBER() OVER (PARTITION BY visit_day ORDER BY day_list_number DESC, created_at DESC, list_number DESC) AS rn FROM pv_visit_lists WHERE status='open') UPDATE pv_visit_lists l SET status='closed', closed_at=COALESCE(l.closed_at,NOW()) FROM ranked_open r WHERE l.list_number=r.list_number AND r.rn>1;",
-    "CREATE UNIQUE INDEX IF NOT EXISTS pv_visit_one_open_list_per_day ON pv_visit_lists(visit_day) WHERE status='open';",
     "CREATE INDEX IF NOT EXISTS pv_visit_lists_day_idx ON pv_visit_lists(visit_day,day_list_number);",
     "CREATE TABLE IF NOT EXISTS pv_visit_entries (",
     "  entry_id TEXT PRIMARY KEY, list_number BIGINT NOT NULL REFERENCES pv_visit_lists(list_number),",
@@ -1914,6 +1912,24 @@ async function inicializarPertencesVisitas(pool) {
     "INSERT INTO pv_visit_days(visit_day,status) VALUES ((NOW() AT TIME ZONE 'America/Campo_Grande')::date,'open') ON CONFLICT (visit_day) DO NOTHING;",
     "INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT (NOW() AT TIME ZONE 'America/Campo_Grande')::date,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') AND EXISTS (SELECT 1 FROM pv_visit_days WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open');"
   ].join('\n'));
+
+  // Executa a limpeza e a criação do índice em comandos separados.
+  // Assim, uma duplicidade não desfaz a criação das tabelas acima.
+  await pool.query("DROP INDEX IF EXISTS pv_visit_one_open_list_per_day");
+  await pool.query(`WITH ranked_open AS (
+    SELECT list_number,
+           ROW_NUMBER() OVER (
+             PARTITION BY visit_day
+             ORDER BY day_list_number DESC, created_at DESC, list_number DESC
+           ) AS rn
+    FROM pv_visit_lists
+    WHERE status='open'
+  )
+  UPDATE pv_visit_lists l
+     SET status='closed', closed_at=COALESCE(l.closed_at,NOW())
+    FROM ranked_open r
+   WHERE l.list_number=r.list_number AND r.rn>1`);
+  await pool.query("CREATE UNIQUE INDEX IF NOT EXISTS pv_visit_one_open_list_per_day ON pv_visit_lists(visit_day) WHERE status='open'");
 }
 
 function montarRotasPertencesVisitas(config) {
