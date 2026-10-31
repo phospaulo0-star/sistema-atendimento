@@ -2721,8 +2721,9 @@ function selecionarItemRelatorio(indice){
  botoes?.forEach((b,i)=>b.classList.toggle('active',i===indice));
  secoes[grupo.indices[0]]?.scrollIntoView({behavior:'smooth',block:'start'});
 }
-function abrirGuicheRelatorio(){if(!me||!['chefe','auxiliar'].includes(me.role)){alert('Acesso permitido somente para chefe ou auxiliar.');return;}location.href='/index.html';}
-function abrirConsultaMesaRelatorio(){if(!me||!['chefe','auxiliar'].includes(me.role)){alert('Acesso permitido somente para chefe ou auxiliar.');return;}location.href='/mesa.html';}
+function abrirAtalhoRelatorio(caminho){if(!me||!['chefe','auxiliar'].includes(me.role)){alert('Acesso permitido somente para chefe ou auxiliar.');return;}const aba=window.open(caminho,'_blank');if(aba){try{aba.opener=null;}catch(e){}}else{alert('O navegador bloqueou a abertura da nova aba. Vou abrir a página nesta mesma aba.');location.assign(caminho);}}
+function abrirGuicheRelatorio(){abrirAtalhoRelatorio('/index.html');}
+function abrirConsultaMesaRelatorio(){abrirAtalhoRelatorio('/mesa.html');}
 function alternarAssinaturasRelatorio(){
  const editor=$('editor');if(!editor)return;
  const titulos=Array.from(editor.querySelectorAll('strong')).filter(el=>/ASSINATURA NA MOVIMENTAÇÃO CARCERÁRIA|ASSINATURAS DOS CHEFES DE EQUIPE/i.test(el.textContent||''));
