@@ -1199,6 +1199,10 @@ function heStatus(text) {
   if (el) el.textContent = text;
 }
 
+function item05PodeEditar() {
+  return !readOnly && canWork && ['chefe','auxiliar'].includes(me?.role) && (!current || current.status !== 'encerrado');
+}
+
 function normalizarNomeHE(nome) {
   return String(nome || '')
     .normalize('NFD')
@@ -1278,11 +1282,7 @@ async function carregarNomesHE() {
         select.appendChild(option);
       });
 
-    const podeEditar =
-      !readOnly &&
-      ['chefe', 'auxiliar'].includes(me.role) &&
-      current &&
-      current.status !== 'encerrado';
+    const podeEditar = item05PodeEditar();
 
     $('heSelectBtn').disabled = !podeEditar;
     $('heAddBtn').disabled = !podeEditar;
@@ -1311,11 +1311,8 @@ async function carregarNomesHE() {
  */
 async function cadastrarListaPadraoEquipeC() {
   if (
-    readOnly ||
-    !['chefe', 'auxiliar'].includes(me?.role) ||
-    me.team !== 'C' ||
-    !current ||
-    current.status === 'encerrado'
+    !item05PodeEditar() ||
+    me.team !== 'C'
   ) {
     heStatus(
       'Esta operação está disponível para chefe ou auxiliar da equipe C, ' +
@@ -1387,11 +1384,7 @@ async function cadastrarListaPadraoEquipeC() {
  * Após o cadastro, recarrega os campos dependentes (item 01, férias e troca de plantão).
  */
 async function adicionarNomeHE() {
-  if (readOnly || !['chefe', 'auxiliar'].includes(me?.role)) {
-    return;
-  }
-
-  if (!current || current.status === 'encerrado') {
+  if (!item05PodeEditar()) {
     heStatus('Abra um relatório em edição antes de adicionar nomes à lista compartilhada.');
     return;
   }
