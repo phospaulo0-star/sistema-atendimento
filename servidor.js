@@ -1908,7 +1908,8 @@ async function inicializarPertencesVisitas(pool) {
     "  internal_name TEXT NOT NULL, rgi TEXT NOT NULL DEFAULT '', pavilion TEXT NOT NULL DEFAULT '', cell TEXT NOT NULL DEFAULT '',",
     "  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), created_by TEXT REFERENCES users(id)",
     ");",
-    "CREATE INDEX IF NOT EXISTS pv_visit_entries_list_idx ON pv_visit_entries(list_number, created_at);",
+    "ALTER TABLE pv_visit_entries ADD COLUMN IF NOT EXISTS visitor_count INTEGER NOT NULL DEFAULT 1 CHECK (visitor_count IN (1,2));",
+    "CREATE INDEX IF NOT EXISTS pv_visit_entries_list_idx ON pv_visit_entries(list_number, created_at);"
     "INSERT INTO pv_visit_days(visit_day,status) VALUES ((NOW() AT TIME ZONE 'America/Campo_Grande')::date,'open') ON CONFLICT (visit_day) DO NOTHING;",
     "INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT (NOW() AT TIME ZONE 'America/Campo_Grande')::date,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') AND EXISTS (SELECT 1 FROM pv_visit_days WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') ON CONFLICT (visit_day) WHERE status='open' DO NOTHING;"
   ].join('\n'));
@@ -2037,16 +2038,17 @@ function montarRotasPertencesVisitas(config) {
       try { await client.query('BEGIN'); await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]); await atualizarFechamentoAutomaticoVisitas(client); await client.query('COMMIT'); }
       catch(e){try{await client.query('ROLLBACK')}catch{} throw e} finally{client.release()}
       const lists = await pool.query('SELECT list_number AS "listNumber",day_list_number AS "dayListNumber",visit_day AS "visitDay",status,created_at AS "createdAt",closed_at AS "closedAt" FROM pv_visit_lists ORDER BY visit_day DESC,day_list_number');
-      const entries = await pool.query('SELECT e.entry_id AS id,e.list_number AS "listNumber",l.day_list_number AS "dayListNumber",l.visit_day AS "visitDay",e.internal_name AS "internalName",e.rgi,e.pavilion,e.cell,e.created_at AS "createdAt" FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) ORDER BY l.visit_day DESC,l.day_list_number,e.created_at,e.internal_name');
+      const entries = await pool.query('SELECT e.entry_id AS id,e.list_number AS "listNumber",l.day_list_number AS "dayListNumber",l.visit_day AS "visitDay",e.internal_name AS "internalName",e.rgi,e.pavilion,e.cell,e.visitor_count AS "visitorCount",e.created_at AS "createdAt" FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) ORDER BY l.visit_day DESC,l.day_list_number,e.created_at,e.internal_name');
       const days = await pool.query(`SELECT d.visit_day AS "visitDay",d.status,d.closed_at AS "closedAt",d.reopened_at AS "reopenedAt",COUNT(DISTINCT COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name)))::integer AS "totalInmates" FROM pv_visit_days d LEFT JOIN pv_visit_lists l ON l.visit_day=d.visit_day LEFT JOIN pv_visit_entries e ON e.list_number=l.list_number GROUP BY d.visit_day,d.status,d.closed_at,d.reopened_at ORDER BY d.visit_day DESC`);
-      const summary = await pool.query(`SELECT DISTINCT ON (l.visit_day,COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name))) l.visit_day AS "visitDay",e.internal_name AS "internalName",e.rgi,e.pavilion,e.cell FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) ORDER BY l.visit_day,COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name)),e.created_at`);
+      const summary = await pool.query(`SELECT DISTINCT ON (l.visit_day,COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name))) l.visit_day AS "visitDay",e.internal_name AS "internalName",e.rgi,e.pavilion,e.cell,e.visitor_count AS "visitorCount" FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) ORDER BY l.visit_day,COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name)),e.created_at`);
       res.json({ok:true,lists:lists.rows,entries:entries.rows,days:days.rows,summary:summary.rows,serverTime:new Date().toISOString()});
     } catch(e){formatarErro(res,e,'Não foi possível carregar as listas de visitas.')}
   });
 
   app.post('/api/pertences-visitas/visits/entries', exigirBanco, exigirAutenticacao, acessoModulo, async (req,res)=>{
-    const internalName=texto(req.body&&req.body.internalName,200),rgi=texto(req.body&&req.body.rgi,80),pavilion=texto(req.body&&req.body.pavilion,100),cell=texto(req.body&&req.body.cell,30);
+    const internalName=texto(req.body&&req.body.internalName,200),rgi=texto(req.body&&req.body.rgi,80),pavilion=texto(req.body&&req.body.pavilion,100),cell=texto(req.body&&req.body.cell,30),visitorCount=Number(req.body&&req.body.visitorCount||1);
     if(!internalName)return res.status(400).json({ok:false,message:'Selecione o nome do interno.'});
+    if(!Number.isInteger(visitorCount)||visitorCount<1||visitorCount>2)return res.status(400).json({ok:false,message:'A quantidade de visitantes deve ser 1 ou 2.'});
     const client=await pool.connect();
     try{
       await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);await atualizarFechamentoAutomaticoVisitas(client);
@@ -2055,9 +2057,9 @@ function montarRotasPertencesVisitas(config) {
       let current=await client.query("SELECT list_number,day_list_number FROM pv_visit_lists WHERE visit_day=$1 AND status='open' ORDER BY day_list_number DESC LIMIT 1 FOR UPDATE",[hoje]);
       if(!current.rowCount){const next=await client.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status,created_by) SELECT $1,COALESCE(MAX(day_list_number),0)+1,'open',$2 FROM pv_visit_lists WHERE visit_day=$1 RETURNING list_number,day_list_number",[hoje,req.user.id]);current=next;}
       const number=current.rows[0].list_number;
-      const result=await client.query('INSERT INTO pv_visit_entries(entry_id,list_number,internal_name,rgi,pavilion,cell,created_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING entry_id AS id,list_number AS "listNumber",internal_name AS "internalName",rgi,pavilion,cell,created_at AS "createdAt"',[crypto.randomUUID(),number,internalName,rgi,pavilion,cell,req.user.id]);
+      const result=await client.query('INSERT INTO pv_visit_entries(entry_id,list_number,internal_name,rgi,pavilion,cell,visitor_count,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING entry_id AS id,list_number AS "listNumber",internal_name AS "internalName",rgi,pavilion,cell,visitor_count AS "visitorCount",created_at AS "createdAt"',[crypto.randomUUID(),number,internalName,rgi,pavilion,cell,visitorCount,req.user.id]);
       await client.query('COMMIT');
-      try{await registrarAuditoria(req.user.id,'visita_incluida_lista',null,{listNumber:number,dayListNumber:current.rows[0].day_list_number,visitDay:hoje,internalName,rgi})}catch(e){console.error('Falha ao registrar auditoria de visitas:',e.message)}
+      try{await registrarAuditoria(req.user.id,'visita_incluida_lista',null,{listNumber:number,dayListNumber:current.rows[0].day_list_number,visitDay:hoje,internalName,rgi,visitorCount})}catch(e){console.error('Falha ao registrar auditoria de visitas:',e.message)}
       res.status(201).json({ok:true,entry:{...result.rows[0],dayListNumber:current.rows[0].day_list_number,visitDay:hoje}});
     }catch(e){try{await client.query('ROLLBACK')}catch{};if(e.message&&e.message.includes('visitas deste dia'))return res.status(409).json({ok:false,message:e.message});formatarErro(res,e,'Não foi possível incluir o interno na lista de visitas.')}
     finally{client.release()}
@@ -2086,7 +2088,7 @@ function montarRotasPertencesVisitas(config) {
       await client.query("UPDATE pv_visit_lists SET status='closed',closed_at=COALESCE(closed_at,NOW()) WHERE visit_day=$1 AND status='open'",[hoje]);
       await client.query("UPDATE pv_visit_days SET status='closed',closed_at=NOW(),closed_by=$2,reopened_at=NULL,reopened_by=NULL WHERE visit_day=$1",[hoje,req.user.id]);
       const total=await client.query("SELECT COUNT(DISTINCT COALESCE(NULLIF(rgi,''),LOWER(internal_name)))::integer AS total FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) WHERE l.visit_day=$1",[hoje]);
-      const rows=await client.query(`SELECT DISTINCT ON(COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name))) e.internal_name AS "internalName",e.pavilion,e.cell,e.rgi FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) WHERE l.visit_day=$1 ORDER BY COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name)),e.created_at`,[hoje]);
+      const rows=await client.query(`SELECT DISTINCT ON(COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name))) e.internal_name AS "internalName",e.pavilion,e.cell,e.rgi,e.visitor_count AS "visitorCount" FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) WHERE l.visit_day=$1 ORDER BY COALESCE(NULLIF(e.rgi,''),LOWER(e.internal_name)),e.created_at`,[hoje]);
       await client.query('COMMIT');try{await registrarAuditoria(req.user.id,'visitas_dia_fechado',null,{visitDay:hoje,total:total.rows[0].total})}catch(e){}
       res.json({ok:true,visitDay:hoje,totalInmates:total.rows[0].total,inmates:rows.rows});
     }catch(e){try{await client.query('ROLLBACK')}catch{};formatarErro(res,e,'Não foi possível fechar as visitas do dia.')}finally{client.release()}
