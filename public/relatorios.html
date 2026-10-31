@@ -2680,37 +2680,44 @@ document.addEventListener('DOMContentLoaded',()=>{const campo=document.getElemen
 
 let itemNavSelecionado=null;
 let gruposItensRelatorio=[];
+function secoesNavegacaoRelatorio(){
+ const grade=$('editor')?.querySelector(':scope > .grid');
+ return grade?Array.from(grade.children).filter(el=>el.matches('.field')):[];
+}
 function configurarNavegacaoItens(){
- const botoes=$('itemsNavButtons'),editor=$('editor');if(!botoes||!editor)return;
- const grade=editor.querySelector(':scope > .grid');if(!grade)return;
- const secoes=Array.from(grade.children).filter(el=>el.matches('section.field'));
+ const botoes=$('itemsNavButtons');
+ const secoes=secoesNavegacaoRelatorio();
+ if(!botoes||!secoes.length)return;
  gruposItensRelatorio=[];
  secoes.forEach((secao,indice)=>{
-  const label=secao.querySelector(':scope > label');
+  const label=Array.from(secao.children).find(el=>el.matches('label'))||secao.querySelector('label');
   const titulo=(label?.textContent||'').replace(/\s+/g,' ').trim();
   const match=titulo.match(/^\s*(\d{1,2})(?:\.(\d+))?\s*[–—.-]/);
   if(!match)return;
-  const numero=Number(match[1]);
-  const sub=Boolean(match[2]);
-  if(sub&&gruposItensRelatorio.length&&gruposItensRelatorio[gruposItensRelatorio.length-1].numero===numero){
-   gruposItensRelatorio[gruposItensRelatorio.length-1].indices.push(indice);
-   gruposItensRelatorio[gruposItensRelatorio.length-1].titulos.push(titulo);
-  }else{
-   gruposItensRelatorio.push({numero,indices:[indice],titulo, titulos:[titulo]});
-  }
+  const numero=Number(match[1]),sub=Boolean(match[2]);
+  const anterior=gruposItensRelatorio[gruposItensRelatorio.length-1];
+  if(sub&&anterior&&anterior.numero===numero){anterior.indices.push(indice);anterior.titulos.push(titulo);}
+  else gruposItensRelatorio.push({numero,indices:[indice],titulo,titulos:[titulo]});
  });
- botoes.innerHTML='';
+ botoes.replaceChildren();
  gruposItensRelatorio.forEach((grupo,indice)=>{
-  const botao=document.createElement('button');botao.type='button';
-  botao.textContent=grupo.titulo;botao.dataset.index=String(indice);
-  botao.addEventListener('click',()=>selecionarItemRelatorio(indice));botoes.appendChild(botao);
+  const botao=document.createElement('button');
+  botao.type='button';botao.textContent=grupo.titulo;botao.dataset.index=String(indice);
+  botao.addEventListener('click',()=>selecionarItemRelatorio(indice));
+  botoes.appendChild(botao);
  });
+ const painel=$('itemsNavPanel');
+ if(painel){painel.classList.add('hidden');painel.style.display='none';}
 }
-function alternarNavegacaoItens(){const p=$('itemsNavPanel');if(!p)return;p.classList.toggle('hidden');}
+function alternarNavegacaoItens(){
+ const painel=$('itemsNavPanel');if(!painel)return;
+ const fechado=painel.classList.contains('hidden')||painel.style.display==='none';
+ painel.classList.toggle('hidden',!fechado);
+ painel.style.display=fechado?'block':'none';
+ const botao=$('itemsNavToggle');if(botao)botao.setAttribute('aria-expanded',String(fechado));
+}
 function selecionarItemRelatorio(indice){
- const grade=$('editor')?.querySelector(':scope > .grid');if(!grade)return;
- const secoes=Array.from(grade.children).filter(el=>el.matches('section.field'));
- const botoes=$('itemsNavButtons')?.querySelectorAll('button');
+ const secoes=secoesNavegacaoRelatorio(),botoes=$('itemsNavButtons')?.querySelectorAll('button');
  const grupo=gruposItensRelatorio[indice];if(!grupo)return;
  if(itemNavSelecionado===indice){
   itemNavSelecionado=null;secoes.forEach(el=>el.classList.remove('hidden'));
@@ -2719,9 +2726,10 @@ function selecionarItemRelatorio(indice){
  itemNavSelecionado=indice;
  secoes.forEach((el,i)=>el.classList.toggle('hidden',!grupo.indices.includes(i)));
  botoes?.forEach((b,i)=>b.classList.toggle('active',i===indice));
- secoes[grupo.indices[0]]?.scrollIntoView({behavior:'smooth',block:'start'});
+ const alvo=secoes[grupo.indices[0]];
+ if(alvo)alvo.scrollIntoView({behavior:'smooth',block:'start'});
 }
-function abrirAtalhoRelatorio(caminho){if(!me||!['chefe','auxiliar'].includes(me.role)){alert('Acesso permitido somente para chefe ou auxiliar.');return;}const aba=window.open(caminho,'_blank');if(aba){try{aba.opener=null;}catch(e){}}else{alert('O navegador bloqueou a abertura da nova aba. Vou abrir a página nesta mesma aba.');location.assign(caminho);}}
+function abrirAtalhoRelatorio(caminho){if(!me||!['chefe','auxiliar'].includes(me.role)){alert('Acesso permitido somente para chefe ou auxiliar.');return;}const destino=new URL(caminho,window.location.origin).href;const aba=window.open(destino,'_blank','noopener');if(!aba){alert('O navegador bloqueou a nova aba. Permita pop-ups para este site e tente novamente.');return;}}
 function abrirGuicheRelatorio(){abrirAtalhoRelatorio('/index.html');}
 function abrirConsultaMesaRelatorio(){abrirAtalhoRelatorio('/mesa.html');}
 function alternarAssinaturasRelatorio(){
