@@ -133,18 +133,33 @@ function numeroFinalPassoStats(r){
  for(const p of padroes){const m=raw.match(p);if(m)return Number(m[1]);}
  return null;
 }
+function dataISOStats(v){
+ const x=String(v||'').trim();if(!x)return '';
+ let m=x.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return x;
+ m=x.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(m)return m[3]+'-'+m[2]+'-'+m[1];
+ return '';
+}
+function contarOcorrenciasNaDataStats(r,chave,indiceData,tipo='tab'){
+ const raw=valorItemStats(r,chave);if(!raw||/^N\/C\.?$/i.test(raw))return 0;
+ const dataRel=dataISOStats(r.report_date);if(!dataRel)return 0;
+ if(tipo==='autorizacoes')return linhasStats(raw).filter(l=>/[\p{L}]/u.test(l)).length;
+ return linhasStats(raw).filter(l=>{
+  const colunas=l.split(/\t+/);
+  return colunas.some((v,i)=>i===indiceData&&dataISOStats(v)===dataRel);
+ }).length;
+}
 function somarStats(rs,fn){return rs.reduce((n,r)=>n+fn(r),0)}
 function calcularDadosStats(rs){
  const ordered=[...rs].sort((a,b)=>String(a.report_date).slice(0,10).localeCompare(String(b.report_date).slice(0,10))||String(a.created_at||'').localeCompare(String(b.created_at||''))||String(a.team).localeCompare(String(b.team)));
  const counts={
  Entradas:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.entradas,'json')),
  Saídas:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.saidas,'json')),
- Hospitalizados:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.hospital,'tab')),
- 'Hospitalizados a confirmar':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.hospitalConfirmar,'tab')),
- Óbitos:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.obitos,'tab')),
- 'Licenças judiciais':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.licencas,'tab')),
- 'Saídas temporárias':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.temporarias,'tab')),
- 'Autorizações cumpridas':somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.autorizacoes,'autorizacoes'))
+ Hospitalizados:somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.hospital,1)),
+ 'Hospitalizados a confirmar':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.hospitalConfirmar,1)),
+ Óbitos:somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.obitos,1)),
+ 'Licenças judiciais':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.licencas,2)),
+ 'Saídas temporárias':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.temporarias,1)),
+ 'Autorizações cumpridas':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.autorizacoes,0,'autorizacoes'))
  };
  // População inicial: quantidade informada no Item 01 do primeiro relatório do período.
  const inicial=ordered.length?numeroItem01Stats(ordered[0]):null;
