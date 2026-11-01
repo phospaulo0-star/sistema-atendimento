@@ -1516,6 +1516,38 @@ app.get('/api/admin/statistics', exigirBanco, exigirAutenticacao, exigirAdmin, a
     res.json({ok:true,reports:q.rows.map(r=>({...r,report_date:String(r.report_date||'').slice(0,10)})),count:q.rowCount});
   }catch(e){console.error('Falha ao consultar estatísticas CPAIG:',e.message);res.status(500).json({ok:false,message:'Não foi possível carregar os dados estatísticos.'});}
 });
+app.get('/api/admin/visits-belongings-statistics', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
+  try{
+    const from=String(req.query.from||'').slice(0,10),to=String(req.query.to||'').slice(0,10);
+    if((from&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(from))||(to&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(to))||(from&&to&&from>to))
+      return res.status(400).json({ok:false,message:'Período inválido para consultar visitas e pertences.'});
+    const visitas=await pool.query(`
+      SELECT CASE WHEN ((EXTRACT(DAY FROM l.visit_day)::integer-1)/7)+1=1 THEN '1º DOMINGO' ELSE '2º DOMINGO' END AS period,
+             COALESCE(NULLIF(BTRIM(e.pavilion),''),'N/I') AS pavilion,
+             COUNT(DISTINCT (l.visit_day::text||'|'||COALESCE(NULLIF(BTRIM(e.rgi),''),LOWER(BTRIM(e.internal_name)))))::integer AS inmates,
+             COALESCE(SUM(e.visitor_count),0)::integer AS visitors
+        FROM pv_visit_entries e
+        JOIN pv_visit_lists l USING(list_number)
+       WHERE EXTRACT(DOW FROM l.visit_day)=0
+         AND EXTRACT(DAY FROM l.visit_day)<=14
+         AND ($1::date IS NULL OR l.visit_day >= $1::date)
+         AND ($2::date IS NULL OR l.visit_day <= $2::date)
+       GROUP BY 1,2
+       ORDER BY CASE WHEN (CASE WHEN ((EXTRACT(DAY FROM l.visit_day)::integer-1)/7)+1=1 THEN 1 ELSE 2 END)=1 THEN 1 ELSE 2 END, pavilion
+    `,[from||null,to||null]);
+    const pertences=await pool.query(`
+      SELECT COALESCE(NULLIF(BTRIM(pavilion),''),'N/I') AS pavilion,COUNT(*)::integer AS quantity
+        FROM pv_belongings
+       WHERE ($1::date IS NULL OR received_at >= ($1::date::timestamp AT TIME ZONE 'America/Campo_Grande'))
+         AND ($2::date IS NULL OR received_at < (($2::date+1)::timestamp AT TIME ZONE 'America/Campo_Grande'))
+       GROUP BY 1 ORDER BY 1
+    `,[from||null,to||null]);
+    res.json({ok:true,visits:visitas.rows,belongings:pertences.rows,from:from||null,to:to||null});
+  }catch(e){
+    console.error('Falha ao consultar estatísticas de visitas e pertences:',e.message);
+    res.status(500).json({ok:false,message:'Não foi possível carregar os indicadores de visitas e pertences.'});
+  }
+});
 app.get('/api/admin/statistics.xlsx', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
   try{
     const from=String(req.query.from||'').slice(0,10),to=String(req.query.to||'').slice(0,10),team=String(req.query.team||'').toUpperCase();
