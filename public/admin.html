@@ -111,8 +111,11 @@ let estatisticasRelatorios=[];
 const CHAVES_STATS={
  entradas:'31 – ENTRADA DE CUSTODIADOS',saidas:'32 – SAÍDA DE CUSTODIADOS',
  hospital:'25 – HOSPITALIZADO',hospitalConfirmar:'25.1 – HOSPITALIZADO A CONFIRMAR',
+ retornoHospital:'26 – RETORNO DE HOSPITALIZADO',
  obitos:'27 – ÓBITO',licencas:'28 – LICENÇA JUDICIAL',
+ retornoLicencas:'28.1 – RETORNO DE LICENÇA JUDICIAL',
  temporarias:'29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)',
+ retornoTemporarias:'29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)',
  autorizacoes:'30 – AUTORIZAÇÕES CUMPRIDAS'
 };
 function valorItemStats(r,chave){return String((r.content||{})[chave]??'').trim()}
@@ -157,17 +160,48 @@ function contarOcorrenciasNaDataStats(r,chave,indiceData,tipo='tab'){
  }).length;
 }
 function somarStats(rs,fn){return rs.reduce((n,r)=>n+fn(r),0)}
+function normalizarTituloEvasaoStats(v){
+ return String(v||'').trim().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleUpperCase('pt-BR').replace(/\\s+/g,' ');
+}
+function lerSaidasStats(r){
+ const raw=valorItemStats(r,CHAVES_STATS.saidas);
+ if(!raw||/^N\\/C\\.?$/i.test(raw))return [];
+ try{
+  const parsed=JSON.parse(raw);
+  return Array.isArray(parsed)?parsed.filter(x=>x&&[x.nome,x.rgi,x.procedencia,x.documento].some(v=>String(v||'').trim())):[];
+ }catch{return [];}
+}
+function contarEvasoesStats(rs){
+ const grupos=new Map();
+ for(const r of rs){
+  for(const saida of lerSaidasStats(r)){
+   const titulo=String(saida.procedencia||'').trim();
+   const chave=normalizarTituloEvasaoStats(titulo);
+   if(!chave.startsWith('EVASAO'))continue;
+   if(!grupos.has(chave))grupos.set(chave,{titulo:titulo.toLocaleUpperCase('pt-BR').replace(/\\s+/g,' '),total:0});
+   grupos.get(chave).total++;
+  }
+ }
+ return Object.fromEntries([...grupos.entries()].sort((a,b)=>a[1].titulo.localeCompare(b[1].titulo,'pt-BR')).map(([chave,item])=>[item.titulo,item.total]));
+}
 function calcularDadosStats(rs){
  const ordered=[...rs].sort((a,b)=>String(a.report_date).slice(0,10).localeCompare(String(b.report_date).slice(0,10))||String(a.created_at||'').localeCompare(String(b.created_at||''))||String(a.team).localeCompare(String(b.team)));
+ const evasoesPorTipo=contarEvasoesStats(ordered);
+ const totalEvasoes=Object.values(evasoesPorTipo).reduce((n,v)=>n+v,0);
  const counts={
  Entradas:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.entradas,'json')),
  Saídas:somarStats(ordered,r=>contarItemStats(r,CHAVES_STATS.saidas,'json')),
  Hospitalizados:somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.hospital,1)),
  'Hospitalizados a confirmar':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.hospitalConfirmar,1)),
+ 'Retorno de hospitalizado (Item 26)':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.retornoHospital,2)),
  Óbitos:somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.obitos,1)),
  'Licenças judiciais':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.licencas,2)),
+ 'Retorno de licença judicial (Item 28.1)':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.retornoLicencas,2)),
  'Saídas temporárias':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.temporarias,1)),
- 'Autorizações cumpridas':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.autorizacoes,0,'autorizacoes'))
+ 'Retorno de saída temporária (Item 29.1)':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.retornoTemporarias,3)),
+ 'Autorizações cumpridas':somarStats(ordered,r=>contarOcorrenciasNaDataStats(r,CHAVES_STATS.autorizacoes,0,'autorizacoes')),
+ ...evasoesPorTipo,
+ 'TOTAL DE EVASÕES':totalEvasoes
  };
  // População inicial: quantidade informada no Item 01 do primeiro relatório do período.
  const inicial=ordered.length?numeroItem01Stats(ordered[0]):null;
@@ -221,7 +255,19 @@ function renderEstatisticas(rs){
  const max=Math.max(1,...Object.values(d.counts));
  $s('statsBars').innerHTML=Object.entries(d.counts).map(([k,v])=>'<div class="stats-bar-row"><strong>'+esc(k)+'</strong><div class="stats-bar-track"><div class="stats-bar-fill" style="width:'+(v/max*100)+'%"></div></div><span class="stats-bar-value">'+v+'</span></div>').join('');
  $s('statsTeamsBody').innerHTML=d.teams.map(t=>'<tr><td>Equipe '+t.team+'</td><td>'+t.reports+'</td><td>'+t.entries+'</td><td>'+t.exits+'</td><td>'+t.balance+'</td></tr>').join('');
- $s('statsOtherBody').innerHTML=[['Hospitalizados','Item 25',d.counts.Hospitalizados],['Hospitalizados a confirmar','Item 25.1',d.counts['Hospitalizados a confirmar']],['Óbitos','Item 27',d.counts.Óbitos],['Licenças judiciais','Item 28',d.counts['Licenças judiciais']],['Saídas temporárias','Item 29',d.counts['Saídas temporárias']],['Autorizações cumpridas','Item 30',d.counts['Autorizações cumpridas']]].map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+'</td></tr>').join('');
+ $s('statsOtherBody').innerHTML=[
+ ['Hospitalizados','Item 25',d.counts.Hospitalizados],
+ ['Hospitalizados a confirmar','Item 25.1',d.counts['Hospitalizados a confirmar']],
+ ['Retorno de hospitalizado','Item 26',d.counts['Retorno de hospitalizado (Item 26)']],
+ ['Óbitos','Item 27',d.counts.Óbitos],
+ ['Licenças judiciais','Item 28',d.counts['Licenças judiciais']],
+ ['Retorno de licença judicial','Item 28.1',d.counts['Retorno de licença judicial (Item 28.1)']],
+ ['Saídas temporárias','Item 29',d.counts['Saídas temporárias']],
+ ['Retorno de saída temporária','Item 29.1',d.counts['Retorno de saída temporária (Item 29.1)']],
+ ['Autorizações cumpridas','Item 30',d.counts['Autorizações cumpridas']],
+ ...Object.entries(d.counts).filter(([k])=>normalizarTituloEvasaoStats(k).startsWith('EVASAO')).map(([k,v])=>[k,'Item 32 – DESTINO/MOTIVO',v]),
+ ['TOTAL DE EVASÕES','Item 32 – DESTINO/MOTIVO',d.counts['TOTAL DE EVASÕES']]
+].map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td><td>'+x[2]+'</td></tr>').join('');
  $s('statsStatus').textContent='Consulta concluída: '+rs.length+' relatório(s) histórico(s). Os itens sem registro ou marcados N/C não aumentam os totais.';
 }
 async function carregarEstatisticas(){
