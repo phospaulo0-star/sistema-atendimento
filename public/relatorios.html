@@ -1982,6 +1982,11 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
    atualizarQuantidadeExtenso();
   }
  }
+ // Item 30: a partir de 01/11/2026, herdar as autorizações cumpridas do relatório do dia anterior (chefe que entregou o plantão), e não do relatório anterior da mesma equipe.
+ const chave30='30 – AUTORIZAÇÕES CUMPRIDAS';
+ if(dataAtual>='2026-11-01'&&relOntem?.content&&Object.prototype.hasOwnProperty.call(relOntem.content,chave30)){
+  atualizado[chave30]=relOntem.content[chave30];
+ }
  // Item 11: recuperar a escala noturna do relatório anterior da mesma equipe.
  const chave11='11 – ESCALA NOTURNA (MONITORAMENTO)';
  if(mesmaEquipe?.content&&String(mesmaEquipe.content[chave11]||'').trim())atualizado[chave11]=mesmaEquipe.content[chave11];
