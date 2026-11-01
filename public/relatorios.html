@@ -467,7 +467,7 @@ body.admin-preview-mode #previewContent{display:block!important;max-width:100%!i
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="confirmarNovoRelatorio()">＋ NOVO RELATÓRIO</button><button type="button" id="guicheShortcut" class="blue hidden" onclick="abrirGuicheRelatorio()">GUICHÊ</button><button type="button" id="mesaShortcut" class="blue hidden" onclick="abrirConsultaMesaRelatorio()">CONSULTA MESA</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" type="button">HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
 <section class="panel no-print" id="reportsPanel"><div class="section-head"><div><h2>Relatórios da equipe</h2><p class="small">O chefe e o auxiliar compartilham o relatório da mesma equipe. O administrador consulta, sem editar.</p></div></div><div class="list" id="reportsList">Carregando…</div><details class="reports-archive" id="reportsArchive"><summary>📁 RELATÓRIOS ANTERIORES <span id="reportsArchiveCount"></span></summary><div class="list" id="archivedReportsList"><p class="small">Carregando…</p></div></details></section>
-<section class="panel no-print" id="itemsNavPanel"><div class="section-head"><div><h3>NAVEGAÇÃO DO RELATÓRIO</h3><p class="small">Selecione um item para abrir somente ele. Clique novamente no item selecionado para voltar a todos.</p></div></div><div class="toolbar" id="itemsNavButtons"></div></section><section class="panel" id="editor"><div class="section-head"><div><h2>Conteúdo do relatório</h2><p class="small">As alterações são salvas automaticamente quando há conexão. Use SALVAR para confirmar imediatamente.</p></div><span class="small" id="revisionLabel"></span></div><textarea id="statusItensConferencia" data-section="CONTROLE DE CONFERÊNCIA DOS ITENS" class="no-print" style="display:none" aria-hidden="true">{}</textarea><div class="grid">
+<section class="panel no-print" id="itemsNavPanel"><div class="section-head"><div><h3>NAVEGAÇÃO DO RELATÓRIO</h3><p class="small">Selecione um item para abrir somente ele.</p></div><button type="button" onclick="mostrarTodosItensRelatorio()">MOSTRAR TODOS</button></div><div class="toolbar" id="itemsNavButtons"></div></section><section class="panel" id="editor"><div class="section-head"><div><h2>Conteúdo do relatório</h2><p class="small">As alterações são salvas automaticamente quando há conexão. Use SALVAR para confirmar imediatamente.</p></div><span class="small" id="revisionLabel"></span></div><textarea id="statusItensConferencia" data-section="CONTROLE DE CONFERÊNCIA DOS ITENS" class="no-print" style="display:none" aria-hidden="true">{}</textarea><div class="grid">
 <section class="field item01-field">
   <label>01 – RECEBIMENTO</label>
   <div class="item01-grid">
@@ -2983,13 +2983,17 @@ function alternarNavegacaoItens(){
  painel.style.display=fechado?'block':'none';
  const botao=$('itemsNavToggle');if(botao)botao.setAttribute('aria-expanded',String(fechado));
 }
+function mostrarTodosItensRelatorio(){
+ const secoes=secoesNavegacaoRelatorio(),botoes=$('itemsNavButtons')?.querySelectorAll('button');
+ itemNavSelecionado=null;
+ secoes.forEach(el=>el.classList.remove('hidden'));
+ botoes?.forEach(b=>b.classList.remove('active'));
+ atualizarControlesStatusItem();
+}
 function selecionarItemRelatorio(indice){
  const secoes=secoesNavegacaoRelatorio(),botoes=$('itemsNavButtons')?.querySelectorAll('button');
  const grupo=gruposItensRelatorio[indice];if(!grupo)return;
- if(itemNavSelecionado===indice){
-  itemNavSelecionado=null;secoes.forEach(el=>el.classList.remove('hidden'));
-  botoes?.forEach(b=>b.classList.remove('active'));atualizarControlesStatusItem();return;
- }
+ // Seleção idempotente: clicar novamente no mesmo item não o fecha por engano.
  itemNavSelecionado=indice;
  secoes.forEach((el,i)=>el.classList.toggle('hidden',!grupo.indices.includes(i)));
  botoes?.forEach((b,i)=>b.classList.toggle('active',i===indice));
