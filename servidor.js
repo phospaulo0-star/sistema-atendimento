@@ -1519,7 +1519,7 @@ app.get('/api/admin/statistics', exigirBanco, exigirAutenticacao, exigirAdmin, a
 app.get('/api/admin/visits-belongings-statistics', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
   try{
     const from=String(req.query.from||'').slice(0,10),to=String(req.query.to||'').slice(0,10);
-    if((from&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(from))||(to&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(to))||(from&&to&&from>to))
+    if((from&&!/^\d{4}-\d{2}-\d{2}$/.test(from))||(to&&!/^\d{4}-\d{2}-\d{2}$/.test(to))||(from&&to&&from>to))
       return res.status(400).json({ok:false,message:'Período inválido para consultar visitas e pertences.'});
     const visitas=await pool.query(`
       SELECT CASE WHEN ((EXTRACT(DAY FROM l.visit_day)::integer-1)/7)+1=1 THEN '1º DOMINGO' ELSE '2º DOMINGO' END AS period,
