@@ -1836,7 +1836,7 @@ function renderList(){
  const meses=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
  const grupos=new Map();
  anteriores.forEach(r=>{
-  const data=String(r.reportDate||'').slice(0,10),m=data.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+  const data=String(r.reportDate||'').slice(0,10),m=data.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   const ano=m?m[1]:'SEM DATA',mes=m?Number(m[2]):0;
   if(!grupos.has(ano))grupos.set(ano,new Map());
   const porMes=grupos.get(ano),chave=mes>=1&&mes<=12?String(mes).padStart(2,'0'):'00';
