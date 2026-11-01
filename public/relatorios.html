@@ -372,7 +372,7 @@ body.admin-preview-mode #previewContent{display:block!important;max-width:100%!i
  body.admin-preview-mode #previewPanel .preview-actions{display:none!important}
  body.admin-preview-mode #previewPanel{display:block!important}
  body.admin-preview-mode #previewContent{padding:0!important}
-}.reports-archive{margin-top:12px;border:1px solid #d2dbe5;border-radius:9px;background:#f8fafc;padding:10px 12px}.reports-archive summary{cursor:pointer;font-weight:700;color:#263746;padding:5px 2px}.reports-archive[open] summary{margin-bottom:10px}.reports-archive .list{display:grid;gap:8px}</style>
+}.reports-archive{margin-top:12px;border:1px solid #d2dbe5;border-radius:9px;background:#f8fafc;padding:10px 12px}.reports-archive summary{cursor:pointer;font-weight:700;color:#263746;padding:5px 2px}.reports-archive[open] summary{margin-bottom:10px}.reports-archive .list{display:grid;gap:8px}.reports-year{margin:8px 0;border:1px solid #d7e0e9;border-radius:8px;background:#fff;padding:8px 10px}.reports-year>summary,.reports-month>summary{cursor:pointer;font-weight:700;color:#263746;padding:5px}.reports-year-content{padding:4px 0 2px 14px}.reports-month{margin:6px 0;border-left:3px solid #dbe4ee;padding:4px 8px}.reports-month-list{padding:6px 0 2px 8px;display:grid;gap:8px}</style>
 <style id="alinhamento-tabelas-relatorio">
 #previewContent table th{ text-align:center!important; vertical-align:middle!important; }
 #previewContent table td{ text-align:center!important; vertical-align:middle!important; }
@@ -1827,7 +1827,35 @@ $('heDeleteBtn').addEventListener('click', excluirNomeHE);
 $('heDeleteSharedBtn').addEventListener('click', excluirNomeListaCompartilhadaHE);
 $('heSelectBtn').addEventListener('click', selecionarNomeHE);
 $('heSeedBtn').addEventListener('click', cadastrarListaPadraoEquipeC);function htmlCardRelatorio(r,admin=false){return `<div class="report-item"><div><strong>${esc(r.title||'Relatório de plantão')}</strong><div class="small">${esc(r.reportDate)} · ${esc(r.shiftName)} · Equipe ${esc(r.team)} · ${r.status==='encerrado'?'ENCERRADO':'ABERTO'} · Rev. ${r.revision}</div></div><button onclick="${admin?'verAdmin':'abrir'}('${esc(r.id)}')">${admin?'CONSULTAR':(r.id===current?.id?'ABERTO':'ABRIR')}</button></div>`}
-function renderList(){const root=$('reportsList'),archive=$('archivedReportsList'),count=$('reportsArchiveCount');if(!root||!archive)return;const atual=reports.filter(r=>String(r.reportDate||'').slice(0,10)===String(currentShiftDate||'').slice(0,10)&&r.status!=='encerrado').sort((a,b)=>Number(b.revision||0)-Number(a.revision||0));const principal=atual.slice(0,1);const ids=new Set(principal.map(r=>r.id));const anteriores=reports.filter(r=>!ids.has(r.id)).sort((a,b)=>String(b.reportDate||'').slice(0,10).localeCompare(String(a.reportDate||'').slice(0,10))||String(a.team||'').localeCompare(String(b.team||''))||Number(b.revision||0)-Number(a.revision||0));root.innerHTML=principal.length?principal.map(r=>htmlCardRelatorio(r,readOnly)).join(''):'<p class="small">Não há relatório aberto para o plantão atual.</p>';archive.innerHTML=anteriores.length?anteriores.map(r=>htmlCardRelatorio(r,readOnly)).join(''):'<p class="small">Nenhum relatório anterior cadastrado.</p>';if(count)count.textContent='('+anteriores.length+')';}
+function renderList(){
+ const root=$('reportsList'),archive=$('archivedReportsList'),count=$('reportsArchiveCount');
+ if(!root||!archive)return;
+ const atual=reports.filter(r=>String(r.reportDate||'').slice(0,10)===String(currentShiftDate||'').slice(0,10)&&r.status!=='encerrado').sort((a,b)=>Number(b.revision||0)-Number(a.revision||0));
+ const principal=atual.slice(0,1),ids=new Set(principal.map(r=>r.id));
+ const anteriores=reports.filter(r=>!ids.has(r.id));
+ const meses=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+ const grupos=new Map();
+ anteriores.forEach(r=>{
+  const data=String(r.reportDate||'').slice(0,10),m=data.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+  const ano=m?m[1]:'SEM DATA',mes=m?Number(m[2]):0;
+  if(!grupos.has(ano))grupos.set(ano,new Map());
+  const porMes=grupos.get(ano),chave=mes>=1&&mes<=12?String(mes).padStart(2,'0'):'00';
+  if(!porMes.has(chave))porMes.set(chave,[]);
+  porMes.get(chave).push(r);
+ });
+ const anos=[...grupos.keys()].sort((a,b)=>b.localeCompare(a));
+ archive.innerHTML=anos.length?anos.map(ano=>{
+  const porMes=grupos.get(ano),chaves=[...porMes.keys()].sort((a,b)=>Number(b)-Number(a));
+  const mesesHtml=chaves.map(chave=>{
+   const mes=Number(chave),lista=porMes.get(chave).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||''))||String(a.team||'').localeCompare(String(b.team||''))||Number(b.revision||0)-Number(a.revision||0));
+   const nomeMes=meses[mes-1]||'SEM DATA';
+   return `<details class="reports-month"><summary>${nomeMes} (${lista.length})</summary><div class="list reports-month-list">${lista.map(r=>htmlCardRelatorio(r,readOnly)).join('')}</div></details>`;
+  }).join('');
+  return `<details class="reports-year"><summary>📁 ${esc(ano)} (${[...porMes.values()].reduce((n,x)=>n+x.length,0)})</summary><div class="reports-year-content">${mesesHtml}</div></details>`;
+ }).join(''):'<p class="small">Nenhum relatório anterior cadastrado.</p>';
+ root.innerHTML=principal.length?principal.map(r=>htmlCardRelatorio(r,readOnly)).join(''):'<p class="small">Não há relatório aberto para o plantão atual.</p>';
+ if(count)count.textContent='('+anteriores.length+')';
+}
 async function api(url,options={}){const res=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(options.headers||{})},...options});let j={};try{j=await res.json()}catch{}if(!res.ok){const e=new Error(j.message||'Falha na comunicação com o servidor.');e.status=res.status;e.data=j;throw e}return j}
 function numeroPorExtensoEncerramento(valor){const n=Number(valor);if(!Number.isFinite(n)||n<0)return '';if(typeof numeroPorExtenso==='function')return numeroPorExtenso(n);return String(n)}
 function preencherOpcoesItem40(){
