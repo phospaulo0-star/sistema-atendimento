@@ -2119,11 +2119,70 @@ function montarRotasPertencesVisitas(config) {
       let current=await client.query("SELECT list_number,day_list_number FROM pv_visit_lists WHERE visit_day=$1 AND status='open' ORDER BY day_list_number DESC LIMIT 1 FOR UPDATE",[hoje]);
       if(!current.rowCount){const next=await client.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status,created_by) SELECT $1,COALESCE(MAX(day_list_number),0)+1,'open',$2 FROM pv_visit_lists WHERE visit_day=$1 RETURNING list_number,day_list_number",[hoje,req.user.id]);current=next;}
       const number=current.rows[0].list_number;
+      const duplicados=await client.query(
+        `SELECT e.entry_id AS id,e.internal_name AS "internalName",l.list_number AS "listNumber",l.day_list_number AS "dayListNumber",l.visit_day AS "visitDay"
+           FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number)
+          WHERE l.visit_day=$1 AND ((NULLIF($2,'') IS NOT NULL AND e.rgi=$2) OR (NULLIF($2,'') IS NULL AND LOWER(BTRIM(e.internal_name))=LOWER(BTRIM($3))))
+          ORDER BY l.day_list_number,e.created_at`,
+        [hoje,rgi,internalName]
+      );
+      if(duplicados.rowCount&&!Boolean(req.body&&req.body.confirmDuplicate)){
+        await client.query('ROLLBACK');
+        return res.status(409).json({ok:false,duplicate:true,currentListNumber:number,duplicates:duplicados.rows,message:'Este interno já está cadastrado em uma das listas de visitas deste dia.'});
+      }
       const result=await client.query('INSERT INTO pv_visit_entries(entry_id,list_number,internal_name,rgi,pavilion,cell,visitor_count,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING entry_id AS id,list_number AS "listNumber",internal_name AS "internalName",rgi,pavilion,cell,visitor_count AS "visitorCount",created_at AS "createdAt"',[crypto.randomUUID(),number,internalName,rgi,pavilion,cell,visitorCount,req.user.id]);
       await client.query('COMMIT');
       try{await registrarAuditoria(req.user.id,'visita_incluida_lista',null,{listNumber:number,dayListNumber:current.rows[0].day_list_number,visitDay:hoje,internalName,rgi,visitorCount})}catch(e){console.error('Falha ao registrar auditoria de visitas:',e.message)}
       res.status(201).json({ok:true,entry:{...result.rows[0],dayListNumber:current.rows[0].day_list_number,visitDay:hoje}});
     }catch(e){try{await client.query('ROLLBACK')}catch{};if(e.message&&e.message.includes('visitas deste dia'))return res.status(409).json({ok:false,message:e.message});formatarErro(res,e,'Não foi possível incluir o interno na lista de visitas.')}
+    finally{client.release()}
+  });
+
+  app.put('/api/pertences-visitas/visits/entries/:id',exigirBanco,exigirAutenticacao,acessoModulo,async(req,res)=>{
+    const id=texto(req.params.id,80),internalName=texto(req.body&&req.body.internalName,200),rgi=texto(req.body&&req.body.rgi,80),pavilion=texto(req.body&&req.body.pavilion,100),cell=texto(req.body&&req.body.cell,30),visitorCount=Number(req.body&&req.body.visitorCount);
+    if(!internalName)return res.status(400).json({ok:false,message:'Informe o nome do interno.'});
+    if(!Number.isInteger(visitorCount)||visitorCount<1||visitorCount>2)return res.status(400).json({ok:false,message:'A quantidade de visitantes deve ser 1 ou 2.'});
+    const client=await pool.connect();
+    try{
+      await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);await atualizarFechamentoAutomaticoVisitas(client);
+      const hoje=hojeCampoGrande();
+      const atual=await client.query("SELECT e.entry_id,e.list_number,l.day_list_number,l.visit_day,l.status AS list_status,d.status AS day_status FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) JOIN pv_visit_days d ON d.visit_day=l.visit_day WHERE e.entry_id=$1 FOR UPDATE OF e,l,d",[id]);
+      if(!atual.rowCount||String(atual.rows[0].visit_day).slice(0,10)!==hoje||atual.rows[0].list_status!=='open'||atual.rows[0].day_status!=='open'){
+        await client.query('ROLLBACK');return res.status(409).json({ok:false,message:'Somente registros da lista aberta de hoje podem ser editados.'});
+      }
+      const duplicados=await client.query(
+        `SELECT e.entry_id AS id,e.internal_name AS "internalName",l.list_number AS "listNumber",l.day_list_number AS "dayListNumber",l.visit_day AS "visitDay"
+           FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number)
+          WHERE l.visit_day=$1 AND e.entry_id<>$2 AND ((NULLIF($3,'') IS NOT NULL AND e.rgi=$3) OR (NULLIF($3,'') IS NULL AND LOWER(BTRIM(e.internal_name))=LOWER(BTRIM($4))))
+          ORDER BY l.day_list_number,e.created_at`,
+        [hoje,id,rgi,internalName]
+      );
+      if(duplicados.rowCount&&!Boolean(req.body&&req.body.confirmDuplicate)){
+        await client.query('ROLLBACK');
+        return res.status(409).json({ok:false,duplicate:true,currentListNumber:atual.rows[0].list_number,duplicates:duplicados.rows,message:'Este interno já está cadastrado em uma das listas de visitas deste dia.'});
+      }
+      const atualizado=await client.query('UPDATE pv_visit_entries SET internal_name=$2,rgi=$3,pavilion=$4,cell=$5,visitor_count=$6 WHERE entry_id=$1 RETURNING entry_id AS id,list_number AS "listNumber",internal_name AS "internalName",rgi,pavilion,cell,visitor_count AS "visitorCount",created_at AS "createdAt"',[id,internalName,rgi,pavilion,cell,visitorCount]);
+      await client.query('COMMIT');
+      try{await registrarAuditoria(req.user.id,'visita_editada',null,{entryId:id,internalName,rgi,visitorCount})}catch(e){}
+      res.json({ok:true,entry:atualizado.rows[0]});
+    }catch(e){try{await client.query('ROLLBACK')}catch{};formatarErro(res,e,'Não foi possível editar o registro de visita.')}
+    finally{client.release()}
+  });
+
+  app.delete('/api/pertences-visitas/visits/entries/:id',exigirBanco,exigirAutenticacao,acessoModulo,async(req,res)=>{
+    const id=texto(req.params.id,80),client=await pool.connect();
+    try{
+      await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);await atualizarFechamentoAutomaticoVisitas(client);
+      const hoje=hojeCampoGrande();
+      const atual=await client.query("SELECT e.entry_id,e.internal_name,l.list_number,l.day_list_number,l.visit_day,l.status AS list_status,d.status AS day_status FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) JOIN pv_visit_days d ON d.visit_day=l.visit_day WHERE e.entry_id=$1 FOR UPDATE OF e,l,d",[id]);
+      if(!atual.rowCount||String(atual.rows[0].visit_day).slice(0,10)!==hoje||atual.rows[0].list_status!=='open'||atual.rows[0].day_status!=='open'){
+        await client.query('ROLLBACK');return res.status(409).json({ok:false,message:'Somente registros da lista aberta de hoje podem ser excluídos.'});
+      }
+      await client.query('DELETE FROM pv_visit_entries WHERE entry_id=$1',[id]);
+      await client.query('COMMIT');
+      try{await registrarAuditoria(req.user.id,'visita_excluida',null,{entryId:id,internalName:atual.rows[0].internal_name,listNumber:atual.rows[0].list_number})}catch(e){}
+      res.json({ok:true});
+    }catch(e){try{await client.query('ROLLBACK')}catch{};formatarErro(res,e,'Não foi possível excluir o registro de visita.')}
     finally{client.release()}
   });
 
