@@ -327,8 +327,8 @@ async function carregarIndicadoresVisitasPertences(){
   renderIndicadoresVisitasPertences();
  }catch(e){$('statsVisitsBelongingsStatus').textContent=e.message;statusMsg(e.message,'error')}
 }
-function aplicarFiltrosEstatisticas(){carregarEstatisticas();carregarIndicadoresVisitasPertences()}
-function limparFiltrosEstatisticas(){$('statsFrom').value='';$('statsTo').value='';$('statsTeam').value='';carregarEstatisticas();carregarIndicadoresVisitasPertences()}
+function aplicarFiltrosEstatisticas(){carregarEstatisticas()}
+function limparFiltrosEstatisticas(){$('statsFrom').value='';$('statsTo').value='';$('statsTeam').value='';carregarEstatisticas()}
 async function exportarEstatisticasExcel(){
  try{const q=new URLSearchParams();if($('statsFrom').value)q.set('from',$('statsFrom').value);if($('statsTo').value)q.set('to',$('statsTo').value);if($('statsTeam').value)q.set('team',$('statsTeam').value);
  const r=await fetch('/api/admin/statistics.xlsx?'+q.toString(),{credentials:'same-origin',cache:'no-store'});if(!r.ok){let j={};try{j=await r.json()}catch{}throw new Error(j.message||'Falha ao exportar Excel.')}
