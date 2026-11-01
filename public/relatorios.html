@@ -2353,7 +2353,7 @@ function visualizarRelatorio(targetId=null){
       if(!arrHosp.length){
         return `<section class="preview-section hospitalizado-preview"><h3>${esc(item.titulo)}:</h3><div class="hospitalizado-preview-nc">• N/C.</div></section>`;
       }
-      const linhasHosp=arrHosp.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:34px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:left;overflow-wrap:anywhere">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:22%">${esc(formatarDataHosp(r.saida))}</td></tr>`).join('');
+      const linhasHosp=arrHosp.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:34px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:${tipoHosp==='confirmar'?'center':'left'};overflow-wrap:anywhere">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:22%">${esc(formatarDataHosp(r.saida))}</td></tr>`).join('');
       return `<section class="preview-section hospitalizado-preview"><h3>${esc(item.titulo)}:</h3><table class="hospitalizado-preview-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;font-family:Arial,sans-serif;font-size:10pt;table-layout:fixed"><thead><tr><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:34px"></th><th style="border:1px solid #222;background:#c6c6c6;padding:4px">NOME DO PRESO</th><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:22%">SAÍDA</th></tr></thead><tbody>${linhasHosp}</tbody></table></section>`;
     }
     if(titulo.startsWith('16')){
