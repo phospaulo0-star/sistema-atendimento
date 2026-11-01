@@ -1982,18 +1982,13 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
    atualizarQuantidadeExtenso();
   }
  }
- // Item 30: a partir de 01/11/2026, herdar as autorizações cumpridas do relatório do dia anterior (chefe que entregou o plantão), e não do relatório anterior da mesma equipe.
- const chave30='30 – AUTORIZAÇÕES CUMPRIDAS';
- if(dataAtual>='2026-11-01'&&relOntem?.content&&Object.prototype.hasOwnProperty.call(relOntem.content,chave30)){
-  atualizado[chave30]=relOntem.content[chave30];
- }
  // Item 11: recuperar a escala noturna do relatório anterior da mesma equipe.
  const chave11='11 – ESCALA NOTURNA (MONITORAMENTO)';
  if(mesmaEquipe?.content&&String(mesmaEquipe.content[chave11]||'').trim())atualizado[chave11]=mesmaEquipe.content[chave11];
- // Item 38: agora herda o conteúdo do relatório mais recente da equipe que entregou o plantão.
+ // Item 38: a partir de 01/11/2026, herdar o conteúdo do relatório do dia anterior (chefe que entregou o plantão).
  const chave38='38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE';
- if(relEquipeAnterior?.content && Object.prototype.hasOwnProperty.call(relEquipeAnterior.content,chave38)){
-  atualizado[chave38]=relEquipeAnterior.content[chave38];
+ if(dataAtual>='2026-11-01'&&relOntem?.content && Object.prototype.hasOwnProperty.call(relOntem.content,chave38)){
+  atualizado[chave38]=relOntem.content[chave38];
  }else{
   atualizado[chave38]=PADROES_RELATORIO[chave38]||'• N/C.';
  }
