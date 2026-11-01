@@ -161,7 +161,13 @@ function contarOcorrenciasNaDataStats(r,chave,indiceData,tipo='tab'){
 }
 function somarStats(rs,fn){return rs.reduce((n,r)=>n+fn(r),0)}
 function normalizarTituloEvasaoStats(v){
- return String(v||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleUpperCase('pt-BR').replace(/\s+/g,' ');
+ const normalizado=String(v||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleUpperCase('pt-BR').replace(/\s+/g,' ');
+ // Unifica EVASÃO DO/DE/DA/DOS/DAS e EVASÃO/ como um único prefixo.
+ const match=normalizado.match(/^EVASAO\s*(?:\/\s*|DE\s+|DO\s+|DA\s+|DOS\s+|DAS\s+)?(.+)$/);
+ return match?'EVASAO/'+match[1].trim().replace(/\s+/g,' '):normalizado;
+}
+function tituloExibicaoEvasaoStats(chave){
+ return chave.startsWith('EVASAO/')?'EVASÃO/'+chave.slice('EVASAO/'.length):chave;
 }
 function lerSaidasStats(r){
  const raw=valorItemStats(r,CHAVES_STATS.saidas);
@@ -178,7 +184,7 @@ function contarEvasoesStats(rs){
    const titulo=String(saida.procedencia||'').trim();
    const chave=normalizarTituloEvasaoStats(titulo);
    if(!chave.startsWith('EVASAO'))continue;
-   if(!grupos.has(chave))grupos.set(chave,{titulo:titulo.toLocaleUpperCase('pt-BR').replace(/\s+/g,' '),total:0});
+   if(!grupos.has(chave))grupos.set(chave,{titulo:tituloExibicaoEvasaoStats(chave),total:0});
    grupos.get(chave).total++;
   }
  }
