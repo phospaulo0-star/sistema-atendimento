@@ -63,7 +63,7 @@
 <div class="stat"><span>Saldo de movimentação</span><strong id="stBalance">0</strong><small>Entradas menos saídas</small></div>
 <div class="stat"><span>População inicial</span><strong id="stInitial">—</strong><small>Item 01 do primeiro relatório do período</small><small id="stInitialSource">Relatório não identificado</small></div>
 <div class="stat"><span>População final</span><strong id="stFinal">—</strong><small>FINAL / PASSO calculado pela página de movimentação (Item 01 + Item 31 − Item 32)</small><small id="stFinalSource">Relatório não identificado</small></div>
-<div class="stat"><span>Hospitalizados</span><strong id="stHospital">0</strong><small>Item 25</small></div>
+<div class="stat"><span>Hospitalizados</span><strong id="stHospital">0</strong><small>Itens 25 + 25.1</small></div>
 <div class="stat"><span>Óbitos</span><strong id="stDeaths">0</strong><small>Item 27</small></div>
 </section>
 <section class="panel" id="statsVisitsBelongingsPanel">
@@ -276,7 +276,7 @@ function renderEstatisticas(rs){
  $s('stInitial').textContent=d.inicial===null?'—':d.inicial;$s('stFinal').textContent=d.final===null?'—':d.final;
  const fmtSource=x=>x?new Date(x.date+'T12:00:00').toLocaleDateString('pt-BR')+' · Equipe '+x.team:'Relatório não identificado';
  $s('stInitialSource').textContent=fmtSource(d.initialSource);$s('stFinalSource').textContent=fmtSource(d.finalSource);
- $s('stHospital').textContent=d.counts.Hospitalizados;$s('stDeaths').textContent=d.counts.Óbitos;
+ $s('stHospital').textContent=d.counts.Hospitalizados+d.counts['Hospitalizados a confirmar'];$s('stDeaths').textContent=d.counts.Óbitos;
  dadosGraficoStats=d;renderGraficoEstatisticas();
  const max=Math.max(1,...Object.values(d.counts));
  $s('statsBars').innerHTML=Object.entries(d.counts).map(([k,v])=>'<div class="stats-bar-row"><strong>'+esc(k)+'</strong><div class="stats-bar-track"><div class="stats-bar-fill" style="width:'+(v/max*100)+'%"></div></div><span class="stats-bar-value">'+v+'</span></div>').join('');
