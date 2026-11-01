@@ -1830,6 +1830,9 @@ $('heSeedBtn').addEventListener('click', cadastrarListaPadraoEquipeC);function h
 function renderList(){
  const root=$('reportsList'),archive=$('archivedReportsList'),count=$('reportsArchiveCount');
  if(!root||!archive)return;
+ // A lista é atualizada por consulta periódica. Guardar quais pastas estavam abertas
+ // evita que anos e meses se fechem ou pisquem durante a atualização automática.
+ const pastasAbertas=new Set([...archive.querySelectorAll('details[open]')].map(el=>el.dataset.folderKey));
  const atual=reports.filter(r=>String(r.reportDate||'').slice(0,10)===String(currentShiftDate||'').slice(0,10)&&r.status!=='encerrado').sort((a,b)=>Number(b.revision||0)-Number(a.revision||0));
  const principal=atual.slice(0,1),ids=new Set(principal.map(r=>r.id));
  const anteriores=reports.filter(r=>!ids.has(r.id));
@@ -1848,10 +1851,11 @@ function renderList(){
   const porMes=grupos.get(ano),chaves=[...porMes.keys()].sort((a,b)=>Number(b)-Number(a));
   const mesesHtml=chaves.map(chave=>{
    const mes=Number(chave),lista=porMes.get(chave).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||''))||String(a.team||'').localeCompare(String(b.team||''))||Number(b.revision||0)-Number(a.revision||0));
-   const nomeMes=meses[mes-1]||'SEM DATA';
-   return `<details class="reports-month"><summary>${nomeMes} (${lista.length})</summary><div class="list reports-month-list">${lista.map(r=>htmlCardRelatorio(r,readOnly)).join('')}</div></details>`;
+   const nomeMes=meses[mes-1]||'SEM DATA',folderKey='mes-'+ano+'-'+chave;
+   return '<details class="reports-month" data-folder-key="'+folderKey+'" '+(pastasAbertas.has(folderKey)?'open':'')+'><summary>'+nomeMes+' ('+lista.length+')</summary><div class="list reports-month-list">'+lista.map(r=>htmlCardRelatorio(r,readOnly)).join('')+'</div></details>';
   }).join('');
-  return `<details class="reports-year"><summary>📁 ${esc(ano)} (${[...porMes.values()].reduce((n,x)=>n+x.length,0)})</summary><div class="reports-year-content">${mesesHtml}</div></details>`;
+  const folderKey='ano-'+ano;
+  return '<details class="reports-year" data-folder-key="'+folderKey+'" '+(pastasAbertas.has(folderKey)?'open':'')+'><summary>📁 '+esc(ano)+' ('+[...porMes.values()].reduce((n,x)=>n+x.length,0)+')</summary><div class="reports-year-content">'+mesesHtml+'</div></details>';
  }).join(''):'<p class="small">Nenhum relatório anterior cadastrado.</p>';
  root.innerHTML=principal.length?principal.map(r=>htmlCardRelatorio(r,readOnly)).join(''):'<p class="small">Não há relatório aberto para o plantão atual.</p>';
  if(count)count.textContent='('+anteriores.length+')';
