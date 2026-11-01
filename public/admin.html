@@ -66,6 +66,22 @@
 <div class="stat"><span>Hospitalizados</span><strong id="stHospital">0</strong><small>Item 25</small></div>
 <div class="stat"><span>Óbitos</span><strong id="stDeaths">0</strong><small>Item 27</small></div>
 </section>
+<section class="panel" id="statsVisitsBelongingsPanel">
+<div class="panel-title"><div><h2>VISITAS E ENTREGA DE PERTENCES</h2><p>Indicadores calculados diretamente dos registros do módulo Pertences e Visitas, respeitando o período selecionado acima.</p></div><button class="light" onclick="carregarIndicadoresVisitasPertences()">ATUALIZAR</button></div>
+<div class="filters" style="align-items:end;margin-bottom:14px"><label>Visualizar pavilhão <select id="statsPavilion" onchange="renderIndicadoresVisitasPertences()"><option value="">Todos os pavilhões</option></select></label></div>
+<div class="stats" style="margin-bottom:14px">
+<div class="stat"><span>Internos visitados · 1º domingo</span><strong id="stVisitInmates1">0</strong><small>Registros de visita por interno e dia</small></div>
+<div class="stat"><span>Visitantes · 1º domingo</span><strong id="stVisitors1">0</strong><small>Soma da quantidade informada</small></div>
+<div class="stat"><span>Internos visitados · 2º domingo</span><strong id="stVisitInmates2">0</strong><small>Registros de visita por interno e dia</small></div>
+<div class="stat"><span>Visitantes · 2º domingo</span><strong id="stVisitors2">0</strong><small>Soma da quantidade informada</small></div>
+<div class="stat"><span>Pertences entregues</span><strong id="stBelongingsTotal">0</strong><small>Registros de entrega no período</small></div>
+</div>
+<div class="two-col">
+<section class="panel"><div class="panel-title"><div><h3>Visitas por pavilhão</h3></div></div><div class="table-wrap"><table><thead><tr><th>Pavilhão</th><th>Internos · 1º domingo</th><th>Visitantes · 1º domingo</th><th>Internos · 2º domingo</th><th>Visitantes · 2º domingo</th></tr></thead><tbody id="statsVisitsPavilionBody"><tr><td colspan="5">Carregando...</td></tr></tbody></table></div></section>
+<section class="panel"><div class="panel-title"><div><h3>Pertences por pavilhão</h3></div></div><div class="table-wrap"><table><thead><tr><th>Pavilhão</th><th>Quantidade entregue</th></tr></thead><tbody id="statsBelongingsPavilionBody"><tr><td colspan="2">Carregando...</td></tr></tbody></table></div></section>
+</div>
+<p id="statsVisitsBelongingsStatus" class="muted">Carregue os indicadores para visualizar os dados.</p>
+</section>
 <section class="panel">
 <div class="panel-title"><div><h2>Visualização gráfica</h2><p>Escolha o formato e os dados que deseja comparar. Os gráficos respeitam os filtros de período e equipe.</p></div></div>
 <div class="filters" style="align-items:end">
@@ -107,7 +123,7 @@ async function carregarRelatoriosPlantao(){try{const j=await api('/api/admin/shi
 function renderRelatoriosPlantao(){if(!$('shiftReportsBody'))return;const q=($('searchShiftReports').value||'').toLocaleLowerCase('pt-BR');const team=$('filterShiftTeam').value;const status=$('filterShiftStatus').value;const rows=shiftReports.filter(r=>(!team||r.team===team)&&(!status||r.status===status)&&(!q||((r.title||'')+' '+r.team+' '+r.shiftName).toLocaleLowerCase('pt-BR').includes(q)));$('shiftReportsBody').innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.reportDate)}</td><td><strong>Equipe ${esc(r.team)}</strong><span class="sub">${esc(r.shiftName)}</span></td><td>${esc(r.title||'Relatório de plantão')}<span class="sub">Revisão ${r.revision}</span></td><td>${esc(r.status==='encerrado'?'ENCERRADO':'ABERTO')}</td><td>${esc(dt(r.updatedAt))}<span class="sub">${esc(r.updatedUsername||'')}</span></td><td><div class="actions"><button class="blue" onclick="consultarRelatorioPlantao('${esc(r.id)}')">CONSULTAR</button><button class="light" onclick="historicoRelatorioPlantao('${esc(r.id)}')">HISTÓRICO</button></div></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Nenhum relatório encontrado.</td></tr>'}
 async function consultarRelatorioPlantao(id){const r=shiftReports.find(x=>x.id===id);if(!r)return;window.open('/relatorios.html?adminReportId='+encodeURIComponent(id),'_blank','noopener');}
 async function historicoRelatorioPlantao(id){try{const j=await api('/api/admin/shift-reports/'+encodeURIComponent(id)+'/history');const detail=$('shiftReportDetail');detail.hidden=false;detail.innerHTML=`<div class="panel-title"><h2>Histórico do relatório</h2><button class="light" onclick="$('shiftReportDetail').hidden=true">FECHAR</button></div>`+(j.history||[]).map(h=>`<div style="border-bottom:1px solid #ddd;padding:10px 0"><strong>${esc(h.action)} · revisão ${h.revision}</strong><div class="muted">${esc(h.full_name||h.username||'Usuário')} · ${esc(dt(h.created_at))}</div><details><summary>Conteúdo anterior e corrigido</summary><pre style="white-space:pre-wrap">${esc(JSON.stringify({anterior:h.previous_content,novo:h.new_content,detalhes:h.details},null,2))}</pre></details></div>`).join('')||'<p>Nenhum evento no histórico.</p>';detail.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){statusMsg(e.message,'error')}}
-let estatisticasRelatorios=[];
+let estatisticasRelatorios=[];let indicadoresVisitasPertences={visits:[],belongings:[]};
 const CHAVES_STATS={
  entradas:'31 – ENTRADA DE CUSTODIADOS',saidas:'32 – SAÍDA DE CUSTODIADOS',
  hospital:'25 – HOSPITALIZADO',hospitalConfirmar:'25.1 – HOSPITALIZADO A CONFIRMAR',
@@ -278,11 +294,41 @@ function renderEstatisticas(rs){
 }
 async function carregarEstatisticas(){
  try{const q=new URLSearchParams();if($('statsFrom').value)q.set('from',$('statsFrom').value);if($('statsTo').value)q.set('to',$('statsTo').value);if($('statsTeam').value)q.set('team',$('statsTeam').value);
- const j=await api('/api/admin/statistics'+(q.toString()?'?'+q.toString():''));estatisticasRelatorios=j.reports||[];renderEstatisticas(estatisticasRelatorios);
+ const j=await api('/api/admin/statistics'+(q.toString()?'?'+q.toString():''));estatisticasRelatorios=j.reports||[];renderEstatisticas(estatisticasRelatorios);await carregarIndicadoresVisitasPertences();
  }catch(e){$('statsStatus').textContent=e.message;statusMsg(e.message,'error')}
 }
-function aplicarFiltrosEstatisticas(){carregarEstatisticas()}
-function limparFiltrosEstatisticas(){$('statsFrom').value='';$('statsTo').value='';$('statsTeam').value='';carregarEstatisticas()}
+function renderIndicadoresVisitasPertences(){
+ const dados=indicadoresVisitasPertences,pavilhao=$('statsPavilion')?.value||'';
+ const visitas=dados.visits.filter(x=>!pavilhao||x.pavilion===pavilhao);
+ const pertences=dados.belongings.filter(x=>!pavilhao||x.pavilion===pavilhao);
+ const soma=(arr,campo,periodo)=>arr.filter(x=>!periodo||x.period===periodo).reduce((n,x)=>n+Number(x[campo]||0),0);
+ $('stVisitInmates1').textContent=soma(visitas,'inmates','1º DOMINGO');
+ $('stVisitors1').textContent=soma(visitas,'visitors','1º DOMINGO');
+ $('stVisitInmates2').textContent=soma(visitas,'inmates','2º DOMINGO');
+ $('stVisitors2').textContent=soma(visitas,'visitors','2º DOMINGO');
+ $('stBelongingsTotal').textContent=pertences.reduce((n,x)=>n+Number(x.quantity||0),0);
+ const pavs=[...new Set([...visitas.map(x=>x.pavilion),...pertences.map(x=>x.pavilion)])].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
+ $('statsVisitsPavilionBody').innerHTML=pavs.length?pavs.map(p=>{
+  const v=visitas.filter(x=>x.pavilion===p);
+  return '<tr><td>'+esc(p)+'</td><td>'+soma(v,'inmates','1º DOMINGO')+'</td><td>'+soma(v,'visitors','1º DOMINGO')+'</td><td>'+soma(v,'inmates','2º DOMINGO')+'</td><td>'+soma(v,'visitors','2º DOMINGO')+'</td></tr>';
+ }).join(''):'<tr><td colspan="5">Nenhum registro de visita nos domingos considerados.</td></tr>';
+ $('statsBelongingsPavilionBody').innerHTML=pertences.length?pertences.map(x=>'<tr><td>'+esc(x.pavilion)+'</td><td>'+Number(x.quantity||0)+'</td></tr>').join(''):'<tr><td colspan="2">Nenhuma entrega de pertences no período.</td></tr>';
+ $('statsVisitsBelongingsStatus').textContent='Visitas consideradas: primeiro e segundo domingo de cada mês dentro do período selecionado. Entregas de pertences: todos os dias do período.';
+}
+async function carregarIndicadoresVisitasPertences(){
+ try{
+  const q=new URLSearchParams();if($('statsFrom').value)q.set('from',$('statsFrom').value);if($('statsTo').value)q.set('to',$('statsTo').value);
+  const j=await api('/api/admin/visits-belongings-statistics'+(q.toString()?'?'+q.toString():''));
+  indicadoresVisitasPertences={visits:j.visits||[],belongings:j.belongings||[]};
+  const select=$('statsPavilion'),selecionado=select.value;
+  const pavs=[...new Set([...indicadoresVisitasPertences.visits.map(x=>x.pavilion),...indicadoresVisitasPertences.belongings.map(x=>x.pavilion)])].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
+  select.innerHTML='<option value="">Todos os pavilhões</option>'+pavs.map(p=>'<option value="'+esc(p)+'">'+esc(p)+'</option>').join('');
+  if(pavs.includes(selecionado))select.value=selecionado;
+  renderIndicadoresVisitasPertences();
+ }catch(e){$('statsVisitsBelongingsStatus').textContent=e.message;statusMsg(e.message,'error')}
+}
+function aplicarFiltrosEstatisticas(){carregarEstatisticas();carregarIndicadoresVisitasPertences()}
+function limparFiltrosEstatisticas(){$('statsFrom').value='';$('statsTo').value='';$('statsTeam').value='';carregarEstatisticas();carregarIndicadoresVisitasPertences()}
 async function exportarEstatisticasExcel(){
  try{const q=new URLSearchParams();if($('statsFrom').value)q.set('from',$('statsFrom').value);if($('statsTo').value)q.set('to',$('statsTo').value);if($('statsTeam').value)q.set('team',$('statsTeam').value);
  const r=await fetch('/api/admin/statistics.xlsx?'+q.toString(),{credentials:'same-origin',cache:'no-store'});if(!r.ok){let j={};try{j=await r.json()}catch{}throw new Error(j.message||'Falha ao exportar Excel.')}
