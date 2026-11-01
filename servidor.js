@@ -1533,7 +1533,7 @@ app.get('/api/admin/visits-belongings-statistics', exigirBanco, exigirAutenticac
          AND ($1::date IS NULL OR l.visit_day >= $1::date)
          AND ($2::date IS NULL OR l.visit_day <= $2::date)
        GROUP BY 1,2
-       ORDER BY CASE WHEN (CASE WHEN ((EXTRACT(DAY FROM l.visit_day)::integer-1)/7)+1=1 THEN 1 ELSE 2 END)=1 THEN 1 ELSE 2 END, pavilion
+       ORDER BY CASE WHEN period='1º DOMINGO' THEN 1 ELSE 2 END, pavilion
     `,[from||null,to||null]);
     const pertences=await pool.query(`
       SELECT COALESCE(NULLIF(BTRIM(pavilion),''),'N/I') AS pavilion,COUNT(*)::integer AS quantity
