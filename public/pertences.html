@@ -10,7 +10,7 @@
 *{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
 header{background:var(--green);color:#fff;padding:18px 22px;box-shadow:0 2px 8px #0002}.head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand h1{margin:0;font-size:24px}.brand .sub{font-size:13px;color:var(--gold);font-weight:bold;margin-top:5px}.brand .cpaig{color:var(--gold);font-weight:bold;margin-top:3px}.account{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px}
 main{max-width:1450px;margin:22px auto;padding:0 15px 44px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}button{border:0;border-radius:7px;padding:10px 13px;font-weight:bold;font-size:13px;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.primary{background:var(--gold);color:#171717}.green{background:var(--green2);color:#fff}.blue{background:var(--blue);color:#fff}.dark{background:#28313a;color:#fff}.gray{background:#64748b;color:#fff}.red{background:var(--red);color:#fff}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:17px;margin-bottom:16px;box-shadow:0 2px 8px #00000008}.panel h2{margin:0 0 5px;font-size:20px}.subtext,.muted{color:var(--muted);font-size:13px;line-height:1.45}.menu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.menu-card{min-height:100px;text-align:left;border:1px solid var(--line);background:white;padding:17px;border-radius:12px;display:flex;align-items:center;gap:13px;font-size:16px}.menu-card .symbol{font-size:27px}.menu-card small{display:block;font-size:12px;color:var(--muted);font-weight:normal;margin-top:5px}.form-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:end}.field{position:relative}.field label{display:block;font-weight:bold;font-size:13px;margin-bottom:6px}.field input,.field select{width:100%;padding:11px;border:1px solid #bcc6d2;border-radius:7px;font:inherit;background:white}.field input[readonly]{background:#f4f6f8;color:#3c4653}.suggestions{position:absolute;top:100%;left:0;right:0;z-index:50;background:white;border:1px solid #aab5c4;border-radius:7px;box-shadow:0 6px 18px #0002;max-height:250px;overflow:auto}.suggestions button{display:block;width:100%;background:white;color:var(--ink);text-align:left;border-radius:0;border-bottom:1px solid #edf0f4;padding:10px;font-weight:normal}.suggestions button:hover{background:#edf5ef}.suggestions strong{display:block}.suggestions small{display:block;color:var(--muted);margin-top:3px}.status{padding:10px 12px;border-radius:8px;margin:10px 0 0;display:none;white-space:pre-line}.status.show{display:block}.status.error{background:#fff0f0;color:#941f1f;border:1px solid #f1b4b4}.status.success{background:#e9f8ee;color:#176236;border:1px solid #b7e3c4}.status.info{background:#edf5ff;color:#244d76;border:1px solid #c7dcf4}.status.warning{background:#fff6df;color:#754b00;border:1px solid #efd18a}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:730px}th,td{border-bottom:1px solid #e6eaf0;padding:10px 9px;text-align:left;vertical-align:top}th{background:#f6f8fa;font-size:12px}td{font-size:13px}.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#eef2f6;font-size:11px;font-weight:bold}.badge.open{background:#dcfce7;color:#166534}.badge.closed{background:#e2e8f0;color:#334155}.inline-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.inline-actions input,.inline-actions select{padding:9px;border:1px solid #bcc6d2;border-radius:7px;font:inherit}.empty{text-align:center;color:var(--muted);padding:25px}.footer{text-align:center;color:var(--muted);font-size:12px;padding:15px}
-.modal-backdrop{display:none;position:fixed;inset:0;background:#0f172a99;z-index:1000;padding:18px;overflow:auto}.modal-backdrop.show{display:flex;align-items:center;justify-content:center}.modal{width:min(620px,100%);background:white;border-radius:12px;box-shadow:0 20px 70px #0004;overflow:hidden}.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);font-weight:bold;font-size:18px}.modal-body{padding:18px;line-height:1.55}.modal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.modal-backdrop{display:none;position:fixed;inset:0;background:#0f172a99;z-index:1000;padding:18px;overflow:auto}.modal-backdrop.show{display:flex;align-items:center;justify-content:center}.modal{width:min(620px,100%);background:white;border-radius:12px;box-shadow:0 20px 70px #0004;overflow:hidden}.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);font-weight:bold;font-size:18px}.modal-body{padding:18px;line-height:1.55}.modal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.edit-grid .wide{grid-column:1/-1}.visit-actions{display:flex;gap:6px;flex-wrap:wrap}.visit-actions button{padding:7px 9px;font-size:11px}@media(max-width:750px){.edit-grid{grid-template-columns:1fr}.edit-grid .wide{grid-column:auto}}
 @media(max-width:750px){header{padding:15px}.brand h1{font-size:21px}.menu-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.panel{padding:12px}.details{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -46,19 +46,20 @@ main{max-width:1450px;margin:22px auto;padding:0 15px 44px}.toolbar{display:flex
 </section>
 <footer class="footer">Sistema Atendimento CPAIG · Pertences e Visitas</footer></main>
 <div id="modalAlertaPertences" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="tituloAlertaPertences"><div class="modal"><div class="modal-head" id="tituloAlertaPertences">⚠️ Atenção: pertences recebidos neste mês</div><div class="modal-body"><p>Este interno já tem um recebimento de pertences registrado no mês atual.</p><div id="detalhesAlertaPertences"></div><p><strong>Deseja continuar com o novo cadastro?</strong></p></div><div class="modal-foot"><button class="gray" type="button" onclick="cancelarAlertaPertences()">VOLTAR</button><button class="green" type="button" onclick="continuarCadastroPertences()">CONTINUAR CADASTRO</button></div></div></div>
+<div id="modalEditarVisita" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="tituloEditarVisita"><form class="modal" id="formEditarVisita"><div class="modal-head" id="tituloEditarVisita">EDITAR REGISTRO DE VISITA</div><div class="modal-body"><div class="edit-grid"><div class="field wide"><label for="editarNomeVisita">Nome do interno</label><input id="editarNomeVisita" maxlength="200" required></div><div class="field"><label for="editarRgiVisita">RGI</label><input id="editarRgiVisita" maxlength="80"></div><div class="field"><label for="editarPavilhaoVisita">Pavilhão</label><input id="editarPavilhaoVisita" maxlength="100"></div><div class="field"><label for="editarCelaVisita">Cela</label><input id="editarCelaVisita" maxlength="30"></div><div class="field"><label for="editarQuantidadeVisita">Quantidade de visitantes</label><input id="editarQuantidadeVisita" type="number" min="1" max="2" step="1" required></div></div><div id="msgEditarVisita" class="status" role="status" aria-live="polite"></div></div><div class="modal-foot"><button class="gray" type="button" onclick="cancelarEdicaoVisita()">CANCELAR</button><button class="green" type="submit">SALVAR ALTERAÇÕES</button></div></form></div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
 let usuarioAtual=null,baseInternos=[],assinaturaBase='',selecionadoP=null,selecionadoV=null;
-let sugestoesAtuais={P:[],V:[]},cadastroPendenteAlerta=null,listasVisitasCache=[],registrosPertencesDia=[];
+let sugestoesAtuais={P:[],V:[]},cadastroPendenteAlerta=null,listasVisitasCache=[],registrosVisitasCache=[],visitaEmEdicao=null,registrosPertencesDia=[];
 function normalizar(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim()}
 function esc(v){return String(v==null?'':v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
 function dataHoje(){const p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Campo_Grande',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).reduce((o,x)=>(o[x.type]=x.value,o),{});return p.year+'-'+p.month+'-'+p.day}
 function dataExibicao(v){if(!v)return '—';if(/^\d{4}-\d{2}-\d{2}$/.test(String(v))){const a=String(v).split('-');return a[2]+'/'+a[1]+'/'+a[0]}const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleString('pt-BR')}
 function mostrarStatus(id,texto,tipo){const el=$(id);el.textContent=texto;el.className='status show '+(tipo||'info')}
 function mensagemGeral(texto,tipo){mostrarStatus('msgGeral',texto,tipo)}
-async function api(url,opcoes){const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...(opcoes||{}),headers:{...((opcoes&&opcoes.headers)||{}),...((opcoes&&opcoes.body)?{'Content-Type':'application/json'}:{})}});let j={};try{j=await r.json()}catch(e){}if(r.status===401){location.replace('/login.html');throw new Error('Sessão encerrada. Entre novamente.')}if(!r.ok||j.ok===false)throw new Error(j.message||'Não foi possível concluir a operação.');return j}
+async function api(url,opcoes){const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...(opcoes||{}),headers:{...((opcoes&&opcoes.headers)||{}),...((opcoes&&opcoes.body)?{'Content-Type':'application/json'}:{})}});let j={};try{j=await r.json()}catch(e){}if(r.status===401){location.replace('/login.html');throw new Error('Sessão encerrada. Entre novamente.')}if(!r.ok||j.ok===false){const erro=new Error(j.message||'Não foi possível concluir a operação.');erro.data=j;throw erro}return j}
 async function validarSessao(){const j=await api('/api/auth/me');usuarioAtual=j.user;if(!['pertences','admin'].includes(usuarioAtual.role)){location.replace(usuarioAtual.role==='mesa'?'/mesa.html':'/index.html');return false}$('usuarioAtual').textContent='Conectado: '+(usuarioAtual.fullName||usuarioAtual.username);return true}
 function abrirArea(nome){$('menuPrincipal').hidden=true;$('areaPertences').hidden=nome!=='pertences';$('areaVisitas').hidden=nome!=='visitas';if(nome==='pertences'){$('dataListaPertences').value=dataHoje();carregarPertencesDia()}if(nome==='visitas')carregarListasVisitas()}
 function voltarMenu(){$('areaPertences').hidden=true;$('areaVisitas').hidden=true;$('menuPrincipal').hidden=false}
@@ -192,7 +193,7 @@ function dataDiaVisitas(d){if(!d)return '';const p=String(d).slice(0,10).split('
 function resumoDoDiaVisitas(j,dia){const day=(j.days||[]).find(x=>String(x.visitDay).slice(0,10)===dia);const pessoas=(j.summary||[]).filter(x=>String(x.visitDay).slice(0,10)===dia);return {day,pessoas}}
 async function carregarListasVisitas(){
  try{
-  const j=await api('/api/pertences-visitas/visits');listasVisitasCache=j.lists||[];const entries=j.entries||[];
+  const j=await api('/api/pertences-visitas/visits');listasVisitasCache=j.lists||[];registrosVisitasCache=j.entries||[];
   const hoje=dataHoje(),sel=$('listaEscolhidaImprimir'),diaSel=$('diaVisitasHistorico'),old=sel.value;
   const dias=[...new Set(listasVisitasCache.map(l=>String(l.visitDay).slice(0,10)))];
   if(diaSel){const anterior=diaSel.value||hoje;diaSel.innerHTML=[hoje,...dias.filter(d=>d!==hoje)].map(d=>'<option value="'+d+'">'+(d===hoje?'HOJE — ':'')+dataDiaVisitas(d)+'</option>').join('');diaSel.value=dias.includes(anterior)?anterior:hoje;}
@@ -204,12 +205,69 @@ async function carregarListasVisitas(){
   else{btn.hidden=true;painel.innerHTML='<strong>VISITAS DO DIA — '+dataDiaVisitas(hoje)+'</strong><p style="margin:6px 0">Situação: <b>EM ANDAMENTO</b>. O fechamento automático ocorre às 12h (horário de Campo Grande), ou pode ser feito manualmente.</p>'}
   const container=$('listasVisitas');if(!listasDia.length){container.innerHTML='<div class="empty">Não há listas de visitas para '+dataDiaVisitas(diaExibido)+'. Use o seletor para consultar dias anteriores.</div>';return}
   container.innerHTML='<h2 style="margin:18px 0 8px">VISITAS DE '+dataDiaVisitas(diaExibido)+'</h2>'+listasDia.sort((a,b)=>a.dayListNumber-b.dayListNumber).map(l=>{
-   const rows=entries.filter(e=>String(e.listNumber)===String(l.listNumber)),cor=corListaVisitas(l.dayListNumber);
-   return '<div class="panel" style="border-left:7px solid '+cor+'"><div class="inline-actions"><h2 style="margin-right:auto;background:'+cor+';padding:6px 12px;border-radius:7px">LISTA '+l.dayListNumber+'</h2><span class="badge '+(l.status==='open'?'open':'closed')+'">'+(l.status==='open'?'ABERTA':'FECHADA')+'</span><span class="muted">'+(l.closedAt?'Fechada em '+esc(dataExibicao(l.closedAt)):'')+'</span></div>'+(rows.length?'<div class="table-wrap"><table><thead><tr><th>Nº</th><th>Nome do interno</th><th>RGI</th><th>Visitantes</th><th>Pavilhão</th><th>Cela</th></tr></thead><tbody>'+rows.map((x,i)=>'<tr><td><b>'+(i+1)+'</b></td><td>'+esc(x.internalName)+'</td><td>'+esc(x.rgi||'')+'</td><td class="centro">'+(Number(x.visitorCount)||1)+'</td><td><strong>'+esc(x.pavilion||'—')+'</strong></td><td><strong>'+esc(x.cell||'—')+'</strong></td></tr>').join('')+'</tbody></table></div>':'<div class="empty">Esta lista ainda não tem internos.</div>')+'</div>'
+   const rows=registrosVisitasCache.filter(e=>String(e.listNumber)===String(l.listNumber)),cor=corListaVisitas(l.dayListNumber),podeEditar=l.status==='open'&&String(l.visitDay).slice(0,10)===hoje;
+   return '<div class="panel" style="border-left:7px solid '+cor+'"><div class="inline-actions"><h2 style="margin-right:auto;background:'+cor+';padding:6px 12px;border-radius:7px">LISTA '+l.dayListNumber+'</h2><span class="badge '+(l.status==='open'?'open':'closed')+'">'+(l.status==='open'?'ABERTA':'FECHADA')+'</span><span class="muted">'+(l.closedAt?'Fechada em '+esc(dataExibicao(l.closedAt)):'')+'</span></div>'+(rows.length?'<div class="table-wrap"><table><thead><tr><th>Nº</th><th>Nome do interno</th><th>RGI</th><th>Visitantes</th><th>Pavilhão</th><th>Cela</th>'+(podeEditar?'<th>AÇÕES</th>':'')+'</tr></thead><tbody>'+rows.map((x,i)=>'<tr><td><b>'+(i+1)+'</b></td><td>'+esc(x.internalName)+'</td><td>'+esc(x.rgi||'')+'</td><td class="centro">'+(Number(x.visitorCount)||1)+'</td><td><strong>'+esc(x.pavilion||'—')+'</strong></td><td><strong>'+esc(x.cell||'—')+'</strong></td>'+(podeEditar?'<td><div class="visit-actions"><button class="blue" type="button" onclick="editarVisita(\''+esc(x.id)+'\')">EDITAR</button><button class="red" type="button" onclick="excluirVisita(\''+esc(x.id)+'\')">EXCLUIR</button></div></td>':'')+'</tr>').join('')+'</tbody></table></div>':'<div class="empty">Esta lista ainda não tem internos.</div>')+'</div>'
   }).join('');
  }catch(e){$('listasVisitas').innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
 }
-$('formVisitas').addEventListener('submit',async e=>{e.preventDefault();if(!selecionadoV||selecionadoV.nome!==$('nomeInternoV').value){mostrarStatus('msgVisitas','Selecione um interno da lista sugerida para preencher os dados automaticamente.','error');return}const escala=verificarEscalaVisitas(selecionadoV.pavilhao||$('pavilhaoV').value);if(!escala.ok&&!confirm(escala.mensagem+'\\n\\nDeseja continuar e incluir este interno mesmo assim?'))return;try{const j=await api('/api/pertences-visitas/visits/entries',{method:'POST',body:JSON.stringify({internalName:selecionadoV.nome,rgi:selecionadoV.rgi||'',pavilion:selecionadoV.pavilhao||'',cell:selecionadoV.cela||'',visitorCount:Number($('quantidadeVisitantesV').value)||1})});mostrarStatus('msgVisitas','Interno incluído na Lista '+j.entry.dayListNumber+'.','success');limparFormVisitas();await carregarListasVisitas()}catch(err){mostrarStatus('msgVisitas',err.message,'error')}})
+function textoDuplicidadeVisita(dados){
+ const itens=dados&&dados.duplicates||[];
+ if(!itens.length)return 'Este interno já está cadastrado nas listas de visitas.';
+ return 'ATENÇÃO! Este interno já está cadastrado no dia '+dataDiaVisitas(itens[0].visitDay)+':\n'+itens.map(x=>'• Lista '+x.dayListNumber+(String(x.listNumber)===String(dados.currentListNumber)?' (mesma lista atual)':' (lista anterior)')+' — '+x.internalName).join('\n')+'\n\nDeseja incluir novamente mesmo assim?';
+}
+async function cadastrarVisita(confirmarDuplicidade=false){
+ if(!selecionadoV||selecionadoV.nome!==$('nomeInternoV').value){mostrarStatus('msgVisitas','Selecione um interno da lista sugerida para preencher os dados automaticamente.','error');return}
+ const escala=verificarEscalaVisitas(selecionadoV.pavilhao||$('pavilhaoV').value);
+ if(!escala.ok&&!confirm(escala.mensagem+'\\n\\nDeseja continuar e incluir este interno mesmo assim?'))return;
+ try{
+  const j=await api('/api/pertences-visitas/visits/entries',{method:'POST',body:JSON.stringify({internalName:selecionadoV.nome,rgi:selecionadoV.rgi||'',pavilion:selecionadoV.pavilhao||'',cell:selecionadoV.cela||'',visitorCount:Number($('quantidadeVisitantesV').value)||1,confirmDuplicate:confirmarDuplicidade})});
+  mostrarStatus('msgVisitas','Interno incluído na Lista '+j.entry.dayListNumber+'.','success');limparFormVisitas();await carregarListasVisitas();
+ }catch(err){
+  if(err.data&&err.data.duplicate&&!confirmarDuplicidade){
+   if(confirm(textoDuplicidadeVisita(err.data)))return cadastrarVisita(true);
+   mostrarStatus('msgVisitas','Cadastro cancelado. O interno já consta em uma das listas deste dia.','warning');return;
+  }
+  mostrarStatus('msgVisitas',err.message,'error');
+ }
+}
+$('formVisitas').addEventListener('submit',async e=>{e.preventDefault();await cadastrarVisita(false)});
+function editarVisita(id){
+ const item=registrosVisitasCache.find(x=>String(x.id)===String(id));
+ if(!item)return mostrarStatus('msgVisitas','Não foi possível localizar este registro. Atualize as listas e tente novamente.','error');
+ const lista=listasVisitasCache.find(x=>String(x.listNumber)===String(item.listNumber));
+ if(!lista||lista.status!=='open'||String(lista.visitDay).slice(0,10)!==dataHoje())return mostrarStatus('msgVisitas','Somente registros da lista aberta de hoje podem ser editados.','warning');
+ visitaEmEdicao=item.id;
+ $('editarNomeVisita').value=item.internalName||'';$('editarRgiVisita').value=item.rgi||'';$('editarPavilhaoVisita').value=item.pavilion||'';$('editarCelaVisita').value=item.cell||'';$('editarQuantidadeVisita').value=Number(item.visitorCount)||1;
+ $('msgEditarVisita').className='status';$('msgEditarVisita').textContent='';
+ $('modalEditarVisita').classList.add('show');
+}
+function cancelarEdicaoVisita(){visitaEmEdicao=null;$('modalEditarVisita').classList.remove('show')}
+$('formEditarVisita').addEventListener('submit',async e=>{
+ e.preventDefault();if(!visitaEmEdicao)return;
+ const dados={internalName:$('editarNomeVisita').value.trim(),rgi:$('editarRgiVisita').value.trim(),pavilion:$('editarPavilhaoVisita').value.trim(),cell:$('editarCelaVisita').value.trim(),visitorCount:Number($('editarQuantidadeVisita').value)};
+ if(!dados.internalName||!Number.isInteger(dados.visitorCount)||dados.visitorCount<1||dados.visitorCount>2){mostrarStatus('msgEditarVisita','Confira o nome e a quantidade de visitantes (1 ou 2).','error');return}
+ try{
+  await salvarEdicaoVisita(dados,false);
+ }catch(err){mostrarStatus('msgEditarVisita',err.message,'error')}
+});
+async function salvarEdicaoVisita(dados,confirmarDuplicidade){
+ try{
+  await api('/api/pertences-visitas/visits/entries/'+encodeURIComponent(visitaEmEdicao),{method:'PUT',body:JSON.stringify({...dados,confirmDuplicate:confirmarDuplicidade})});
+  cancelarEdicaoVisita();mostrarStatus('msgVisitas','Registro de visita atualizado.','success');await carregarListasVisitas();
+ }catch(err){
+  if(err.data&&err.data.duplicate&&!confirmarDuplicidade){
+   if(confirm(textoDuplicidadeVisita(err.data)))return salvarEdicaoVisita(dados,true);
+   mostrarStatus('msgEditarVisita','Alteração cancelada. O interno já consta em uma das listas deste dia.','warning');return;
+  }
+  mostrarStatus('msgEditarVisita',err.message,'error');
+ }
+}
+async function excluirVisita(id){
+ const item=registrosVisitasCache.find(x=>String(x.id)===String(id));if(!item)return;
+ if(!confirm('Confirma excluir '+item.internalName+' da Lista '+item.dayListNumber+'? Esta ação não poderá ser desfeita.'))return;
+ try{await api('/api/pertences-visitas/visits/entries/'+encodeURIComponent(id),{method:'DELETE'});mostrarStatus('msgVisitas','Registro de '+item.internalName+' excluído da Lista '+item.dayListNumber+'.','success');await carregarListasVisitas()}
+ catch(e){mostrarStatus('msgVisitas',e.message,'error')}
+});
 async function fecharListaVisitas(){if(!confirm('Deseja fechar a lista atual e abrir a próxima? A numeração continuará dentro do mesmo dia.'))return;try{const j=await api('/api/pertences-visitas/visits/close',{method:'POST',body:JSON.stringify({})});mostrarStatus('msgVisitas',j.closedListNumber?'Lista '+j.closedListNumber+' fechada. A Lista '+j.nextListNumber+' foi aberta.':'Próxima lista aberta.','success');await carregarListasVisitas()}catch(e){mostrarStatus('msgVisitas',e.message,'error')}}
 async function fecharDiaVisitas(){if(!confirm('Confirma o FECHAMENTO DAS VISITAS DE HOJE? O sistema apresentará o resumo dos internos visitados. Será possível reabrir o dia se necessário.'))return;try{const j=await api('/api/pertences-visitas/visits/day/close',{method:'POST',body:JSON.stringify({})});mostrarStatus('msgVisitas','Visitas do dia encerradas. Total de internos distintos: '+j.totalInmates+'.','success');await carregarListasVisitas()}catch(e){mostrarStatus('msgVisitas',e.message,'error')}}
 async function reabrirDiaVisitas(){if(!confirm('Deseja reabrir as visitas de hoje? A próxima lista continuará a sequência do dia.'))return;try{const j=await api('/api/pertences-visitas/visits/day/reopen',{method:'POST',body:JSON.stringify({})});mostrarStatus('msgVisitas','Visitas reabertas. A sequência continuará na Lista '+j.nextListNumber+'.','success');await carregarListasVisitas()}catch(e){mostrarStatus('msgVisitas',e.message,'error')}}
