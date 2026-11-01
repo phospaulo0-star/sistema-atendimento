@@ -1535,14 +1535,21 @@ app.get('/api/admin/visits-belongings-statistics', exigirBanco, exigirAutenticac
        GROUP BY 1,2
        ORDER BY 1,2
     `,[from||null,to||null]);
+    // Sem filtro de período, os pertences mostram somente o mês atual de Campo Grande.
+    // Quando o administrador informa datas, respeita exatamente o intervalo escolhido.
+    const periodoPertences=(!from&&!to)
+      ? await pool.query("SELECT to_char(date_trunc('month', NOW() AT TIME ZONE 'America/Campo_Grande')::date,'YYYY-MM-DD') AS inicio, to_char((date_trunc('month', NOW() AT TIME ZONE 'America/Campo_Grande') + INTERVAL '1 month - 1 day')::date,'YYYY-MM-DD') AS fim")
+      : {rows:[{inicio:from||null,fim:to||null}]};
+    const inicioPertences=periodoPertences.rows[0].inicio;
+    const fimPertences=periodoPertences.rows[0].fim;
     const pertences=await pool.query(`
       SELECT COALESCE(NULLIF(BTRIM(pavilion),''),'N/I') AS pavilion,COUNT(*)::integer AS quantity
         FROM pv_belongings
        WHERE ($1::date IS NULL OR received_at >= ($1::date::timestamp AT TIME ZONE 'America/Campo_Grande'))
          AND ($2::date IS NULL OR received_at < (($2::date+1)::timestamp AT TIME ZONE 'America/Campo_Grande'))
        GROUP BY 1 ORDER BY 1
-    `,[from||null,to||null]);
-    res.json({ok:true,visits:visitas.rows,belongings:pertences.rows,from:from||null,to:to||null});
+    `,[inicioPertences,fimPertences]);
+    res.json({ok:true,visits:visitas.rows,belongings:pertences.rows,from:from||null,to:to||null,belongingsFrom:inicioPertences,belongingsTo:fimPertences});
   }catch(e){
     console.error('Falha ao consultar estatísticas de visitas e pertences:',e.message);
     res.status(500).json({ok:false,message:'Não foi possível carregar os indicadores de visitas e pertences.'});
