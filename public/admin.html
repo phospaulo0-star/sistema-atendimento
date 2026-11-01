@@ -161,11 +161,11 @@ function contarOcorrenciasNaDataStats(r,chave,indiceData,tipo='tab'){
 }
 function somarStats(rs,fn){return rs.reduce((n,r)=>n+fn(r),0)}
 function normalizarTituloEvasaoStats(v){
- return String(v||'').trim().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleUpperCase('pt-BR').replace(/\\s+/g,' ');
+ return String(v||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleUpperCase('pt-BR').replace(/\s+/g,' ');
 }
 function lerSaidasStats(r){
  const raw=valorItemStats(r,CHAVES_STATS.saidas);
- if(!raw||/^N\\/C\\.?$/i.test(raw))return [];
+ if(!raw||/^N\/C\.?$/i.test(raw))return [];
  try{
   const parsed=JSON.parse(raw);
   return Array.isArray(parsed)?parsed.filter(x=>x&&[x.nome,x.rgi,x.procedencia,x.documento].some(v=>String(v||'').trim())):[];
@@ -178,7 +178,7 @@ function contarEvasoesStats(rs){
    const titulo=String(saida.procedencia||'').trim();
    const chave=normalizarTituloEvasaoStats(titulo);
    if(!chave.startsWith('EVASAO'))continue;
-   if(!grupos.has(chave))grupos.set(chave,{titulo:titulo.toLocaleUpperCase('pt-BR').replace(/\\s+/g,' '),total:0});
+   if(!grupos.has(chave))grupos.set(chave,{titulo:titulo.toLocaleUpperCase('pt-BR').replace(/\s+/g,' '),total:0});
    grupos.get(chave).total++;
   }
  }
