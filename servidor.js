@@ -2146,8 +2146,8 @@ function montarRotasPertencesVisitas(config) {
     try{
       await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);await atualizarFechamentoAutomaticoVisitas(client);
       const hoje=hojeCampoGrande();
-      const atual=await client.query("SELECT e.entry_id,e.list_number,l.day_list_number,l.visit_day,l.status AS list_status,d.status AS day_status FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) JOIN pv_visit_days d ON d.visit_day=l.visit_day WHERE e.entry_id=$1 FOR UPDATE OF e,l,d",[id]);
-      if(!atual.rowCount||String(atual.rows[0].visit_day).slice(0,10)!==hoje||atual.rows[0].list_status!=='open'||atual.rows[0].day_status!=='open'){
+      const atual=await client.query("SELECT e.entry_id,e.list_number,l.day_list_number,l.visit_day,l.status AS list_status,d.status AS day_status FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) JOIN pv_visit_days d ON d.visit_day=l.visit_day WHERE e.entry_id=$1 AND l.visit_day=$2 AND l.status='open' AND d.status='open' FOR UPDATE OF e,l,d",[id,hoje]);
+      if(!atual.rowCount){
         await client.query('ROLLBACK');return res.status(409).json({ok:false,message:'Somente registros da lista aberta de hoje podem ser editados.'});
       }
       const duplicados=await client.query(
@@ -2174,8 +2174,8 @@ function montarRotasPertencesVisitas(config) {
     try{
       await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);await atualizarFechamentoAutomaticoVisitas(client);
       const hoje=hojeCampoGrande();
-      const atual=await client.query("SELECT e.entry_id,e.internal_name,l.list_number,l.day_list_number,l.visit_day,l.status AS list_status,d.status AS day_status FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) JOIN pv_visit_days d ON d.visit_day=l.visit_day WHERE e.entry_id=$1 FOR UPDATE OF e,l,d",[id]);
-      if(!atual.rowCount||String(atual.rows[0].visit_day).slice(0,10)!==hoje||atual.rows[0].list_status!=='open'||atual.rows[0].day_status!=='open'){
+      const atual=await client.query("SELECT e.entry_id,e.internal_name,l.list_number,l.day_list_number,l.visit_day,l.status AS list_status,d.status AS day_status FROM pv_visit_entries e JOIN pv_visit_lists l USING(list_number) JOIN pv_visit_days d ON d.visit_day=l.visit_day WHERE e.entry_id=$1 AND l.visit_day=$2 AND l.status='open' AND d.status='open' FOR UPDATE OF e,l,d",[id,hoje]);
+      if(!atual.rowCount){
         await client.query('ROLLBACK');return res.status(409).json({ok:false,message:'Somente registros da lista aberta de hoje podem ser excluídos.'});
       }
       await client.query('DELETE FROM pv_visit_entries WHERE entry_id=$1',[id]);
