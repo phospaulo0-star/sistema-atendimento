@@ -126,7 +126,48 @@ async function carregarAtendimentos(){try{const j=await api('/api/admin/attendan
 function renderLinhaAtendimentoAdmin(a){const r=a.record||{};return `<tr><td>${esc(dt(a.createdAt))}</td><td><strong>${esc(r.nome||'')}</strong><span class="sub">RGI ${esc(r.rgi||'')}</span></td><td>${esc(r.pavilhao||'')} / ${esc(r.cela||'')}</td><td>${esc(r.atendimento||'')}<span class="sub">${esc(r.assunto||'')}</span></td><td><strong>${esc(a.ownerUsername||'')}</strong><span class="sub">${esc(a.ownerFullName||'')}</span></td><td>${esc(a.status||'')}${a.guicheArchivedAt?`<span class="sub">Guardado no Guichê em ${esc(dt(a.guicheArchivedAt))}</span>`:''}${a.mesaArchivedAt?`<span class="sub">Guardado na Mesa em ${esc(dt(a.mesaArchivedAt))}</span>`:''}${a.refusalReason?`<span class="sub">Motivo: ${esc(a.refusalReason)}</span>`:''}</td></tr>`}
 function filtrarAtendimentosAdmin(lista){const q=($('searchAttendances')?.value||'').toLocaleLowerCase('pt-BR');const status=$('filterAttendanceStatus')?.value||'';return lista.filter(a=>{const d=a.record||{};const statusMatch=!status||(status==='guardado'?Boolean(a.guicheArchivedAt||a.mesaArchivedAt):a.status===status);return statusMatch&&(!q||[d.nome,d.rgi,a.ownerUsername,a.ownerFullName,d.atendimento,d.assunto,d.pavilhao,d.cela].some(x=>String(x||'').toLocaleLowerCase('pt-BR').includes(q)))})}
 function renderAtendimentosHoje(){const hoje=dataHojeAdmin();const rows=attendances.filter(a=>dataLocalAdmin(a.createdAt)===hoje).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));$('todayAttendanceDate').textContent='Data: '+formatarDiaAdmin(hoje);$('todayAttendancesBody').innerHTML=rows.length?rows.map(renderLinhaAtendimentoAdmin).join(''):'<tr><td colspan="6" class="empty">Nenhum atendimento registrado hoje.</td></tr>';$('todayAttendanceCount').textContent='Total de atendimentos de hoje: '+rows.length}
-function renderPastasAtendimentos(){const raiz={};attendances.forEach(a=>{const key=dataLocalAdmin(a.createdAt);if(!key)return;const [ano,mes,dia]=key.split('-');raiz[ano]??={};raiz[ano][mes]??={};raiz[ano][mes][dia]=(raiz[ano][mes][dia]||0)+1});const anos=Object.keys(raiz).sort().reverse();if(!anos.length){$('attendanceFolders').innerHTML='<p class="muted">Nenhum atendimento arquivado.</p>';return}const hoje=dataHojeAdmin(),[anoHoje,mesHoje]=hoje.split('-');anos.forEach(y=>{if(y===anoHoje)attendanceExpandedAdmin.add('y:'+y)});attendanceExpandedAdmin.add('m:'+anoHoje+'-'+mesHoje);$('attendanceFolders').innerHTML=anos.map(y=>{const meses=Object.keys(raiz[y]).sort().reverse();const abertoY=attendanceExpandedAdmin.has('y:'+y);return `<div><button class="folder-node" onclick="alternarPastaAtendimento('y:${y}')"><span>${abertoY?'📂':'📁'}</span><strong>${y}</strong><span class="folder-count">${Object.values(raiz[y]).reduce((n,x)=>n+Object.values(x).reduce((a,b)=>a+b,0),0)}</span></button>${abertoY?`<div class="folder-children">${meses.map(m=>{const id='m:'+y+'-'+m,abertoM=attendanceExpandedAdmin.has(id);return `<div><button class="folder-node month" onclick="alternarPastaAtendimento('${id}')"><span>${abertoM?'📂':'📁'}</span>${mesNomeAdmin(m)}<span class="folder-count">${Object.values(raiz[y][m]).reduce((a,b)=>a+b,0)}</span></button>${abertoM?`<div class="folder-children">${Object.keys(raiz[y][m]).sort().reverse().map(d=>{const diaKey=y+'-'+m+'-'+d,selecionado=attendanceSelectedDayAdmin===diaKey;return `<button class="folder-node day ${selecionado?'selected':''}" onclick="selecionarDiaAtendimentos('${diaKey}')"><span>📄</span>${d}/${m}/${y}<span class="folder-count">${raiz[y][m][d]}</span></button>`}).join('')}`:''}</div>`:''}</div>`}).join('')}`:''}</div></div>`}).join('')}
+function renderPastasAtendimentos(){
+ const raiz={};
+ attendances.forEach(a=>{
+  const key=dataLocalAdmin(a.createdAt);
+  if(!key)return;
+  const [ano,mes,dia]=key.split('-');
+  raiz[ano]??={};
+  raiz[ano][mes]??={};
+  raiz[ano][mes][dia]=(raiz[ano][mes][dia]||0)+1;
+ });
+ const anos=Object.keys(raiz).sort().reverse();
+ if(!anos.length){
+  $('attendanceFolders').innerHTML='<p class="muted">Nenhum atendimento arquivado.</p>';
+  return;
+ }
+ const hoje=dataHojeAdmin();
+ const [anoHoje,mesHoje]=hoje.split('-');
+ anos.forEach(y=>{
+  if(y===anoHoje)attendanceExpandedAdmin.add('y:'+y);
+ });
+ attendanceExpandedAdmin.add('m:'+anoHoje+'-'+mesHoje);
+ const htmlAnos=anos.map(y=>{
+  const meses=Object.keys(raiz[y]).sort().reverse();
+  const abertoY=attendanceExpandedAdmin.has('y:'+y);
+  const htmlMeses=meses.map(m=>{
+   const id='m:'+y+'-'+m;
+   const abertoM=attendanceExpandedAdmin.has(id);
+   let htmlDias='';
+   if(abertoM){
+    htmlDias=Object.keys(raiz[y][m]).sort().reverse().map(d=>{
+     const diaKey=y+'-'+m+'-'+d;
+     const selecionado=attendanceSelectedDayAdmin===diaKey;
+     return '<button class="folder-node day '+(selecionado?'selected':'')+'" onclick="selecionarDiaAtendimentos(\''+diaKey+'\')"><span>📄</span>'+d+'/'+m+'/'+y+'<span class="folder-count">'+raiz[y][m][d]+'</span></button>';
+    }).join('');
+   }
+   return '<div><button class="folder-node month" onclick="alternarPastaAtendimento(\''+id+'\')"><span>'+(abertoM?'📂':'📁')+'</span>'+mesNomeAdmin(m)+'<span class="folder-count">'+Object.values(raiz[y][m]).reduce((a,b)=>a+b,0)+'</span></button>'+(abertoM?'<div class="folder-children">'+htmlDias+'</div>':'')+'</div>';
+  }).join('');
+  const totalAno=Object.values(raiz[y]).reduce((n,x)=>n+Object.values(x).reduce((a,b)=>a+b,0),0);
+  return '<div><button class="folder-node" onclick="alternarPastaAtendimento(\'y:'+y+'\')"><span>'+(abertoY?'📂':'📁')+'</span><strong>'+y+'</strong><span class="folder-count">'+totalAno+'</span></button>'+(abertoY?'<div class="folder-children">'+htmlMeses+'</div>':'')+'</div>';
+ }).join('');
+ $('attendanceFolders').innerHTML=htmlAnos;
+}
 function alternarPastaAtendimento(id){if(attendanceExpandedAdmin.has(id))attendanceExpandedAdmin.delete(id);else attendanceExpandedAdmin.add(id);renderPastasAtendimentos()}
 function selecionarDiaAtendimentos(key){attendanceSelectedDayAdmin=key;const [y,m]=key.split('-');attendanceExpandedAdmin.add('y:'+y);attendanceExpandedAdmin.add('m:'+y+'-'+m);renderPastasAtendimentos();renderAttendances()}
 function renderAttendances(){const dia=attendanceSelectedDayAdmin||dataHojeAdmin();const lista=attendances.filter(a=>dataLocalAdmin(a.createdAt)===dia);const rows=filtrarAtendimentosAdmin(lista).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));$('historySelectedDate').textContent='ATENDIMENTOS DO DIA '+formatarDiaAdmin(dia);$('attendancesBody').innerHTML=rows.length?rows.map(renderLinhaAtendimentoAdmin).join(''):'<tr><td colspan="6" class="empty">Nenhum atendimento encontrado para este dia e filtro.</td></tr>';$('historyAttendanceCount').textContent='Exibindo '+rows.length+' de '+lista.length+' atendimento(s) nesta data.'}
