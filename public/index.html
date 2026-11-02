@@ -1170,11 +1170,19 @@ atualizarFiltroGuardados();
 atualizarResumoGuardados();
 }
 
-function excluirRecusado(recordId){
-if(!confirm("Excluir definitivamente este atendimento recusado?"))return;
-recusados=recusados.filter(x=>x.recordId!==recordId);
+async function excluirRecusado(recordId){
+if(!confirm("Excluir definitivamente este atendimento recusado? Esta ação também removerá o registro do servidor e não poderá ser desfeita."))return;
+try{
+const resp=await fetch("/api/me/attendances/"+encodeURIComponent(recordId),{method:"DELETE",credentials:"same-origin",headers:{"Accept":"application/json"}});
+const dados=await resp.json().catch(()=>({}));
+if(!resp.ok||!dados.ok)throw new Error(dados.message||"O servidor não confirmou a exclusão.");
+recusados=recusados.filter(x=>String(x.recordId)!==String(recordId));
+historico=historico.filter(x=>String(x.recordId)!==String(recordId));
+arquivo=arquivo.filter(x=>String(x.recordId)!==String(recordId));
 salvarTudo();
-renderRecusados();
+renderRecusados();renderHistorico();renderGuardados();atualizarFiltroGuardados();atualizarResumoGuardados();
+alert("Atendimento recusado excluído definitivamente do servidor.");
+}catch(e){alert("Não foi possível excluir o atendimento: "+e.message);await sincronizarHistoricoCentral();}
 }
 
 function atualizarFiltroGuardados(){
