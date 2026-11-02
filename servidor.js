@@ -759,6 +759,43 @@ app.get('/api/me/attendances', exigirBanco, exigirAutenticacao, async (req, res)
     })) });
   } catch (e) { res.status(500).json({ ok: false, message: 'NÃÂÃÂ£o foi possÃÂÃÂ­vel carregar o histÃÂÃÂ³rico desta conta.' }); }
 });
+app.delete('/api/me/attendances/:recordId', exigirBanco, exigirAutenticacao, async (req, res) => {
+  const recordId = textoSeguro(req.params.recordId, 180);
+  if (!recordId) return res.status(400).json({ ok: false, message: 'Identificador do atendimento não informado.' });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await client.query('SELECT owner_id,status FROM attendances WHERE record_id=$1 FOR UPDATE', [recordId]);
+    if (!result.rowCount) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ ok: false, message: 'Atendimento não encontrado no servidor.' });
+    }
+    const row = result.rows[0];
+    if (row.owner_id !== req.user.id && req.user.role !== 'admin') {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ ok: false, message: 'Você não tem permissão para excluir este atendimento.' });
+    }
+    if (row.status !== 'recusado') {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ ok: false, message: 'Somente atendimentos recusados podem ser excluídos por esta opção.' });
+    }
+    await client.query('DELETE FROM attendances WHERE record_id=$1', [recordId]);
+    await registrarAuditoria(req.user.id, 'atendimento_recusado_excluido', row.owner_id, { recordId });
+    await client.query('COMMIT');
+    recusasPendentes.delete(recordId);
+    pendentes.delete(recordId);
+    recebidos.delete(recordId);
+    transmitirParaCanal('sender', { type: 'record_deleted', recordId, reason: 'Atendimento recusado excluído.' });
+    transmitirParaCanal('receiver', { type: 'record_deleted', recordId, reason: 'Atendimento recusado excluído.' });
+    return res.json({ ok: true, deleted: true, recordId });
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Erro excluindo atendimento recusado:', e.message);
+    return res.status(500).json({ ok: false, message: 'Não foi possível excluir definitivamente o atendimento recusado.' });
+  } finally {
+    client.release();
+  }
+});
 app.get('/api/me/backup-data', exigirBanco, exigirAutenticacao, async (req, res) => {
   if (!['guiche', 'mesa', 'admin'].includes(req.user.role)) {
     return res.status(403).json({ ok: false, message: 'Esta conta nÃÂÃÂ£o pode gerar backup de atendimentos.' });
