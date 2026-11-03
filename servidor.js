@@ -1608,6 +1608,35 @@ app.get('/api/admin/statistics.xlsx', exigirBanco, exigirAutenticacao, exigirAdm
     const buffer=Buffer.from(await wb.xlsx.writeBuffer());res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');res.setHeader('Content-Disposition','attachment; filename="Estatisticas_CPAIG.xlsx"');res.setHeader('X-Report-Count',String(q.rowCount));res.send(buffer);
   }catch(e){console.error('Falha ao exportar estatísticas CPAIG:',e.message);res.status(500).json({ok:false,message:'Não foi possível gerar o Excel estatístico.'});}
 });
+app.post('/api/admin/shift-reports/:id/recover-item', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
+  const id=textoSeguro(req.params.id,100);
+  const revision=Number(req.body?.revision);
+  const itemKey=String(req.body?.itemKey||'').trim();
+  if(!Number.isInteger(revision)||revision<1||!itemKey||itemKey.length>180)return res.status(400).json({ok:false,message:'Informe uma revisão e um item válidos.'});
+  const client=await pool.connect();
+  try{
+    await client.query('BEGIN');
+    const current=await client.query('SELECT * FROM shift_reports WHERE id=$1 FOR UPDATE',[id]);
+    if(!current.rowCount){await client.query('ROLLBACK');return res.status(404).json({ok:false,message:'Relatório não encontrado.'});}
+    const old=current.rows[0];
+    const source=await client.query(`SELECT new_content FROM shift_report_history WHERE report_id=$1 AND revision=$2 ORDER BY created_at DESC LIMIT 1`,[id,revision]);
+    if(!source.rowCount){await client.query('ROLLBACK');return res.status(404).json({ok:false,message:'A revisão escolhida não foi encontrada no histórico.'});}
+    const snapshot=source.rows[0].new_content&&typeof source.rows[0].new_content==='object'?source.rows[0].new_content:{};
+    if(!Object.prototype.hasOwnProperty.call(snapshot,itemKey)){await client.query('ROLLBACK');return res.status(404).json({ok:false,message:'O item selecionado não existe no conteúdo dessa revisão.'});}
+    const previous=old.content&&typeof old.content==='object'?old.content:{};
+    const merged={...previous,[itemKey]:snapshot[itemKey]};
+    const nextRevision=Number(old.revision||0)+1;
+    const updated=await client.query(`UPDATE shift_reports SET content=$2::jsonb,revision=$3,updated_by=$4,updated_at=NOW() WHERE id=$1 RETURNING *`,[id,JSON.stringify(merged),nextRevision,req.user.id]);
+    await client.query(`INSERT INTO shift_report_history(report_id,actor_user_id,action,revision,previous_content,new_content,details) VALUES($1,$2,'recuperar_item',$3,$4::jsonb,$5::jsonb,$6::jsonb)`,[id,req.user.id,nextRevision,JSON.stringify(previous),JSON.stringify(merged),JSON.stringify({team:old.team,reportDate:String(old.report_date).slice(0,10),itemKey,sourceRevision:revision,method:'recuperacao_seletiva_administrativa'})]);
+    await client.query('COMMIT');
+    try{await registrarAuditoria(req.user.id,'relatorio_item_recuperado',null,{reportId:id,team:old.team,reportDate:String(old.report_date).slice(0,10),itemKey,sourceRevision:revision,newRevision:nextRevision});}catch(auditError){console.error('Falha ao registrar auditoria de recuperação de item:',auditError&&auditError.stack?auditError.stack:auditError);}
+    return res.json({ok:true,report:relatorioPublico(updated.rows[0]),itemKey,sourceRevision:revision});
+  }catch(e){
+    try{await client.query('ROLLBACK')}catch{}
+    console.error('Falha na recuperação seletiva de item do relatório:',e&&e.stack?e.stack:e);
+    return res.status(500).json({ok:false,message:'Não foi possível recuperar o item. O relatório atual foi preservado.'});
+  }finally{client.release();}
+});
 app.get('/api/admin/shift-reports/:id/history', exigirBanco, exigirAutenticacao, exigirAdmin, async(req,res)=>{
   try{const q=await pool.query(`SELECT h.id,h.action,h.revision,h.previous_content,h.new_content,h.details,h.created_at,u.username,u.full_name FROM shift_report_history h LEFT JOIN users u ON u.id=h.actor_user_id WHERE h.report_id=$1 ORDER BY h.created_at DESC LIMIT 500`,[textoSeguro(req.params.id,100)]);res.json({ok:true,history:q.rows});}
   catch(e){res.status(500).json({ok:false,message:'NÃÂ£o foi possÃÂ­vel carregar o histÃÂ³rico do relatÃÂ³rio.'});}
