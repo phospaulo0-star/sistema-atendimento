@@ -1412,50 +1412,6 @@ function normalizarLargurasCelulasDocx(html) {
   });
 }
 
-function normalizarEstruturaRelatorioDocx(html) {
-  let resultado = html;
-
-  // O conversor não reproduz CSS Grid de forma confiável. Converte o cabeçalho
-  // institucional em tabela real para manter brasão, texto e logotipo lado a lado.
-  resultado = resultado.replace(
-    /<div class="preview-letterhead">([\s\S]*?)<\/div>\s*<div class="preview-archive">/i,
-    (bloco, conteudo) => {
-      const brasoes = conteudo.match(/<img\b[^>]*>/gi) || [];
-      const texto = conteudo.match(/<div class="preview-letterhead-text">[\s\S]*?<\/div>\s*<\/div>/i);
-      const imagemEsquerda = brasoes[0] || '';
-      const imagemDireita = brasoes[1] || '';
-      const textoInstitucional = texto ? texto[0].replace(
-        '<div class="preview-letterhead-text">',
-        '<div style="font-family:Arial,Helvetica,sans-serif;font-size:7pt;font-style:italic;font-weight:bold;color:#858585;line-height:1.15;text-align:center;">'
-      ) : '';
-      const esquerda = imagemEsquerda.replace(/class="[^"]*"/i, 'style="width:1.7cm;height:1.7cm;object-fit:contain;"');
-      const direita = imagemDireita.replace(/class="[^"]*"/i, 'style="width:3.5cm;height:2.4cm;object-fit:contain;"');
-      return '<table style="width:16.8cm;border-collapse:collapse;margin:0 0 10px 0;"><tbody><tr>' +
-        '<td style="width:2cm;text-align:center;vertical-align:middle;border:0;padding:0;">' + esquerda + '</td>' +
-        '<td style="width:10.8cm;text-align:center;vertical-align:middle;border:0;padding:0;">' + textoInstitucional + '</td>' +
-        '<td style="width:4cm;text-align:center;vertical-align:middle;border:0;padding:0;">' + direita + '</td>' +
-        '</tr></tbody></table><div class="preview-archive">';
-    }
-  );
-
-  // Evita que o Word aplique os estilos próprios Heading 2/3, diferentes da impressão.
-  resultado = resultado.replace(
-    /<div class="preview-title"><h2>([\s\S]*?)<\/h2><\/div>/i,
-    '<p style="font-family:Times New Roman,serif;font-size:12pt;font-weight:bold;text-align:center;margin:0 0 18px 0;">$1</p>'
-  );
-  resultado = resultado.replace(/<h3([^>]*)>/gi,
-    '<p style="font-family:Times New Roman,serif;font-size:11pt;line-height:1.15;font-weight:bold;margin:0 0 4px 0;">');
-  resultado = resultado.replace(/<\/h3>/gi, '</p>');
-  return resultado;
-}
-
-function prepararHtmlParaDocx(html) {
-  const semRegrasIncompativeis = html.replace(/<style\b([^>]*)>([\s\S]*?)<\/style>/gi, (tag, atributos, css) =>
-    '<style' + atributos + '>' + limparRegrasAtCss(css) + '</style>'
-  );
-  return normalizarLargurasCelulasDocx(normalizarEstruturaRelatorioDocx(semRegrasIncompativeis));
-}
-
 // ExportaÃÂ§ÃÂ£o de Word gerada no servidor.
 app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
   const html = req.body?.html;
@@ -1470,7 +1426,7 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
       pageSize: { width: 11906, height: 16838 },
       font: 'Times New Roman',
       fontSize: 22,
-      margins: { top: 1020, right: 1020, bottom: 1020, left: 1020 },
+      margins: { top: 850, right: 900, bottom: 850, left: 900 },
       table: { row: { cantSplit: true } }
     });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
