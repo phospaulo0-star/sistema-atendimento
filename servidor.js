@@ -1370,8 +1370,14 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
     res.setHeader('Content-Disposition', 'attachment; filename="Relatorio_CPAIG.docx"');
     res.send(Buffer.from(docx));
   } catch (e) {
-    console.error('Erro ao gerar DOCX do relatÃÂ³rio:', e && e.stack ? e.stack : e);
-    res.status(500).json({ ok: false, message: 'NÃÂ£o foi possÃÂ­vel gerar o arquivo Word no servidor.' });
+    const detalhe = String(e && e.message ? e.message : e || 'Erro desconhecido').slice(0, 700);
+    console.error('Erro ao gerar DOCX do relatório:', e && e.stack ? e.stack : e);
+    // Retorna somente a mensagem do erro, sem stack, para identificar a falha real no teste.
+    res.status(500).json({
+      ok: false,
+      message: 'Não foi possível gerar o arquivo Word no servidor.',
+      detail: detalhe
+    });
   }
 });
 
