@@ -1417,7 +1417,7 @@ function prepararHtmlParaDocx(html) {
   // Remove regras CSS @media, @page, @supports e similares que o conversor DOCX
   // não interpreta. Preserva as declarações CSS comuns usadas na impressão.
   const semRegrasIncompativeis = String(html || '').replace(
-    /<style\\b([^>]*)>([\\s\\S]*?)<\\/style>/gi,
+    /<style\b([^>]*)>([\s\S]*?)<\/style>/gi,
     (tag, atributos, css) => '<style' + atributos + '>' + limparRegrasAtCss(css) + '</style>'
   );
   return normalizarLargurasCelulasDocx(semRegrasIncompativeis);
