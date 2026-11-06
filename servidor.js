@@ -1318,27 +1318,77 @@ app.delete('/api/relatorios/he-nomes/:id',
 // Remove regras CSS iniciadas por @ antes da conversÃÂ£o para DOCX. Alguns conversores
 // tentam interpretar regras como @page/@media como nomes XML e falham com "Invalid XML name: @w".
 function limparRegrasAtCss(css) {
+  // Remove regras CSS @media, @page, @supports etc. com leitura balanceada.
+  // O parser anterior contava chaves dentro de comentários/strings e podia
+  // deixar fragmentos de @-rules no HTML enviado ao conversor DOCX.
   let resultado = '';
-  let posicao = 0;
-  while (posicao < css.length) {
-    const at = css.indexOf('@', posicao);
-    if (at === -1) { resultado += css.slice(posicao); break; }
-    resultado += css.slice(posicao, at);
-    let abre = css.indexOf('{', at);
-    const pontoVirgula = css.indexOf(';', at);
-    if (pontoVirgula !== -1 && (abre === -1 || pontoVirgula < abre)) {
-      posicao = pontoVirgula + 1;
+  let i = 0;
+  while (i < css.length) {
+    if (css.startsWith('/*', i)) {
+      const fimComentario = css.indexOf('*/', i + 2);
+      const fim = fimComentario === -1 ? css.length : fimComentario + 2;
+      resultado += css.slice(i, fim);
+      i = fim;
       continue;
     }
-    if (abre === -1) { break; }
-    let profundidade = 1;
-    let fim = abre + 1;
-    while (fim < css.length && profundidade > 0) {
-      if (css[fim] === '{') profundidade++;
-      else if (css[fim] === '}') profundidade--;
-      fim++;
+    const ch = css[i];
+    if (ch === '"' || ch === "'") {
+      const quote = ch;
+      const inicio = i++;
+      while (i < css.length) {
+        if (css[i] === '\\\\') { i += 2; continue; }
+        if (css[i] === quote) { i++; break; }
+        i++;
+      }
+      resultado += css.slice(inicio, i);
+      continue;
     }
-    posicao = fim;
+    if (ch !== '@') { resultado += ch; i++; continue; }
+
+    // Avança até o terminador da regra, ignorando strings e comentários.
+    let j = i + 1;
+    let abre = -1;
+    while (j < css.length) {
+      if (css.startsWith('/*', j)) {
+        const fimComentario = css.indexOf('*/', j + 2);
+        j = fimComentario === -1 ? css.length : fimComentario + 2;
+        continue;
+      }
+      if (css[j] === '"' || css[j] === "'") {
+        const quote = css[j++];
+        while (j < css.length) {
+          if (css[j] === '\\\\') { j += 2; continue; }
+          if (css[j++] === quote) break;
+        }
+        continue;
+      }
+      if (css[j] === ';') { j++; break; }
+      if (css[j] === '{') { abre = j; break; }
+      j++;
+    }
+    if (abre === -1) { i = j; continue; }
+
+    let profundidade = 1;
+    j = abre + 1;
+    while (j < css.length && profundidade > 0) {
+      if (css.startsWith('/*', j)) {
+        const fimComentario = css.indexOf('*/', j + 2);
+        j = fimComentario === -1 ? css.length : fimComentario + 2;
+        continue;
+      }
+      if (css[j] === '"' || css[j] === "'") {
+        const quote = css[j++];
+        while (j < css.length) {
+          if (css[j] === '\\\\') { j += 2; continue; }
+          if (css[j++] === quote) break;
+        }
+        continue;
+      }
+      if (css[j] === '{') profundidade++;
+      else if (css[j] === '}') profundidade--;
+      j++;
+    }
+    i = j;
   }
   return resultado;
 }
