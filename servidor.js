@@ -1412,6 +1412,17 @@ function normalizarLargurasCelulasDocx(html) {
   });
 }
 
+
+function prepararHtmlParaDocx(html) {
+  // Remove regras CSS @media, @page, @supports e similares que o conversor DOCX
+  // não interpreta. Preserva as declarações CSS comuns usadas na impressão.
+  const semRegrasIncompativeis = String(html || '').replace(
+    /<style\\b([^>]*)>([\\s\\S]*?)<\\/style>/gi,
+    (tag, atributos, css) => '<style' + atributos + '>' + limparRegrasAtCss(css) + '</style>'
+  );
+  return normalizarLargurasCelulasDocx(semRegrasIncompativeis);
+}
+
 // ExportaÃÂ§ÃÂ£o de Word gerada no servidor.
 app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirPerfilRelatorio, async (req, res) => {
   const html = req.body?.html;
