@@ -1942,7 +1942,9 @@ async function exportarWord(){
     });
     if(!resposta.ok){
       const erro=await resposta.json().catch(()=>({}));
-      throw new Error(erro.message||'Falha na exportação do Word (HTTP '+resposta.status+').');
+      const mensagem=erro.message||'Falha na exportação do Word (HTTP '+resposta.status+').';
+      const detalhe=erro.detail?(' Detalhe técnico: '+erro.detail):'';
+      throw new Error(mensagem+detalhe);
     }
     const blob=await resposta.blob();
     if(!blob.size)throw new Error('O servidor retornou um arquivo vazio.');
