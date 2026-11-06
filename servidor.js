@@ -1421,7 +1421,7 @@ function normalizarEstruturaRelatorioDocx(html) {
     /<div class="preview-letterhead">([\s\S]*?)<\/div>\s*<div class="preview-archive">/i,
     (bloco, conteudo) => {
       const brasoes = conteudo.match(/<img\b[^>]*>/gi) || [];
-      const texto = conteudo.match(/<div class="preview-letterhead-text">[\s\S]*?<\/div>/i);
+      const texto = conteudo.match(/<div class="preview-letterhead-text">[\s\S]*?<\/div>\s*<\/div>/i);
       const imagemEsquerda = brasoes[0] || '';
       const imagemDireita = brasoes[1] || '';
       const textoInstitucional = texto ? texto[0].replace(
