@@ -1421,12 +1421,14 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
     res.send(Buffer.from(docx));
   } catch (e) {
     const detalhe = String(e && e.message ? e.message : e || 'Erro desconhecido').slice(0, 700);
+    const diagnostico = String(e && e.stack ? e.stack : detalhe).split('\n').slice(0, 7).join(' | ').slice(0, 1100);
     console.error('Erro ao gerar DOCX do relatório:', e && e.stack ? e.stack : e);
-    // Retorna somente a mensagem do erro, sem stack, para identificar a falha real no teste.
+    // Diagnóstico temporário limitado para identificar o ponto interno da falha.
     res.status(500).json({
       ok: false,
       message: 'Não foi possível gerar o arquivo Word no servidor.',
-      detail: detalhe
+      detail: detalhe,
+      diagnostic: diagnostico
     });
   }
 });
