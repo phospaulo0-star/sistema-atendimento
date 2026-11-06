@@ -1359,6 +1359,8 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
     const htmlSeguro = prepararHtmlParaDocx(html);
     const docx = await HTMLtoDOCX(htmlSeguro, null, {
       orientation: 'portrait',
+      // A4 em TWIPs: evita o padrão Letter quando as regras @page são removidas do CSS.
+      pageSize: { width: 11906, height: 16838 },
       font: 'Times New Roman',
       fontSize: 22,
       margins: { top: 850, right: 900, bottom: 850, left: 900 },
