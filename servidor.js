@@ -1445,6 +1445,63 @@ async function corrigirDocxParaWord2016(arquivo) {
     (m, antes, valor, depois) => antes + String(Math.max(1, Math.round(Number(valor)))) + depois
   );
 
+  // Reproduz a área imprimível oficial do PDF: A4, margens 15/12/14/12 mm.
+  // Fazemos isso diretamente no OOXML para não depender do suporte CSS do conversor.
+  xml = xml.replace(/<w:pgMar\b[^>]*\/>/,
+    '<w:pgMar w:top="850" w:right="680" w:bottom="794" w:left="680" w:header="425" w:footer="425" w:gutter="0"/>'
+  );
+
+  // O conversor aplica bordas padrão até na tabela usada apenas para alinhar
+  // os logotipos. A primeira tabela é o cabeçalho: deve ficar sem contorno.
+  let indiceTabela = -1;
+  xml = xml.replace(/<w:tbl\b[\s\S]*?<\/w:tbl>/g, tabela => {
+    indiceTabela++;
+    if (indiceTabela === 0) {
+      tabela = tabela.replace(/<w:tblBorders>[\s\S]*?<\/w:tblBorders>/,
+        '<w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders>');
+      tabela = tabela.replace(/<w:tcBorders>[\s\S]*?<\/w:tcBorders>/g,
+        '<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>');
+      return tabela;
+    }
+
+    // Bordas finas e contínuas, como nas tabelas da impressão PDF.
+    tabela = tabela.replace(/w:sz="0"/g, 'w:sz="6"');
+
+    // Cabeçalhos de tabelas (incluindo os títulos das duas tabelas finais)
+    // recebem cinza CPAIG. O preenchimento é aplicado célula por célula.
+    tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
+      const textoLinha = (linha.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+        .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toUpperCase();
+      const ehCabecalho = /ITENS|QUANT\.|NOME|RGI|PROCEDÊNCIA|DESTINO\/MOTIVO|DOCUMENTO|ENTRADA DE CUSTODIADOS|SAÍDA DE CUSTODIADOS|Nº/.test(textoLinha);
+      if (!ehCabecalho) return linha;
+      return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
+        const textoCelula = (celula.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+          .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toUpperCase();
+        if (!/ITENS|QUANT\.|NOME|RGI|PROCEDÊNCIA|DESTINO\/MOTIVO|DOCUMENTO|ENTRADA DE CUSTODIADOS|SAÍDA DE CUSTODIADOS|Nº/.test(textoCelula)) return celula;
+        if (/<w:tcPr>[\s\S]*?<\/w:tcPr>/.test(celula)) {
+          return celula.replace(/<w:tcPr>([\s\S]*?)<\/w:tcPr>/,
+            '<w:tcPr>$1<w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
+        }
+        return celula.replace('<w:tc>', '<w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
+      });
+    });
+    return tabela;
+  });
+
+  // A tabela de viaturas possui a primeira coluna cinza mesmo sem linha de título.
+  const tabelasDocx = [...xml.matchAll(/<w:tbl\b[\s\S]*?<\/w:tbl>/g)];
+  if (tabelasDocx[2]) {
+    let viaturas = tabelasDocx[2][0];
+    viaturas = viaturas.replace(/<w:tc\b[\s\S]*?<\/w:tc>/, celula => {
+      if (/<w:tcPr>[\s\S]*?<\/w:tcPr>/.test(celula)) {
+        return celula.replace(/<w:tcPr>([\s\S]*?)<\/w:tcPr>/,
+          '<w:tcPr>$1<w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
+      }
+      return celula.replace('<w:tc>', '<w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
+    });
+    xml = xml.replace(tabelasDocx[2][0], viaturas);
+  }
+
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
     type: 'nodebuffer',
