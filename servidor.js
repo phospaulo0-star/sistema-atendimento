@@ -1528,6 +1528,24 @@ async function corrigirDocxParaWord2016(arquivo) {
     xml = xml.replace(tabelasDocx[2][0], viaturas);
   }
 
+  // A quebra CSS page-break-before não é respeitada de forma consistente
+  // pelo html-to-docx. Insere uma quebra OOXML real antes do título da
+  // Movimentação Carcerária para que ela sempre comece em página independente.
+  let inseriuQuebraMovimentacao = false;
+  xml = xml.replace(/<w:p\b[\s\S]*?<\/w:p>/g, paragrafo => {
+    if (inseriuQuebraMovimentacao) return paragrafo;
+    const texto = (paragrafo.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, '')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    if (!texto.includes('MOVIMENTACAO CARCERARIA')) return paragrafo;
+    inseriuQuebraMovimentacao = true;
+    return '<w:p><w:r><w:br w:type="page"/></w:r></w:p>' + paragrafo;
+  });
+  if (!inseriuQuebraMovimentacao) {
+    console.warn('Word CPAIG: título da Movimentação Carcerária não localizado para inserir quebra de página.');
+  }
+
   // Substitui os marcadores do rodapé por campos dinâmicos nativos do Word.
   // Assim o Word 2016 calcula a página atual e o total ao abrir/imprimir.
   xml = xml.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
