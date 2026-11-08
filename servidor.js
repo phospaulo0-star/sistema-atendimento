@@ -1438,7 +1438,8 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
       pageSize: { width: 11906, height: 16838 },
       font: 'Times New Roman',
       fontSize: 22,
-      margins: { top: 850, right: 680, bottom: 794, left: 680, header: 450, footer: 450, gutter: 0 },
+      // Mantém as margens padrão do conversor: a opção margins da versão 1.8.0
+      // pode gerar DOCX que o Microsoft Word 2016 considera corrompido.
       table: { row: { cantSplit: true } }
     });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
