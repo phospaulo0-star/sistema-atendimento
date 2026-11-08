@@ -1540,7 +1540,7 @@ async function corrigirDocxParaWord2016(arquivo) {
     const texto = (paragrafo.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
       .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
     let tamanho = dentroTabela ? '16' : '22';
-    let depois = dentroTabela ? '0' : '60';
+    let depois = dentroTabela ? '0' : '100';
     let entrelinha = dentroTabela ? '240' : '276';
     let alinhamento = dentroTabela ? 'center' : '';
     let negrito = false, sublinhado = false, italico = false, quebraAntes = false;
@@ -1567,12 +1567,13 @@ async function corrigirDocxParaWord2016(arquivo) {
       p = p.replace(/<w:pPr>([\s\S]*?)<\/w:pPr>/, (m, props) => {
         props = props.replace(/<w:spacing\b[^>]*\/>/, '').replace(/<w:jc\b[^>]*\/>/, '').replace(/<w:pageBreakBefore\b[^>]*\/>/, '');
         if (quebraAntes) props += '<w:pageBreakBefore/>';
+        if (/^Estrada da Gameleira/i.test(texto)) props += '<w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="777777"/></w:pBdr>';
         props += spacing;
         if (alinhamento) props += '<w:jc w:val="' + alinhamento + '"/>';
         return '<w:pPr>' + props + '</w:pPr>';
       });
     } else {
-      p = p.replace('<w:p>', '<w:p><w:pPr>' + (quebraAntes ? '<w:pageBreakBefore/>' : '') + spacing + (alinhamento ? '<w:jc w:val="' + alinhamento + '"/>' : '') + '</w:pPr>');
+      p = p.replace('<w:p>', '<w:p><w:pPr>' + (quebraAntes ? '<w:pageBreakBefore/>' : '') + (/^Estrada da Gameleira/i.test(texto) ? '<w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="777777"/></w:pBdr>' : '') + spacing + (alinhamento ? '<w:jc w:val="' + alinhamento + '"/>' : '') + '</w:pPr>');
     }
     p = p.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
       if (!/<w:t\b/.test(run)) return run;
@@ -1592,6 +1593,15 @@ async function corrigirDocxParaWord2016(arquivo) {
   xml = xml.replace(/<w:tbl\b[\s\S]*?<\/w:tbl>/g, tabela =>
     tabela.replace(/<w:p\b[\s\S]*?<\/w:p>/g, p => formatarParagrafoDocx(p, true))
   );
+
+  // Converte os marcadores do rodapé em campos nativos do Word (página atual e total).
+  function campoWord(instr, valorInicial) {
+    return '<w:fldSimple w:instr=" ' + instr + ' "><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="13"/></w:rPr><w:t>' + valorInicial + '</w:t></w:r></w:fldSimple>';
+  }
+  xml = xml.replace(/<w:r\b[\s\S]*?<w:t\b[^>]*>\[\[PAGE\]\]<\/w:t>[\s\S]*?<\/w:r>/,
+    campoWord('PAGE', '1'));
+  xml = xml.replace(/<w:r\b[\s\S]*?<w:t\b[^>]*>\[\[NUMPAGES\]\]<\/w:t>[\s\S]*?<\/w:r>/,
+    campoWord('NUMPAGES', '4'));
 
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
