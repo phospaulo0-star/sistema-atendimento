@@ -1931,50 +1931,99 @@ function reaplicarPadroesItem40(relatorio){
 function instalarItem40(){['item40Entrega','item40Recebe','item40Substitui','item40Substituido','reportDate','recebePlantao','entregaPlantao','quantidadeCustodiados'].forEach(id=>{const el=$(id);if(el&&!el.dataset.item40Bound){el.addEventListener('input',()=>{sincronizarDadosItem40();atualizarItem40();if(typeof changed==='function')changed()});el.addEventListener('change',()=>{if(el.tagName==='SELECT'&&(id==='item40Entrega'||id==='item40Recebe'))el.dataset.pendingName=el.value||'';sincronizarDadosItem40();atualizarItem40();if(typeof changed==='function')changed()});el.dataset.item40Bound='1'}});restaurarDadosItem40();atualizarItem40()}
 function instalarCamposAssinatura(){[['assinaturaNomeInput','assinaturaNomeData'],['assinaturaFuncaoInput','assinaturaFuncaoData'],['assinaturaUnidadeInput','assinaturaUnidadeData'],['assinaturaMatriculaInput','assinaturaMatriculaData'],['passaNomeInput','passaNomeData'],['passaMatriculaInput','passaMatriculaData'],['recebeNomeAssInput','recebeNomeAssData'],['recebeMatriculaInput','recebeMatriculaData']].forEach(([vis,data])=>{const a=$(vis),b=$(data);if(!a||!b||a.dataset.assinaturaBound)return;a.value=b.value||a.value||'';const sync=()=>{b.value=a.value;if(typeof changed==='function')changed()};a.addEventListener('input',sync);a.addEventListener('change',sync);a.dataset.assinaturaBound='1'})}
 async function exportarWord(){
-  let conteudo=$('previewContent')?.innerHTML;
-  if(!conteudo){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
-  // O Word não interpreta CSS Grid de forma confiável. Para o DOCX, monta o
-  // cabeçalho institucional em tabela, preservando os dois logotipos lado a lado.
+  const original=$('previewContent')?.innerHTML;
+  if(!original){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
   const areaWord=document.createElement('div');
-  areaWord.innerHTML=conteudo;
-  const cabecalhoWord=areaWord.querySelector('.preview-letterhead');
-  if(cabecalhoWord){
-    const logos=cabecalhoWord.querySelectorAll('img');
-    const textoCab=cabecalhoWord.querySelector('.preview-letterhead-text');
-    if(logos.length>=2 && textoCab){
-      const tabelaCab=document.createElement('table');
-      tabelaCab.setAttribute('style','width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 8mm 0;border:0');
-      const linhaCab=document.createElement('tr');
-      const celLogo1=document.createElement('td');
-      const celTexto=document.createElement('td');
-      const celLogo2=document.createElement('td');
-      celLogo1.setAttribute('style','width:19mm;text-align:center;vertical-align:middle;padding:0;border:0');
-      celTexto.setAttribute('style','text-align:center;vertical-align:middle;padding:0 2mm;border:0;font-family:Arial,sans-serif;font-size:8pt;font-weight:bold;font-style:italic;line-height:1.08');
-      celLogo2.setAttribute('style','width:44mm;text-align:center;vertical-align:middle;padding:0;border:0');
-      logos[0].setAttribute('style','display:block;width:17mm;height:18mm;object-fit:contain;margin:auto');
-      logos[1].setAttribute('style','display:block;width:42mm;height:28mm;object-fit:contain;margin:auto');
-      celLogo1.appendChild(logos[0].cloneNode(true));
-      celTexto.appendChild(textoCab.cloneNode(true));
-      celLogo2.appendChild(logos[1].cloneNode(true));
-      linhaCab.append(celLogo1,celTexto,celLogo2);
-      tabelaCab.appendChild(linhaCab);
-      cabecalhoWord.replaceWith(tabelaCab);
+  areaWord.innerHTML=original;
+
+  const documento=areaWord.querySelector('.preview-document')||areaWord;
+  documento.setAttribute('style','font-family:"Times New Roman",Times,serif;font-size:11pt;line-height:1.15;color:#000;width:100%;max-width:100%;margin:0;padding:0');
+
+  // Cabeçalho em tabela sem bordas: brasão, texto institucional e logotipo estadual.
+  const cabecalho=documento.querySelector('.preview-letterhead');
+  if(cabecalho){
+    const logos=cabecalho.querySelectorAll('img');
+    const texto=cabecalho.querySelector('.preview-letterhead-text');
+    if(logos.length>=2&&texto){
+      const linhas=[...texto.querySelectorAll('div')].map(x=>x.textContent.trim()).filter(Boolean);
+      const tabela=document.createElement('table');
+      tabela.setAttribute('border','0');
+      tabela.setAttribute('style','width:100%;border:0;border-collapse:collapse;table-layout:fixed;margin:0 0 5mm 0');
+      const tr=document.createElement('tr');
+      const td1=document.createElement('td'),td2=document.createElement('td'),td3=document.createElement('td');
+      td1.setAttribute('style','width:19mm;border:0;padding:0;text-align:center;vertical-align:middle');
+      td2.setAttribute('style','border:0;padding:0 2mm;text-align:center;vertical-align:middle');
+      td3.setAttribute('style','width:44mm;border:0;padding:0;text-align:center;vertical-align:middle');
+      logos[0].setAttribute('style','display:block;width:17mm;height:18mm;margin:0 auto;object-fit:contain');
+      logos[1].setAttribute('style','display:block;width:42mm;height:28mm;margin:0 auto;object-fit:contain');
+      const p=document.createElement('p');
+      p.setAttribute('style','font-family:Arial,sans-serif;font-size:6pt;line-height:1.05;font-weight:bold;font-style:italic;text-align:center;margin:0;padding:0');
+      linhas.forEach((linha,i)=>{if(i)p.appendChild(document.createElement('br'));p.appendChild(document.createTextNode(linha));});
+      td1.appendChild(logos[0].cloneNode(true));td2.appendChild(p);td3.appendChild(logos[1].cloneNode(true));
+      tr.append(td1,td2,td3);tabela.appendChild(tr);cabecalho.replaceWith(tabela);
     }
   }
-  conteudo=areaWord.innerHTML;
-  const estilos=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>'+estilos+'\ntable th,table td{text-align:center;vertical-align:middle}table th{ text-align:center!important } .custody-preview-table td:nth-child(2),.licenca-judicial-preview-table td:nth-child(2),.retorno-licenca-judicial-preview-table td:nth-child(2),.hospitalizado-preview-table td:nth-child(2){text-align:left!important}.custody-preview-table td:nth-child(2){text-align:left!important}.hospitalizado-preview-padrao .hospitalizado-preview-table td:nth-child(2){text-align:center!important;font-family:"Times New Roman",Times,serif!important;font-size:11pt!important;font-weight:normal!important}.material-carga-print-table tbody td:first-child{text-align:left!important}.viaturas-print-table tbody td:first-child{text-align:left!important}.custody-preview-table th:nth-child(2),.licenca-judicial-preview-table th:nth-child(2),.retorno-licenca-judicial-preview-table th:nth-child(2),.hospitalizado-preview-table th:nth-child(2){text-align:center!important}\n@page{size:A4;margin:1.7cm 1.8cm}body{background:#fff!important;color:#000;font-family:"Times New Roman",serif;font-size:11pt}.preview-actions,.no-print{display:none!important}.preview-document{width:100%;max-width:none;margin:0;padding:0;box-shadow:none}.preview-letterhead,.preview-footer{position:static!important}.movement-page{break-before:page;page-break-before:always}table{border-collapse:collapse;max-width:100%}img{max-width:100%;height:auto}</style></head><body class="preview-mode"><div id="previewContent">'+conteudo+'</div></body></html>';
-  try{
-    const resposta=await fetch('/api/relatorios/export-docx',{
-      method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({html})
+
+  const arquivo=documento.querySelector('.preview-archive');
+  if(arquivo)arquivo.setAttribute('style','font-family:"Times New Roman",serif;font-size:7pt;font-style:italic;text-align:right;margin:0 0 5mm 0;padding:0;color:#000');
+
+  const titulo=documento.querySelector('.preview-title h2');
+  if(titulo)titulo.setAttribute('style','font-family:"Times New Roman",serif;font-size:12pt;font-weight:bold;text-decoration:underline;text-align:left;line-height:1.05;margin:0 0 5mm 0;padding:0;color:#000');
+
+  // Estilos explícitos em cada item: o Word não interpreta com fidelidade
+  // os seletores e as regras @media print do navegador.
+  documento.querySelectorAll('.preview-section').forEach(sec=>{
+    sec.setAttribute('style','display:block;margin:0 0 4px 0;padding:0;color:#000');
+    const h=sec.querySelector('h3');
+    if(h)h.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:bold;text-decoration:underline;line-height:1.05;margin:0 0 2px 0;padding:0;color:#000');
+    const tx=sec.querySelector('.preview-text');
+    if(tx)tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.15;white-space:pre-wrap;margin:0;padding:0;color:#000');
+  });
+
+  // Tabelas com largura, alinhamento e espaçamento consistentes.
+  documento.querySelectorAll('table').forEach(tab=>{
+    tab.setAttribute('style',(tab.getAttribute('style')||'')+';width:100%;border-collapse:collapse;table-layout:fixed;font-family:"Times New Roman",serif;font-size:8pt;margin:0');
+    tab.querySelectorAll('th,td').forEach(cell=>{
+      cell.setAttribute('style',(cell.getAttribute('style')||'')+';vertical-align:middle;text-align:center;padding:2px 3px;font-family:"Times New Roman",serif;font-size:8pt');
     });
+  });
+  documento.querySelectorAll('.custody-preview-table td:nth-child(2),.licenca-judicial-preview-table td:nth-child(2),.retorno-licenca-judicial-preview-table td:nth-child(2),.hospitalizado-preview-table td:nth-child(2),.material-carga-print-table tbody td:first-child,.viaturas-print-table tbody td:first-child').forEach(x=>x.style.textAlign='left');
+
+  // As duas assinaturas ficam lado a lado, em caixas independentes.
+  const grupoAssinaturas=documento.querySelector('.team-leader-signatures');
+  if(grupoAssinaturas){
+    const blocos=[...grupoAssinaturas.querySelectorAll('.team-leader-signature')];
+    if(blocos.length>=2){
+      const tabelaAss=document.createElement('table');
+      tabelaAss.setAttribute('style','width:100%;border-collapse:collapse;table-layout:fixed;margin:5mm 0 0;font-family:"Times New Roman",serif;font-size:8pt');
+      const linha=document.createElement('tr');
+      blocos.slice(0,2).forEach(bloco=>{
+        const td=document.createElement('td');
+        td.setAttribute('style','width:50%;border:1px solid #000;padding:2mm;text-align:center;vertical-align:middle');
+        const copia=bloco.cloneNode(true);
+        copia.setAttribute('style','border:0;padding:0;margin:0;text-align:center;font-family:"Times New Roman",serif;font-size:8pt;line-height:1.2');
+        td.appendChild(copia);linha.appendChild(td);
+      });
+      tabelaAss.appendChild(linha);grupoAssinaturas.replaceWith(tabelaAss);
+    }
+  }
+
+  const movimento=documento.querySelector('.movement-page');
+  if(movimento)movimento.setAttribute('style','page-break-before:always;break-before:page;margin:0;padding:0');
+  const rodape=documento.querySelector('.preview-footer');
+  if(rodape){
+    const filhos=[...rodape.children];
+    if(filhos[0])filhos[0].setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;text-align:center;margin:0;padding:0');
+    if(filhos[1])filhos[1].setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;text-align:right;margin:1mm 0 0;padding:0');
+    rodape.setAttribute('style','border-top:1px solid #777;margin:8mm 0 0;padding:2mm 0 0;text-align:center;font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;color:#000');
+  }
+
+  const html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>@page{size:A4 portrait;margin:15mm 12mm 14mm 12mm}body{font-family:"Times New Roman",serif;font-size:11pt;color:#000;margin:0;padding:0}table{border-collapse:collapse}img{max-width:100%}</style></head><body>'+areaWord.innerHTML+'</body></html>';
+  try{
+    const resposta=await fetch('/api/relatorios/export-docx',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({html})});
     if(!resposta.ok){
       const erro=await resposta.json().catch(()=>({}));
-      const mensagem=erro.message||'Falha na exportação do Word (HTTP '+resposta.status+').';
-      const detalhe=erro.detail?(' Detalhe técnico: '+erro.detail):'';
-      const diagnostico=erro.diagnostic?(' Diagnóstico: '+erro.diagnostic):'';
-      throw new Error(mensagem+detalhe+diagnostico);
+      throw new Error((erro.message||'Falha na exportação do Word (HTTP '+resposta.status+').')+(erro.detail?(' Detalhe técnico: '+erro.detail):''));
     }
     const blob=await resposta.blob();
     if(!blob.size)throw new Error('O servidor retornou um arquivo vazio.');
