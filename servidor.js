@@ -10,6 +10,7 @@ const { Pool } = require('pg');
 const ExcelJS = require('exceljs');
 const archiver = require('archiver');
 const HTMLtoDOCX = require('html-to-docx');
+const JSZip = require('jszip');
 
 const scryptAsync = promisify(crypto.scrypt);
 const app = express();
@@ -1414,6 +1415,41 @@ function normalizarLargurasCelulasDocx(html) {
 }
 
 
+async function corrigirDocxParaWord2016(arquivo) {
+  // html-to-docx 1.8.0 pode emitir wp:extent sem cx/cy e larguras
+  // fracionárias em w:gridCol. O XML continua bem formado, mas o Word 2016
+  // rejeita esses valores por não obedecerem aos tipos OOXML esperados.
+  const zip = await JSZip.loadAsync(arquivo);
+  const documento = zip.file('word/document.xml');
+  if (!documento) throw new Error('O DOCX gerado não contém word/document.xml.');
+  let xml = await documento.async('string');
+
+  // Dimensões físicas dos dois logotipos do cabeçalho (EMU; 914400 por polegada).
+  const dimensoesImagem = {
+    rId7: { cx: 612000, cy: 648000 },    // brasão: 17 x 18 mm
+    rId9: { cx: 1512000, cy: 1008000 }  // Governo MS: 42 x 28 mm
+  };
+  xml = xml.replace(/<wp:inline\b[\s\S]*?<\/wp:inline>/g, bloco => {
+    const rel = bloco.match(/\br:embed="([^"]+)"/);
+    const tamanho = rel && dimensoesImagem[rel[1]];
+    if (!tamanho) return bloco;
+    return bloco.replace(/<wp:extent\b[^>]*\/>/, '<wp:extent cx="' + tamanho.cx + '" cy="' + tamanho.cy + '"/>');
+  });
+
+  // ST_TwipsMeasure exige número inteiro. Arredonda apenas as larguras
+  // fracionárias geradas na grade de tabelas, mantendo a largura total visual.
+  xml = xml.replace(/(<w:gridCol\b[^>]*\bw:w=")(-?\d+(?:\.\d+)?)(")/g,
+    (m, antes, valor, depois) => antes + String(Math.max(1, Math.round(Number(valor)))) + depois
+  );
+
+  zip.file('word/document.xml', xml);
+  return zip.generateAsync({
+    type: 'nodebuffer',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 }
+  });
+}
+
 function prepararHtmlParaDocx(html) {
   // Remove regras CSS @media, @page, @supports e similares que o conversor DOCX
   // não interpreta. Preserva as declarações CSS comuns usadas na impressão.
@@ -1432,7 +1468,7 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
   }
   try {
     const htmlSeguro = prepararHtmlParaDocx(html);
-    const docx = await HTMLtoDOCX(htmlSeguro, null, {
+    let docx = await HTMLtoDOCX(htmlSeguro, null, {
       orientation: 'portrait',
       // A4 em TWIPs: evita o padrão Letter quando as regras @page são removidas do CSS.
       pageSize: { width: 11906, height: 16838 },
@@ -1442,6 +1478,7 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
       // pode gerar DOCX que o Microsoft Word 2016 considera corrompido.
       table: { row: { cantSplit: true } }
     });
+    docx = await corrigirDocxParaWord2016(docx);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     res.setHeader('Content-Disposition', 'attachment; filename="Relatorio_CPAIG.docx"');
     res.send(Buffer.from(docx));
