@@ -1437,7 +1437,7 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
       pageSize: { width: 11906, height: 16838 },
       font: 'Times New Roman',
       fontSize: 22,
-      margins: { top: 850, right: 900, bottom: 850, left: 900 },
+      margins: { top: 850, right: 900, bottom: 850, left: 900, header: 450, footer: 450, gutter: 0 },
       table: { row: { cantSplit: true } }
     });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
