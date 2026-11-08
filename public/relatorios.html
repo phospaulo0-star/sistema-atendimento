@@ -1951,16 +1951,16 @@ async function exportarWord(){
       tabela.setAttribute('style','width:100%;border:0;border-collapse:collapse;table-layout:fixed;margin:0 0 5mm 0');
       const tr=document.createElement('tr');
       const td1=document.createElement('td'),td2=document.createElement('td'),td3=document.createElement('td');
-      td1.setAttribute('style','width:19mm;border:0;padding:0;text-align:center;vertical-align:middle');
-      td2.setAttribute('style','border:0;padding:0 2mm;text-align:center;vertical-align:middle');
-      td3.setAttribute('style','width:44mm;border:0;padding:0;text-align:center;vertical-align:middle');
-      logos[0].setAttribute('style','display:block;width:17mm;height:18mm;margin:0 auto;object-fit:contain');
-      logos[1].setAttribute('style','display:block;width:42mm;height:28mm;margin:0 auto;object-fit:contain');
-      // Um parágrafo independente por linha evita sobreposição no Word 2016.
+      td1.setAttribute('style','width:18%;border:0;padding:0;text-align:center;vertical-align:middle');
+      td2.setAttribute('style','width:62%;border:0;padding:0 1mm;text-align:center;vertical-align:middle');
+      td3.setAttribute('style','width:20%;border:0;padding:0;text-align:center;vertical-align:middle');
+      logos[0].setAttribute('style,'display:block;width:17mm;height:18mm;margin:0 auto;object-fit:contain');
+      logos[1].setAttribute('style','display:block;width:36mm;height:25mm;margin:0 auto;object-fit:contain');
+      // Linhas institucionais em parágrafos próprios, com espaço para quebra controlada.
       linhas.forEach(linha=>{
         const p=document.createElement('p');
         p.textContent=linha;
-        p.setAttribute('style','font-family:Arial,sans-serif;font-size:6pt;line-height:1.15;font-weight:bold;font-style:italic;text-align:center;margin:0;padding:0;white-space:nowrap');
+        p.setAttribute('style','font-family:Arial,sans-serif;font-size:6.2pt;line-height:1.2;font-weight:bold;font-style:italic;text-align:center;margin:0;padding:0;white-space:normal;overflow-wrap:break-word');
         td2.appendChild(p);
       });
       td1.appendChild(logos[0].cloneNode(true));td3.appendChild(logos[1].cloneNode(true));
@@ -1969,7 +1969,15 @@ async function exportarWord(){
   }
 
   const arquivo=documento.querySelector('.preview-archive');
-  if(arquivo)arquivo.setAttribute('style','font-family:"Times New Roman",serif;font-size:7pt;font-style:italic;text-align:right;margin:0 0 5mm 0;padding:0;color:#000');
+  if(arquivo){
+    const textoArquivo=arquivo.textContent.replace(/\\s+/g,' ').trim();
+    arquivo.replaceChildren();
+    arquivo.setAttribute('style','width:100%;display:block;text-align:right;margin:0 0 5mm 0;padding:0;color:#000');
+    const pArquivo=document.createElement('p');
+    pArquivo.textContent=textoArquivo;
+    pArquivo.setAttribute('style','font-family:"Times New Roman",serif;font-size:10pt;font-style:normal;text-align:right;text-align-last:right;margin:0;padding:0;color:#000;width:100%;');
+    arquivo.appendChild(pArquivo);
+  }
 
   const titulo=documento.querySelector('.preview-title h2');
   if(titulo)titulo.setAttribute('style','font-family:"Times New Roman",serif;font-size:12pt;font-weight:bold;text-decoration:underline;text-align:left;line-height:1.05;margin:0 0 5mm 0;padding:0;color:#000');
