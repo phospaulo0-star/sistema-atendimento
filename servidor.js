@@ -1433,7 +1433,10 @@ async function corrigirDocxParaWord2016(arquivo) {
     const rel = bloco.match(/\br:embed="([^"]+)"/);
     const tamanho = rel && dimensoesImagem[rel[1]];
     if (!tamanho) return bloco;
-    return bloco.replace(/<wp:extent\b[^>]*\/>/, '<wp:extent cx="' + tamanho.cx + '" cy="' + tamanho.cy + '"/>');
+    // Word exige dimensões no contêiner DrawingML e também no desenho interno da imagem.
+    bloco = bloco.replace(/<wp:extent\b[^>]*\/>/, '<wp:extent cx="' + tamanho.cx + '" cy="' + tamanho.cy + '"/>');
+    bloco = bloco.replace(/<a:ext\b[^>]*\/>/, '<a:ext cx="' + tamanho.cx + '" cy="' + tamanho.cy + '"/>');
+    return bloco;
   });
 
   // ST_TwipsMeasure exige número inteiro. Arredonda apenas as larguras
