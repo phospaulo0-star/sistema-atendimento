@@ -1596,7 +1596,7 @@ async function corrigirDocxParaWord2016(arquivo) {
 
   // Converte os marcadores do rodapé em campos nativos do Word.
   function campoWord(instr, valorInicial, propriedades) {
-    return '<w:fldSimple w:instr=" ' + instr + ' ">' + propriedades + '<w:r><w:t>' + valorInicial + '</w:t></w:r></w:fldSimple>';
+    return '<w:fldSimple w:instr=" ' + instr + ' "><w:r>' + propriedades + '<w:t>' + valorInicial + '</w:t></w:r></w:fldSimple>';
   }
   xml = xml.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
     const noTexto = run.match(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/);
