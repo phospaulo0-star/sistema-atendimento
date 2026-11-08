@@ -1486,7 +1486,10 @@ async function corrigirDocxParaWord2016(arquivo) {
         tabela = tabela.replace(/<w:tblW\\b[^>]*w:w="\\d+"[^>]*\\/>/,
           '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/>');
       } else {
-        tabela = tabela.replace('</w:tblPr>', '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/></w:tblPr>');
+        const propriedadeLargura = '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/>';
+        if (tabela.includes('<w:tblCellMar>')) tabela = tabela.replace('<w:tblCellMar>', propriedadeLargura + '<w:tblCellMar>');
+        else if (tabela.includes('<w:jc ')) tabela = tabela.replace('<w:jc ', propriedadeLargura + '<w:jc ');
+        else tabela = tabela.replace('</w:tblPr>', propriedadeLargura + '</w:tblPr>');
       }
       tabela = tabela.replace(/(<w:gridCol\b[^>]*w:w=")(\d+)("[^>]*\/>)/g,
         (m, a, v, b) => a + escalar(v) + b);
@@ -1563,12 +1566,13 @@ async function corrigirDocxParaWord2016(arquivo) {
     if (/<w:pPr>[\s\S]*?<\/w:pPr>/.test(p)) {
       p = p.replace(/<w:pPr>([\s\S]*?)<\/w:pPr>/, (m, props) => {
         props = props.replace(/<w:spacing\b[^>]*\/>/, '').replace(/<w:jc\b[^>]*\/>/, '').replace(/<w:pageBreakBefore\b[^>]*\/>/, '');
-        if (alinhamento) props += '<w:jc w:val="' + alinhamento + '"/>';
         if (quebraAntes) props += '<w:pageBreakBefore/>';
-        return '<w:pPr>' + props + spacing + '</w:pPr>';
+        props += spacing;
+        if (alinhamento) props += '<w:jc w:val="' + alinhamento + '"/>';
+        return '<w:pPr>' + props + '</w:pPr>';
       });
     } else {
-      p = p.replace('<w:p>', '<w:p><w:pPr>' + (alinhamento ? '<w:jc w:val="' + alinhamento + '"/>' : '') + (quebraAntes ? '<w:pageBreakBefore/>' : '') + spacing + '</w:pPr>');
+      p = p.replace('<w:p>', '<w:p><w:pPr>' + (quebraAntes ? '<w:pageBreakBefore/>' : '') + spacing + (alinhamento ? '<w:jc w:val="' + alinhamento + '"/>' : '') + '</w:pPr>');
     }
     p = p.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
       if (!/<w:t\b/.test(run)) return run;
