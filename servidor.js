@@ -1317,10 +1317,9 @@ app.delete('/api/relatorios/he-nomes/:id',
 
 // Remove regras CSS iniciadas por @ antes da conversÃÂ£o para DOCX. Alguns conversores
 // tentam interpretar regras como @page/@media como nomes XML e falham com "Invalid XML name: @w".
-function limparRegrasAtCss(css) {
-  // Remove regras CSS @media, @page, @supports etc. com leitura balanceada.
-  // O parser anterior contava chaves dentro de comentários/strings e podia
-  // deixar fragmentos de @-rules no HTML enviado ao conversor DOCX.
+function limparRegrasAtCss(css, preservarImpressao = true) {
+  // O conversor não aceita wrappers @media/@page. Mantemos, porém, o conteúdo
+  // de @media print, pois ele contém a configuração oficial usada no PDF.
   let resultado = '';
   let i = 0;
   while (i < css.length) {
@@ -1331,23 +1330,21 @@ function limparRegrasAtCss(css) {
       i = fim;
       continue;
     }
-    const ch = css[i];
-    if (ch === '"' || ch === "'") {
-      const quote = ch;
+    if (css[i] === '"' || css[i] === "'") {
+      const quote = css[i];
       const inicio = i++;
       while (i < css.length) {
-        if (css[i] === '\\\\') { i += 2; continue; }
+        if (css[i] === '\\') { i += 2; continue; }
         if (css[i] === quote) { i++; break; }
         i++;
       }
       resultado += css.slice(inicio, i);
       continue;
     }
-    if (ch !== '@') { resultado += ch; i++; continue; }
+    if (css[i] !== '@') { resultado += css[i++]; continue; }
 
-    // Avança até o terminador da regra, ignorando strings e comentários.
-    let j = i + 1;
-    let abre = -1;
+    const inicioRegra = i;
+    let j = i + 1, abre = -1;
     while (j < css.length) {
       if (css.startsWith('/*', j)) {
         const fimComentario = css.indexOf('*/', j + 2);
@@ -1357,7 +1354,7 @@ function limparRegrasAtCss(css) {
       if (css[j] === '"' || css[j] === "'") {
         const quote = css[j++];
         while (j < css.length) {
-          if (css[j] === '\\\\') { j += 2; continue; }
+          if (css[j] === '\\') { j += 2; continue; }
           if (css[j++] === quote) break;
         }
         continue;
@@ -1379,7 +1376,7 @@ function limparRegrasAtCss(css) {
       if (css[j] === '"' || css[j] === "'") {
         const quote = css[j++];
         while (j < css.length) {
-          if (css[j] === '\\\\') { j += 2; continue; }
+          if (css[j] === '\\') { j += 2; continue; }
           if (css[j++] === quote) break;
         }
         continue;
@@ -1388,11 +1385,15 @@ function limparRegrasAtCss(css) {
       else if (css[j] === '}') profundidade--;
       j++;
     }
+
+    const cabecalho = css.slice(inicioRegra, abre).trim().toLowerCase();
+    if (preservarImpressao && cabecalho.startsWith('@media') && /\bprint\b/.test(cabecalho)) {
+      resultado += limparRegrasAtCss(css.slice(abre + 1, j - 1), false);
+    }
     i = j;
   }
   return resultado;
 }
-
 function normalizarLargurasCelulasDocx(html) {
   // html-to-docx 1.8.0 aceita larguras de célula somente em pt, px, cm ou in.
   // Valores como %, auto ou números sem unidade fazem o conversor chamar
