@@ -1956,10 +1956,14 @@ async function exportarWord(){
       td3.setAttribute('style','width:44mm;border:0;padding:0;text-align:center;vertical-align:middle');
       logos[0].setAttribute('style','display:block;width:17mm;height:18mm;margin:0 auto;object-fit:contain');
       logos[1].setAttribute('style','display:block;width:42mm;height:28mm;margin:0 auto;object-fit:contain');
-      const p=document.createElement('p');
-      p.setAttribute('style','font-family:Arial,sans-serif;font-size:6pt;line-height:1.05;font-weight:bold;font-style:italic;text-align:center;margin:0;padding:0');
-      linhas.forEach((linha,i)=>{if(i)p.appendChild(document.createElement('br'));p.appendChild(document.createTextNode(linha));});
-      td1.appendChild(logos[0].cloneNode(true));td2.appendChild(p);td3.appendChild(logos[1].cloneNode(true));
+      // Um parágrafo independente por linha evita sobreposição no Word 2016.
+      linhas.forEach(linha=>{
+        const p=document.createElement('p');
+        p.textContent=linha;
+        p.setAttribute('style','font-family:Arial,sans-serif;font-size:6pt;line-height:1.15;font-weight:bold;font-style:italic;text-align:center;margin:0;padding:0;white-space:nowrap');
+        td2.appendChild(p);
+      });
+      td1.appendChild(logos[0].cloneNode(true));td3.appendChild(logos[1].cloneNode(true));
       tr.append(td1,td2,td3);tabela.appendChild(tr);cabecalho.replaceWith(tabela);
     }
   }
@@ -2013,9 +2017,9 @@ async function exportarWord(){
   const rodape=documento.querySelector('.preview-footer');
   if(rodape){
     const filhos=[...rodape.children];
-    if(filhos[0])filhos[0].setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;text-align:center;margin:0;padding:0');
-    if(filhos[1])filhos[1].setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;text-align:right;margin:1mm 0 0;padding:0');
-    rodape.setAttribute('style','border-top:1px solid #777;margin:8mm 0 0;padding:2mm 0 0;text-align:center;font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;color:#000');
+    if(filhos[0])filhos[0].setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.0;text-align:center;margin:0;padding:0');
+    if(filhos[1])filhos[1].setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.0;text-align:right;margin:0;padding:0');
+    rodape.setAttribute('style','border-top:1px solid #777;margin:1mm 0 0;padding:1mm 0 0;text-align:center;font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.0;color:#000');
   }
 
   const html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>@page{size:A4 portrait;margin:15mm 12mm 14mm 12mm}body{font-family:"Times New Roman",serif;font-size:11pt;color:#000;margin:0;padding:0}table{border-collapse:collapse}img{max-width:100%}</style></head><body>'+areaWord.innerHTML+'</body></html>';
