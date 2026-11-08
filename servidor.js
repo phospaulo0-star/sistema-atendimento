@@ -1457,11 +1457,37 @@ async function corrigirDocxParaWord2016(arquivo) {
   xml = xml.replace(/<w:tbl\b[\s\S]*?<\/w:tbl>/g, tabela => {
     indiceTabela++;
     if (indiceTabela === 0) {
+      // Cabeçalho sem bordas e com proporções iguais ao modelo impresso.
+      tabela = tabela.replace(/<w:tblW\b[^>]*w:w="\d+"[^>]*\/>/,
+        '<w:tblW w:type="dxa" w:w="10546"/>');
+      tabela = tabela.replace(/<w:tblGrid>[\s\S]*?<\/w:tblGrid>/,
+        '<w:tblGrid><w:gridCol w:w="1077"/><w:gridCol w:w="6975"/><w:gridCol w:w="2494"/></w:tblGrid>');
+      const largurasCabecalho = [1077, 6975, 2494];
+      let indiceCelulaCabecalho = 0;
+      tabela = tabela.replace(/<w:tcW\b[^>]*w:w="\d+"[^>]*\/>/g, () => {
+        const largura = largurasCabecalho[Math.min(indiceCelulaCabecalho++, 2)];
+        return '<w:tcW w:type="dxa" w:w="' + largura + '"/>';
+      });
       tabela = tabela.replace(/<w:tblBorders>[\s\S]*?<\/w:tblBorders>/,
         '<w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders>');
       tabela = tabela.replace(/<w:tcBorders>[\s\S]*?<\/w:tcBorders>/g,
         '<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>');
       return tabela;
+    }
+    // As tabelas ocupam a mesma largura útil do PDF (A4 menos 12 mm de cada lado).
+    // A grade e as larguras das células são escaladas juntas.
+    const larguraUtil = 10546;
+    const gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
+      .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
+    const totalGrade = gradeAtual.reduce((a, b) => a + b, 0);
+    if (totalGrade > 0) {
+      const escalar = valor => String(Math.max(1, Math.round(Number(valor) * larguraUtil / totalGrade)));
+      tabela = tabela.replace(/<w:tblW\b[^>]*w:w="\d+"[^>]*\/>/,
+        '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/>');
+      tabela = tabela.replace(/(<w:gridCol\b[^>]*w:w=")(\d+)("[^>]*\/>)/g,
+        (m, a, v, b) => a + escalar(v) + b);
+      tabela = tabela.replace(/(<w:tcW\b[^>]*w:w=")(\d+)("[^>]*\/>)/g,
+        (m, a, v, b) => a + escalar(v) + b);
     }
 
     // Bordas finas e contínuas, como nas tabelas da impressão PDF.
