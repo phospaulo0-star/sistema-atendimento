@@ -1482,8 +1482,12 @@ async function corrigirDocxParaWord2016(arquivo) {
     const totalGrade = gradeAtual.reduce((a, b) => a + b, 0);
     if (totalGrade > 0) {
       const escalar = valor => String(Math.max(1, Math.round(Number(valor) * larguraUtil / totalGrade)));
-      tabela = tabela.replace(/<w:tblW\b[^>]*w:w="\d+"[^>]*\/>/,
-        '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/>');
+      if (/<w:tblW\\b/.test(tabela)) {
+        tabela = tabela.replace(/<w:tblW\\b[^>]*w:w="\\d+"[^>]*\\/>/,
+          '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/>');
+      } else {
+        tabela = tabela.replace('</w:tblPr>', '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/></w:tblPr>');
+      }
       tabela = tabela.replace(/(<w:gridCol\b[^>]*w:w=")(\d+)("[^>]*\/>)/g,
         (m, a, v, b) => a + escalar(v) + b);
       tabela = tabela.replace(/(<w:tcW\b[^>]*w:w=")(\d+)("[^>]*\/>)/g,
@@ -1527,6 +1531,63 @@ async function corrigirDocxParaWord2016(arquivo) {
     });
     xml = xml.replace(tabelasDocx[2][0], viaturas);
   }
+
+  // Formatação explícita: evita fonte e espaçamento padrão do Word, diferentes do PDF.
+  function formatarParagrafoDocx(paragrafo, dentroTabela = false) {
+    const texto = (paragrafo.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+    let tamanho = dentroTabela ? '16' : '22';
+    let depois = dentroTabela ? '0' : '60';
+    let entrelinha = dentroTabela ? '240' : '276';
+    let alinhamento = dentroTabela ? 'center' : '';
+    let negrito = false, sublinhado = false, italico = false, quebraAntes = false;
+
+    if (/^(?:\d{2}(?:\.\d+)?\s*[–-]|RELATÓRIO Nº|MOVIMENTAÇÃO CARCERÁRIA|INICIAL\s*\/\s*RECEBI:|FINAL\s*\/\s*PASSO:)/i.test(texto)) {
+      negrito = true; sublinhado = true; depois = '20';
+    }
+    if (texto.startsWith('RELATÓRIO Nº')) tamanho = '24';
+    if (texto.startsWith('MOVIMENTAÇÃO CARCERÁRIA')) { alinhamento = 'center'; quebraAntes = true; depois = '60'; }
+    if (/^(GOVERNO DO ESTADO|SECRETARIA DE ESTADO|AGÊNCIA ESTADUAL|CENTRO PENAL)/i.test(texto)) {
+      tamanho = '12'; negrito = true; italico = true; alinhamento = 'center'; depois = '0'; entrelinha = '180';
+    }
+    if (/^\(\s*\)\s*SDV/i.test(texto)) { tamanho = '14'; italico = true; alinhamento = 'right'; depois = '80'; }
+    if (/^(Estrada da Gameleira|Tel\.)/i.test(texto)) { tamanho = '13'; alinhamento = 'center'; depois = '0'; entrelinha = '180'; }
+    if (/^Página/i.test(texto) || texto === 'de') { tamanho = '13'; alinhamento = 'right'; depois = '0'; entrelinha = '180'; }
+    if (/^(Policial Penal|Chefe de Equipe|Matrícula:|Passo o plantão|Recebo o plantão)/i.test(texto)) {
+      tamanho = '16'; alinhamento = 'center'; depois = '0'; entrelinha = '220';
+    }
+    if (dentroTabela && /^(ITENS|QUANT\.|Nº|NOME|RGI|PROCEDÊNCIA|DESTINO\/MOTIVO|DOCUMENTO|ENTRADA DE CUSTODIADOS|SAÍDA DE CUSTODIADOS)$/i.test(texto)) negrito = true;
+
+    let p = paragrafo;
+    const spacing = '<w:spacing w:before="0" w:after="' + depois + '" w:line="' + entrelinha + '" w:lineRule="auto"/>';
+    if (/<w:pPr>[\s\S]*?<\/w:pPr>/.test(p)) {
+      p = p.replace(/<w:pPr>([\s\S]*?)<\/w:pPr>/, (m, props) => {
+        props = props.replace(/<w:spacing\b[^>]*\/>/, '').replace(/<w:jc\b[^>]*\/>/, '').replace(/<w:pageBreakBefore\b[^>]*\/>/, '');
+        if (alinhamento) props += '<w:jc w:val="' + alinhamento + '"/>';
+        if (quebraAntes) props += '<w:pageBreakBefore/>';
+        return '<w:pPr>' + props + spacing + '</w:pPr>';
+      });
+    } else {
+      p = p.replace('<w:p>', '<w:p><w:pPr>' + (alinhamento ? '<w:jc w:val="' + alinhamento + '"/>' : '') + (quebraAntes ? '<w:pageBreakBefore/>' : '') + spacing + '</w:pPr>');
+    }
+    p = p.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
+      if (!/<w:t\b/.test(run)) return run;
+      const propsNovos = '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>' +
+        (negrito ? '<w:b/>' : '') + (italico ? '<w:i/>' : '') + (sublinhado ? '<w:u w:val="single"/>' : '') +
+        '<w:sz w:val="' + tamanho + '"/><w:szCs w:val="' + tamanho + '"/>';
+      if (/<w:rPr\/>/.test(run)) return run.replace('<w:rPr/>', '<w:rPr>' + propsNovos + '</w:rPr>');
+      if (/<w:rPr>[\s\S]*?<\/w:rPr>/.test(run)) return run.replace(/<w:rPr>[\s\S]*?<\/w:rPr>/, '<w:rPr>' + propsNovos + '</w:rPr>');
+      return run.replace('<w:r>', '<w:r><w:rPr>' + propsNovos + '</w:rPr>');
+    });
+    return p;
+  }
+
+  // Remove o parágrafo vazio inserido pelo conversor antes do cabeçalho.
+  xml = xml.replace(/(<w:body>)\s*<w:p>[\s\S]*?<w:t\b[^>]*><\/w:t>[\s\S]*?<\/w:p>/, '$1');
+  xml = xml.replace(/<w:p\b[\s\S]*?<\/w:p>/g, p => formatarParagrafoDocx(p, false));
+  xml = xml.replace(/<w:tbl\b[\s\S]*?<\/w:tbl>/g, tabela =>
+    tabela.replace(/<w:p\b[\s\S]*?<\/w:p>/g, p => formatarParagrafoDocx(p, true))
+  );
 
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
