@@ -2013,18 +2013,8 @@ async function exportarWord(){
   const rodape=documento.querySelector('.preview-footer');
   if(rodape){
     const filhos=[...rodape.children];
-    if(filhos[0]){
-      const endereco=document.createElement('p');
-      endereco.innerHTML=filhos[0].innerHTML;
-      endereco.setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;text-align:center;margin:0;padding:0');
-      filhos[0].replaceWith(endereco);
-    }
-    if(filhos[1]){
-      const pagina=document.createElement('p');
-      pagina.textContent='Página [[PAGE]] de [[NUMPAGES]]';
-      pagina.setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;text-align:right;margin:1mm 0 0;padding:0');
-      filhos[1].replaceWith(pagina);
-    }
+    if(filhos[0])filhos[0].setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;text-align:center;margin:0;padding:0');
+    if(filhos[1])filhos[1].setAttribute('style','font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;text-align:right;margin:1mm 0 0;padding:0');
     rodape.setAttribute('style','border-top:1px solid #777;margin:8mm 0 0;padding:2mm 0 0;text-align:center;font-family:"Times New Roman",serif;font-size:6.5pt;line-height:1.1;color:#000');
   }
 
