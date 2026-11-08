@@ -1528,6 +1528,23 @@ async function corrigirDocxParaWord2016(arquivo) {
     xml = xml.replace(tabelasDocx[2][0], viaturas);
   }
 
+  // Substitui os marcadores do rodapé por campos dinâmicos nativos do Word.
+  // Assim o Word 2016 calcula a página atual e o total ao abrir/imprimir.
+  xml = xml.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
+    const match = run.match(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/);
+    if (!match || (!match[1].includes('[[PAGE]]') && !match[1].includes('[[NUMPAGES]]'))) return run;
+    const rPr = (run.match(/<w:rPr>[\s\S]*?<\/w:rPr>/) || [''])[0];
+    const partes = match[1].split(/(\[\[PAGE\]\]|\[\[NUMPAGES\]\])/g);
+    return partes.map(parte => {
+      if (parte === '[[PAGE]]' || parte === '[[NUMPAGES]]') {
+        const instrucao = parte === '[[PAGE]]' ? 'PAGE' : 'NUMPAGES';
+        const inicial = parte === '[[PAGE]]' ? '1' : '4';
+        return '<w:fldSimple w:instr=" ' + instrucao + ' "><w:r>' + rPr + '<w:t>' + inicial + '</w:t></w:r></w:fldSimple>';
+      }
+      return parte ? '<w:r>' + rPr + '<w:t xml:space="preserve">' + parte + '</w:t></w:r>' : '';
+    }).join('');
+  });
+
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
     type: 'nodebuffer',
