@@ -1594,14 +1594,21 @@ async function corrigirDocxParaWord2016(arquivo) {
     tabela.replace(/<w:p\b[\s\S]*?<\/w:p>/g, p => formatarParagrafoDocx(p, true))
   );
 
-  // Converte os marcadores do rodapé em campos nativos do Word (página atual e total).
-  function campoWord(instr, valorInicial) {
-    return '<w:fldSimple w:instr=" ' + instr + ' "><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="13"/></w:rPr><w:t>' + valorInicial + '</w:t></w:r></w:fldSimple>';
+  // Converte os marcadores do rodapé em campos nativos do Word.
+  function campoWord(instr, valorInicial, propriedades) {
+    return '<w:fldSimple w:instr=" ' + instr + ' ">' + propriedades + '<w:r><w:t>' + valorInicial + '</w:t></w:r></w:fldSimple>';
   }
-  xml = xml.replace(/<w:r\b[\s\S]*?<w:t\b[^>]*>\[\[PAGE\]\]<\/w:t>[\s\S]*?<\/w:r>/,
-    campoWord('PAGE', '1'));
-  xml = xml.replace(/<w:r\b[\s\S]*?<w:t\b[^>]*>\[\[NUMPAGES\]\]<\/w:t>[\s\S]*?<\/w:r>/,
-    campoWord('NUMPAGES', '4'));
+  xml = xml.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
+    const noTexto = run.match(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/);
+    if (!noTexto || (!noTexto[1].includes('[[PAGE]]') && !noTexto[1].includes('[[NUMPAGES]]'))) return run;
+    const propriedades = (run.match(/<w:rPr>[\s\S]*?<\/w:rPr>/) || [''])[0];
+    const partes = noTexto[1].split(/(\[\[PAGE\]\]|\[\[NUMPAGES\]\])/g);
+    return partes.map(parte => {
+      if (parte === '[[PAGE]]') return campoWord('PAGE', '1', propriedades);
+      if (parte === '[[NUMPAGES]]') return campoWord('NUMPAGES', '4', propriedades);
+      return parte ? '<w:r>' + propriedades + '<w:t xml:space="preserve">' + parte + '</w:t></w:r>' : '';
+    }).join('');
+  });
 
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
