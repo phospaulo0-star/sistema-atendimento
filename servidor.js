@@ -1579,10 +1579,10 @@ async function corrigirDocxParaWord2016(arquivo) {
   const fimCorpo = xml.indexOf('</w:body>', inicioCorpo);
   if (inicioCorpo >= 0 && fimCorpo > inicioCorpo) {
     let corpo = xml.slice(inicioCorpo, fimCorpo);
-    const tituloNoXml = corpo.search(/<w:p\\b(?:(?!<\\/w:p>)[\\s\\S])*?<w:t\\b[^>]*>\\s*RELATÓRIO\\s*N/i);
+    const tituloNoXml = corpo.search(/<w:p\b(?:(?!<\/w:p>)[\s\S])*?<w:t\b[^>]*>\s*RELATÓRIO\s*N/i);
     if (tituloNoXml >= 0) {
       const antesTitulo = corpo.slice(0, tituloNoXml);
-      const paragrafosAntes = [...antesTitulo.matchAll(/<w:p\\b[\\s\\S]*?<\\/w:p>/g)];
+      const paragrafosAntes = [...antesTitulo.matchAll(/<w:p\b[\s\S]*?<\/w:p>/g)];
       const inicioRemocao = paragrafosAntes.length ? paragrafosAntes[0].index : -1;
       if (inicioRemocao >= 0) {
         corpo = corpo.slice(0, inicioRemocao) + corpo.slice(tituloNoXml);
