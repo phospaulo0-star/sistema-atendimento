@@ -1671,18 +1671,18 @@ async function corrigirDocxParaWord2016(arquivo) {
 
   // Itens 16 e 17: fundo cinza em toda a primeira coluna.
   // Item 17 recebe cabeçalho próprio: VIATURAS | SITUAÇÃO.
-  const tabelasDocx = [...xml.matchAll(/<w:tbl\\b[\\s\\S]*?<\\/w:tbl>/g)];
+  const tabelasDocx = [...xml.matchAll(/<w:tbl\b[\s\S]*?<\/w:tbl>/g)];
   const aplicarCinzaCelula = celula => {
-    if (/<w:tcPr>[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
-      if (/<w:shd\\b[^>]*\\/>/.test(celula)) {
-        return celula.replace(/<w:shd\\b[^>]*\\/>/g, '<w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/>');
+    if (/<w:tcPr>[\s\S]*?<\/w:tcPr>/.test(celula)) {
+      if (/<w:shd\b[^>]*\/>/.test(celula)) {
+        return celula.replace(/<w:shd\b[^>]*\/>/g, '<w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/>');
       }
       return celula.replace(/<w:tcPr>/, '<w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/>');
     }
     return celula.replace('<w:tc>', '<w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
   };
-  const aplicarCinzaPrimeiraColuna = tabelaXml => tabelaXml.replace(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/g, linha => {
-    const primeiraCelula = linha.match(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/);
+  const aplicarCinzaPrimeiraColuna = tabelaXml => tabelaXml.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
+    const primeiraCelula = linha.match(/<w:tc\b[\s\S]*?<\/w:tc>/);
     return primeiraCelula ? linha.replace(primeiraCelula[0], aplicarCinzaCelula(primeiraCelula[0])) : linha;
   });
 
@@ -1695,19 +1695,19 @@ async function corrigirDocxParaWord2016(arquivo) {
   // Item 17 - Viaturas: criar a primeira linha com os títulos das duas colunas.
   if (tabelasDocx[2]) {
     let viaturas = tabelasDocx[2][0];
-    if (!/VIATURAS[\\s\\S]*SITUAÇÃO/.test(viaturas)) {
-      const primeiraLinha = viaturas.match(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/);
+    if (!/VIATURAS[\s\S]*SITUAÇÃO/.test(viaturas)) {
+      const primeiraLinha = viaturas.match(/<w:tr\b[\s\S]*?<\/w:tr>/);
       if (primeiraLinha) {
         let cabecalho = primeiraLinha[0];
-        const textos = [...cabecalho.matchAll(/<w:t\\b[^>]*>[\\s\\S]*?<\\/w:t>/g)];
+        const textos = [...cabecalho.matchAll(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g)];
         textos.forEach((m, i) => {
           const valor = i === 0 ? 'VIATURAS' : i === 1 ? 'SITUAÇÃO' : '';
           cabecalho = cabecalho.replace(m[0], '<w:t>' + valor + '</w:t>');
         });
-        cabecalho = cabecalho.replace(/<w:rPr\\b[^>]*>[\\s\\S]*?<\\/w:rPr>/g, propriedades =>
-          /<w:b\\b/.test(propriedades) ? propriedades : propriedades.replace('</w:rPr>', '<w:b/></w:rPr>')
+        cabecalho = cabecalho.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g, propriedades =>
+          /<w:b\b/.test(propriedades) ? propriedades : propriedades.replace('</w:rPr>', '<w:b/></w:rPr>')
         );
-        const celulasCabecalho = [...cabecalho.matchAll(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/g)];
+        const celulasCabecalho = [...cabecalho.matchAll(/<w:tc\b[\s\S]*?<\/w:tc>/g)];
         if (celulasCabecalho[0]) {
           cabecalho = cabecalho.replace(celulasCabecalho[0][0], aplicarCinzaCelula(celulasCabecalho[0][0]));
         }
