@@ -2139,8 +2139,8 @@ function aplicarPadraoTabelasCPAIG(container) {
     formatar(table, widths, opts);
 
     // Itens 25 e 27: colunas numéricas realmente estreitas e cabeçalho de data/saída cinza.
-    const isItem25 = /^25(?:\\s|[–-])/.test(title);
-    const isItem27 = /^27(?:\\s|[–-])/.test(title);
+    const isItem25 = /^25(?:\s|[–-])/.test(title);
+    const isItem27 = /^27(?:\s|[–-])/.test(title);
     if (isItem25 || isItem27) {
       table.style.setProperty("width", "100%", "important");
       table.style.setProperty("table-layout", "fixed", "important");
@@ -2319,7 +2319,7 @@ async function exportarWord(){
 
   const arquivo=documento.querySelector('.preview-archive');
   if(arquivo){
-    const textoArquivo=arquivo.textContent.replace(/\\s+/g,' ').trim();
+    const textoArquivo=arquivo.textContent.replace(/\s+/g,' ').trim();
     arquivo.replaceChildren();
     arquivo.setAttribute('style','width:100%;display:block;text-align:right;margin:0 0 2mm 0;padding:0;color:#000');
     const pArquivo=document.createElement('p');
