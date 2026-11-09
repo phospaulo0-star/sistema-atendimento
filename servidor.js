@@ -1657,12 +1657,12 @@ async function corrigirDocxParaWord2016(arquivo) {
     // Item 16: COLETES permanece sem negrito, mas recebe o fundo cinza
     // aplicado a toda a coluna ITENS na etapa final abaixo.
     if (indiceTabela === 1) {
-      tabela = tabela.replace(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/g, linha => {
-        const textoLinha = (linha.match(/<w:t\\b[^>]*>[\\s\\S]*?<\\/w:t>/g) || [])
+      tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
+        const textoLinha = (linha.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
           .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toUpperCase();
         if (!textoLinha.includes('COLETES BALISTICOS') && !textoLinha.includes('COLETES BALÍSTICOS')) return linha;
-        return linha.replace(/<w:rPr\\b[^>]*>[\\s\\S]*?<\\/w:rPr>/g, propriedades =>
-          propriedades.replace(/<w:b\\b[^>]*\\/>/g, '').replace(/<w:bCs\\b[^>]*\\/>/g, '')
+        return linha.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g, propriedades =>
+          propriedades.replace(/<w:b\b[^>]*\/>/g, '').replace(/<w:bCs\b[^>]*\/>/g, '')
         );
       });
     }
