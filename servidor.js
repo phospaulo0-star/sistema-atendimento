@@ -1482,7 +1482,7 @@ async function corrigirDocxParaWord2016(arquivo) {
     // são aplicadas diretamente à grade OOXML, tabela por tabela.
     const larguraUtil = 10546;
     const largurasModeloCPAIG = {
-      1: [91.5, 8.5],                    // Item 16 - Material Carga: coluna QUANT. compacta
+      1: [85, 15],                       // Item 16 - Material Carga: coluna QUANT. mais larga para manter "QUANT." em uma linha
       2: [50, 50],                         // Item 17 - Viaturas
       3: [7.2, 72.8, 20],                  // Item 25 - Hospitalizado
       4: [7.2, 72.8, 20],                  // Item 25.1 - Hospitalizado a confirmar
@@ -1558,8 +1558,8 @@ async function corrigirDocxParaWord2016(arquivo) {
       .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toUpperCase();
     if (textoTabelaAtual.includes('ITENS') && textoTabelaAtual.includes('QUANT.') &&
         (textoTabelaAtual.includes('CARABINA TAURUS') || textoTabelaAtual.includes('COLETES'))) {
-      const larguraItens = 9280; // aproximadamente 88% da largura útil
-      const larguraQuant = 1266; // aproximadamente 12%, pouco maior que "QUANT."
+      const larguraItens = 8964; // aproximadamente 85% da largura útil
+      const larguraQuant = 1582; // aproximadamente 15%, ampliada para manter "QUANT." em uma linha
       const larguraTabela = larguraItens + larguraQuant;
       tabela = tabela.replace(/<w:tblW\b[^>]*\/>/,
         '<w:tblW w:type="dxa" w:w="' + larguraTabela + '"/>');
@@ -1719,8 +1719,8 @@ async function corrigirDocxParaWord2016(arquivo) {
     // na coluna estreita, mantendo a abreviação e a largura compacta.
     materiais = materiais.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
       const textoCelula = (celula.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
-        .join(' ').replace(/<[^>]+>/g, '').trim().toUpperCase();
-      if (textoCelula !== 'QUANT.') return celula;
+        .join('').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim().toUpperCase();
+      if (textoCelula.replace(/\s+/g, '') !== 'QUANT.') return celula;
       if (/<w:tcPr>[\s\S]*?<\/w:tcPr>/.test(celula)) {
         return celula.replace(/<w:tcPr>([\s\S]*?)<\/w:tcPr>/,
           (m, props) => '<w:tcPr>' + (/<w:noWrap\b/.test(props) ? props : props + '<w:noWrap/>') + '</w:tcPr>');
