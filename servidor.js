@@ -1745,9 +1745,8 @@ app.post('/api/relatorios/export-docx', exigirBanco, exigirAutenticacao, exigirP
       pageSize: { width: 11906, height: 16838 },
       font: 'Times New Roman',
       fontSize: 22,
-      // Mantém as margens padrão do conversor: a opção margins da versão 1.8.0
-      // pode gerar DOCX que o Microsoft Word 2016 considera corrompido.
-      table: { row: { cantSplit: true } }
+      // Não passar opções de linha de tabela nesta versão do html-to-docx:
+      // buildTableRowProperties está gerando o nome XML inválido "@w".
     });
     docx = await corrigirDocxParaWord2016(docx);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
