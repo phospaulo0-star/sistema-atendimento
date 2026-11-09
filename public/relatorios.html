@@ -219,7 +219,7 @@ body.preview-mode #previewContent .material-carga-tabela td:first-child { text-a
 .movement-page{font-family:Arial,Helvetica,sans-serif;font-size:9pt;break-before:page;page-break-before:always;position:relative;min-height:230mm;padding-bottom:22mm}
 .movement-page h2{text-align:center;font-size:10pt;text-decoration:underline;margin:10px 0 12px}
 .movement-page h3{font-size:9pt;text-decoration:underline;margin:8px 0 2px}
-.movement-initial,.movement-final{font-size:9pt;margin:8px 0}
+.movement-initial,.movement-final{display:block;font-family:"Times New Roman",Times,serif;font-size:9pt;line-height:1.15;margin:8px 0;white-space:nowrap}
 .custody-preview-table{width:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,Helvetica,sans-serif;font-size:8pt;margin:0}
 .custody-preview-table th,.custody-preview-table td{border:1px solid #222;padding:2px 3px;height:15px;overflow-wrap:anywhere}
 .custody-preview-table th{background:#d2d2d2;text-align:center}
@@ -2035,7 +2035,12 @@ async function exportarWord(){
     movimento.querySelectorAll('h2').forEach(x=>x.setAttribute('style','font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;line-height:1.0;text-align:center;margin:0 0 2mm;padding:0'));
     movimento.querySelectorAll('h3').forEach(x=>x.setAttribute('style','font-family:Arial,sans-serif;font-size:9pt;font-weight:bold;line-height:1.0;margin:2mm 0 1mm;padding:0'));
     movimento.querySelectorAll('p').forEach(x=>{
-      if(x.classList.contains('movement-closing')){
+      if(x.classList.contains('movement-initial')||x.classList.contains('movement-final')){
+        // Rótulo e quantidade permanecem juntos na mesma linha no DOCX.
+        x.setAttribute('style','display:block;font-family:"Times New Roman",Times,serif;font-size:9pt;font-weight:normal;line-height:1.15;text-align:left;white-space:nowrap;margin:2mm 0;padding:0;color:#000;border:0');
+        x.querySelector('strong')?.setAttribute('style','font-weight:normal');
+        x.querySelector('span')?.setAttribute('style','display:inline;font-weight:normal;margin-left:2px;white-space:nowrap');
+      }else if(x.classList.contains('movement-closing')){
         // Mesmo padrão tipográfico do texto final do Item 40 no corpo do relatório.
         x.setAttribute('style','font-family:"Times New Roman",Times,serif;font-size:11pt;font-weight:normal;line-height:1.15;text-align:justify;white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0 25px;padding:0;color:#000;border:0');
       }else if(x.hasAttribute('align')&&x.getAttribute('align')==='right'){
@@ -2639,7 +2644,7 @@ function gerarPaginaMovimentacao(dataExtenso){
  const assinaturaUnidade=String($('assinaturaUnidadeData')?.value||'').trim();
  const assinaturaMatricula=String($('assinaturaMatriculaData')?.value||'').trim();
  const assinatura=`<div class="movement-signature" style="text-align:center;margin:50px auto 0;max-width:100%;line-height:1.35;white-space:pre-wrap">${assinaturaNome?`<strong>${escMov(assinaturaNome)}</strong>`:''}${assinaturaFuncao?`<br><em>${escMov(assinaturaFuncao)}</em>`:''}${assinaturaUnidade?`<br><em>${escMov(assinaturaUnidade)}</em>`:''}${assinaturaMatricula?`<br><em>Matrícula: ${escMov(assinaturaMatricula)}</em>`:''}</div>`;
- return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><div class="movement-initial"><strong><u>INICIAL / RECEBI:</u></strong> ${inicial}</div>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<div class="movement-final"><strong><u>FINAL / PASSO:</u></strong> ${final}</div><p class="movement-closing preview-text">${textoEncerramento}</p>${assinatura}</section>`;
+ return `<section class="movement-page"><h2>MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><p class="movement-initial"><strong><u>INICIAL / RECEBI:</u></strong> <span>${inicial}</span></p>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<p class="movement-final"><strong><u>FINAL / PASSO:</u></strong> <span>${final}</span></p><p class="movement-closing preview-text">${textoEncerramento}</p>${assinatura}</section>`;
 }
 
 // Inicialização do editor de documentos do Item 35 a partir do conteúdo salvo.
