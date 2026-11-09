@@ -2136,7 +2136,7 @@ async function exportarWord(){
     const resposta=await fetch('/api/relatorios/export-docx',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({html})});
     if(!resposta.ok){
       const erro=await resposta.json().catch(()=>({}));
-      throw new Error((erro.message||'Falha na exportação do Word (HTTP '+resposta.status+').')+(erro.detail?(' Detalhe técnico: '+erro.detail):''));
+      throw new Error((erro.message||'Falha na exportação do Word (HTTP '+resposta.status+').')+(erro.detail?(' Detalhe técnico: '+erro.detail):'')+(erro.diagnostic?(' Diagnóstico interno: '+erro.diagnostic):''));
     }
     const blob=await resposta.blob();
     if(!blob.size)throw new Error('O servidor retornou um arquivo vazio.');
