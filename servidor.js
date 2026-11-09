@@ -1715,6 +1715,63 @@ async function corrigirDocxParaWord2016(arquivo) {
       }
     }
     viaturas = aplicarCinzaPrimeiraColuna(viaturas);
+
+    // Alinhamento e destaque do cabeçalho do Item 17:
+    // "VIATURAS" centralizado; coluna SITUAÇÃO à esquerda nos dados,
+    // mantendo somente o título "SITUAÇÃO" centralizado.
+    const formatarCelulaViaturas = (celula, alinhamento, tamanhoFonte = null) => {
+      celula = celula.replace(/<w:p\b[\s\S]*?<\/w:p>/g, paragrafo => {
+        if (/<w:pPr\b[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+          paragrafo = paragrafo.replace(/<w:pPr>([\s\S]*?)<\/w:pPr>/, (m, props) => {
+            const jc = '<w:jc w:val="' + alinhamento + '"/>';
+            return '<w:pPr>' + (/<w:jc\b[^>]*\/>/.test(props)
+              ? props.replace(/<w:jc\b[^>]*\/>/, jc)
+              : props + jc) + '</w:pPr>';
+          });
+        } else {
+          paragrafo = paragrafo.replace(/<w:p\b[^>]*>/, m =>
+            m + '<w:pPr><w:jc w:val="' + alinhamento + '"/></w:pPr>');
+        }
+        if (tamanhoFonte) {
+          paragrafo = paragrafo.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
+            if (!/<w:t\b/.test(run)) return run;
+            if (/<w:rPr\b[\s\S]*?<\/w:rPr>/.test(run)) {
+              return run.replace(/<w:rPr>([\s\S]*?)<\/w:rPr>/, (m, props) => {
+                const bold = /<w:b\b[^>]*\/>/.test(props) ? props : props + '<w:b/>';
+                const sz = '<w:sz w:val="' + tamanhoFonte + '"/>';
+                const szCs = '<w:szCs w:val="' + tamanhoFonte + '"/>';
+                const p1 = /<w:sz\b[^>]*\/>/.test(bold) ? bold.replace(/<w:sz\b[^>]*\/>/, sz) : bold + sz;
+                return '<w:rPr>' + (/ <w:szCs/.test(p1) ? p1.replace(/<w:szCs\b[^>]*\/>/, szCs) : p1 + szCs) + '</w:rPr>';
+              });
+            }
+            return run.replace(/<w:r\b[^>]*>/, m =>
+              m + '<w:rPr><w:b/><w:sz w:val="' + tamanhoFonte + '"/><w:szCs w:val="' + tamanhoFonte + '"/></w:rPr>');
+          });
+        }
+        return paragrafo;
+      });
+      return celula;
+    };
+
+    const linhasViaturas = [...viaturas.matchAll(/<w:tr\b[\s\S]*?<\/w:tr>/g)];
+    linhasViaturas.forEach((linhaMatch, indiceLinha) => {
+      const linha = linhaMatch[0];
+      const celulas = [...linha.matchAll(/<w:tc\b[\s\S]*?<\/w:tc>/g)];
+      if (celulas.length < 2) return;
+      let linhaNova = linha;
+      // Cabeçalho: as duas palavras centralizadas e com fonte maior (11 pt).
+      // Demais linhas: toda a coluna SITUAÇÃO alinhada à esquerda.
+      const celulaEsquerda = indiceLinha === 0
+        ? formatarCelulaViaturas(celulas[0][0], 'center', 22)
+        : celulas[0][0];
+      const celulaDireita = indiceLinha === 0
+        ? formatarCelulaViaturas(celulas[1][0], 'center', 22)
+        : formatarCelulaViaturas(celulas[1][0], 'left');
+      linhaNova = linhaNova.replace(celulas[0][0], celulaEsquerda);
+      linhaNova = linhaNova.replace(celulas[1][0], celulaDireita);
+      viaturas = viaturas.replace(linha, linhaNova);
+    });
+
     xml = xml.replace(tabelasDocx[2][0], viaturas);
   }
 
