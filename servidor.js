@@ -2531,7 +2531,8 @@ async function inicializarPertencesVisitas(pool) {
     "ALTER TABLE pv_visit_entries ADD COLUMN IF NOT EXISTS visitor_count INTEGER NOT NULL DEFAULT 1 CHECK (visitor_count IN (1,2));",
     "CREATE INDEX IF NOT EXISTS pv_visit_entries_list_idx ON pv_visit_entries(list_number, created_at);",
     "INSERT INTO pv_visit_days(visit_day,status) VALUES ((NOW() AT TIME ZONE 'America/Campo_Grande')::date,'open') ON CONFLICT (visit_day) DO NOTHING;",
-    "INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT (NOW() AT TIME ZONE 'America/Campo_Grande')::date,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') AND EXISTS (SELECT 1 FROM pv_visit_days WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') ON CONFLICT (visit_day) WHERE status='open' DO NOTHING;"
+    // A criação da próxima lista é feita somente depois de garantir o índice único parcial.
+    // Isso evita o erro PostgreSQL 42P10 no ON CONFLICT durante a inicialização.
   ].join('\n'));
 
   // Executa a limpeza e a criação do índice em comandos separados.
@@ -2551,6 +2552,8 @@ async function inicializarPertencesVisitas(pool) {
     FROM ranked_open r
    WHERE l.list_number=r.list_number AND r.rn>1`);
   await pool.query("CREATE UNIQUE INDEX IF NOT EXISTS pv_visit_one_open_list_per_day ON pv_visit_lists(visit_day) WHERE status='open'");
+  // O índice parcial já existe; agora o ON CONFLICT (visit_day) WHERE status='open' é válido.
+  await pool.query("INSERT INTO pv_visit_lists(visit_day,day_list_number,status) SELECT (NOW() AT TIME ZONE 'America/Campo_Grande')::date,COALESCE(MAX(day_list_number),0)+1,'open' FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND NOT EXISTS (SELECT 1 FROM pv_visit_lists WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') AND EXISTS (SELECT 1 FROM pv_visit_days WHERE visit_day=(NOW() AT TIME ZONE 'America/Campo_Grande')::date AND status='open') ON CONFLICT (visit_day) WHERE status='open' DO NOTHING");
 }
 
 function montarRotasPertencesVisitas(config) {
