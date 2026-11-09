@@ -2028,7 +2028,15 @@ async function exportarWord(){
   }
 
   const titulo=documento.querySelector('.preview-title h2');
-  if(titulo)titulo.setAttribute('style','font-family:"Times New Roman",serif;font-size:12pt;font-weight:bold;text-decoration:underline;text-align:left;line-height:1.05;margin:0 0 2mm 0;padding:0;color:#000');
+  if(titulo){
+    // Tag <u> explícita para o sublinhado sobreviver à exportação DOCX.
+    if(!titulo.querySelector('u')){
+      const sublinhadoTitulo=document.createElement('u');
+      while(titulo.firstChild)sublinhadoTitulo.appendChild(titulo.firstChild);
+      titulo.appendChild(sublinhadoTitulo);
+    }
+    titulo.setAttribute('style','font-family:"Times New Roman",serif;font-size:12pt;font-weight:bold;text-decoration:underline;text-align:left;line-height:1.05;margin:0 0 2mm 0;padding:0;color:#000');
+  }
 
   // Estilos explícitos em cada item: o Word não interpreta com fidelidade
   // os seletores e as regras @media print do navegador.
@@ -2097,7 +2105,16 @@ async function exportarWord(){
     const padrao=numeroItem==='01'
       ? /(Eu,\s*)([^,]+)(,\s*recebi o plantão do\s+)([^,]+)(?=,)/i
       : /(Eu,\s*)([^,]+)(,\s*encerro o plantão e passo para\s+)([^,]+)(?=,)/i;
-    const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT);
+    // Agrupar a frase inteira em um único parágrafo evita que o conversor DOCX
+    // transforme os nós de texto ao redor dos nomes em parágrafos separados.
+    let paragrafo=container.querySelector(':scope > p');
+    if(!paragrafo){
+      paragrafo=document.createElement('p');
+      paragrafo.setAttribute('style','display:block;margin:0;padding:0;font-family:"Times New Roman",serif;font-size:11pt;line-height:0.95;white-space:pre-wrap');
+      while(container.firstChild)paragrafo.appendChild(container.firstChild);
+      container.appendChild(paragrafo);
+    }
+    const walker=document.createTreeWalker(paragrafo,NodeFilter.SHOW_TEXT);
     const nos=[];
     let no;
     while((no=walker.nextNode()))if(padrao.test(no.nodeValue))nos.push(no);
@@ -2108,11 +2125,13 @@ async function exportarWord(){
       const antes=no.nodeValue.slice(0,m.index);
       if(antes)fragmento.appendChild(document.createTextNode(antes));
       fragmento.appendChild(document.createTextNode(m[1]));
-      const nome1=document.createElement('strong');
+      const nome1=document.createElement('span');
+      nome1.setAttribute('style','font-weight:bold;display:inline');
       nome1.textContent=m[2].trim();
       fragmento.appendChild(nome1);
       fragmento.appendChild(document.createTextNode(m[3]));
-      const nome2=document.createElement('strong');
+      const nome2=document.createElement('span');
+      nome2.setAttribute('style','font-weight:bold;display:inline');
       nome2.textContent=m[4].trim();
       fragmento.appendChild(nome2);
       const depois=no.nodeValue.slice(m.index+m[0].length);
