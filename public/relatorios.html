@@ -2137,6 +2137,48 @@ function aplicarPadraoTabelasCPAIG(container) {
       }
     }
     formatar(table, widths, opts);
+
+    // Correção definitiva do Item 25: aplica a largura diretamente na estrutura
+    // da tabela após toda a formatação geral, inclusive na cópia usada pelo Word.
+    if (sec.classList.contains("hospitalizado-preview-item25")) {
+      table.style.setProperty("width", "100%", "important");
+      table.style.setProperty("table-layout", "fixed", "important");
+      let cols = table.querySelector("colgroup");
+      if (!cols) { cols = document.createElement("colgroup"); table.insertBefore(cols, table.firstChild); }
+      while (cols.children.length < 3) cols.appendChild(document.createElement("col"));
+      cols.children[0].style.setProperty("width", "22px", "important");
+      cols.children[1].style.setProperty("width", "calc(78% - 22px)", "important");
+      cols.children[2].style.setProperty("width", "22%", "important");
+      table.querySelectorAll("tbody tr").forEach(row => {
+        const numero = row.cells[0];
+        if (numero) {
+          numero.style.setProperty("width", "22px", "important");
+          numero.style.setProperty("min-width", "22px", "important");
+          numero.style.setProperty("max-width", "22px", "important");
+          numero.style.setProperty("padding", "2px 1px", "important");
+          numero.style.setProperty("white-space", "nowrap", "important");
+          numero.style.setProperty("word-break", "keep-all", "important");
+          numero.style.setProperty("overflow-wrap", "normal", "important");
+          numero.style.setProperty("text-align", "center", "important");
+          numero.style.setProperty("background-color", "#d9d9d9", "important");
+        }
+        const nome = row.cells[1];
+        if (nome) {
+          nome.style.setProperty("text-align", "left", "important");
+          nome.style.setProperty("white-space", "normal", "important");
+          nome.style.setProperty("word-break", "normal", "important");
+          nome.style.setProperty("overflow-wrap", "break-word", "important");
+        }
+      });
+      const cabecalho = table.querySelector("thead tr:first-child");
+      if (cabecalho && cabecalho.cells.length >= 2) {
+        cabecalho.cells[0].style.setProperty("background-color", "#fff", "important");
+        cabecalho.cells[cabecalho.cells.length - 1].style.setProperty("background-color", "#bfbfbf", "important");
+        cabecalho.cells[cabecalho.cells.length - 1].style.setProperty("-webkit-print-color-adjust", "exact", "important");
+        cabecalho.cells[cabecalho.cells.length - 1].style.setProperty("print-color-adjust", "exact", "important");
+      }
+    }
+
     if (opts.item25) {
       // O nome e o número da CI permanecem juntos na mesma célula;
       // o texto só quebra naturalmente quando a largura não for suficiente.
