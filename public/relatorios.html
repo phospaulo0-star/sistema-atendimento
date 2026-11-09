@@ -2072,12 +2072,12 @@ async function exportarWord(){
   const movimento=documento.querySelector('.movement-page');
   if(movimento){
     movimento.setAttribute('style','page-break-before:always;break-before:page;margin:0;padding:0;font-family:"Times New Roman",serif;font-size:9pt;line-height:1.0');
-    movimento.querySelectorAll('h2').forEach(x=>x.setAttribute('style','font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;text-decoration:underline;text-align:center;line-height:1.0;margin:0 0 2mm;padding:0;color:#000'));
+    movimento.querySelectorAll('h2').forEach(x=>x.setAttribute('style','font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;text-decoration:underline;text-align:center;line-height:1.2;margin:0 0 5mm;padding:0;color:#000'));
     movimento.querySelectorAll('h3').forEach(x=>x.setAttribute('style','font-family:Arial,sans-serif;font-size:9pt;font-weight:bold;line-height:1.0;margin:2mm 0 1mm;padding:0'));
     movimento.querySelectorAll('p').forEach(x=>{
       if(x.classList.contains('movement-initial')||x.classList.contains('movement-final')){
         // Rótulo e quantidade permanecem juntos na mesma linha no DOCX.
-        x.setAttribute('style','display:block;font-family:"Times New Roman",Times,serif;font-size:9pt;font-weight:normal;line-height:1.15;text-align:left;white-space:nowrap;margin:2mm 0;padding:0;color:#000;border:0');
+        x.setAttribute('style','display:block;font-family:"Times New Roman",Times,serif;font-size:9pt;font-weight:normal;line-height:1.25;text-align:left;white-space:nowrap;margin:4mm 0 5mm;padding:0;color:#000;border:0');
         x.querySelector('strong')?.setAttribute('style','font-weight:normal');
         x.querySelector('span')?.setAttribute('style','display:inline;font-weight:normal;margin-left:2px;white-space:nowrap');
       }else if(x.classList.contains('movement-closing')){
@@ -2089,8 +2089,14 @@ async function exportarWord(){
       }else x.setAttribute('style','font-family:"Times New Roman",serif;font-size:9pt;line-height:1.0;margin:0 0 1mm;padding:0');
     });
     movimento.querySelectorAll('table').forEach(tab=>{
-      tab.setAttribute('style',(tab.getAttribute('style')||'')+';margin:0;border-collapse:collapse;font-size:7pt');
-      tab.querySelectorAll('th,td').forEach(cell=>cell.setAttribute('style',(cell.getAttribute('style')||'')+';padding:1px 2px;font-size:7pt;line-height:1.0'));
+      // Bordas finas e altura automática evitam linhas pesadas e texto cortado
+      // no meio ao converter o HTML para Word.
+      tab.setAttribute('border','0');
+      tab.setAttribute('style','width:100%;margin:0;border-collapse:collapse;border-spacing:0;table-layout:fixed;font-family:Arial,sans-serif;font-size:8pt;line-height:1.25;border:0.5pt solid #555');
+      tab.querySelectorAll('th,td').forEach(cell=>{
+        cell.setAttribute('style','border:0.5pt solid #555;padding:3px 4px;font-family:Arial,sans-serif;font-size:8pt;line-height:1.25;height:auto;min-height:0;vertical-align:middle;overflow-wrap:anywhere');
+      });
+      tab.querySelectorAll('th').forEach(cell=>cell.style.backgroundColor='#d2d2d2');
     });
     movimento.querySelectorAll('table').forEach(tab=>{
       if(tab.querySelector('td[align="right"]'))tab.setAttribute('style','width:100%;border:0;border-collapse:collapse;table-layout:fixed;margin:1mm 0;padding:0;font-family:"Times New Roman",serif;font-size:8pt');
