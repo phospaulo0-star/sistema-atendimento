@@ -1448,7 +1448,9 @@ async function corrigirDocxParaWord2016(arquivo) {
   // Reproduz a área imprimível oficial do PDF: A4, margens 15/12/14/12 mm.
   // Fazemos isso diretamente no OOXML para não depender do suporte CSS do conversor.
   xml = xml.replace(/<w:pgMar\b[^>]*\/>/,
-    '<w:pgMar w:top="850" w:right="680" w:bottom="794" w:left="680" w:header="425" w:footer="425" w:gutter="0"/>'
+    // Área superior ampliada para acomodar o cabeçalho institucional nativo,
+    // mantendo a mesma área útil horizontal e a margem inferior do PDF.
+    '<w:pgMar w:top="1700" w:right="680" w:bottom="794" w:left="680" w:header="250" w:footer="425" w:gutter="0"/>'
   );
 
   // O conversor aplica bordas padrão até na tabela usada apenas para alinhar
@@ -1563,6 +1565,54 @@ async function corrigirDocxParaWord2016(arquivo) {
     }).join('');
   });
 
+  // Move a tabela institucional (logotipo, texto central e logotipo) para o
+  // cabeçalho nativo do Word, evitando que ela fique no corpo da primeira página.
+  const primeiraTabela = xml.match(/<w:tbl\b[\s\S]*?<\/w:tbl>/);
+  if (!primeiraTabela) throw new Error('A tabela do cabeçalho institucional não foi encontrada no DOCX.');
+  const tabelaCabecalho = primeiraTabela[0];
+  xml = xml.replace(tabelaCabecalho, '');
+
+  const relsDocPath = 'word/_rels/document.xml.rels';
+  const relsDocFile = zip.file(relsDocPath);
+  if (!relsDocFile) throw new Error('O DOCX gerado não contém os relacionamentos das imagens.');
+  let relsDocXml = await relsDocFile.async('string');
+  const idsImagemCabecalho = [...tabelaCabecalho.matchAll(/r:embed="([^"]+)"/g)].map(m => m[1]);
+  const relacoesImagemCabecalho = [...relsDocXml.matchAll(/<Relationship\b[^>]*\/>/g)]
+    .map(m => m[0])
+    .filter(rel => idsImagemCabecalho.some(id => new RegExp('\\\\bId="' + id + '"').test(rel)) && /\/image/.test(rel));
+  if (idsImagemCabecalho.length && relacoesImagemCabecalho.length !== new Set(idsImagemCabecalho).size) {
+    throw new Error('Não foi possível localizar todos os arquivos de imagem do cabeçalho institucional.');
+  }
+  const headerRelId = 'rIdHeaderCPAIG';
+  const headerPath = 'word/header1.xml';
+  const headerRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    relacoesImagemCabecalho.join('') + '</Relationships>';
+  zip.file('word/_rels/header1.xml.rels', headerRels);
+  const headerXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
+    'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" ' +
+    'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ' +
+    'xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+    tabelaCabecalho + '</w:hdr>';
+  zip.file(headerPath, headerXml);
+
+  // Relacionamento próprio do cabeçalho; as imagens apontam para os mesmos arquivos
+  // de mídia já presentes no DOCX, sem duplicar nem alterar os logotipos.
+  let relsAtual = await zip.file(relsDocPath).async('string');
+  const relIdsAtual = [...relsAtual.matchAll(/\bId="rId(\d+)"/g)].map(m => Number(m[1]));
+  const headerDocRelId = 'rId' + (Math.max(0, ...relIdsAtual) + 1);
+  relsAtual = relsAtual.replace('</Relationships>',
+    '<Relationship Id="' + headerDocRelId + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/></Relationships>');
+  zip.file(relsDocPath, relsAtual);
+
+  const contentTypesHeader = await zip.file('[Content_Types].xml').async('string');
+  if (!contentTypesHeader.includes('/word/header1.xml')) {
+    zip.file('[Content_Types].xml', contentTypesHeader.replace('</Types>',
+      '<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/></Types>'));
+  }
+
   // Rodapé institucional nativo do Word: aparece no limite inferior de todas as páginas,
   // com linha superior, endereço/contato centralizados e paginação alinhada à direita.
   const relsPath = 'word/_rels/document.xml.rels';
@@ -1606,10 +1656,10 @@ async function corrigirDocxParaWord2016(arquivo) {
   xml = xml.replace(/<w:footerReference\b[^>]*\/>/g, '');
   if (/<w:sectPr\b[\s\S]*?<\/w:sectPr>/.test(xml)) {
     xml = xml.replace(/<w:sectPr\b([\s\S]*?)<\/w:sectPr>/, (secao, attrs) => {
-      const referenciaRodape = '<w:footerReference w:type="default" r:id="' + footerRelId + '"/>';
-      if (/<w:pgSz\b/.test(attrs)) return '<w:sectPr' + attrs.replace(/<w:pgSz\b/, referenciaRodape + '<w:pgSz') + '</w:sectPr>';
-      if (/<w:pgMar\b/.test(attrs)) return '<w:sectPr' + attrs.replace(/<w:pgMar\b/, referenciaRodape + '<w:pgMar') + '</w:sectPr>';
-      return '<w:sectPr' + attrs + referenciaRodape + '</w:sectPr>';
+      const referencias = '<w:headerReference w:type="default" r:id="' + headerDocRelId + '"/><w:footerReference w:type="default" r:id="' + footerRelId + '"/>';
+      if (/<w:pgSz\b/.test(attrs)) return '<w:sectPr' + attrs.replace(/<w:pgSz\b/, referencias + '<w:pgSz') + '</w:sectPr>';
+      if (/<w:pgMar\b/.test(attrs)) return '<w:sectPr' + attrs.replace(/<w:pgMar\b/, referencias + '<w:pgMar') + '</w:sectPr>';
+      return '<w:sectPr' + attrs + referencias + '</w:sectPr>';
     });
   } else {
     throw new Error('Não foi possível localizar a seção final do DOCX para posicionar o rodapé.');
