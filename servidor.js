@@ -1482,7 +1482,7 @@ async function corrigirDocxParaWord2016(arquivo) {
     // são aplicadas diretamente à grade OOXML, tabela por tabela.
     const larguraUtil = 10546;
     const largurasModeloCPAIG = {
-      1: [82, 18],                         // Item 16 - Material Carga
+      1: [91.5, 8.5],                    // Item 16 - Material Carga: coluna QUANT. compacta
       2: [50, 50],                         // Item 17 - Viaturas
       3: [7.2, 72.8, 20],                  // Item 25 - Hospitalizado
       4: [7.2, 72.8, 20],                  // Item 25.1 - Hospitalizado a confirmar
@@ -1619,6 +1619,22 @@ async function corrigirDocxParaWord2016(arquivo) {
         return celula.replace('<w:tc>', '<w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
       });
     });
+
+    // Item 16: a linha "COLETES BALÍSTICOS" é um item comum,
+    // não um cabeçalho. Remover somente seu fundo cinza e negrito,
+    // preservando todas as bordas e o alinhamento da linha.
+    if (indiceTabela === 1) {
+      tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
+        const textoLinha = (linha.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+          .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toUpperCase();
+        if (!textoLinha.includes('COLETES BALISTICOS') && !textoLinha.includes('COLETES BALÍSTICOS')) return linha;
+        linha = linha.replace(/<w:shd\b[^>]*\/>/g, '');
+        linha = linha.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g, propriedades =>
+          propriedades.replace(/<w:b\b[^>]*\/>/g, '').replace(/<w:bCs\b[^>]*\/>/g, '')
+        );
+        return linha;
+      });
+    }
     return tabela;
   });
 
