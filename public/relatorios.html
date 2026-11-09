@@ -527,6 +527,52 @@ body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col
   }
 }
 </style>
+
+<style id="item25-coluna-numero-cinza-saida">
+/* Ajuste específico do Item 25: número ocupa só o espaço necessário. */
+#previewContent .hospitalizado-preview-item25 table.hospitalizado-preview-table,
+body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table{
+  width:100%!important;table-layout:fixed!important;
+}
+#previewContent .hospitalizado-preview-item25 table.hospitalizado-preview-table colgroup col:first-child,
+body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table colgroup col:first-child{
+  width:24px!important;
+}
+#previewContent .hospitalizado-preview-item25 table.hospitalizado-preview-table colgroup col:nth-child(2),
+body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table colgroup col:nth-child(2){
+  width:auto!important;
+}
+#previewContent .hospitalizado-preview-item25 table.hospitalizado-preview-table colgroup col:nth-child(3),
+body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table colgroup col:nth-child(3){
+  width:22%!important;
+}
+#previewContent .hospitalizado-preview-item25 table.hospitalizado-preview-table tbody td:first-child,
+body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table tbody td:first-child{
+  width:24px!important;min-width:24px!important;max-width:24px!important;
+  box-sizing:border-box!important;padding:2px 1px!important;
+  white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;
+  text-align:center!important;background-color:#d9d9d9!important;
+}
+#previewContent .hospitalizado-preview-item25 table.hospitalizado-preview-table tbody td:nth-child(2),
+body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table tbody td:nth-child(2){
+  width:auto!important;white-space:normal!important;word-break:normal!important;overflow-wrap:break-word!important;
+  text-align:left!important;
+}
+#previewContent .hospitalizado-preview-item25 table.hospitalizado-preview-table thead th:last-child,
+body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table thead th:last-child{
+  background-color:#bfbfbf!important;
+  -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
+}
+@media print{
+  body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table tbody td:first-child{
+    width:24px!important;min-width:24px!important;max-width:24px!important;
+    white-space:nowrap!important;padding:2px 1px!important;
+  }
+  body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-table thead th:last-child{
+    background-color:#bfbfbf!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
+  }
+}
+</style>
 </head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
 <main class="wrap"><section class="panel no-print"><div class="toolbar"><button class="primary" id="newBtn" onclick="confirmarNovoRelatorio()">＋ NOVO RELATÓRIO</button><button type="button" id="guicheShortcut" class="blue hidden" onclick="abrirGuicheRelatorio()">GUICHÊ</button><button type="button" id="mesaShortcut" class="blue hidden" onclick="abrirConsultaMesaRelatorio()">CONSULTA MESA</button><button onclick="carregarLista()">ATUALIZAR LISTA</button><button class="blue" onclick="visualizarRelatorio()">👁️ VISUALIZAR RELATÓRIO</button><button class="blue" onclick="window.print()">IMPRIMIR</button><button onclick="mostrarHistorico()" id="historyBtn" type="button">HISTÓRICO DE ALTERAÇÕES</button><span class="small" id="saveState">Aguardando…</span></div><div class="meta"><div class="field"><label for="reportDate">Data de início do plantão (08h)</label><input type="date" id="reportDate"></div><div class="field"><label for="shiftName">Turno / Plantão</label><select id="shiftName"><option>Plantão 24x72h</option><option>Plantão diurno</option><option>Plantão noturno</option><option>Plantão</option></select></div><div class="field"><label for="team">Equipe</label><input id="team" readonly></div><div class="field"><label for="title">Título / identificação</label><input id="title" maxlength="180" placeholder="Ex.: Relatório nº / data"></div></div><div id="status" class="status">Carregando seus relatórios…</div><div class="toolbar"><button class="primary" id="saveBtn" onclick="salvar('salvar')" disabled>SALVAR</button><button class="blue" id="closeBtn" onclick="salvar('encerrar')" disabled>ENCERRAR RELATÓRIO</button><button id="reopenBtn" onclick="salvar('reabrir')" disabled>REABRIR (CHEFE)</button></div></section>
