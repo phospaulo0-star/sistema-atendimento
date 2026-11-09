@@ -1767,8 +1767,12 @@ async function corrigirDocxParaWord2016(arquivo) {
       const celulaDireita = indiceLinha === 0
         ? formatarCelulaViaturas(celulas[1][0], 'center', 22)
         : formatarCelulaViaturas(celulas[1][0], 'left');
+      // As duas células da primeira linha do cabeçalho ficam com fundo cinza.
+      const celulaDireitaFormatada = indiceLinha === 0
+        ? aplicarCinzaCelula(celulaDireita)
+        : celulaDireita;
       linhaNova = linhaNova.replace(celulas[0][0], celulaEsquerda);
-      linhaNova = linhaNova.replace(celulas[1][0], celulaDireita);
+      linhaNova = linhaNova.replace(celulas[1][0], celulaDireitaFormatada);
       viaturas = viaturas.replace(linha, linhaNova);
     });
 
