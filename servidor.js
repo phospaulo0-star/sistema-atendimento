@@ -1401,7 +1401,8 @@ function normalizarLargurasCelulasDocx(html) {
   // o erro "Invalid XML name: @w" no xmlbuilder2. Removemos apenas essas larguras
   // incompatíveis; a tabela e suas células continuam preservadas.
   const larguraValida = valor => /^\s*\d+(?:\.\d+)?\s*(?:pt|px|cm|in)\s*$/i.test(valor || '');
-  return html.replace(/<(td|th|col)\b([^>]*)>/gi, (tag, nome, atributos) => {
+  // A largura incompatível também pode estar no table, div, section ou no contêiner do documento.
+  return html.replace(/<([a-z][a-z0-9:-]*)\b([^>]*)>/gi, (tag, nome, atributos) => {
     let limpo = atributos.replace(/\swidth\s*=\s*(["'])(.*?)\1/gi, (atributo, aspas, valor) =>
       larguraValida(valor) ? atributo : ''
     );
