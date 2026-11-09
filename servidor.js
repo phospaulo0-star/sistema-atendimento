@@ -1493,8 +1493,43 @@ async function corrigirDocxParaWord2016(arquivo) {
         (m, a, v, b) => a + escalar(v) + b);
     }
 
-    // Bordas finas e contínuas, como nas tabelas da impressão PDF.
-    tabela = tabela.replace(/w:sz="0"/g, 'w:sz="6"');
+    // Bordas finas e contínuas nas tabelas do Word.
+    // OOXML mede w:sz em oitavos de ponto: 4 = 0,5 pt.
+    // Força todas as linhas externas e internas, pois o html-to-docx pode
+    // manter bordas padrão mais grossas ou omitir divisões entre células.
+    const bordasTabelaWord = '<w:tblBorders>' +
+      '<w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '<w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '<w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '<w:insideH w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '<w:insideV w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '</w:tblBorders>';
+    if (/<w:tblBorders>[\\s\\S]*?<\\/w:tblBorders>/.test(tabela)) {
+      tabela = tabela.replace(/<w:tblBorders>[\\s\\S]*?<\\/w:tblBorders>/, bordasTabelaWord);
+    } else if (/<w:tblPr>[\\s\\S]*?<\\/w:tblPr>/.test(tabela)) {
+      tabela = tabela.replace(/<w:tblPr>([\\s\\S]*?)<\\/w:tblPr>/,
+        '<w:tblPr>$1' + bordasTabelaWord + '</w:tblPr>');
+    } else {
+      tabela = tabela.replace(/<w:tblGrid>/, '<w:tblPr>' + bordasTabelaWord + '</w:tblPr><w:tblGrid>');
+    }
+
+    const bordasCelulaWord = '<w:tcBorders>' +
+      '<w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '<w:left w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '<w:bottom w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '<w:right w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
+      '</w:tcBorders>';
+    tabela = tabela.replace(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/g, celula => {
+      if (/<w:tcBorders>[\\s\\S]*?<\\/w:tcBorders>/.test(celula)) {
+        return celula.replace(/<w:tcBorders>[\\s\\S]*?<\\/w:tcBorders>/, bordasCelulaWord);
+      }
+      if (/<w:tcPr>[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
+        return celula.replace(/<w:tcPr>([\\s\\S]*?)<\\/w:tcPr>/,
+          '<w:tcPr>$1' + bordasCelulaWord + '</w:tcPr>');
+      }
+      return celula.replace('<w:tc>', '<w:tc><w:tcPr>' + bordasCelulaWord + '</w:tcPr>');
+    });
 
     // Cabeçalhos de tabelas (incluindo os títulos das duas tabelas finais)
     // recebem cinza CPAIG. O preenchimento é aplicado célula por célula.
