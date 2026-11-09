@@ -1715,6 +1715,18 @@ async function corrigirDocxParaWord2016(arquivo) {
   if (tabelasDocx[1]) {
     let materiais = aplicarCinzaPrimeiraColuna(tabelasDocx[1][0]);
     materiais = ajustarFonteTabela(materiais, 24, 20);
+    // Impede que a pontuação de "QUANT." quebre para uma linha isolada
+    // na coluna estreita, mantendo a abreviação e a largura compacta.
+    materiais = materiais.replace(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/g, celula => {
+      const textoCelula = (celula.match(/<w:t\\b[^>]*>[\\s\\S]*?<\\/w:t>/g) || [])
+        .join(' ').replace(/<[^>]+>/g, '').trim().toUpperCase();
+      if (textoCelula !== 'QUANT.') return celula;
+      if (/<w:tcPr>[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
+        return celula.replace(/<w:tcPr>([\\s\\S]*?)<\\/w:tcPr>/,
+          (m, props) => '<w:tcPr>' + (/<w:noWrap\\b/.test(props) ? props : props + '<w:noWrap/>') + '</w:tcPr>');
+      }
+      return celula.replace('<w:tc>', '<w:tc><w:tcPr><w:noWrap/></w:tcPr>');
+    });
     xml = xml.replace(tabelasDocx[1][0], materiais);
   }
 
