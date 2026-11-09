@@ -2032,9 +2032,9 @@ async function exportarWord(){
           linha.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.0;margin:0;padding:0;white-space:nowrap;page-break-inside:avoid');
         });
       }
-      if(sec.classList.contains('item38-preview')){
+      if(sec.classList.contains('item38-preview')||sec.classList.contains('stacked-item-preview')){
         tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.15;white-space:normal;margin:0;padding:0;color:#000');
-        tx.querySelectorAll('.item38-line').forEach(linha=>{
+        tx.querySelectorAll('.item38-line,.stacked-item-line').forEach(linha=>{
           linha.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.15;text-align:left;white-space:normal;margin:0 0 2px 0;padding:0;color:#000;page-break-inside:avoid');
         });
       }
@@ -2442,10 +2442,39 @@ function visualizarRelatorio(targetId=null){
     const bruto=String(texto||'').trim();
     if(!bruto || /^(?:•\s*)?N\/C\.?$/i.test(bruto)) return '• N/C.';
     if(/^•\s*SEM ALTERAÇÃO\.?$/i.test(bruto)||/^SEM ALTERAÇÃO\.?$/i.test(bruto)) return '• '+bruto.replace(/^•\s*/, '');
-    const linhas=bruto.split(/\r?\n/).map(l=>l.replace(/^\s*\d+[.)]\s*/, '').replace(/^\s*•\s*/, '').trim()).filter(Boolean);
+    // Também separa opções numeradas quando o Word recebe tudo em uma única linha.
+    const normalizado=bruto.replace(/\s+(?=\d{1,2}[.)]\s+)/g,'\n');
+    const linhas=normalizado.split(/\r?\n/).map(l=>l.replace(/^\s*\d+[.)]\s*/, '').replace(/^\s*•\s*/, '').trim()).filter(Boolean);
     if(!linhas.length) return '• N/C.';
     if(linhas.every(l=>/^(?:N\/C\.?|SEM ALTERAÇÃO\.?)$/i.test(l))) return '• '+linhas[0];
     return linhas.map((linha,i)=>`${i+1}. ${linha}`).join('\n');
+  }
+  function linhasEmpilhadasWord(titulo,texto){
+    const t=String(titulo||'').trim(), bruto=String(texto||'').trim();
+    if(!bruto)return ['• N/C.'];
+    if(t.startsWith('02')){
+      const partes=bruto.replace(/\s+(?=\d+[.)]\s+)/g,'\n').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+      return partes.map((linha,i)=>{
+        const semNumero=linha.replace(/^\d+\s*[.)-]?\s*/,'').trim();
+        const m=semNumero.match(/^([^:;]+):\s*(.*)$/);
+        return `${i+1}. ${m?m[1].trim()+': '+m[2].replace(/[;.]$/,'').trim():semNumero.replace(/[;.]$/,'')}`;
+      });
+    }
+    if(['05','08','30'].some(n=>t.startsWith(n))){
+      return textoComNumeracao(bruto).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    }
+    if(t.startsWith('11')){
+      const partes=bruto.replace(/\s+(?=\d{1,2}º?\s*TURNO\s*:)/gi,'\n').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+      return partes;
+    }
+    if(t.startsWith('10')||t.startsWith('12')){
+      const partes=bruto.split(/;\s*/).map(x=>x.trim()).filter(Boolean);
+      return partes.map((x,i)=>i<partes.length-1?x+';':x);
+    }
+    if(t.startsWith('36')||t.startsWith('37')){
+      return bruto.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    }
+    return bruto.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   }
   const corpo=secoes.length?secoes.map(item=>{
     const titulo=item.titulo.trim();
@@ -2551,6 +2580,12 @@ function visualizarRelatorio(targetId=null){
       return `<section class="preview-section material-carga-print"><h3>${esc(item.titulo)}:</h3><table class="material-carga-print-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;font-family:Arial,sans-serif;font-size:10pt;table-layout:fixed"><thead><tr><th style="background:#ccc;border:1px solid #222;padding:4px">ITENS</th><th style="background:#ccc;border:1px solid #222;padding:4px;width:23%">QUANT.</th></tr></thead><tbody>${linhasTabela||'<tr><td style=\"border:1px solid #222;padding:4px\">N/C.</td><td style=\"border:1px solid #222;padding:4px\"></td></tr>'}</tbody></table></section>`;
     }
     const blocosAssinaturaEquipe = (titulo.startsWith('40 –') || titulo.startsWith('40 -')) ? (() => { const pn=String($('passaNomeData')?.value||'').trim(), pm=String($('passaMatriculaData')?.value||'').trim(), rn=String($('recebeNomeAssData')?.value||'').trim(), rm=String($('recebeMatriculaData')?.value||'').trim(); const bloco=(nome,matricula,frase)=>`<div class="team-leader-signature" style="box-sizing:border-box;border:1px solid #000;padding:6px 8px 8px;text-align:center;line-height:1.3;min-width:0;break-inside:avoid;page-break-inside:avoid"><div style="height:34px"></div><div style="font-weight:bold;overflow-wrap:anywhere">${esc(nome||'')}</div><div>Policial Penal</div><div>Chefe de Equipe - Plantão</div><div>Matrícula: ${esc(matricula||'')}</div><div><strong>${frase} às 08h</strong></div></div>`; return `<div class="team-leader-signatures" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%;margin-top:20px;break-inside:avoid;page-break-inside:avoid">${bloco(pn,pm,'Passo o plantão')}${bloco(rn,rm,'Recebo o plantão')}</div>`; })() : '';
+    const empilhar=['02','05','08','10','11','12','30','36','37'].some(n=>titulo.startsWith(n));
+    if(empilhar){
+      const linhas=linhasEmpilhadasWord(titulo,textoFinal);
+      const conteudo=linhas.map(l=>`<p class="stacked-item-line">${esc(l)}</p>`).join('');
+      return `<section class="preview-section stacked-item-preview"><h3>${esc(item.titulo)}:</h3><div class="preview-text">${conteudo}</div>${blocosAssinaturaEquipe}</section>`;
+    }
     return `<section class="preview-section${titulo.startsWith('01')?' item01-justified':''}"><h3>${esc(item.titulo)}:</h3><div class="preview-text${is02?' team02-print':''}">${esc(textoFinal)}</div>${blocosAssinaturaEquipe}</section>`
   }).join(''):'<p>Nenhuma seção foi preenchida ainda.</p>';
   const paginaMovimentacao=(!targetId)?gerarPaginaMovimentacao(dataExtenso):'';
