@@ -2032,6 +2032,12 @@ async function exportarWord(){
           linha.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.0;margin:0;padding:0;white-space:nowrap;page-break-inside:avoid');
         });
       }
+      if(sec.classList.contains('item38-preview')){
+        tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.15;white-space:normal;margin:0;padding:0;color:#000');
+        tx.querySelectorAll('.item38-line').forEach(linha=>{
+          linha.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.15;text-align:left;white-space:normal;margin:0 0 2px 0;padding:0;color:#000;page-break-inside:avoid');
+        });
+      }
     }
   });
 
@@ -2481,7 +2487,9 @@ function visualizarRelatorio(targetId=null){
     }
     if(titulo.startsWith('38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE')){
       const texto=textoItem38(item.texto);
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div class="preview-text" style="white-space:pre-line">${esc(texto)}</div></section>`;
+      const linhas=String(texto||'• N/C.').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      const opcoes=linhas.map(l=>`<p class="item38-line">${esc(l)}</p>`).join('');
+      return `<section class="preview-section item38-preview"><h3>${esc(item.titulo)}:</h3><div class="preview-text">${opcoes||'<p class="item38-line">• N/C.</p>'}</div></section>`;
     }
     if(titulo.startsWith('35 – DOCUMENTOS REPASSADOS À CHEFIA')){
       const docs=montarDocumentosItem35(item.texto);
