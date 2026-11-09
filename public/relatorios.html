@@ -1970,9 +1970,9 @@ async function exportarWord(){
       td2.setAttribute('style','width:60%;border:0;padding:0 1mm;text-align:center;vertical-align:middle;overflow:visible');
       td3.setAttribute('width','20%');
       td3.setAttribute('align','right');
-      td3.setAttribute('style','width:20%;border:0;padding:0;text-align:right;vertical-align:middle');
+      td3.setAttribute('style','width:20%;border:0;padding:0;text-align:right;vertical-align:middle;overflow:visible');
       logos[0].setAttribute('style','display:block;width:16mm;height:17mm;margin:0;object-fit:contain');
-      logos[1].setAttribute('style','display:block;width:30mm;height:23mm;margin-left:auto;margin-right:0;object-fit:contain');
+      logos[1].setAttribute('style','display:block;width:30mm;height:23mm;margin-left:auto;margin-right:-15mm;object-fit:contain;position:relative;left:0');
       // Não dividir palavras no meio: fonte compacta, quebra apenas entre palavras.
       linhas.forEach(linha=>{
         const p=document.createElement('p');
