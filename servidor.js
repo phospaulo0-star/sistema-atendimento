@@ -1396,12 +1396,12 @@ function limparRegrasAtCss(css, preservarImpressao = true) {
   return resultado;
 }
 function normalizarLargurasCelulasDocx(html) {
-  // html-to-docx 1.8.0 aceita larguras de célula somente em pt, px, cm ou in.
-  // Valores como %, auto ou números sem unidade fazem o conversor chamar
-  // xmlbuilder2 com um atributo inválido (@w). Removemos apenas essas larguras
-  // incompatíveis; a tabela continua preservada e o Word calcula a distribuição.
+  // html-to-docx 1.8.0 aceita larguras de célula/coluna somente em pt, px, cm ou in.
+  // Valores como %, auto ou números sem unidade em td/th/col podem gerar
+  // o erro "Invalid XML name: @w" no xmlbuilder2. Removemos apenas essas larguras
+  // incompatíveis; a tabela e suas células continuam preservadas.
   const larguraValida = valor => /^\s*\d+(?:\.\d+)?\s*(?:pt|px|cm|in)\s*$/i.test(valor || '');
-  return html.replace(/<(td|th)\b([^>]*)>/gi, (tag, nome, atributos) => {
+  return html.replace(/<(td|th|col)\b([^>]*)>/gi, (tag, nome, atributos) => {
     let limpo = atributos.replace(/\swidth\s*=\s*(["'])(.*?)\1/gi, (atributo, aspas, valor) =>
       larguraValida(valor) ? atributo : ''
     );
