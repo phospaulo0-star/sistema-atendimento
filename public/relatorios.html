@@ -1969,7 +1969,8 @@ async function exportarWord(){
       td1.appendChild(logos[0].cloneNode(true));td3.appendChild(logos[1].cloneNode(true));
       if(arquivoCabecalho){
         const opcoes=document.createElement('p');
-        opcoes.textContent=arquivoCabecalho.textContent.replace(/\s+/g,' ').trim();
+        // Espaços não separáveis mantêm a distância correta entre as opções no Word.
+        opcoes.textContent='( )\u00A0\u00A0SDV\u00A0\u00A0\u00A0\u00A0( )\u00A0\u00A0ARQUIVO';
         opcoes.setAttribute('align','right');
         opcoes.setAttribute('style','font-family:"Times New Roman",serif;font-size:9pt;font-style:normal;font-weight:normal;text-align:right;white-space:nowrap;margin:1mm 0 0;padding:0;color:#000');
         td3.appendChild(opcoes);
