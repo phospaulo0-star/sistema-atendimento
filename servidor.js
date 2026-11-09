@@ -1552,6 +1552,40 @@ async function corrigirDocxParaWord2016(arquivo) {
       });
     }
 
+    // Item 16 - Material Carga: localizar pelo conteúdo, não pelo índice,
+    // pois o Word pode inserir tabelas auxiliares antes da tabela de materiais.
+    const textoTabelaAtual = (tabela.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toUpperCase();
+    if (textoTabelaAtual.includes('ITENS') && textoTabelaAtual.includes('QUANT.') &&
+        (textoTabelaAtual.includes('CARABINA TAURUS') || textoTabelaAtual.includes('COLETES'))) {
+      const larguraItens = 9280; // aproximadamente 88% da largura útil
+      const larguraQuant = 1266; // aproximadamente 12%, pouco maior que "QUANT."
+      const larguraTabela = larguraItens + larguraQuant;
+      tabela = tabela.replace(/<w:tblW\b[^>]*\/>/,
+        '<w:tblW w:type="dxa" w:w="' + larguraTabela + '"/>');
+      if (/<w:tblLayout\b[^>]*\/>/.test(tabela)) {
+        tabela = tabela.replace(/<w:tblLayout\b[^>]*\/>/, '<w:tblLayout w:type="fixed"/>');
+      } else if (/<w:tblPr>/.test(tabela)) {
+        tabela = tabela.replace(/<w:tblPr>/, '<w:tblPr><w:tblLayout w:type="fixed"/>');
+      }
+      tabela = tabela.replace(/<w:tblGrid>[\s\S]*?<\/w:tblGrid>/,
+        '<w:tblGrid><w:gridCol w:w="' + larguraItens + '"/><w:gridCol w:w="' + larguraQuant + '"/></w:tblGrid>');
+      tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
+        let indiceCelula = 0;
+        return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
+          const largura = indiceCelula++ === 0 ? larguraItens : larguraQuant;
+          const larguraCelula = '<w:tcW w:type="dxa" w:w="' + largura + '"/>';
+          if (/<w:tcW\b[^>]*\/>/.test(celula)) {
+            return celula.replace(/<w:tcW\b[^>]*\/>/, larguraCelula);
+          }
+          if (/<w:tcPr>/.test(celula)) {
+            return celula.replace(/<w:tcPr>/, '<w:tcPr>' + larguraCelula);
+          }
+          return celula.replace(/<w:tc>/, '<w:tc><w:tcPr>' + larguraCelula + '</w:tcPr>');
+        });
+      });
+    }
+
     // Bordas finas e contínuas nas tabelas do Word.
     // OOXML mede w:sz em oitavos de ponto: 4 = 0,5 pt.
     // Força todas as linhas externas e internas, pois o html-to-docx pode
