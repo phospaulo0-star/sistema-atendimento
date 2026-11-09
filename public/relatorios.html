@@ -2063,6 +2063,33 @@ async function exportarWord(){
     }
   });
 
+  // Item 12 segue o modelo Word aprovado: rótulo do setor em negrito e
+  // informação correspondente em fonte normal, cada setor em sua própria linha.
+  const secaoExpedienteWord = [...documento.querySelectorAll('.preview-section')]
+    .find(sec => /^12\s*[–-]/.test(sec.querySelector('h3')?.textContent.trim() || ''));
+  const textoExpedienteWord = secaoExpedienteWord?.querySelector('.preview-text');
+  if (textoExpedienteWord) {
+    const originalExpediente = textoExpedienteWord.textContent.replace(/\r/g, '').trim();
+    const linhasExpediente = originalExpediente.split(/;\s*|\n+/).map(x => x.trim()).filter(Boolean);
+    const fragmentoExpediente = document.createDocumentFragment();
+    linhasExpediente.forEach((linha, indice) => {
+      const rotulo = linha.match(/^([^:]+:)([\s\S]*)$/);
+      if (rotulo) {
+        const negrito = document.createElement('strong');
+        negrito.textContent = rotulo[1];
+        fragmentoExpediente.appendChild(negrito);
+        fragmentoExpediente.appendChild(document.createTextNode(rotulo[2]));
+      } else {
+        fragmentoExpediente.appendChild(document.createTextNode(linha));
+      }
+      if (indice < linhasExpediente.length - 1) {
+        if (originalExpediente.includes(';')) fragmentoExpediente.appendChild(document.createTextNode(';'));
+        fragmentoExpediente.appendChild(document.createElement('br'));
+      }
+    });
+    textoExpedienteWord.replaceChildren(fragmentoExpediente);
+  }
+
   // Tabelas com largura, alinhamento e espaçamento consistentes.
   documento.querySelectorAll('table').forEach(tab=>{
     tab.setAttribute('style',(tab.getAttribute('style')||'')+';width:100%;border-collapse:collapse;table-layout:fixed;font-family:"Times New Roman",serif;font-size:8pt;margin:0');
