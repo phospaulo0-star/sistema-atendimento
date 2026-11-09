@@ -469,6 +469,28 @@ body.admin-preview-mode #previewContent{display:block!important;max-width:100%!i
     overflow: visible !important;
   }
 }
+
+/* IMPRESSÃO: compactar as linhas dos Itens 02, 10, 11, 12 e 38.
+   Os parágrafos gerados para cada linha não devem herdar a margem padrão do navegador. */
+@media print {
+  body.preview-mode #previewContent .preview-section.stacked-item-preview .preview-text,
+  body.preview-mode #previewContent .preview-section.item38-preview .preview-text {
+    line-height: 1.0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body.preview-mode #previewContent .preview-section.stacked-item-preview .stacked-item-line,
+  body.preview-mode #previewContent .preview-section.item38-preview .item38-line {
+    display: block !important;
+    margin: 0 0 1px 0 !important;
+    padding: 0 !important;
+    line-height: 1.0 !important;
+    font-size: 11pt !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
 </style>
 </head><body>
 <header><div><h1>RELATÓRIOS DE PLANTÃO</h1><p>POLÍCIA PENAL DE MATO GROSSO DO SUL</p><strong>CPAIG · SISTEMA ATENDIMENTO</strong></div><div><span id="who">Validando acesso…</span><br><button style="margin-top:8px" onclick="sair()">SAIR</button></div></header>
