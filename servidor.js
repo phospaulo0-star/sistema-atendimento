@@ -1741,7 +1741,7 @@ async function corrigirDocxParaWord2016(arquivo) {
                 const sz = '<w:sz w:val="' + tamanhoFonte + '"/>';
                 const szCs = '<w:szCs w:val="' + tamanhoFonte + '"/>';
                 const p1 = /<w:sz\b[^>]*\/>/.test(bold) ? bold.replace(/<w:sz\b[^>]*\/>/, sz) : bold + sz;
-                return '<w:rPr>' + (/ <w:szCs/.test(p1) ? p1.replace(/<w:szCs\b[^>]*\/>/, szCs) : p1 + szCs) + '</w:rPr>';
+                return '<w:rPr>' + (/<w:szCs\b/.test(p1) ? p1.replace(/<w:szCs\b[^>]*\/>/, szCs) : p1 + szCs) + '</w:rPr>';
               });
             }
             return run.replace(/<w:r\b[^>]*>/, m =>
