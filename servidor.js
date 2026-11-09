@@ -1580,8 +1580,8 @@ async function corrigirDocxParaWord2016(arquivo) {
   const relacoesImagemCabecalho = [...relsDocXml.matchAll(/<Relationship\b[^>]*\/>/g)]
     .map(m => m[0])
     .filter(rel => {
-      const idRelacao = rel.match(/\\bId="([^"]+)"/);
-      return idRelacao && idsImagemCabecalho.includes(idRelacao[1]) && /\\/image/.test(rel);
+      const idRelacao = rel.match(/\bId="([^"]+)"/);
+      return idRelacao && idsImagemCabecalho.includes(idRelacao[1]) && /\/image/.test(rel);
     });
   if (idsImagemCabecalho.length && relacoesImagemCabecalho.length !== new Set(idsImagemCabecalho).size) {
     throw new Error('Não foi possível localizar todos os arquivos de imagem do cabeçalho institucional.');
