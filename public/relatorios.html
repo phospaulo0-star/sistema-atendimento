@@ -2474,7 +2474,7 @@ function visualizarRelatorio(targetId=null){
           if(prefixo.toLowerCase()==='aux.'&&/^Chefe\s+de\s+equipe\s*:/i.test(proximo)){
             atual='Aux. de '+proximo;
             i++;
-          }else if(/^(?:de\s+)?(?:Chefe\s+de\s+equipe|Portaria\s+[IVX]+|Pav(?:ilh[aã]o)?\s+[A-D]|Celas\s+Disciplinares|dos\s+Pavilh[oõ]es)\s*:/i.test(proximo)){
+          }else if(/^(?:de\s+)?(?:Chefe\s+de\s+equipe|Portaria\s+[IVX]+|Pav(?:ilh[aã]o)?\s+[A-D](?:\s+e\s+(?:Celas\s+Disciplinares|CP))?|Celas\s+Disciplinares|dos\s+Pavilh[oõ]es)\s*:/i.test(proximo)){
             atual=prefixo+' '+proximo;
             i++;
           }
