@@ -2013,7 +2013,16 @@ async function exportarWord(){
   documento.querySelectorAll('.preview-section').forEach(sec=>{
     sec.setAttribute('style','display:block;margin:0 0 4px 0;padding:0;color:#000');
     const h=sec.querySelector('h3');
-    if(h)h.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:bold;text-decoration:underline;line-height:1.05;margin:0 0 2px 0;padding:0;color:#000');
+    if(h){
+      // O conversor HTML/DOCX pode ignorar text-decoration no estilo do h3.
+      // A tag <u> explícita garante o sublinhado de todos os títulos dos itens no Word.
+      if(!h.querySelector('u')){
+        const sublinhado=document.createElement('u');
+        while(h.firstChild)sublinhado.appendChild(h.firstChild);
+        h.appendChild(sublinhado);
+      }
+      h.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:bold;text-decoration:underline;line-height:1.05;margin:0 0 2px 0;padding:0;color:#000');
+    }
     const tx=sec.querySelector('.preview-text');
     if(tx)tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.15;white-space:pre-wrap;margin:0;padding:0;color:#000');
   });
