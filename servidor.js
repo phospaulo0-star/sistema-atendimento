@@ -1654,35 +1654,67 @@ async function corrigirDocxParaWord2016(arquivo) {
       });
     });
 
-    // Item 16: a linha "COLETES BALÍSTICOS" é um item comum,
-    // não um cabeçalho. Remover somente seu fundo cinza e negrito,
-    // preservando todas as bordas e o alinhamento da linha.
+    // Item 16: COLETES permanece sem negrito, mas recebe o fundo cinza
+    // aplicado a toda a coluna ITENS na etapa final abaixo.
     if (indiceTabela === 1) {
-      tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
-        const textoLinha = (linha.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      tabela = tabela.replace(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/g, linha => {
+        const textoLinha = (linha.match(/<w:t\\b[^>]*>[\\s\\S]*?<\\/w:t>/g) || [])
           .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toUpperCase();
         if (!textoLinha.includes('COLETES BALISTICOS') && !textoLinha.includes('COLETES BALÍSTICOS')) return linha;
-        linha = linha.replace(/<w:shd\b[^>]*\/>/g, '');
-        linha = linha.replace(/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/g, propriedades =>
-          propriedades.replace(/<w:b\b[^>]*\/>/g, '').replace(/<w:bCs\b[^>]*\/>/g, '')
+        return linha.replace(/<w:rPr\\b[^>]*>[\\s\\S]*?<\\/w:rPr>/g, propriedades =>
+          propriedades.replace(/<w:b\\b[^>]*\\/>/g, '').replace(/<w:bCs\\b[^>]*\\/>/g, '')
         );
-        return linha;
       });
     }
     return tabela;
   });
 
-  // A tabela de viaturas possui a primeira coluna cinza mesmo sem linha de título.
-  const tabelasDocx = [...xml.matchAll(/<w:tbl\b[\s\S]*?<\/w:tbl>/g)];
+  // Itens 16 e 17: fundo cinza em toda a primeira coluna.
+  // Item 17 recebe cabeçalho próprio: VIATURAS | SITUAÇÃO.
+  const tabelasDocx = [...xml.matchAll(/<w:tbl\\b[\\s\\S]*?<\\/w:tbl>/g)];
+  const aplicarCinzaCelula = celula => {
+    if (/<w:tcPr>[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
+      if (/<w:shd\\b[^>]*\\/>/.test(celula)) {
+        return celula.replace(/<w:shd\\b[^>]*\\/>/g, '<w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/>');
+      }
+      return celula.replace(/<w:tcPr>/, '<w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/>');
+    }
+    return celula.replace('<w:tc>', '<w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
+  };
+  const aplicarCinzaPrimeiraColuna = tabelaXml => tabelaXml.replace(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/g, linha => {
+    const primeiraCelula = linha.match(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/);
+    return primeiraCelula ? linha.replace(primeiraCelula[0], aplicarCinzaCelula(primeiraCelula[0])) : linha;
+  });
+
+  // Item 16 - Material Carga: toda a coluna ITENS fica cinza.
+  if (tabelasDocx[1]) {
+    const materiais = aplicarCinzaPrimeiraColuna(tabelasDocx[1][0]);
+    xml = xml.replace(tabelasDocx[1][0], materiais);
+  }
+
+  // Item 17 - Viaturas: criar a primeira linha com os títulos das duas colunas.
   if (tabelasDocx[2]) {
     let viaturas = tabelasDocx[2][0];
-    viaturas = viaturas.replace(/<w:tc\b[\s\S]*?<\/w:tc>/, celula => {
-      if (/<w:tcPr>[\s\S]*?<\/w:tcPr>/.test(celula)) {
-        return celula.replace(/<w:tcPr>([\s\S]*?)<\/w:tcPr>/,
-          '<w:tcPr>$1<w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
+    if (!/VIATURAS[\\s\\S]*SITUAÇÃO/.test(viaturas)) {
+      const primeiraLinha = viaturas.match(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/);
+      if (primeiraLinha) {
+        let cabecalho = primeiraLinha[0];
+        const textos = [...cabecalho.matchAll(/<w:t\\b[^>]*>[\\s\\S]*?<\\/w:t>/g)];
+        textos.forEach((m, i) => {
+          const valor = i === 0 ? 'VIATURAS' : i === 1 ? 'SITUAÇÃO' : '';
+          cabecalho = cabecalho.replace(m[0], '<w:t>' + valor + '</w:t>');
+        });
+        cabecalho = cabecalho.replace(/<w:rPr\\b[^>]*>[\\s\\S]*?<\\/w:rPr>/g, propriedades =>
+          /<w:b\\b/.test(propriedades) ? propriedades : propriedades.replace('</w:rPr>', '<w:b/></w:rPr>')
+        );
+        const celulasCabecalho = [...cabecalho.matchAll(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/g)];
+        if (celulasCabecalho[0]) {
+          cabecalho = cabecalho.replace(celulasCabecalho[0][0], aplicarCinzaCelula(celulasCabecalho[0][0]));
+        }
+        viaturas = viaturas.replace(primeiraLinha[0], cabecalho + primeiraLinha[0]);
       }
-      return celula.replace('<w:tc>', '<w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
-    });
+    }
+    viaturas = aplicarCinzaPrimeiraColuna(viaturas);
     xml = xml.replace(tabelasDocx[2][0], viaturas);
   }
 
