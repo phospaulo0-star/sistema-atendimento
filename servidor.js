@@ -1722,13 +1722,28 @@ async function corrigirDocxParaWord2016(arquivo) {
 }
 
 function prepararHtmlParaDocx(html) {
-  // Remove regras CSS @media, @page, @supports e similares que o conversor DOCX
-  // não interpreta. Preserva as declarações CSS comuns usadas na impressão.
-  const semRegrasIncompativeis = String(html || '').replace(
+  // Remove regras CSS incompatíveis e adapta somente a cópia enviada ao conversor Word.
+  let preparado = String(html || '').replace(
     /<style\b([^>]*)>([\s\S]*?)<\/style>/gi,
-    (tag, atributos, css) => '<style' + atributos + '>' + limparRegrasAtCss(css) + '</style>'
+    (tag, atributos, css) => {
+      let regras = limparRegrasAtCss(css);
+      // Evita que alturas CSS de tabelas sejam convertidas em trHeight pelo html-to-docx.
+      regras = regras.replace(/([^{}]+)\{([^{}]*)\}/g, (bloco, seletor, declaracoes) => {
+        if (!/(^|[\s>+~,.#])(?:table|thead|tbody|tfoot|tr|td|th)(?=$|[\s>+~,.#:[\]])/i.test(seletor)) return bloco;
+        return seletor + '{' + declaracoes.replace(/(^|;)\s*height\s*:[^;}]*(?=;|$)/gi, '$1') + '}';
+      });
+      return '<style' + atributos + '>' + regras + '</style>';
+    }
   );
-  return normalizarLargurasCelulasDocx(semRegrasIncompativeis);
+  // A biblioteca também lê height inline da linha e da primeira célula.
+  preparado = preparado.replace(/<(tr|td|th)\b([^>]*)>/gi, (tag, nome, atributos) => {
+    const limpos = atributos.replace(/\sstyle\s*=\s*(["'])([\s\S]*?)\1/gi, (attr, aspas, estilo) => {
+      const novo = estilo.replace(/(^|;)\s*height\s*:[^;]+;?/gi, '$1').trim();
+      return novo ? ' style=' + aspas + novo + aspas : '';
+    });
+    return '<' + nome + limpos + '>';
+  });
+  return normalizarLargurasCelulasDocx(preparado);
 }
 
 // ExportaÃÂ§ÃÂ£o de Word gerada no servidor.
