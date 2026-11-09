@@ -1477,20 +1477,79 @@ async function corrigirDocxParaWord2016(arquivo) {
         '<w:tcBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/></w:tcBorders>');
       return tabela;
     }
-    // As tabelas ocupam a mesma largura útil do PDF (A4 menos 12 mm de cada lado).
-    // A grade e as larguras das células são escaladas juntas.
+    // Reproduz as larguras do modelo Word CPAIG aprovado (A4, área útil de 10.546 twips).
+    // O html-to-docx pode descartar larguras percentuais; por isso as proporções oficiais
+    // são aplicadas diretamente à grade OOXML, tabela por tabela.
     const larguraUtil = 10546;
+    const largurasModeloCPAIG = {
+      1: [82, 18],                         // Item 16 - Material Carga
+      2: [50, 50],                         // Item 17 - Viaturas
+      3: [7.2, 72.8, 20],                  // Item 25 - Hospitalizado
+      4: [7.2, 72.8, 20],                  // Item 25.1 - Hospitalizado a confirmar
+      5: [7.2, 72.8, 20],                  // Item 27 - Óbito
+      6: [7.2, 37.8, 15, 15, 25],          // Item 28 - Licença Judicial
+      7: [7.2, 42.5, 19.9, 30.4],          // Item 29 - Saída temporária
+      8: [7.2, 42.5, 19.9, 30.4],          // Item 29.1 - Retorno
+      9: [5, 28, 12, 30, 25],              // Item 31 - Entrada
+      10: [5, 28, 12, 30, 25],             // Item 32 - Saída
+      11: [50, 50],                        // Assinaturas
+      12: [5, 28, 12, 30, 25],             // Movimentação - Entradas
+      13: [5, 28, 12, 30, 25]              // Movimentação - Saídas
+    };
     const gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
       .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
     const totalGrade = gradeAtual.reduce((a, b) => a + b, 0);
     if (totalGrade > 0) {
-      const escalar = valor => String(Math.max(1, Math.round(Number(valor) * larguraUtil / totalGrade)));
-      tabela = tabela.replace(/<w:tblW\b[^>]*w:w="\d+"[^>]*\/>/,
-        '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/>');
-      tabela = tabela.replace(/(<w:gridCol\b[^>]*w:w=")(\d+)("[^>]*\/>)/g,
-        (m, a, v, b) => a + escalar(v) + b);
-      tabela = tabela.replace(/(<w:tcW\b[^>]*w:w=")(\d+)("[^>]*\/>)/g,
-        (m, a, v, b) => a + escalar(v) + b);
+      const proporcoes = largurasModeloCPAIG[indiceTabela];
+      const base = proporcoes && proporcoes.length === gradeAtual.length
+        ? proporcoes
+        : gradeAtual.map(v => v * 100 / totalGrade);
+      const largurasColunas = base.map((p, i) => i === base.length - 1
+        ? larguraUtil - base.slice(0, -1).reduce((s, x) => s + Math.round(x * larguraUtil / 100), 0)
+        : Math.max(1, Math.round(p * larguraUtil / 100)));
+      const larguraTabelaXml = '<w:tblW w:type="dxa" w:w="' + larguraUtil + '"/>';
+      if (/<w:tblW\b[^>]*\/>/.test(tabela)) {
+        tabela = tabela.replace(/<w:tblW\b[^>]*\/>/, larguraTabelaXml);
+      } else if (/<w:tblPr\b[^>]*>/.test(tabela)) {
+        tabela = tabela.replace(/(<w:tblPr\b[^>]*>)/, '$1' + larguraTabelaXml);
+      } else {
+        tabela = tabela.replace(/<w:tbl\b[^>]*>/, m => m + '<w:tblPr>' + larguraTabelaXml + '</w:tblPr>');
+      }
+      let indiceGrade = 0;
+      tabela = tabela.replace(/<w:gridCol\b[^>]*w:w="\d+"[^>]*\/>/g, celula => {
+        const largura = largurasColunas[Math.min(indiceGrade++, largurasColunas.length - 1)];
+        return celula.replace(/w:w="\d+"/, 'w:w="' + largura + '"');
+      });
+      tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
+        let indiceColuna = 0;
+        return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
+          const spanMatch = celula.match(/<w:gridSpan\b[^>]*w:val="(\d+)"/);
+          const span = Math.max(1, Number(spanMatch && spanMatch[1] || 1));
+          const largura = largurasColunas.slice(indiceColuna, indiceColuna + span)
+            .reduce((s, x) => s + x, 0) || largurasColunas[Math.min(indiceColuna, largurasColunas.length - 1)];
+          indiceColuna += span;
+          const tcW = '<w:tcW w:type="dxa" w:w="' + largura + '"/>';
+          if (/<w:tcW\b[^>]*\/>/.test(celula)) {
+            celula = celula.replace(/<w:tcW\b[^>]*\/>/, tcW);
+          } else if (/<w:tcPr\b[^>]*>/.test(celula)) {
+            celula = celula.replace(/(<w:tcPr\b[^>]*>)/, '$1' + tcW);
+          } else {
+            celula = celula.replace(/<w:tc\b[^>]*>/, m => m + '<w:tcPr>' + tcW + '</w:tcPr>');
+          }
+          return celula;
+        });
+      });
+      // Zera espaçamento antes/depois dos parágrafos das células, como no modelo aprovado.
+      tabela = tabela.replace(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g, paragrafo => {
+        const spacing = '<w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>';
+        if (/<w:pPr\b[^>]*>[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+          if (/<w:spacing\b[^>]*\/>/.test(paragrafo)) {
+            return paragrafo.replace(/<w:spacing\b[^>]*\/>/, spacing);
+          }
+          return paragrafo.replace(/(<w:pPr\b[^>]*>)/, '$1' + spacing);
+        }
+        return paragrafo.replace(/(<w:p\b[^>]*>)/, '$1<w:pPr>' + spacing + '</w:pPr>');
+      });
     }
 
     // Bordas finas e contínuas nas tabelas do Word.
