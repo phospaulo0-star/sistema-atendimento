@@ -1967,7 +1967,7 @@ async function exportarWord(){
       td1.setAttribute('style','width:20%;border:0;padding:0;text-align:left;vertical-align:middle');
       td2.setAttribute('width','60%');
       td2.setAttribute('align','center');
-      td2.setAttribute('style','width:60%;border:0;padding:0 0 0 8mm;text-align:center;vertical-align:middle;overflow:visible');
+      td2.setAttribute('style','width:60%;border:0;padding:0 0 0 18mm;text-align:center;vertical-align:middle;overflow:visible');
       td3.setAttribute('width','20%');
       td3.setAttribute('align','right');
       td3.setAttribute('style','width:20%;border:0;padding:0;text-align:right;vertical-align:middle;overflow:visible');
@@ -1984,7 +1984,7 @@ async function exportarWord(){
       if(arquivoCabecalho){
         const opcoes=document.createElement('p');
         // Espaços não separáveis mantêm a distância correta entre as opções no Word.
-        opcoes.textContent='( )\u00A0\u00A0SDV\u00A0\u00A0\u00A0\u00A0( )\u00A0\u00A0ARQUIVO';
+        opcoes.textContent='( )\u00A0\u00A0SDV\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0( )\u00A0\u00A0ARQUIVO';
         opcoes.setAttribute('align','right');
         opcoes.setAttribute('style','font-family:"Times New Roman",serif;font-size:9pt;font-style:normal;font-weight:normal;text-align:right;white-space:nowrap;margin:1mm 0 0;padding:0;color:#000');
         td3.appendChild(opcoes);
