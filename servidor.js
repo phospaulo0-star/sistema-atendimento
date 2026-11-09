@@ -1403,18 +1403,18 @@ function normalizarLargurasCelulasDocx(html) {
   const larguraUtilPt = 527.3;
   const converterLargura = valor => {
     const texto = String(valor || '').trim();
-    if (/^\\d+(?:\\.\\d+)?\\s*(?:pt|px|cm|in)$/i.test(texto)) return texto;
-    const percentual = texto.match(/^(\\d+(?:\\.\\d+)?)\\s*%$/);
+    if (/^\d+(?:\.\d+)?\s*(?:pt|px|cm|in)$/i.test(texto)) return texto;
+    const percentual = texto.match(/^(\d+(?:\.\d+)?)\s*%$/);
     if (percentual) return (larguraUtilPt * Number(percentual[1]) / 100).toFixed(3) + 'pt';
     return null;
   };
-  return html.replace(/<([a-z][a-z0-9:-]*)\\b([^>]*)>/gi, (tag, nome, atributos) => {
-    let limpo = atributos.replace(/\\swidth\\s*=\\s*(["'])(.*?)\\1/gi, (atributo, aspas, valor) => {
+  return html.replace(/<([a-z][a-z0-9:-]*)\b([^>]*)>/gi, (tag, nome, atributos) => {
+    let limpo = atributos.replace(/\swidth\s*=\s*(["'])(.*?)\1/gi, (atributo, aspas, valor) => {
       const largura = converterLargura(valor);
       return largura ? ' width=' + aspas + largura + aspas : '';
     });
-    limpo = limpo.replace(/\\sstyle\\s*=\\s*(["'])([\\s\\S]*?)\\1/gi, (atributo, aspas, estilo) => {
-      const estiloNovo = estilo.replace(/(^|;)\\s*width\\s*:\\s*([^;]+)\\s*;?/gi,
+    limpo = limpo.replace(/\sstyle\s*=\s*(["'])([\s\S]*?)\1/gi, (atributo, aspas, estilo) => {
+      const estiloNovo = estilo.replace(/(^|;)\s*width\s*:\s*([^;]+)\s*;?/gi,
         (declaracao, inicio, valor) => {
           const largura = converterLargura(valor);
           return largura ? (inicio || '') + 'width:' + largura + ';' : (inicio || '');
@@ -1527,12 +1527,12 @@ async function corrigirDocxParaWord2016(arquivo) {
     // O conversor pode omitir tblW e tblLayout quando recebeu width:100% no HTML.
     // Sem esses metadados, o Word usa largura automática e algumas tabelas ficam
     // limitadas às primeiras colunas da grade. Fixamos a largura útil A4 e o layout.
-    tabela = tabela.replace(/<w:tblPr>([\\s\\S]*?)<\\/w:tblPr>/, (propriedades, conteudo) => {
-      let props = conteudo.replace(/<w:tblW\\b[^>]*\\/>/g, '').replace(/<w:tblLayout\\b[^>]*\\/>/g, '');
+    tabela = tabela.replace(/<w:tblPr>([\s\S]*?)<\/w:tblPr>/, (propriedades, conteudo) => {
+      let props = conteudo.replace(/<w:tblW\b[^>]*\/>/g, '').replace(/<w:tblLayout\b[^>]*\/>/g, '');
       const largura = '<w:tblW w:w="10546" w:type="dxa"/>';
       const layout = '<w:tblLayout w:type="fixed"/>';
-      if (/<w:tblBorders>[\\s\\S]*?<\\/w:tblBorders>/.test(props)) {
-        props = props.replace(/(<\\/w:tblBorders>)/, '$1' + layout);
+      if (/<w:tblBorders>[\s\S]*?<\/w:tblBorders>/.test(props)) {
+        props = props.replace(/(<\/w:tblBorders>)/, '$1' + layout);
       } else {
         props += layout;
       }
