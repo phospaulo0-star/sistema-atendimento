@@ -1396,29 +1396,19 @@ function limparRegrasAtCss(css, preservarImpressao = true) {
   return resultado;
 }
 function normalizarLargurasCelulasDocx(html) {
-  // O html-to-docx 1.8.0 não interpreta percentuais de forma confiável.
-  // Em vez de simplesmente removê-los (o que fazia as tabelas encolherem),
-  // convertemos as porcentagens para pontos usando a largura útil A4 de 527,3 pt.
-  // Assim, larguras de colunas como 23%, 20% e 6% chegam ao OOXML como medidas físicas.
-  const larguraUtilPt = 527.3;
-  const converterLargura = valor => {
-    const texto = String(valor || '').trim();
-    if (/^\d+(?:\.\d+)?\s*(?:pt|px|cm|in)$/i.test(texto)) return texto;
-    const percentual = texto.match(/^(\d+(?:\.\d+)?)\s*%$/);
-    if (percentual) return (larguraUtilPt * Number(percentual[1]) / 100).toFixed(3) + 'pt';
-    return null;
-  };
+  // html-to-docx 1.8.0 aceita larguras de célula/coluna somente em pt, px, cm ou in.
+  // Valores como %, auto ou números sem unidade em td/th/col podem gerar
+  // o erro "Invalid XML name: @w" no xmlbuilder2. Removemos apenas essas larguras
+  // incompatíveis; a tabela e suas células continuam preservadas.
+  const larguraValida = valor => /^\s*\d+(?:\.\d+)?\s*(?:pt|px|cm|in)\s*$/i.test(valor || '');
+  // A largura incompatível também pode estar no table, div, section ou no contêiner do documento.
   return html.replace(/<([a-z][a-z0-9:-]*)\b([^>]*)>/gi, (tag, nome, atributos) => {
-    let limpo = atributos.replace(/\swidth\s*=\s*(["'])(.*?)\1/gi, (atributo, aspas, valor) => {
-      const largura = converterLargura(valor);
-      return largura ? ' width=' + aspas + largura + aspas : '';
-    });
+    let limpo = atributos.replace(/\swidth\s*=\s*(["'])(.*?)\1/gi, (atributo, aspas, valor) =>
+      larguraValida(valor) ? atributo : ''
+    );
     limpo = limpo.replace(/\sstyle\s*=\s*(["'])([\s\S]*?)\1/gi, (atributo, aspas, estilo) => {
       const estiloNovo = estilo.replace(/(^|;)\s*width\s*:\s*([^;]+)\s*;?/gi,
-        (declaracao, inicio, valor) => {
-          const largura = converterLargura(valor);
-          return largura ? (inicio || '') + 'width:' + largura + ';' : (inicio || '');
-        });
+        (declaracao, inicio, valor) => larguraValida(valor) ? declaracao : (inicio || ''));
       return estiloNovo.trim() ? ' style=' + aspas + estiloNovo + aspas : '';
     });
     return '<' + nome + limpo + '>';
@@ -1523,23 +1513,6 @@ async function corrigirDocxParaWord2016(arquivo) {
     } else {
       tabela = tabela.replace(/<w:tblGrid>/, '<w:tblPr>' + bordasTabelaWord + '</w:tblPr><w:tblGrid>');
     }
-
-    // O conversor pode omitir tblW e tblLayout quando recebeu width:100% no HTML.
-    // Sem esses metadados, o Word usa largura automática e algumas tabelas ficam
-    // limitadas às primeiras colunas da grade. Fixamos a largura útil A4 e o layout.
-    tabela = tabela.replace(/<w:tblPr>([\s\S]*?)<\/w:tblPr>/, (propriedades, conteudo) => {
-      let props = conteudo.replace(/<w:tblW\b[^>]*\/>/g, '').replace(/<w:tblLayout\b[^>]*\/>/g, '');
-      const largura = '<w:tblW w:w="10546" w:type="dxa"/>';
-      const layout = '<w:tblLayout w:type="fixed"/>';
-      if (/<w:shd\b[^>]*\/>/.test(props)) {
-        props = props.replace(/(<w:shd\b[^>]*\/>)/, '$1' + layout);
-      } else if (/<w:tblBorders>[\s\S]*?<\/w:tblBorders>/.test(props)) {
-        props = props.replace(/(<\/w:tblBorders>)/, '$1' + layout);
-      } else {
-        props += layout;
-      }
-      return '<w:tblPr>' + largura + props + '</w:tblPr>';
-    });
 
     const bordasCelulaWord = '<w:tcBorders>' +
       '<w:top w:val="single" w:sz="4" w:space="0" w:color="222222"/>' +
