@@ -2104,13 +2104,13 @@ async function exportarWord(){
     }
     nos.forEach(no=>{
       const fragmento=document.createDocumentFragment();
-      no.nodeValue.split(/(\\r?\\n)/).forEach(parte=>{
+      no.nodeValue.split(/(\r?\n)/).forEach(parte=>{
         if(!parte)return;
-        if(/^\\r?\\n$/.test(parte)){
+        if(/^\r?\n$/.test(parte)){
           fragmento.appendChild(document.createTextNode(parte));
           return;
         }
-        const rotulo=parte.match(/^(\\s*[^:\\r\\n]+:)([\\s\\S]*)$/);
+        const rotulo=parte.match(/^(\s*[^:\r\n]+:)([\s\S]*)$/);
         if(rotulo){
           const negrito=document.createElement('strong');
           negrito.textContent=rotulo[1];
