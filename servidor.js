@@ -1396,19 +1396,30 @@ function limparRegrasAtCss(css, preservarImpressao = true) {
   return resultado;
 }
 function normalizarLargurasCelulasDocx(html) {
-  // html-to-docx 1.8.0 aceita larguras de célula/coluna somente em pt, px, cm ou in.
-  // Valores como %, auto ou números sem unidade em td/th/col podem gerar
-  // o erro "Invalid XML name: @w" no xmlbuilder2. Removemos apenas essas larguras
-  // incompatíveis; a tabela e suas células continuam preservadas.
+  // O conversor html-to-docx pode gerar XML inválido ao receber larguras percentuais
+  // em células/colunas. Em vez de removê-las (o que faz as colunas ficarem iguais),
+  // convertemos as porcentagens para medidas físicas usando a largura útil A4
+  // do relatório: 210 mm menos 12 mm de cada margem lateral = 186 mm.
+  const larguraUtilCm = 18.6;
   const larguraValida = valor => /^\s*\d+(?:\.\d+)?\s*(?:pt|px|cm|in)\s*$/i.test(valor || '');
-  // A largura incompatível também pode estar no table, div, section ou no contêiner do documento.
+  const converterLargura = valor => {
+    const v = String(valor || '').trim();
+    if (larguraValida(v)) return v;
+    const percentual = v.match(/^(\d+(?:\.\d+)?)\s*%$/);
+    if (percentual) return (larguraUtilCm * Number(percentual[1]) / 100).toFixed(3) + 'cm';
+    return null;
+  };
   return html.replace(/<([a-z][a-z0-9:-]*)\b([^>]*)>/gi, (tag, nome, atributos) => {
-    let limpo = atributos.replace(/\swidth\s*=\s*(["'])(.*?)\1/gi, (atributo, aspas, valor) =>
-      larguraValida(valor) ? atributo : ''
-    );
+    let limpo = atributos.replace(/\swidth\s*=\s*(["'])(.*?)\1/gi, (atributo, aspas, valor) => {
+      const largura = converterLargura(valor);
+      return largura ? ' width=' + aspas + largura + aspas : '';
+    });
     limpo = limpo.replace(/\sstyle\s*=\s*(["'])([\s\S]*?)\1/gi, (atributo, aspas, estilo) => {
       const estiloNovo = estilo.replace(/(^|;)\s*width\s*:\s*([^;]+)\s*;?/gi,
-        (declaracao, inicio, valor) => larguraValida(valor) ? declaracao : (inicio || ''));
+        (declaracao, inicio, valor) => {
+          const largura = converterLargura(valor);
+          return largura ? (inicio || '') + 'width:' + largura + ';' : (inicio || '');
+        });
       return estiloNovo.trim() ? ' style=' + aspas + estiloNovo + aspas : '';
     });
     return '<' + nome + limpo + '>';
