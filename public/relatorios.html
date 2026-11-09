@@ -1954,7 +1954,7 @@ async function exportarWord(){
       tabela.setAttribute('width','100%');
       tabela.setAttribute('style','width:100%;border:0;border-collapse:collapse;table-layout:fixed;margin:0');
       const colgroup=document.createElement('colgroup');
-      ['18%','64%','18%'].forEach(largura=>{
+      ['20%','60%','20%'].forEach(largura=>{
         const col=document.createElement('col');
         col.setAttribute('style','width:'+largura);
         colgroup.appendChild(col);
@@ -1962,22 +1962,22 @@ async function exportarWord(){
       tabela.appendChild(colgroup);
       const tr=document.createElement('tr');
       const td1=document.createElement('td'),td2=document.createElement('td'),td3=document.createElement('td');
-      td1.setAttribute('width','18%');
+      td1.setAttribute('width','20%');
       td1.setAttribute('align','left');
-      td1.setAttribute('style','width:18%;border:0;padding:0;text-align:left;vertical-align:middle');
-      td2.setAttribute('width','64%');
+      td1.setAttribute('style','width:20%;border:0;padding:0;text-align:left;vertical-align:middle');
+      td2.setAttribute('width','60%');
       td2.setAttribute('align','center');
-      td2.setAttribute('style','width:64%;border:0;padding:0 1mm;text-align:center;vertical-align:middle;overflow:visible');
-      td3.setAttribute('width','18%');
+      td2.setAttribute('style','width:60%;border:0;padding:0 1mm;text-align:center;vertical-align:middle;overflow:visible');
+      td3.setAttribute('width','20%');
       td3.setAttribute('align','right');
-      td3.setAttribute('style','width:18%;border:0;padding:0;text-align:right;vertical-align:middle');
+      td3.setAttribute('style','width:20%;border:0;padding:0;text-align:right;vertical-align:middle');
       logos[0].setAttribute('style','display:block;width:16mm;height:17mm;margin:0;object-fit:contain');
-      logos[1].setAttribute('style','display:block;width:34mm;height:23mm;margin:0 0 0 auto;object-fit:contain');
+      logos[1].setAttribute('style','display:block;width:30mm;height:23mm;margin-left:auto;margin-right:0;object-fit:contain');
       // Não dividir palavras no meio: fonte compacta, quebra apenas entre palavras.
       linhas.forEach(linha=>{
         const p=document.createElement('p');
         p.textContent=linha;
-        p.setAttribute('style','font-family:Arial,sans-serif;font-size:4.8pt;line-height:1.2;font-weight:bold;font-style:italic;text-align:center;margin:0;padding:0;white-space:normal;overflow-wrap:normal;word-break:normal;hyphens:none');
+        p.setAttribute('style','font-family:Arial,sans-serif;font-size:6pt;line-height:8pt;font-weight:bold;font-style:italic;text-align:center;margin:0;padding:0;white-space:normal;overflow-wrap:normal;word-break:normal;hyphens:none');
         td2.appendChild(p);
       });
       td1.appendChild(logos[0].cloneNode(true));td3.appendChild(logos[1].cloneNode(true));
