@@ -1563,6 +1563,54 @@ async function corrigirDocxParaWord2016(arquivo) {
     }).join('');
   });
 
+  // Rodapé institucional nativo do Word: aparece no limite inferior de todas as páginas,
+  // com linha superior, endereço/contato centralizados e paginação alinhada à direita.
+  const relsPath = 'word/_rels/document.xml.rels';
+  const relsFile = zip.file(relsPath);
+  if (!relsFile) throw new Error('O DOCX gerado não contém os relacionamentos do documento.');
+  let relsXml = await relsFile.async('string');
+  const ids = [...relsXml.matchAll(/\\bId="rId(\\d+)"/g)].map(m => Number(m[1]));
+  const footerRelId = 'rId' + (Math.max(0, ...ids) + 1);
+  if (!relsXml.includes('/footer')) {
+    relsXml = relsXml.replace('</Relationships>',
+      '<Relationship Id="' + footerRelId + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>');
+  }
+  zip.file(relsPath, relsXml);
+
+  const typesPath = '[Content_Types].xml';
+  const typesFile = zip.file(typesPath);
+  if (!typesFile) throw new Error('O DOCX gerado não contém [Content_Types].xml.');
+  let typesXml = await typesFile.async('string');
+  if (!typesXml.includes('/word/footer1.xml')) {
+    typesXml = typesXml.replace('</Types>',
+      '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>');
+  }
+  zip.file(typesPath, typesXml);
+
+  const campo = instrucao => '<w:fldSimple w:instr=" ' + instrucao + ' "><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="16"/></w:rPr><w:t>' + (instrucao === 'PAGE' ? '1' : '4') + '</w:t></w:r></w:fldSimple>';
+  const rodapeXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+    '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0" w:line="200" w:lineRule="auto"/>' +
+    '<w:pBdr><w:top w:val="single" w:sz="5" w:space="5" w:color="777777"/></w:pBdr></w:pPr>' +
+    '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="14"/></w:rPr><w:t>Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS</w:t></w:r></w:p>' +
+    '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0" w:line="200" w:lineRule="auto"/></w:pPr>' +
+    '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="14"/></w:rPr><w:t>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</w:t></w:r></w:p>' +
+    '<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:before="0" w:after="0" w:line="200" w:lineRule="auto"/></w:pPr>' +
+    '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="14"/></w:rPr><w:t xml:space="preserve">Página </w:t></w:r>' +
+    campo('PAGE') +
+    '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="14"/></w:rPr><w:t xml:space="preserve"> de </w:t></w:r>' +
+    campo('NUMPAGES') + '</w:p></w:ftr>';
+  zip.file('word/footer1.xml', rodapeXml);
+
+  // Vincula o rodapé à seção do documento para repeti-lo em todas as páginas.
+  xml = xml.replace(/<w:footerReference\\b[^>]*\\/>/g, '');
+  if (/<w:sectPr\\b[\\s\\S]*?<\\/w:sectPr>/.test(xml)) {
+    xml = xml.replace(/<w:sectPr\\b([\\s\\S]*?)<\\/w:sectPr>/, (secao, attrs) =>
+      '<w:sectPr' + attrs + '<w:footerReference w:type="default" r:id="' + footerRelId + '"/></w:sectPr>');
+  } else {
+    throw new Error('Não foi possível localizar a seção final do DOCX para posicionar o rodapé.');
+  }
+
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
     type: 'nodebuffer',
