@@ -1531,7 +1531,9 @@ async function corrigirDocxParaWord2016(arquivo) {
       let props = conteudo.replace(/<w:tblW\b[^>]*\/>/g, '').replace(/<w:tblLayout\b[^>]*\/>/g, '');
       const largura = '<w:tblW w:w="10546" w:type="dxa"/>';
       const layout = '<w:tblLayout w:type="fixed"/>';
-      if (/<w:tblBorders>[\s\S]*?<\/w:tblBorders>/.test(props)) {
+      if (/<w:shd\b[^>]*\/>/.test(props)) {
+        props = props.replace(/(<w:shd\b[^>]*\/>)/, '$1' + layout);
+      } else if (/<w:tblBorders>[\s\S]*?<\/w:tblBorders>/.test(props)) {
         props = props.replace(/(<\/w:tblBorders>)/, '$1' + layout);
       } else {
         props += layout;
