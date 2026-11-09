@@ -1572,24 +1572,27 @@ async function corrigirDocxParaWord2016(arquivo) {
   const tabelaCabecalho = primeiraTabela[0];
   xml = xml.replace(tabelaCabecalho, '');
 
-  // Ao retirar a tabela do corpo, o conversor pode deixar parágrafos vazios
-  // antes do campo SDV/ARQUIVO. No Word eles ocupam altura e criam um vão
-  // grande entre o cabeçalho e o início do relatório. Remova somente esses
-  // parágrafos vazios iniciais, preservando quebras de página e conteúdo.
+  // O conversor deixa um parágrafo técnico vazio (com borda lateral/sombreamento)
+  // entre o cabeçalho e o título. O Word o mostra como uma barra cinza e reserva
+  // altura para ele. Como SDV/ARQUIVO já está no cabeçalho, o corpo deve começar
+  // diretamente no parágrafo do título do relatório.
   const inicioCorpo = xml.indexOf('<w:body');
   const fimCorpo = xml.indexOf('</w:body>', inicioCorpo);
   if (inicioCorpo >= 0 && fimCorpo > inicioCorpo) {
     let corpo = xml.slice(inicioCorpo, fimCorpo);
-    const paragrafosIniciais = [...corpo.matchAll(/<w:p\b[\s\S]*?<\/w:p>/g)];
-    let removerAte = -1;
-    for (const paragrafo of paragrafosIniciais) {
-      const vazio = !/<w:t\b|<w:drawing\b|<w:object\b|<w:br\b/.test(paragrafo[0]);
-      if (!vazio) break;
-      removerAte = paragrafo.index + paragrafo[0].length;
-    }
-    if (removerAte >= 0) {
-      corpo = corpo.slice(0, paragrafosIniciais[0].index) + corpo.slice(removerAte);
+    const paragrafos = [...corpo.matchAll(/<w:p\\b[\\s\\S]*?<\\/w:p>/g)];
+    const indiceTitulo = paragrafos.findIndex(p => /RELATÓRIO\\s*N[º°]/i.test(p[0]));
+    if (indiceTitulo >= 0) {
+      corpo = corpo.slice(paragrafos[indiceTitulo].index);
       xml = xml.slice(0, inicioCorpo) + corpo + xml.slice(fimCorpo);
+    } else {
+      // Fallback conservador: elimina apenas parágrafos iniciais sem texto visível.
+      const iniciais = paragrafos.filter(p => !/<w:t\\b[^>]*>\\s*[^\\s<]/.test(p[0]));
+      if (iniciais.length && iniciais[0].index === 0) {
+        const ultimo = iniciais[iniciais.length - 1];
+        corpo = corpo.slice(ultimo.index + ultimo[0].length);
+        xml = xml.slice(0, inicioCorpo) + corpo + xml.slice(fimCorpo);
+      }
     }
   }
 
