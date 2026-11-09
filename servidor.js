@@ -1569,7 +1569,7 @@ async function corrigirDocxParaWord2016(arquivo) {
   const relsFile = zip.file(relsPath);
   if (!relsFile) throw new Error('O DOCX gerado não contém os relacionamentos do documento.');
   let relsXml = await relsFile.async('string');
-  const ids = [...relsXml.matchAll(/\\bId="rId(\\d+)"/g)].map(m => Number(m[1]));
+  const ids = [...relsXml.matchAll(/\bId="rId(\d+)"/g)].map(m => Number(m[1]));
   const footerRelId = 'rId' + (Math.max(0, ...ids) + 1);
   if (!relsXml.includes('/footer')) {
     relsXml = relsXml.replace('</Relationships>',
@@ -1603,10 +1603,14 @@ async function corrigirDocxParaWord2016(arquivo) {
   zip.file('word/footer1.xml', rodapeXml);
 
   // Vincula o rodapé à seção do documento para repeti-lo em todas as páginas.
-  xml = xml.replace(/<w:footerReference\\b[^>]*\\/>/g, '');
-  if (/<w:sectPr\\b[\\s\\S]*?<\\/w:sectPr>/.test(xml)) {
-    xml = xml.replace(/<w:sectPr\\b([\\s\\S]*?)<\\/w:sectPr>/, (secao, attrs) =>
-      '<w:sectPr' + attrs + '<w:footerReference w:type="default" r:id="' + footerRelId + '"/></w:sectPr>');
+  xml = xml.replace(/<w:footerReference\b[^>]*\/>/g, '');
+  if (/<w:sectPr\b[\s\S]*?<\/w:sectPr>/.test(xml)) {
+    xml = xml.replace(/<w:sectPr\b([\s\S]*?)<\/w:sectPr>/, (secao, attrs) => {
+      const referenciaRodape = '<w:footerReference w:type="default" r:id="' + footerRelId + '"/>';
+      if (/<w:pgSz\b/.test(attrs)) return '<w:sectPr' + attrs.replace(/<w:pgSz\b/, referenciaRodape + '<w:pgSz') + '</w:sectPr>';
+      if (/<w:pgMar\b/.test(attrs)) return '<w:sectPr' + attrs.replace(/<w:pgMar\b/, referenciaRodape + '<w:pgMar') + '</w:sectPr>';
+      return '<w:sectPr' + attrs + referenciaRodape + '</w:sectPr>';
+    });
   } else {
     throw new Error('Não foi possível localizar a seção final do DOCX para posicionar o rodapé.');
   }
