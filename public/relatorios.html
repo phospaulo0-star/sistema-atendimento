@@ -2138,6 +2138,45 @@ function aplicarPadraoTabelasCPAIG(container) {
     }
     formatar(table, widths, opts);
 
+    // Itens 25 e 27: colunas numéricas realmente estreitas e cabeçalho de data/saída cinza.
+    const isItem25 = /^25(?:\\s|[–-])/.test(title);
+    const isItem27 = /^27(?:\\s|[–-])/.test(title);
+    if (isItem25 || isItem27) {
+      table.style.setProperty("width", "100%", "important");
+      table.style.setProperty("table-layout", "fixed", "important");
+      let cols = table.querySelector("colgroup");
+      if (!cols) { cols = document.createElement("colgroup"); table.insertBefore(cols, table.firstChild); }
+      while (cols.children.length < 3) cols.appendChild(document.createElement("col"));
+      cols.children[0].style.setProperty("width", "28px", "important");
+      cols.children[1].style.setProperty("width", isItem25 ? "auto" : "calc(75% - 28px)", "important");
+      cols.children[2].style.setProperty("width", isItem25 ? "22%" : "25%", "important");
+      table.querySelectorAll("tbody tr").forEach(row => {
+        const num = row.cells[0];
+        if (num) {
+          ["width","min-width","max-width"].forEach(prop => num.style.setProperty(prop, "28px", "important"));
+          num.style.setProperty("box-sizing", "border-box", "important");
+          num.style.setProperty("padding", "2px 1px", "important");
+          num.style.setProperty("white-space", "nowrap", "important");
+          num.style.setProperty("word-break", "keep-all", "important");
+          num.style.setProperty("overflow-wrap", "normal", "important");
+          num.style.setProperty("background-color", "#d9d9d9", "important");
+        }
+        if (row.cells[1]) {
+          row.cells[1].style.setProperty("white-space", "normal", "important");
+          row.cells[1].style.setProperty("overflow-wrap", "break-word", "important");
+          row.cells[1].style.setProperty("word-break", "normal", "important");
+          row.cells[1].style.setProperty("text-align", "left", "important");
+        }
+      });
+      const header = table.querySelector("thead tr:first-child");
+      if (header && header.cells.length >= 2) {
+        header.cells[0].style.setProperty("background-color", "#fff", "important");
+        header.cells[header.cells.length - 1].style.setProperty("background-color", "#bfbfbf", "important");
+        header.cells[header.cells.length - 1].style.setProperty("-webkit-print-color-adjust", "exact", "important");
+        header.cells[header.cells.length - 1].style.setProperty("print-color-adjust", "exact", "important");
+      }
+    }
+
     // Correção definitiva do Item 25: aplica a largura diretamente na estrutura
     // da tabela após toda a formatação geral, inclusive na cópia usada pelo Word.
     if (sec.classList.contains("hospitalizado-preview-item25")) {
@@ -3010,8 +3049,8 @@ function visualizarRelatorio(targetId=null){
     if(titulo.startsWith('27 –') || titulo.startsWith('27 -')){
       const rows=listaObitos.filter(r=>!r.nc);
       if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>• N/C.</div></section>`;
-      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:34px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:left">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:25%">${esc(formatarDataHosp(r.data))}</td></tr>`).join('');
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><thead><tr><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:34px"></th><th style="border:1px solid #222;background:#c6c6c6;padding:4px">NOME DO PRESO</th><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:25%">DATA</th></tr></thead><tbody>${trs}</tbody></table></section>`;
+      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:2px 1px;text-align:center;white-space:nowrap;width:28px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:left;overflow-wrap:break-word">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:25%">${esc(formatarDataHosp(r.data))}</td></tr>`).join('');
+      return `<section class="preview-section item27-compact-preview"><h3>${esc(item.titulo)}:</h3><table class="item27-compact-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><colgroup><col style="width:28px"><col style="width:auto"><col style="width:25%"></colgroup><thead><tr><th colspan="2" style="border:1px solid #222;background:#fff;padding:4px;text-align:center">NOME DO PRESO</th><th style="border:1px solid #222;background:#bfbfbf;padding:4px;width:25%;text-align:center">DATA</th></tr></thead><tbody>${trs}</tbody></table></section>`;
     }
     if(titulo.startsWith('26 –') || titulo.startsWith('26 -')){
       const rows=listaRetornoHospitalizados;
