@@ -1572,24 +1572,24 @@ async function corrigirDocxParaWord2016(arquivo) {
   let tabelaCabecalho = primeiraTabela[0];
   // O Word pode ignorar o alinhamento CSS do HTML convertido. Força o
   // alinhamento à direita diretamente no OOXML da última célula (logo do Governo).
-  tabelaCabecalho = tabelaCabecalho.replace(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/, linha => {
-    const celulas = [...linha.matchAll(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/g)];
+  tabelaCabecalho = tabelaCabecalho.replace(/<w:tr\b[\s\S]*?<\/w:tr>/, linha => {
+    const celulas = [...linha.matchAll(/<w:tc\b[\s\S]*?<\/w:tc>/g)];
     if (!celulas.length) return linha;
     const ultima = celulas[celulas.length - 1];
     let celula = ultima[0];
     // Remove margem interna direita que possa manter a imagem afastada da margem.
-    if (/<w:tcPr\\b[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
-      celula = celula.replace(/<w:tcPr\\b([\\s\\S]*?)<\\/w:tcPr>/, (tcPr, attrs) => {
-        const semMargemDireita = attrs.replace(/<w:tcMar\\b[\\s\\S]*?<\\/w:tcMar>/, '');
+    if (/<w:tcPr\b[\s\S]*?<\/w:tcPr>/.test(celula)) {
+      celula = celula.replace(/<w:tcPr\b([\s\S]*?)<\/w:tcPr>/, (tcPr, attrs) => {
+        const semMargemDireita = attrs.replace(/<w:tcMar\b[\s\S]*?<\/w:tcMar>/, '');
         return '<w:tcPr' + semMargemDireita +
           '<w:tcMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar></w:tcPr>';
       });
     }
     // Todos os parágrafos da última célula (logo e SDV/ARQUIVO) ficam à direita.
-    celula = celula.replace(/<w:p\\b[\\s\\S]*?<\\/w:p>/g, paragrafo => {
-      if (/<w:pPr\\b[\\s\\S]*?<\\/w:pPr>/.test(paragrafo)) {
-        return paragrafo.replace(/<w:pPr\\b([\\s\\S]*?)<\\/w:pPr>/,
-          (pPr, attrs) => '<w:pPr' + attrs.replace(/<w:jc\\b[^>]*\\/>/g, '') + '<w:jc w:val="right"/></w:pPr>');
+    celula = celula.replace(/<w:p\b[\s\S]*?<\/w:p>/g, paragrafo => {
+      if (/<w:pPr\b[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+        return paragrafo.replace(/<w:pPr\b([\s\S]*?)<\/w:pPr>/,
+          (pPr, attrs) => '<w:pPr' + attrs.replace(/<w:jc\b[^>]*\/>/g, '') + '<w:jc w:val="right"/></w:pPr>');
       }
       return paragrafo.replace('<w:p>', '<w:p><w:pPr><w:jc w:val="right"/></w:pPr>');
     });
