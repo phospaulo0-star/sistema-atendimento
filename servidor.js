@@ -1600,7 +1600,18 @@ async function corrigirDocxParaWord2016(arquivo) {
       return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
         const textoCelula = (celula.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
           .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').toUpperCase();
-        if (!/ITENS|QUANT\.|NOME|RGI|PROCEDÊNCIA|DESTINO\/MOTIVO|DOCUMENTO|ENTRADA DE CUSTODIADOS|SAÍDA DE CUSTODIADOS|Nº/.test(textoCelula)) return celula;
+        if (!/ITENS|QUANT\\.|NOME|RGI|PROCEDÊNCIA|DESTINO\\/MOTIVO|DOCUMENTO|ENTRADA DE CUSTODIADOS|SAÍDA DE CUSTODIADOS|Nº/.test(textoCelula)) return celula;
+        // Cabeçalhos seguem o modelo definitivo: negrito e 9,5 pt.
+        celula = celula.replace(/<w:r\\b[\\s\\S]*?<\\/w:r>/g, run => {
+          if (!/<w:t\\b/.test(run)) return run;
+          const existente = run.match(/<w:rPr>[\\s\\S]*?<\\/w:rPr>/);
+          let propriedades = existente ? existente[0] : '<w:rPr></w:rPr>';
+          if (/<w:b\\b[^>]*\\/>/.test(propriedades)) propriedades = propriedades.replace(/<w:b\\b[^>]*\\/>/, '<w:b/>');
+          else propriedades = propriedades.replace('</w:rPr>', '<w:b/></w:rPr>');
+          if (/<w:sz\\b[^>]*\\/>/.test(propriedades)) propriedades = propriedades.replace(/<w:sz\\b[^>]*\\/>/, '<w:sz w:val="19"/>');
+          else propriedades = propriedades.replace('</w:rPr>', '<w:sz w:val="19"/></w:rPr>');
+          return existente ? run.replace(existente[0], propriedades) : run.replace(/<w:r\\b[^>]*>/, m => m + propriedades);
+        });
         if (/<w:tcPr>[\s\S]*?<\/w:tcPr>/.test(celula)) {
           return celula.replace(/<w:tcPr>([\s\S]*?)<\/w:tcPr>/,
             '<w:tcPr>$1<w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
