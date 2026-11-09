@@ -2071,34 +2071,33 @@ async function exportarWord(){
     }
   });
 
-  // Item 12: rótulos em negrito e respectivos valores na mesma sequência,
-  // sem quebras forçadas. O Word fará a quebra somente no fim da linha.
+  // Item 12: cada cargo e seu valor ficam no MESMO parágrafo.
+  // O valor vem imediatamente após os dois-pontos; somente o rótulo fica em negrito.
   const secaoExpedienteWord = [...documento.querySelectorAll('.preview-section')]
     .find(sec => /^12\s*[–-]/.test(sec.querySelector('h3')?.textContent.trim() || ''));
   const textoExpedienteWord = secaoExpedienteWord?.querySelector('.preview-text');
   if (textoExpedienteWord) {
     const originalExpediente = textoExpedienteWord.textContent.replace(/\r/g, '').trim();
-    const separadorTemPontoEVirgula = originalExpediente.includes(';');
     const linhasExpediente = originalExpediente.split(/;\s*|\n+/).map(x => x.trim()).filter(Boolean);
     const fragmentoExpediente = document.createDocumentFragment();
     linhasExpediente.forEach((linha, indice) => {
-      const rotulo = linha.match(/^([^:]+:)([\s\S]*)$/);
+      const paragrafo = document.createElement('p');
+      paragrafo.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.95;margin:0;padding:0;white-space:normal;page-break-inside:avoid');
+      const rotulo = linha.match(/^([^:]+:)\s*([\s\S]*)$/);
       if (rotulo) {
         const negrito = document.createElement('strong');
-        negrito.textContent = rotulo[1] + (rotulo[2].startsWith(' ') ? '' : '');
-        fragmentoExpediente.appendChild(negrito);
-        fragmentoExpediente.appendChild(document.createTextNode(rotulo[2]));
+        negrito.setAttribute('style','font-weight:bold;display:inline');
+        negrito.textContent = rotulo[1];
+        paragrafo.appendChild(negrito);
+        if (rotulo[2]) paragrafo.appendChild(document.createTextNode(' ' + rotulo[2]));
       } else {
-        fragmentoExpediente.appendChild(document.createTextNode(linha));
+        paragrafo.textContent = linha;
       }
-      if (indice < linhasExpediente.length - 1) {
-        fragmentoExpediente.appendChild(document.createTextNode(separadorTemPontoEVirgula ? '; ' : ' '));
-      } else if (separadorTemPontoEVirgula) {
-        fragmentoExpediente.appendChild(document.createTextNode(';'));
-      }
+      if (indice < linhasExpediente.length - 1) paragrafo.appendChild(document.createTextNode(';'));
+      fragmentoExpediente.appendChild(paragrafo);
     });
     textoExpedienteWord.replaceChildren(fragmentoExpediente);
-    textoExpedienteWord.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.95;white-space:normal;margin:0;padding:0;color:#000');
+    textoExpedienteWord.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.95;white-space:normal;margin:0;padding:0;color:#000');
   }
 
   // Regra geral do Word: compactar todas as linhas de texto e destacar
@@ -2176,7 +2175,7 @@ async function exportarWord(){
     const secaoDoTexto=tx.closest('.preview-section');
     const tituloDaSecao=secaoDoTexto?.querySelector('h3')?.textContent.trim()||'';
     // Exceção: no Item 02, manter todo o texto normal, inclusive os rótulos antes de ":".
-    if(!/^02\s*[–—-]/.test(tituloDaSecao)){
+    if(!/^02\s*[–—-]/.test(tituloDaSecao) && !/^12\s*[–—-]/.test(tituloDaSecao)){
       aplicarNegritoAntesDoPrimeiroDoisPontosWord(tx);
     }
     if(/^01\s*[–—-]/.test(tituloDaSecao))aplicarNegritoNomesItem01E40(tx,'01');
