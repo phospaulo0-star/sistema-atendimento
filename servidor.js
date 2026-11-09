@@ -1580,14 +1580,14 @@ async function corrigirDocxParaWord2016(arquivo) {
   const fimCorpo = xml.indexOf('</w:body>', inicioCorpo);
   if (inicioCorpo >= 0 && fimCorpo > inicioCorpo) {
     let corpo = xml.slice(inicioCorpo, fimCorpo);
-    const paragrafos = [...corpo.matchAll(/<w:p\\b[\\s\\S]*?<\\/w:p>/g)];
-    const indiceTitulo = paragrafos.findIndex(p => /RELATÓRIO\\s*N[º°]/i.test(p[0]));
+    const paragrafos = [...corpo.matchAll(/<w:p\b[\s\S]*?<\/w:p>/g)];
+    const indiceTitulo = paragrafos.findIndex(p => /RELATÓRIO\s*N[º°]/i.test(p[0]));
     if (indiceTitulo >= 0) {
       corpo = corpo.slice(paragrafos[indiceTitulo].index);
       xml = xml.slice(0, inicioCorpo) + corpo + xml.slice(fimCorpo);
     } else {
       // Fallback conservador: elimina apenas parágrafos iniciais sem texto visível.
-      const iniciais = paragrafos.filter(p => !/<w:t\\b[^>]*>\\s*[^\\s<]/.test(p[0]));
+      const iniciais = paragrafos.filter(p => !/<w:t\b[^>]*>\s*[^\s<]/.test(p[0]));
       if (iniciais.length && iniciais[0].index === 0) {
         const ultimo = iniciais[iniciais.length - 1];
         corpo = corpo.slice(ultimo.index + ultimo[0].length);
