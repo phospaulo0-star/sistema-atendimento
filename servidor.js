@@ -1818,6 +1818,24 @@ async function corrigirDocxParaWord2016(arquivo) {
     throw new Error('Não foi possível localizar a seção final do DOCX para posicionar o rodapé.');
   }
 
+  // Zera o espaçamento de parágrafo em TODO o corpo do Word.
+  // O html-to-docx aplica 6 pt (120 twips) por padrão mesmo quando o HTML
+  // informa margin:0; por isso a correção precisa ser feita no OOXML final.
+  xml = xml.replace(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g, paragrafo => {
+    const espaçamentoZero = '<w:spacing w:before="0" w:after="0"/>';
+    if (/<w:pPr\b[^>]*>[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+      const propriedades = paragrafo.match(/<w:pPr\b[^>]*>[\s\S]*?<\/w:pPr>/)[0];
+      const propriedadesCorrigidas = propriedades
+        .replace(/<w:spacing\b[^>]*(?:\/>|>[\s\S]*?<\/w:spacing>)/g, '')
+        .replace(/(<w:pPr\b[^>]*>)/, '$1' + espaçamentoZero);
+      return paragrafo.replace(propriedades, propriedadesCorrigidas);
+    }
+    if (/<w:pPr\b[^>]*\/>/.test(paragrafo)) {
+      return paragrafo.replace(/<w:pPr\b[^>]*\/>/, '<w:pPr>' + espaçamentoZero + '</w:pPr>');
+    }
+    return paragrafo.replace(/(<w:p\b[^>]*>)/, '$1<w:pPr>' + espaçamentoZero + '</w:pPr>');
+  });
+
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
     type: 'nodebuffer',
