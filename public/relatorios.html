@@ -1941,6 +1941,9 @@ async function exportarWord(){
 
   // Cabeçalho em tabela sem bordas: brasão, texto institucional e logotipo estadual.
   const cabecalho=documento.querySelector('.preview-letterhead');
+  // As opções SDV/ARQUIVO passam a integrar a mesma tabela institucional
+  // para serem transferidas junto com as logos ao cabeçalho nativo do Word.
+  const arquivoCabecalho=documento.querySelector('.preview-archive');
   if(cabecalho){
     const logos=cabecalho.querySelectorAll('img');
     const texto=cabecalho.querySelector('.preview-letterhead-text');
@@ -1964,6 +1967,14 @@ async function exportarWord(){
         td2.appendChild(p);
       });
       td1.appendChild(logos[0].cloneNode(true));td3.appendChild(logos[1].cloneNode(true));
+      if(arquivoCabecalho){
+        const opcoes=document.createElement('p');
+        opcoes.textContent=arquivoCabecalho.textContent.replace(/\s+/g,' ').trim();
+        opcoes.setAttribute('align','right');
+        opcoes.setAttribute('style','font-family:"Times New Roman",serif;font-size:9pt;font-style:normal;font-weight:normal;text-align:right;white-space:nowrap;margin:1mm 0 0;padding:0;color:#000');
+        td3.appendChild(opcoes);
+        arquivoCabecalho.remove();
+      }
       tr.append(td1,td2,td3);tabela.appendChild(tr);cabecalho.replaceWith(tabela);
     }
   }
