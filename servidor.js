@@ -1686,9 +1686,35 @@ async function corrigirDocxParaWord2016(arquivo) {
     return primeiraCelula ? linha.replace(primeiraCelula[0], aplicarCinzaCelula(primeiraCelula[0])) : linha;
   });
 
+  // Itens 16 e 17: corpo da tabela em 10 pt e primeira linha (cabeçalho) em 12 pt.
+  // OOXML utiliza meio-ponto: 20 = 10 pt e 24 = 12 pt.
+  const definirFonteRun = (run, tamanho) => {
+    if (!/<w:t\b/.test(run)) return run;
+    const tamanhoXml = '<w:sz w:val="' + tamanho + '"/>';
+    const tamanhoCs = '<w:szCs w:val="' + tamanho + '"/>';
+    if (/<w:rPr\b[\s\S]*?<\/w:rPr>/.test(run)) {
+      return run.replace(/<w:rPr>([\s\S]*?)<\/w:rPr>/, (m, props) => {
+        props = /<w:sz\b[^>]*\/>/.test(props)
+          ? props.replace(/<w:sz\b[^>]*\/>/, tamanhoXml) : props + tamanhoXml;
+        props = /<w:szCs\b[^>]*\/>/.test(props)
+          ? props.replace(/<w:szCs\b[^>]*\/>/, tamanhoCs) : props + tamanhoCs;
+        return '<w:rPr>' + props + '</w:rPr>';
+      });
+    }
+    return run.replace(/<w:r\b[^>]*>/, m =>
+      m + '<w:rPr>' + tamanhoXml + tamanhoCs + '</w:rPr>');
+  };
+  const ajustarFonteTabela = (tabelaXml, fonteCabecalho = 24, fonteCorpo = 20) =>
+    tabelaXml.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, (linha, indice, textoCompleto) => {
+      const indiceLinha = (textoCompleto.slice(0, indice).match(/<w:tr\b/g) || []).length;
+      const tamanho = indiceLinha === 0 ? fonteCabecalho : fonteCorpo;
+      return linha.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => definirFonteRun(run, tamanho));
+    });
+
   // Item 16 - Material Carga: toda a coluna ITENS fica cinza.
   if (tabelasDocx[1]) {
-    const materiais = aplicarCinzaPrimeiraColuna(tabelasDocx[1][0]);
+    let materiais = aplicarCinzaPrimeiraColuna(tabelasDocx[1][0]);
+    materiais = ajustarFonteTabela(materiais, 24, 20);
     xml = xml.replace(tabelasDocx[1][0], materiais);
   }
 
@@ -1715,6 +1741,7 @@ async function corrigirDocxParaWord2016(arquivo) {
       }
     }
     viaturas = aplicarCinzaPrimeiraColuna(viaturas);
+    viaturas = ajustarFonteTabela(viaturas, 24, 20);
 
     // Alinhamento e destaque do cabeçalho do Item 17:
     // "VIATURAS" centralizado; coluna SITUAÇÃO à esquerda nos dados,
