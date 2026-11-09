@@ -2463,8 +2463,26 @@ function visualizarRelatorio(targetId=null){
       // de Equipe" deve permanecer junto, sem deixar "Aux." em linha isolada.
       const inicioPosto=/(?:Aux\.\s+(?:de\s+)?Chefe\s+de\s+equipe|Chefe\s+de\s+equipe|(?:Aux\.|Resp\.)\s+(?:Portaria\s+[IVX]+|Pav(?:ilh[aã]o)?\s+[A-D](?:\s+e\s+(?:Celas\s+Disciplinares|CP))?|Celas\s+Disciplinares|dos\s+Pavilh[oõ]es)|Portaria\s+[IVX]+|Pav(?:ilh[aã]o)?\s+[A-D](?:\s+e\s+(?:Celas\s+Disciplinares|CP))?|Celas\s+Disciplinares)\s*:/gi;
       const fragmentos=bruto.replace(/;\s*/g,'\n').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+      const agrupados=[];
+      for(let i=0;i<fragmentos.length;i++){
+        let atual=fragmentos[i];
+        // Corrige dados antigos em que "Aux." ou "Resp." foi salvo em uma
+        // linha separada do posto seguinte.
+        if(/^(Aux\.|Resp\.)$/i.test(atual)&&i+1<fragmentos.length){
+          const prefixo=atual;
+          const proximo=fragmentos[i+1];
+          if(prefixo.toLowerCase()==='aux.'&&/^Chefe\s+de\s+equipe\s*:/i.test(proximo)){
+            atual='Aux. de '+proximo;
+            i++;
+          }else if(/^(?:de\s+)?(?:Chefe\s+de\s+equipe|Portaria\s+[IVX]+|Pav(?:ilh[aã]o)?\s+[A-D]|Celas\s+Disciplinares|dos\s+Pavilh[oõ]es)\s*:/i.test(proximo)){
+            atual=prefixo+' '+proximo;
+            i++;
+          }
+        }
+        agrupados.push(atual);
+      }
       const partes=[];
-      fragmentos.forEach(fragmento=>{
+      agrupados.forEach(fragmento=>{
         const encontrados=[...fragmento.matchAll(inicioPosto)];
         if(encontrados.length<=1){partes.push(fragmento);return;}
         encontrados.forEach((m,i)=>{
