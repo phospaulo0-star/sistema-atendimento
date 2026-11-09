@@ -1948,7 +1948,7 @@ async function exportarWord(){
       const linhas=[...texto.querySelectorAll('div')].map(x=>x.textContent.trim()).filter(Boolean);
       const tabela=document.createElement('table');
       tabela.setAttribute('border','0');
-      tabela.setAttribute('style','width:100%;border:0;border-collapse:collapse;table-layout:fixed;margin:0 0 5mm 0');
+      tabela.setAttribute('style','width:100%;border:0;border-collapse:collapse;table-layout:fixed;margin:0');
       const tr=document.createElement('tr');
       const td1=document.createElement('td'),td2=document.createElement('td'),td3=document.createElement('td');
       td1.setAttribute('style','width:16%;border:0;padding:0;text-align:center;vertical-align:middle');
@@ -1972,7 +1972,7 @@ async function exportarWord(){
   if(arquivo){
     const textoArquivo=arquivo.textContent.replace(/\\s+/g,' ').trim();
     arquivo.replaceChildren();
-    arquivo.setAttribute('style','width:100%;display:block;text-align:right;margin:0 0 5mm 0;padding:0;color:#000');
+    arquivo.setAttribute('style','width:100%;display:block;text-align:right;margin:0 0 2mm 0;padding:0;color:#000');
     const pArquivo=document.createElement('p');
     pArquivo.textContent=textoArquivo;
     pArquivo.setAttribute('style','font-family:"Times New Roman",serif;font-size:10pt;font-style:normal;text-align:right;text-align-last:right;margin:0;padding:0;color:#000;width:100%;');
@@ -1980,7 +1980,7 @@ async function exportarWord(){
   }
 
   const titulo=documento.querySelector('.preview-title h2');
-  if(titulo)titulo.setAttribute('style','font-family:"Times New Roman",serif;font-size:12pt;font-weight:bold;text-decoration:underline;text-align:left;line-height:1.05;margin:0 0 5mm 0;padding:0;color:#000');
+  if(titulo)titulo.setAttribute('style','font-family:"Times New Roman",serif;font-size:12pt;font-weight:bold;text-decoration:underline;text-align:left;line-height:1.05;margin:0 0 2mm 0;padding:0;color:#000');
 
   // Estilos explícitos em cada item: o Word não interpreta com fidelidade
   // os seletores e as regras @media print do navegador.
