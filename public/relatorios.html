@@ -2055,17 +2055,17 @@ async function exportarWord(){
     }
     const tx=sec.querySelector('.preview-text');
     if(tx){
-      tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.9;white-space:pre-wrap;margin:0;padding:0;color:#000');
+      tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.8;white-space:pre-wrap;margin:0;padding:0;color:#000');
       if(tx.classList.contains('documentos-item35')){
-        tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.9;white-space:normal;margin:0;padding:0;color:#000');
+        tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.8;white-space:normal;margin:0;padding:0;color:#000');
         tx.querySelectorAll('.documento-item35-linha').forEach(linha=>{
-          linha.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.9;margin:0;padding:0;white-space:nowrap;page-break-inside:avoid');
+          linha.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.8;margin:0;padding:0;white-space:nowrap;page-break-inside:avoid');
         });
       }
       if(sec.classList.contains('item38-preview')||sec.classList.contains('stacked-item-preview')){
         tx.setAttribute('style','font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:1.15;white-space:normal;margin:0;padding:0;color:#000');
         tx.querySelectorAll('.item38-line,.stacked-item-line').forEach(linha=>{
-          linha.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.9;text-align:left;white-space:normal;margin:0;padding:0;color:#000;page-break-inside:avoid');
+          linha.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.8;text-align:left;white-space:normal;margin:0;padding:0;color:#000;page-break-inside:avoid');
         });
       }
     }
@@ -2082,7 +2082,7 @@ async function exportarWord(){
     const fragmentoExpediente = document.createDocumentFragment();
     linhasExpediente.forEach((linha, indice) => {
       const paragrafo = document.createElement('p');
-      paragrafo.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.9;margin:0;padding:0;white-space:normal;page-break-inside:avoid');
+      paragrafo.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.8;margin:0;padding:0;white-space:normal;page-break-inside:avoid');
       const rotulo = linha.match(/^([^:]+:)\s*([\s\S]*)$/);
       if (rotulo) {
         const negrito = document.createElement('strong');
@@ -2097,7 +2097,7 @@ async function exportarWord(){
       fragmentoExpediente.appendChild(paragrafo);
     });
     textoExpedienteWord.replaceChildren(fragmentoExpediente);
-    textoExpedienteWord.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.9;white-space:normal;margin:0;padding:0;color:#000');
+    textoExpedienteWord.setAttribute('style','display:block;font-family:"Times New Roman",serif;font-size:11pt;font-weight:normal;line-height:0.8;white-space:normal;margin:0;padding:0;color:#000');
   }
 
   // Regra geral do Word: compactar todas as linhas de texto e destacar
