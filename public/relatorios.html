@@ -2050,16 +2050,10 @@ async function exportarWord(){
   }
   // O título do item 38 deve permanecer em uma única linha quando houver espaço.
   documento.querySelectorAll('.item38-field h3,.item38-field .preview-text').forEach(x=>x.setAttribute('style','font-family:"Times New Roman",serif;font-size:10pt;line-height:1.0;white-space:nowrap;margin:0;padding:0'));
+  // O rodapé será inserido como rodapé nativo do Word pelo servidor,
+  // para permanecer fixo no limite inferior de todas as páginas.
   const rodape=documento.querySelector('.preview-footer');
-  if(rodape){
-    const filhos=[...rodape.children];
-    if(filhos[0])filhos[0].setAttribute('style','font-family:"Times New Roman",serif;font-size:5.8pt;line-height:1.0;text-align:center;margin:0;padding:0');
-    if(filhos[1]){
-      filhos[1].textContent='Página [[PAGE]] de [[NUMPAGES]]';
-      filhos[1].setAttribute('style','font-family:"Times New Roman",serif;font-size:5.8pt;line-height:1.0;text-align:right;margin:0;padding:0');
-    }
-    rodape.setAttribute('style','border-top:1px solid #777;margin:0;padding:0.8mm 0 0;text-align:center;font-family:"Times New Roman",serif;font-size:5.8pt;line-height:1.0;color:#000');
-  }
+  if(rodape)rodape.remove();
 
   const html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório CPAIG</title><style>@page{size:A4 portrait;margin:15mm 12mm 14mm 12mm}body{font-family:"Times New Roman",serif;font-size:11pt;color:#000;margin:0;padding:0}table{border-collapse:collapse}img{max-width:100%}</style></head><body>'+areaWord.innerHTML+'</body></html>';
   try{
