@@ -2011,7 +2011,7 @@ async function exportarWord(){
   // Estilos explícitos em cada item: o Word não interpreta com fidelidade
   // os seletores e as regras @media print do navegador.
   documento.querySelectorAll('.preview-section').forEach(sec=>{
-    sec.setAttribute('style','display:block;margin:0 0 4px 0;padding:0;color:#000');
+    sec.setAttribute('style','display:block;margin:0 0 4px 0;padding:0;color:#000'+(sec.classList.contains('item10-scale-preview')?';page-break-inside:avoid;break-inside:avoid':''));
     const h=sec.querySelector('h3');
     if(h){
       // O conversor HTML/DOCX pode ignorar text-decoration no estilo do h3.
@@ -2459,8 +2459,21 @@ function visualizarRelatorio(targetId=null){
       return partes;
     }
     if(t.startsWith('10')){
-      const inicioNovoPosto=/\s+((?:(?:Aux\.|Resp\.)\s+)?(?:Chefe de equipe|Portaria\s+[IVX]+|Pavilhão\s+[A-D](?:\s+e\s+(?:Celas Disciplinares|CP))?|Celas Disciplinares|dos Pavilhões)\s*:)/gi;
-      const partes=bruto.replace(/;\s*/g,'\n').replace(inicioNovoPosto,'\n$1').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+      // Reconhece o nome completo de cada posto. Em especial, "Aux. de Chefe
+      // de Equipe" deve permanecer junto, sem deixar "Aux." em linha isolada.
+      const inicioPosto=/(?:Aux\.\s+(?:de\s+)?Chefe\s+de\s+equipe|Chefe\s+de\s+equipe|(?:Aux\.|Resp\.)\s+(?:Portaria\s+[IVX]+|Pav(?:ilh[aã]o)?\s+[A-D](?:\s+e\s+(?:Celas\s+Disciplinares|CP))?|Celas\s+Disciplinares|dos\s+Pavilh[oõ]es)|Portaria\s+[IVX]+|Pav(?:ilh[aã]o)?\s+[A-D](?:\s+e\s+(?:Celas\s+Disciplinares|CP))?|Celas\s+Disciplinares)\s*:/gi;
+      const fragmentos=bruto.replace(/;\s*/g,'\n').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+      const partes=[];
+      fragmentos.forEach(fragmento=>{
+        const encontrados=[...fragmento.matchAll(inicioPosto)];
+        if(encontrados.length<=1){partes.push(fragmento);return;}
+        encontrados.forEach((m,i)=>{
+          const inicio=m.index;
+          const fim=i+1<encontrados.length?encontrados[i+1].index:fragmento.length;
+          const trecho=fragmento.slice(inicio,fim).trim();
+          if(trecho)partes.push(trecho);
+        });
+      });
       return partes.map((x,i)=>i<partes.length-1?x.replace(/[;,\s]+$/,'')+';':x.replace(/[;,\s]+$/,''));
     }
     if(t.startsWith('12')){
@@ -2595,7 +2608,8 @@ function visualizarRelatorio(targetId=null){
     if(empilhar){
       const linhas=linhasEmpilhadasWord(titulo,textoFinal);
       const conteudo=linhas.map(l=>`<p class="stacked-item-line">${esc(l)}</p>`).join('');
-      return `<section class="preview-section stacked-item-preview"><h3>${esc(item.titulo)}:</h3><div class="preview-text">${conteudo}</div>${blocosAssinaturaEquipe}</section>`;
+      const classeItem10=titulo.startsWith('10')?' item10-scale-preview':'';
+      return `<section class="preview-section stacked-item-preview${classeItem10}"><h3>${esc(item.titulo)}:</h3><div class="preview-text">${conteudo}</div>${blocosAssinaturaEquipe}</section>`;
     }
     return `<section class="preview-section${titulo.startsWith('01')?' item01-justified':''}"><h3>${esc(item.titulo)}:</h3><div class="preview-text${is02?' team02-print':''}">${esc(textoFinal)}</div>${blocosAssinaturaEquipe}</section>`
   }).join(''):'<p>Nenhuma seção foi preenchida ainda.</p>';
