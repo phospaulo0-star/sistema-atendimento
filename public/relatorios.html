@@ -2122,7 +2122,12 @@ async function exportarWord(){
     });
   }
   documento.querySelectorAll('.preview-section .preview-text').forEach(tx=>{
-    aplicarNegritoAntesDoPrimeiroDoisPontosWord(tx);
+    const secaoDoTexto=tx.closest('.preview-section');
+    const tituloDaSecao=secaoDoTexto?.querySelector('h3')?.textContent.trim()||'';
+    // Exceção: no Item 02, manter todo o texto normal, inclusive os rótulos antes de ":".
+    if(!/^02\s*[–—-]/.test(tituloDaSecao)){
+      aplicarNegritoAntesDoPrimeiroDoisPontosWord(tx);
+    }
     tx.style.lineHeight='1.0';
     tx.style.margin='0';
     tx.style.padding='0';
