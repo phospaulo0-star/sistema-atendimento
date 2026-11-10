@@ -1495,9 +1495,9 @@ async function corrigirDocxParaWord2016(arquivo) {
     const largurasModeloCPAIG = {
       1: [85, 15],                       // Item 16 - Material Carga: coluna QUANT. mais larga para manter "QUANT." em uma linha
       2: [50, 50],                         // Item 17 - Viaturas
-      3: [7.2, 72.8, 20],                  // Item 25 - Hospitalizado
+      3: [3.2, 74.3, 22.5],                // Item 25 - Hospitalizado
       4: [7.2, 72.8, 20],                  // Item 25.1 - Hospitalizado a confirmar
-      5: [7.2, 72.8, 20],                  // Item 27 - Óbito
+      5: [3.2, 71.8, 25],                  // Item 27 - Óbito
       6: [7.2, 37.8, 15, 15, 25],          // Item 28 - Licença Judicial
       7: [7.2, 42.5, 19.9, 30.4],          // Item 29 - Saída temporária
       8: [7.2, 42.5, 19.9, 30.4],          // Item 29.1 - Retorno
@@ -2028,6 +2028,51 @@ async function corrigirDocxParaWord2016(arquivo) {
       return paragrafo.replace(/<w:pPr\b[^>]*\/>/, '<w:pPr>' + espaçamento + '</w:pPr>');
     }
     return paragrafo.replace(/(<w:p\b[^>]*>)/, '$1<w:pPr>' + espaçamento + '</w:pPr>');
+  });
+
+
+  // Ajuste final por identificação do conteúdo, não pelo índice da tabela.
+  // O Word recebe a largura diretamente na grade OOXML e em cada célula.
+  // Isso impede que a largura antiga de 7,2% ou o HTML convertido a sobrescrevam.
+  const larguraTabelaHospTwips = 10546; // largura útil A4
+  const aplicarLargurasHospDocx = (tabela, larguras) => {
+    const total = larguras.reduce((a, b) => a + b, 0);
+    tabela = tabela.replace(/<w:tblW\\b[^>]*\\/>/, '<w:tblW w:type="dxa" w:w="' + total + '"/>');
+    tabela = tabela.replace(/<w:tblLayout\\b[^>]*\\/>/g, '');
+    if (/<w:tblPr>/.test(tabela)) {
+      tabela = tabela.replace(/<w:tblPr>/, '<w:tblPr><w:tblLayout w:type="fixed"/>');
+    }
+    tabela = tabela.replace(/<w:tblGrid>[\\s\\S]*?<\\/w:tblGrid>/,
+      '<w:tblGrid>' + larguras.map(w => '<w:gridCol w:w="' + w + '"/>').join('') + '</w:tblGrid>');
+    tabela = tabela.replace(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/g, linha => {
+      let indice = 0;
+      return linha.replace(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/g, celula => {
+        const spanMatch = celula.match(/<w:gridSpan\\b[^>]*w:val="(\\d+)"/);
+        const span = Math.max(1, Number(spanMatch && spanMatch[1] || 1));
+        const largura = larguras.slice(indice, indice + span).reduce((a, b) => a + b, 0) || larguras[Math.min(indice, larguras.length - 1)];
+        indice += span;
+        const tcW = '<w:tcW w:type="dxa" w:w="' + largura + '"/>';
+        if (/<w:tcW\\b[^>]*\\/>/.test(celula)) return celula.replace(/<w:tcW\\b[^>]*\\/>/, tcW);
+        if (/<w:tcPr>/.test(celula)) return celula.replace(/<w:tcPr>/, '<w:tcPr>' + tcW);
+        return celula.replace(/<w:tc>/, '<w:tc><w:tcPr>' + tcW + '</w:tcPr>');
+      });
+    });
+    return tabela;
+  };
+  xml = xml.replace(/<w:tbl\\b[\\s\\S]*?<\\/w:tbl>/g, tabela => {
+    const texto = (tabela.match(/<w:t\\b[^>]*>[\\s\\S]*?<\\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\\s+/g, ' ').toUpperCase();
+    const colunas = (tabela.match(/<w:gridCol\\b/g) || []).length;
+    if (colunas !== 3 || !texto.includes('NOME DO PRESO')) return tabela;
+    if (texto.includes('SAÍDA')) {
+      const larguras = [340, 7835, larguraTabelaHospTwips - 340 - 7835]; // 3,2% | 74,3% | 22,5%
+      return aplicarLargurasHospDocx(tabela, larguras);
+    }
+    if (texto.includes('DATA')) {
+      const larguras = [340, 7572, larguraTabelaHospTwips - 340 - 7572]; // 3,2% | 71,8% | 25%
+      return aplicarLargurasHospDocx(tabela, larguras);
+    }
+    return tabela;
   });
 
   zip.file('word/document.xml', xml);
