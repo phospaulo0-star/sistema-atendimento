@@ -2115,6 +2115,20 @@ async function corrigirDocxParaWord2016(arquivo) {
         let indiceCelulaItem28 = 0;
         return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
           const coluna = indiceCelulaItem28++;
+          // Coluna Nº: fundo cinza nas linhas de dados, mantendo o cabeçalho original.
+          if (coluna === 0) {
+            const cinza = '<w:shd w:val="clear" w:color="auto" w:fill="D9D9D9"/>';
+            if (/<w:tcPr\b[^>]*>[\s\S]*?<\/w:tcPr>/.test(celula)) {
+              celula = celula.replace(/(<w:tcPr\b[^>]*>[\s\S]*?)(<\/w:tcPr>)/, (m, antes, fecha) => {
+                if (/<w:shd\b[^>]*\/>/.test(antes)) antes = antes.replace(/<w:shd\b[^>]*\/>/g, cinza);
+                else antes = antes.replace(/(<w:tcW\b[^>]*\/>)/, '$1' + cinza);
+                return antes + fecha;
+              });
+            } else {
+              celula = celula.replace(/<w:tc>/, '<w:tc><w:tcPr>' + cinza + '</w:tcPr>');
+            }
+            return celula;
+          }
           if (coluna !== 1) return celula;
           // O segundo parágrafo contém AUTOS Nº; remove eventual negrito herdado pelo Word.
           celula = celula.replace(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g, paragrafo => {
@@ -2124,8 +2138,10 @@ async function corrigirDocxParaWord2016(arquivo) {
           });
           if (/<w:tcPr\b[^>]*>[\s\S]*?<\/w:tcPr>/.test(celula)) {
             celula = celula.replace(/(<w:tcPr\b[^>]*>[\s\S]*?)(<\/w:tcPr>)/, (m, antes, fecha) => {
-              antes = antes.replace(/<w:shd\b[^>]*\/>/g, '');
-              return antes + '<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/>' + fecha;
+              const branco = '<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/>';
+              if (/<w:shd\b[^>]*\/>/.test(antes)) antes = antes.replace(/<w:shd\b[^>]*\/>/g, branco);
+              else antes = antes.replace(/(<w:tcW\b[^>]*\/>)/, '$1' + branco);
+              return antes + fecha;
             });
           }
           return celula;
