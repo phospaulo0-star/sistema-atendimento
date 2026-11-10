@@ -2082,18 +2082,11 @@ async function corrigirDocxParaWord2016(arquivo) {
       return tabela;
     }
 
-    // A primeira coluna fica com 340 twips (aprox. 6 mm).
-    // Se o conversor criou colunas extras por causa de células mescladas,
-    // distribui somente a largura da coluna do nome entre essas colunas.
-    const quantidadeMeio = gradeAtual.length - 2;
-    const largurasGrade = [340];
-    let restanteNome = larguraNome;
-    for (let i = 0; i < quantidadeMeio; i++) {
-      const largura = i === quantidadeMeio - 1 ? restanteNome : Math.round(larguraNome / quantidadeMeio);
-      largurasGrade.push(largura);
-      restanteNome -= largura;
-    }
-    largurasGrade.push(larguraFinal);
+    // O html-to-docx pode gerar uma grade artificial com 15 colunas,
+    // embora cada linha tenha somente 3 células lógicas. O Word então
+    // comprime o conteúdo. Normalize a grade para exatamente 3 colunas.
+    // A primeira mede 6 mm; nome e data recebem larguras fixas proporcionais.
+    const largurasGrade = [340, larguraNome, larguraFinal];
     return aplicarLargurasHospDocx(tabela, largurasGrade);
   });
 
