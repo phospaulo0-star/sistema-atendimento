@@ -2053,6 +2053,17 @@ async function corrigirDocxParaWord2016(arquivo) {
         indice += span;
         const tcW = '<w:tcW w:type="dxa" w:w="' + largura + '"/>';
         const noWrap = colunasSemQuebra.includes(indice - span) ? '<w:noWrap/>' : '';
+        if (noWrap) {
+          // No Item 29, impede que o nome e o sufixo (UMMVE) sejam separados
+          // em linhas distintas na primeira linha do conteúdo da célula.
+          celula = celula.replace(/<w:p\b[^>]*>([\s\S]*?)<\/w:p>/g, (paragrafo) => {
+            if (/<w:pPr\b[^>]*>/.test(paragrafo)) {
+              return paragrafo.replace(/<w:pPr\b[^>]*>([\s\S]*?)<\/w:pPr>/, (m, props) =>
+                '<w:pPr>' + (/<w:wordWrap\b/.test(props) ? props : props + '<w:wordWrap w:val="0"/>') + '</w:pPr>');
+            }
+            return paragrafo.replace(/(<w:p\b[^>]*>)/, '$1<w:pPr><w:wordWrap w:val="0"/></w:pPr>');
+          });
+        }
         if (/<w:tcPr\b[^>]*>/.test(celula)) {
           celula = celula.replace(/<w:tcPr\b[^>]*>([\s\S]*?)<\/w:tcPr>/, (m, props) => {
             props = props.replace(/<w:tcW\b[^>]*\/>/, '');
@@ -2089,11 +2100,11 @@ async function corrigirDocxParaWord2016(arquivo) {
     };
     if (textoCompacto.includes('NOMEDOPRESOAUTOS') &&
         textoCompacto.includes('RETORNOPREVISTO') && textoCompacto.includes('DIAS')) {
-      return aplicarLargurasHospDocx(tabela, distribuirLarguras(720, [42, 17, 19, 16]));
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras(900, [42, 17, 19, 16]));
     }
     if (textoCompacto.includes('NOMEDOINTERNO') &&
         textoCompacto.includes('SAIDA') && textoCompacto.includes('RETORNOPREVISTO')) {
-      return aplicarLargurasHospDocx(tabela, distribuirLarguras(600, [56, 22, 22]), [1]);
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras(600, [64, 18, 18]), [1]);
     }
 
     if (!textoCompacto.includes('NOMEDOPRESO')) return tabela;
