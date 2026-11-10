@@ -2034,7 +2034,7 @@ async function corrigirDocxParaWord2016(arquivo) {
   // Localiza as tabelas dos Itens 25 e 27 pelo texto, sem depender do índice
   // ou de uma quantidade fixa de colunas internas geradas pelo html-to-docx.
   const larguraTabelaHospTwips = 10546;
-  const aplicarLargurasHospDocx = (tabela, largurasGrade) => {
+  const aplicarLargurasHospDocx = (tabela, largurasGrade, colunasSemQuebra = []) => {
     const total = largurasGrade.reduce((a, b) => a + b, 0);
     tabela = tabela.replace(/<w:tblW[^>]*\/>/, '<w:tblW w:type="dxa" w:w="' + total + '"/>');
     if (/<w:tblLayout[^>]*\/>/.test(tabela)) {
@@ -2052,9 +2052,16 @@ async function corrigirDocxParaWord2016(arquivo) {
         const largura = largurasGrade.slice(indice, indice + span).reduce((a, b) => a + b, 0) || largurasGrade[Math.min(indice, largurasGrade.length - 1)];
         indice += span;
         const tcW = '<w:tcW w:type="dxa" w:w="' + largura + '"/>';
-        if (/<w:tcW\b[^>]*\/>/.test(celula)) return celula.replace(/<w:tcW\b[^>]*\/>/, tcW);
-        if (/<w:tcPr\b[^>]*>/.test(celula)) return celula.replace(/(<w:tcPr\b[^>]*>)/, '$1' + tcW);
-        return celula.replace(/<w:tc\b[^>]*>/, m => m + '<w:tcPr>' + tcW + '</w:tcPr>');
+        const noWrap = colunasSemQuebra.includes(indice - span) ? '<w:noWrap/>' : '';
+        if (/<w:tcPr\b[^>]*>/.test(celula)) {
+          celula = celula.replace(/<w:tcPr\b[^>]*>([\s\S]*?)<\/w:tcPr>/, (m, props) => {
+            props = props.replace(/<w:tcW\b[^>]*\/>/, '');
+            if (noWrap && !/<w:noWrap\b/.test(props)) props += noWrap;
+            return '<w:tcPr>' + tcW + props + '</w:tcPr>';
+          });
+          return celula;
+        }
+        return celula.replace(/<w:tc\b[^>]*>/, m => m + '<w:tcPr>' + tcW + noWrap + '</w:tcPr>');
       });
     });
     return tabela;
@@ -2073,9 +2080,8 @@ async function corrigirDocxParaWord2016(arquivo) {
     // Item 28 — cinco colunas: ordem, nome/autos, saída, retorno previsto e dias.
     // Item 29 — quatro colunas: ordem, nome, saída e retorno previsto.
     // Em ambos, manter a mesma largura de ordem já validada nos Itens 25 e 27.
-    const larguraOrdemJudicial = 600;
-    const larguraRestanteJudicial = larguraTabelaHospTwips - larguraOrdemJudicial;
-    const distribuirLarguras = proporcoes => {
+    const distribuirLarguras = (larguraOrdemJudicial, proporcoes) => {
+      const larguraRestanteJudicial = larguraTabelaHospTwips - larguraOrdemJudicial;
       const soma = proporcoes.reduce((a, b) => a + b, 0);
       const larguras = proporcoes.map(p => Math.floor(larguraRestanteJudicial * p / soma));
       larguras[larguras.length - 1] += larguraRestanteJudicial - larguras.reduce((a, b) => a + b, 0);
@@ -2083,11 +2089,11 @@ async function corrigirDocxParaWord2016(arquivo) {
     };
     if (textoCompacto.includes('NOMEDOPRESOAUTOS') &&
         textoCompacto.includes('RETORNOPREVISTO') && textoCompacto.includes('DIAS')) {
-      return aplicarLargurasHospDocx(tabela, distribuirLarguras([42, 17, 19, 16]));
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras(720, [42, 17, 19, 16]));
     }
     if (textoCompacto.includes('NOMEDOINTERNO') &&
         textoCompacto.includes('SAIDA') && textoCompacto.includes('RETORNOPREVISTO')) {
-      return aplicarLargurasHospDocx(tabela, distribuirLarguras([50, 22, 22]));
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras(600, [56, 22, 22]), [1]);
     }
 
     if (!textoCompacto.includes('NOMEDOPRESO')) return tabela;
