@@ -2083,7 +2083,14 @@ function aplicarPadraoTabelasCPAIG(container) {
       cell.style.backgroundColor = "#d9d9d9";
       cell.style.textAlign = "center";
     });
-    if (opts.nameLeft) table.querySelectorAll("tbody tr td:nth-child(2)").forEach(cell => { cell.style.textAlign = "left"; });
+    if (opts.nameLeft) table.querySelectorAll("tbody tr td:nth-child(2)").forEach(cell => {
+      cell.style.textAlign = "left";
+      if (/^31(?:\s|[–-])|^32(?:\s|[–-])/.test(title)) {
+        cell.style.whiteSpace = "nowrap";
+        cell.style.overflowWrap = "normal";
+        cell.style.wordBreak = "keep-all";
+      }
+    });
     if (opts.documentGray) table.querySelectorAll("tbody tr td:last-child").forEach(cell => { cell.style.backgroundColor = "#bfbfbf"; });
     if (opts.movementHeader) {
       table.querySelectorAll("thead tr:nth-child(2) th").forEach((cell, i) => { cell.style.backgroundColor = i === 0 ? "#d9d9d9" : "#fff"; });
@@ -2117,9 +2124,10 @@ function aplicarPadraoTabelasCPAIG(container) {
     } else if (/^29\.1(?:\s|[–-])/.test(title)) {
       widths = [4.2,63.8,17.4,16]; opts.nameLeft = true;
     } else if (/^31(?:\s|[–-])/.test(title)) {
-      widths = [5,32,14,23,26]; opts.movementHeader = true;
+      // Itens 31/32: reproduzir as larguras medidas no modelo Word aprovado.
+      widths = [5.30,34.02,9.51,21.15,30.02]; opts.movementHeader = true; opts.nameLeft = true;
     } else if (/^32(?:\s|[–-])/.test(title)) {
-      widths = [5,32,9,22,32]; opts.movementHeader = true;
+      widths = [5.28,34.14,9.52,21.53,29.53]; opts.movementHeader = true; opts.nameLeft = true;
     } else return;
 
     const firstHeader = table.querySelector("thead tr");
