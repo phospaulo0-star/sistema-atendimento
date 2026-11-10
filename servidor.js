@@ -1517,8 +1517,8 @@ async function corrigirDocxParaWord2016(arquivo) {
     const tabelaItem32 = textoTabelaParaLargura.includes('SAIDADECUSTODIADOS');
     if (totalGrade > 0) {
       // Itens 31 e 32 são identificados pelo título, nunca pela posição da tabela no DOCX.
-      const proporcoesMovimentacao = tabelaItem31 ? [5, 32, 14, 23, 26]
-        : tabelaItem32 ? [5, 32, 9, 22, 32] : null;
+      const proporcoesMovimentacao = tabelaItem31 ? [4, 36, 11, 23, 26]
+        : tabelaItem32 ? [4, 36, 7, 22, 31] : null;
       const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
         ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
       const base = proporcoes && proporcoes.length === gradeAtual.length
