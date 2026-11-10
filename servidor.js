@@ -2106,7 +2106,32 @@ async function corrigirDocxParaWord2016(arquivo) {
         textoCompacto.includes('SITUACAO') &&
         !textoCompacto.includes('RETORNOPREVISTO') &&
         gradeAtual.length >= 5) {
-      return aplicarLargurasHospDocx(tabela, [422, 4746, 1371, 1371, 2636], [0]);
+      let tabelaItem28 = aplicarLargurasHospDocx(tabela, [600, 4568, 1371, 1371, 2636], [0]);
+      // Mantém o cabeçalho cinza, mas força a célula de nome/autos de cada registro em branco.
+      let indiceLinhaItem28 = 0;
+      tabelaItem28 = tabelaItem28.replace(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/g, linha => {
+        const ehCabecalho = indiceLinhaItem28++ === 0;
+        if (ehCabecalho) return linha;
+        let indiceCelulaItem28 = 0;
+        return linha.replace(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/g, celula => {
+          const coluna = indiceCelulaItem28++;
+          if (coluna !== 1) return celula;
+          // O segundo parágrafo contém AUTOS Nº; remove eventual negrito herdado pelo Word.
+          celula = celula.replace(/<w:p\\b[^>]*>[\\s\\S]*?<\\/w:p>/g, paragrafo => {
+            const textoParagrafo = (paragrafo.match(/<w:t\\b[^>]*>[\\s\\S]*?<\\/w:t>/g) || []).join(' ').replace(/<[^>]+>/g, ' ');
+            if (!/AUTOS\\s*N[º°]/i.test(textoParagrafo)) return paragrafo;
+            return paragrafo.replace(/<w:b(?:Cs)?\\b[^>]*\\/>/g, '');
+          });
+          if (/<w:tcPr\\b[^>]*>[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
+            celula = celula.replace(/(<w:tcPr\\b[^>]*>[\\s\\S]*?)(<\\/w:tcPr>)/, (m, antes, fecha) => {
+              antes = antes.replace(/<w:shd\\b[^>]*\\/>/g, '');
+              return antes + '<w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/>' + fecha;
+            });
+          }
+          return celula;
+        });
+      });
+      return tabelaItem28;
     }
 
     if ((textoCompacto.includes('NOMEDOPRESO') || textoCompacto.includes('NOMEDOINTERNO')) &&
