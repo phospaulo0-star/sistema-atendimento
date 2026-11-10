@@ -2169,13 +2169,34 @@ async function corrigirDocxParaWord2016(arquivo) {
         !textoCompacto.includes('RETORNOPREVISTO')) {
       // Item 29.1: mesma largura visual da coluna de ordem do Item 29.
       // O cabeçalho correto desta tabela é NOME DO INTERNO (não NOME DO PRESO).
-      const larguraOrdemRetorno = 800;
+      const larguraOrdemRetorno = 600;
       const restante = larguraTabelaHospTwips - larguraOrdemRetorno;
-      return aplicarLargurasHospDocx(
+      let tabelaRetorno291 = aplicarLargurasHospDocx(
         tabela,
         [larguraOrdemRetorno, Math.round(restante * 0.58), restante - Math.round(restante * 0.58)],
         [0]
       );
+      // Mantém a coluna de ordem cinza e centralizada, no padrão da imagem enviada.
+      let indiceLinhaRetorno291 = 0;
+      tabelaRetorno291 = tabelaRetorno291.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
+        const cabecalho = indiceLinhaRetorno291++ === 0;
+        if (cabecalho) return linha;
+        let indiceCelulaRetorno291 = 0;
+        return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
+          const coluna = indiceCelulaRetorno291++;
+          if (coluna !== 0) return celula;
+          const cinza = '<w:shd w:val="clear" w:color="auto" w:fill="D9D9D9"/>';
+          if (/<w:tcPr\b[^>]*>[\s\S]*?<\/w:tcPr>/.test(celula)) {
+            celula = celula.replace(/(<w:tcPr\b[^>]*>[\s\S]*?)(<\/w:tcPr>)/, (m, antes, fecha) => {
+              if (/<w:shd\b[^>]*\/>/.test(antes)) antes = antes.replace(/<w:shd\b[^>]*\/>/g, cinza);
+              else antes = antes.replace(/(<w:tcW\b[^>]*\/>)/, '$1' + cinza);
+              return antes + fecha;
+            });
+          }
+          return celula;
+        });
+      });
+      return tabelaRetorno291;
     }
 
     if (!textoCompacto.includes('NOMEDOPRESO')) return tabela;
