@@ -2089,7 +2089,7 @@ function aplicarPadraoTabelasCPAIG(container) {
     let widths = null, opts = {};
     if (/^25(?:\s|[–-])/.test(title)) {
       // Item 25: numeração compacta, nome/CI na mesma célula e SAÍDA destacada.
-      widths = [4.0,74,22];
+      widths = [3.2,74.3,22.5];
       opts.nameLeft = true;
       opts.item25 = true;
     } else if (/^25\.1(?:\s|[–-])/.test(title)) {
@@ -2097,7 +2097,7 @@ function aplicarPadraoTabelasCPAIG(container) {
     } else if (/^26(?:\s|[–-])/.test(title)) {
       widths = [4.4,54.4,19.1,22.1]; opts.nameLeft = true;
     } else if (/^27(?:\s|[–-])/.test(title)) {
-      widths = [4.4,66.2,29.4];
+      widths = [3.2,71.8,25];
     } else if (/^28(?:\s|[–-])/.test(title)) {
       widths = [4.3,44.9,13.1,13,24.7]; opts.nameLeft = true;
     } else if (/^28\.1(?:\s|[–-])/.test(title)) {
@@ -2150,13 +2150,13 @@ function aplicarPadraoTabelasCPAIG(container) {
       let cols = table.querySelector("colgroup");
       if (!cols) { cols = document.createElement("colgroup"); table.insertBefore(cols, table.firstChild); }
       while (cols.children.length < 3) cols.appendChild(document.createElement("col"));
-      cols.children[0].style.setProperty("width", "5.5%", "important");
-      cols.children[1].style.setProperty("width", isItem25 ? "72%" : "69.5%", "important");
+      cols.children[0].style.setProperty("width", "3.2%", "important");
+      cols.children[1].style.setProperty("width", isItem25 ? "74.3%" : "71.8%", "important");
       cols.children[2].style.setProperty("width", isItem25 ? "22.5%" : "25%", "important");
       table.querySelectorAll("tbody tr").forEach(row => {
         const numero = row.cells[0];
         if (numero) {
-          numero.style.setProperty("width", "5.5%", "important");
+          numero.style.setProperty("width", "3.2%", "important");
           numero.style.setProperty("min-width", "0", "important");
           numero.style.setProperty("max-width", "none", "important");
           numero.style.setProperty("box-sizing", "border-box", "important");
@@ -2169,7 +2169,7 @@ function aplicarPadraoTabelasCPAIG(container) {
         }
         const nome = row.cells[1];
         if (nome) {
-          nome.style.setProperty("width", isItem25 ? "72%" : "69.5%", "important");
+          nome.style.setProperty("width", isItem25 ? "74.3%" : "71.8%", "important");
           nome.style.setProperty("padding", "2px 6px", "important");
           nome.style.setProperty("text-align", "left", "important");
           nome.style.setProperty("white-space", "normal", "important");
@@ -3025,7 +3025,7 @@ function visualizarRelatorio(targetId=null){
       const rows=listaObitos.filter(r=>!r.nc);
       if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>• N/C.</div></section>`;
       const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:2px 1px;text-align:center;white-space:nowrap;width:28px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:left;overflow-wrap:break-word">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:25%">${esc(formatarDataHosp(r.data))}</td></tr>`).join('');
-      return `<section class="preview-section item27-compact-preview"><h3>${esc(item.titulo)}:</h3><table class="item27-compact-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><colgroup><col style="width:28px"><col style="width:auto"><col style="width:25%"></colgroup><thead><tr><th style="border:1px solid #222;background:#d2d2d2;padding:4px;width:5.5%"></th><th style="border:1px solid #222;background:#d2d2d2;padding:4px;text-align:center">NOME DO PRESO</th><th style="border:1px solid #222;background:#d2d2d2;padding:4px;width:25%;text-align:center">DATA</th></tr></thead><tbody>${trs}</tbody></table></section>`;
+      return `<section class="preview-section item27-compact-preview"><h3>${esc(item.titulo)}:</h3><table class="item27-compact-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><colgroup><col style="width:28px"><col style="width:auto"><col style="width:25%"></colgroup><thead><tr><th style="border:1px solid #222;background:#d2d2d2;padding:4px;width:3.2%"></th><th style="border:1px solid #222;background:#d2d2d2;padding:4px;text-align:center">NOME DO PRESO</th><th style="border:1px solid #222;background:#d2d2d2;padding:4px;width:25%;text-align:center">DATA</th></tr></thead><tbody>${trs}</tbody></table></section>`;
     }
     if(titulo.startsWith('26 –') || titulo.startsWith('26 -')){
       const rows=listaRetornoHospitalizados;
