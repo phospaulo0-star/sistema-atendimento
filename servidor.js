@@ -1596,8 +1596,10 @@ async function corrigirDocxParaWord2016(arquivo) {
         let colunaMov = 0;
         return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
           const coluna = colunaMov++;
-          // Faixa de título inteira cinza; nas demais linhas, somente a coluna Nº.
-          const cinza = atual === 0 || coluna === 0;
+          // Modelo CPAIG: título e cabeçalho de colunas cinza;
+          // corpo branco, exceto a última coluna DOCUMENTO, também cinza.
+          const totalColunas = gradeAtual.length;
+          const cinza = atual <= 1 || (atual >= 2 && coluna === totalColunas - 1);
           return definirFundoCelulaMov(celula, cinza ? 'D2D2D2' : 'FFFFFF');
         });
       });
