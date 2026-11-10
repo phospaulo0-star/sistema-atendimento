@@ -2066,10 +2066,31 @@ async function corrigirDocxParaWord2016(arquivo) {
       .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)));
     const texto = textoBruto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
     const textoCompacto = texto.replace(/\s+/g, '');
-    if (!textoCompacto.includes('NOMEDOPRESO')) return tabela;
     const gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
       .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
     if (gradeAtual.length < 3) return tabela;
+
+    // Item 28 — cinco colunas: ordem, nome/autos, saída, retorno previsto e dias.
+    // Item 29 — quatro colunas: ordem, nome, saída e retorno previsto.
+    // Em ambos, manter a mesma largura de ordem já validada nos Itens 25 e 27.
+    const larguraOrdemJudicial = 600;
+    const larguraRestanteJudicial = larguraTabelaHospTwips - larguraOrdemJudicial;
+    const distribuirLarguras = proporcoes => {
+      const soma = proporcoes.reduce((a, b) => a + b, 0);
+      const larguras = proporcoes.map(p => Math.floor(larguraRestanteJudicial * p / soma));
+      larguras[larguras.length - 1] += larguraRestanteJudicial - larguras.reduce((a, b) => a + b, 0);
+      return [larguraOrdemJudicial, ...larguras];
+    };
+    if (textoCompacto.includes('NOMEDOPRESOAUTOS') &&
+        textoCompacto.includes('RETORNOPREVISTO') && textoCompacto.includes('DIAS')) {
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras([42, 17, 19, 16]));
+    }
+    if (textoCompacto.includes('NOMEDOINTERNO') &&
+        textoCompacto.includes('SAIDA') && textoCompacto.includes('RETORNOPREVISTO')) {
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras([50, 22, 22]));
+    }
+
+    if (!textoCompacto.includes('NOMEDOPRESO')) return tabela;
 
     let larguraNome, larguraFinal;
     const larguraOrdem = 600; // aprox. 10,6 mm: comporta "01." sem quebrar a linha.
