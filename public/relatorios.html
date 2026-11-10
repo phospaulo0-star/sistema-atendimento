@@ -2138,30 +2138,29 @@ function aplicarPadraoTabelasCPAIG(container) {
     }
     formatar(table, widths, opts);
 
-    // Itens 25 e 27: colunas numéricas realmente estreitas e cabeçalho de data/saída cinza.
-    const isItem25 = /^25(?:\s|[–-])/.test(title);
-    const isItem27 = /^27(?:\s|[–-])/.test(title);
+    // Itens 25 e 27: deixa o navegador dimensionar a primeira coluna
+    // pelo conteúdo real (01.), sem reservar percentual da largura da tabela.
+    const isItem25 = /^25(?:\\s|[–-])/.test(title);
+    const isItem27 = /^27(?:\\s|[–-])/.test(title);
     if (isItem25 || isItem27) {
       table.style.setProperty("width", "100%", "important");
-      table.style.setProperty("table-layout", "fixed", "important");
-      let cols = table.querySelector("colgroup");
-      if (!cols) { cols = document.createElement("colgroup"); table.insertBefore(cols, table.firstChild); }
-      while (cols.children.length < 3) cols.appendChild(document.createElement("col"));
-      cols.children[0].style.setProperty("width", "28px", "important");
-      cols.children[1].style.setProperty("width", isItem25 ? "auto" : "calc(75% - 28px)", "important");
-      cols.children[2].style.setProperty("width", isItem25 ? "22%" : "25%", "important");
+      table.style.setProperty("table-layout", "auto", "important");
+      table.querySelectorAll("colgroup").forEach(group => group.remove());
       table.querySelectorAll("tbody tr").forEach(row => {
-        const num = row.cells[0];
-        if (num) {
-          ["width","min-width","max-width"].forEach(prop => num.style.setProperty(prop, "28px", "important"));
-          num.style.setProperty("box-sizing", "border-box", "important");
-          num.style.setProperty("padding", "2px 1px", "important");
-          num.style.setProperty("white-space", "nowrap", "important");
-          num.style.setProperty("word-break", "keep-all", "important");
-          num.style.setProperty("overflow-wrap", "normal", "important");
-          num.style.setProperty("background-color", "#d9d9d9", "important");
+        const numero = row.cells[0];
+        if (numero) {
+          numero.style.setProperty("width", "1%", "important");
+          numero.style.setProperty("min-width", "0", "important");
+          numero.style.setProperty("max-width", "none", "important");
+          numero.style.setProperty("padding", "2px 3px", "important");
+          numero.style.setProperty("white-space", "nowrap", "important");
+          numero.style.setProperty("word-break", "keep-all", "important");
+          numero.style.setProperty("overflow-wrap", "normal", "important");
+          numero.style.setProperty("text-align", "center", "important");
+          numero.style.setProperty("background-color", "#d9d9d9", "important");
         }
         if (row.cells[1]) {
+          row.cells[1].style.setProperty("width", "auto", "important");
           row.cells[1].style.setProperty("white-space", "normal", "important");
           row.cells[1].style.setProperty("overflow-wrap", "break-word", "important");
           row.cells[1].style.setProperty("word-break", "normal", "important");
@@ -2170,51 +2169,14 @@ function aplicarPadraoTabelasCPAIG(container) {
       });
       const header = table.querySelector("thead tr:first-child");
       if (header && header.cells.length >= 2) {
-        header.cells[0].style.setProperty("background-color", "#fff", "important");
-        header.cells[header.cells.length - 1].style.setProperty("background-color", "#bfbfbf", "important");
-        header.cells[header.cells.length - 1].style.setProperty("-webkit-print-color-adjust", "exact", "important");
-        header.cells[header.cells.length - 1].style.setProperty("print-color-adjust", "exact", "important");
-      }
-    }
-
-    // Correção definitiva do Item 25: aplica a largura diretamente na estrutura
-    // da tabela após toda a formatação geral, inclusive na cópia usada pelo Word.
-    if (sec.classList.contains("hospitalizado-preview-item25")) {
-      table.style.setProperty("width", "100%", "important");
-      table.style.setProperty("table-layout", "fixed", "important");
-      let cols = table.querySelector("colgroup");
-      if (!cols) { cols = document.createElement("colgroup"); table.insertBefore(cols, table.firstChild); }
-      while (cols.children.length < 3) cols.appendChild(document.createElement("col"));
-      cols.children[0].style.setProperty("width", "22px", "important");
-      cols.children[1].style.setProperty("width", "calc(78% - 22px)", "important");
-      cols.children[2].style.setProperty("width", "22%", "important");
-      table.querySelectorAll("tbody tr").forEach(row => {
-        const numero = row.cells[0];
-        if (numero) {
-          numero.style.setProperty("width", "22px", "important");
-          numero.style.setProperty("min-width", "22px", "important");
-          numero.style.setProperty("max-width", "22px", "important");
-          numero.style.setProperty("padding", "2px 1px", "important");
-          numero.style.setProperty("white-space", "nowrap", "important");
-          numero.style.setProperty("word-break", "keep-all", "important");
-          numero.style.setProperty("overflow-wrap", "normal", "important");
-          numero.style.setProperty("text-align", "center", "important");
-          numero.style.setProperty("background-color", "#d9d9d9", "important");
-        }
-        const nome = row.cells[1];
-        if (nome) {
-          nome.style.setProperty("text-align", "left", "important");
-          nome.style.setProperty("white-space", "normal", "important");
-          nome.style.setProperty("word-break", "normal", "important");
-          nome.style.setProperty("overflow-wrap", "break-word", "important");
-        }
-      });
-      const cabecalho = table.querySelector("thead tr:first-child");
-      if (cabecalho && cabecalho.cells.length >= 2) {
-        cabecalho.cells[0].style.setProperty("background-color", "#fff", "important");
-        cabecalho.cells[cabecalho.cells.length - 1].style.setProperty("background-color", "#bfbfbf", "important");
-        cabecalho.cells[cabecalho.cells.length - 1].style.setProperty("-webkit-print-color-adjust", "exact", "important");
-        cabecalho.cells[cabecalho.cells.length - 1].style.setProperty("print-color-adjust", "exact", "important");
+        const tituloNome = header.cells[0];
+        const tituloDataSaida = header.cells[header.cells.length - 1];
+        tituloNome.style.setProperty("background-color", "#fff", "important");
+        tituloDataSaida.setAttribute("bgcolor", "#bfbfbf");
+        tituloDataSaida.style.setProperty("background", "#bfbfbf", "important");
+        tituloDataSaida.style.setProperty("background-color", "#bfbfbf", "important");
+        tituloDataSaida.style.setProperty("-webkit-print-color-adjust", "exact", "important");
+        tituloDataSaida.style.setProperty("print-color-adjust", "exact", "important");
       }
     }
 
