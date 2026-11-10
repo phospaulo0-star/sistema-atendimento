@@ -2031,47 +2031,70 @@ async function corrigirDocxParaWord2016(arquivo) {
   });
 
 
-  // Ajuste final por identificação do conteúdo, não pelo índice da tabela.
-  // Define as larguras diretamente na grade OOXML e em cada célula do Word.
+  // Localiza as tabelas dos Itens 25 e 27 pelo texto, sem depender do índice
+  // ou de uma quantidade fixa de colunas internas geradas pelo html-to-docx.
   const larguraTabelaHospTwips = 10546;
-  const aplicarLargurasHospDocx = (tabela, larguras) => {
-    const total = larguras.reduce((a, b) => a + b, 0);
+  const aplicarLargurasHospDocx = (tabela, largurasGrade) => {
+    const total = largurasGrade.reduce((a, b) => a + b, 0);
     tabela = tabela.replace(/<w:tblW[^>]*\/>/, '<w:tblW w:type="dxa" w:w="' + total + '"/>');
-    tabela = tabela.replace(/<w:tblLayout[^>]*\/>/g, '');
-    if (/<w:tblPr>/.test(tabela)) {
+    if (/<w:tblLayout[^>]*\/>/.test(tabela)) {
+      tabela = tabela.replace(/<w:tblLayout[^>]*\/>/, '<w:tblLayout w:type="fixed"/>');
+    } else if (/<w:tblPr>/.test(tabela)) {
       tabela = tabela.replace(/<w:tblPr>/, '<w:tblPr><w:tblLayout w:type="fixed"/>');
     }
-    tabela = tabela.replace(/<w:tblGrid>[^]*?<\/w:tblGrid>/,
-      '<w:tblGrid>' + larguras.map(w => '<w:gridCol w:w="' + w + '"/>').join('') + '</w:tblGrid>');
-    tabela = tabela.replace(/<w:tr[^>]*>[^]*?<\/w:tr>/g, linha => {
+    tabela = tabela.replace(/<w:tblGrid>[\s\S]*?<\/w:tblGrid>/,
+      '<w:tblGrid>' + largurasGrade.map(w => '<w:gridCol w:w="' + w + '"/>').join('') + '</w:tblGrid>');
+    tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
       let indice = 0;
-      return linha.replace(/<w:tc[^>]*>[^]*?<\/w:tc>/g, celula => {
-        const spanMatch = celula.match(/<w:gridSpan[^>]*w:val="([0-9]+)"/);
+      return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
+        const spanMatch = celula.match(/<w:gridSpan\b[^>]*w:val="(\d+)"/);
         const span = Math.max(1, Number(spanMatch && spanMatch[1] || 1));
-        const largura = larguras.slice(indice, indice + span).reduce((a, b) => a + b, 0) || larguras[Math.min(indice, larguras.length - 1)];
+        const largura = largurasGrade.slice(indice, indice + span).reduce((a, b) => a + b, 0) || largurasGrade[Math.min(indice, largurasGrade.length - 1)];
         indice += span;
         const tcW = '<w:tcW w:type="dxa" w:w="' + largura + '"/>';
-        if (/<w:tcW[^>]*\/>/.test(celula)) return celula.replace(/<w:tcW[^>]*\/>/, tcW);
-        if (/<w:tcPr>/.test(celula)) return celula.replace(/<w:tcPr>/, '<w:tcPr>' + tcW);
-        return celula.replace(/<w:tc>/, '<w:tc><w:tcPr>' + tcW + '</w:tcPr>');
+        if (/<w:tcW\b[^>]*\/>/.test(celula)) return celula.replace(/<w:tcW\b[^>]*\/>/, tcW);
+        if (/<w:tcPr\b[^>]*>/.test(celula)) return celula.replace(/(<w:tcPr\b[^>]*>)/, '$1' + tcW);
+        return celula.replace(/<w:tc\b[^>]*>/, m => m + '<w:tcPr>' + tcW + '</w:tcPr>');
       });
     });
     return tabela;
   };
-  xml = xml.replace(/<w:tbl[^>]*>[^]*?<\/w:tbl>/g, tabela => {
-    const texto = (tabela.match(/<w:t[^>]*>[^]*?<\/w:t>/g) || [])
-      .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/[ ]+/g, ' ').toUpperCase();
-    const colunas = (tabela.match(/<w:gridCol/g) || []).length;
-    if (colunas !== 3 || !texto.includes('NOME DO PRESO')) return tabela;
-    if (texto.includes('SAÍDA')) {
-      const larguras = [340, 7835, larguraTabelaHospTwips - 340 - 7835];
-      return aplicarLargurasHospDocx(tabela, larguras);
+  xml = xml.replace(/<w:tbl\b[\s\S]*?<\/w:tbl>/g, tabela => {
+    const textoBruto = (tabela.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ')
+      .replace(/&amp;/g, '&').replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+      .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)));
+    const texto = textoBruto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    const textoCompacto = texto.replace(/\s+/g, '');
+    if (!textoCompacto.includes('NOMEDOPRESO')) return tabela;
+    const gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
+      .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
+    if (gradeAtual.length < 3) return tabela;
+
+    let larguraNome, larguraFinal;
+    if (textoCompacto.includes('SAIDA')) {
+      larguraNome = 7835;
+      larguraFinal = larguraTabelaHospTwips - 340 - larguraNome;
+    } else if (textoCompacto.includes('DATA')) {
+      larguraNome = 7572;
+      larguraFinal = larguraTabelaHospTwips - 340 - larguraNome;
+    } else {
+      return tabela;
     }
-    if (texto.includes('DATA')) {
-      const larguras = [340, 7572, larguraTabelaHospTwips - 340 - 7572];
-      return aplicarLargurasHospDocx(tabela, larguras);
+
+    // A primeira coluna fica com 340 twips (aprox. 6 mm).
+    // Se o conversor criou colunas extras por causa de células mescladas,
+    // distribui somente a largura da coluna do nome entre essas colunas.
+    const quantidadeMeio = gradeAtual.length - 2;
+    const largurasGrade = [340];
+    let restanteNome = larguraNome;
+    for (let i = 0; i < quantidadeMeio; i++) {
+      const largura = i === quantidadeMeio - 1 ? restanteNome : Math.round(larguraNome / quantidadeMeio);
+      largurasGrade.push(largura);
+      restanteNome -= largura;
     }
-    return tabela;
+    largurasGrade.push(larguraFinal);
+    return aplicarLargurasHospDocx(tabela, largurasGrade);
   });
 
   zip.file('word/document.xml', xml);
