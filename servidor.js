@@ -1517,8 +1517,8 @@ async function corrigirDocxParaWord2016(arquivo) {
     const tabelaItem32 = textoTabelaParaLargura.includes('SAIDADECUSTODIADOS');
     if (totalGrade > 0) {
       // Itens 31 e 32 são identificados pelo título, nunca pela posição da tabela no DOCX.
-      const proporcoesMovimentacao = tabelaItem31 ? [4, 36, 11, 23, 26]
-        : tabelaItem32 ? [4, 36, 7, 22, 31] : null;
+      const proporcoesMovimentacao = tabelaItem31 ? [4, 42, 9, 19, 26]
+        : tabelaItem32 ? [4, 42, 7, 19, 28] : null;
       const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
         ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
       const base = proporcoes && proporcoes.length === gradeAtual.length
@@ -1600,6 +1600,15 @@ async function corrigirDocxParaWord2016(arquivo) {
           // corpo branco, exceto a última coluna DOCUMENTO, também cinza.
           const totalColunas = gradeAtual.length;
           const cinza = atual <= 1 || (atual >= 2 && coluna === totalColunas - 1);
+          if (atual >= 2 && coluna === 1) {
+            // Nome do custodiado em uma única linha no Word.
+            if (/<w:tcPr\\b[^>]*>[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
+              celula = celula.replace(/(<w:tcPr\\b[^>]*>[\\s\\S]*?)(<\\/w:tcPr>)/, (m, antes, fecha) => {
+                if (!/<w:noWrap\\b/.test(antes)) antes += '<w:noWrap/>';
+                return antes + fecha;
+              });
+            }
+          }
           return definirFundoCelulaMov(celula, cinza ? 'D2D2D2' : 'FFFFFF');
         });
       });
