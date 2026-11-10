@@ -2109,6 +2109,21 @@ async function corrigirDocxParaWord2016(arquivo) {
       return aplicarLargurasHospDocx(tabela, distribuirLarguras(600, [50, 22, 22]));
     }
 
+    // Item 29.1 — retorno da licença judicial de 7 dias.
+    // Mantém a coluna de ordem estreita e impede que o ponto desça para outra linha.
+    if (textoCompacto.includes('NOMEDOPRESO') &&
+        textoCompacto.includes('SAIDA') &&
+        textoCompacto.includes('RETORNO') &&
+        !textoCompacto.includes('RETORNOPREVISTO')) {
+      const larguraOrdemRetorno = 600;
+      const restante = larguraTabelaHospTwips - larguraOrdemRetorno;
+      return aplicarLargurasHospDocx(
+        tabela,
+        [larguraOrdemRetorno, Math.round(restante * 0.58), restante - Math.round(restante * 0.58)],
+        [0]
+      );
+    }
+
     if (!textoCompacto.includes('NOMEDOPRESO')) return tabela;
 
     let larguraNome, larguraFinal;
