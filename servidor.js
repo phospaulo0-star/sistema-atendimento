@@ -1578,7 +1578,7 @@ async function corrigirDocxParaWord2016(arquivo) {
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, '');
     const ehEntradaSaida = textoTabelaMov.includes('ENTRADADECUSTODIADOS') ||
       textoTabelaMov.includes('SAIDADECUSTODIADOS');
-    if (ehEntradaSaida && gradeAtual.length === 5) {
+    if (ehEntradaSaida && gradeAtual.length >= 5) {
       const definirFundoCelulaMov = (celula, cor) => {
         const sombreado = '<w:shd w:val="clear" w:color="auto" w:fill="' + cor + '"/>';
         if (/<w:tcPr\b[^>]*>[\s\S]*?<\/w:tcPr>/.test(celula)) {
