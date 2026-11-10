@@ -2102,11 +2102,11 @@ async function corrigirDocxParaWord2016(arquivo) {
         textoCompacto.includes('RETORNOPREVISTO') &&
         (textoCompacto.includes('QUANTIDADEDEDIAS') || textoCompacto.includes('DIAS'))) {
       // Item 28: coluna de ordem com largura suficiente e sem quebra entre "01" e ".".
-      return aplicarLargurasHospDocx(tabela, distribuirLarguras(1100, [42, 17, 19, 16]), [0]);
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras(600, [42, 17, 19, 16]), [0]);
     }
     if (textoCompacto.includes('NOMEDOINTERNO') &&
         textoCompacto.includes('SAIDA') && textoCompacto.includes('RETORNOPREVISTO')) {
-      return aplicarLargurasHospDocx(tabela, distribuirLarguras(600, [64, 18, 18]), [1]);
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras(600, [50, 22, 22]));
     }
 
     if (!textoCompacto.includes('NOMEDOPRESO')) return tabela;
