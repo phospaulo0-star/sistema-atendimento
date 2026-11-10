@@ -24,7 +24,7 @@
 .escala-diurna-row{display:grid;grid-template-columns:minmax(130px,1fr) 12px minmax(260px,2fr) 70px auto;gap:8px;align-items:center;margin:7px 0}.escala-diurna-row input,.escala-diurna-row select{width:100%;min-width:0;font:inherit;border:1px solid #bbc3cc;border-radius:6px;padding:9px;background:white}.escala-diurna-row .escala-nome-control{display:grid;grid-template-columns:1fr;gap:5px}.escala-diurna-row .escala-nome-control select{font-size:13px;padding:7px}.escala-diurna-row .escala-nome-control input{width:100%}.escala-diurna-row .escala-he{display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-weight:bold}.escala-diurna-row .escala-he input{width:auto;margin:0}.escala-diurna-row .escala-order{display:flex;gap:4px}.escala-diurna-row button{padding:8px 9px}.escala-diurna-row .escala-colon{font-weight:bold;text-align:center}.escala-diurna-print{white-space:pre-wrap}@media(max-width:650px){.escala-diurna-row{grid-template-columns:1fr 1fr}.escala-diurna-row .escala-colon{display:none}.escala-diurna-row .escala-nome-control{grid-column:1/-1}.escala-diurna-row .escala-order{grid-column:1/-1}.escala-diurna-row .escala-he{justify-content:flex-start}}
 
 /* Itens 31 e 32: fonte 8pt, colunas proporcionais e nome em uma linha alinhado à esquerda. */
-.custody-preview-table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;font-family:Arial,Helvetica,sans-serif!important;font-size:8pt!important}
+.custody-preview-table{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;font-family:"Times New Roman",Times,serif!important;font-size:8pt!important}
 .custody-preview-table th,.custody-preview-table td{font-size:8pt!important;line-height:1.05!important;padding:2px 3px!important;vertical-align:middle!important}
 .custody-preview-table th:nth-child(2){text-align:center!important}
 .custody-preview-table td:nth-child(2){text-align:left!important;white-space:nowrap!important;overflow-wrap:normal!important;word-break:keep-all!important;vertical-align:middle!important}
@@ -2247,7 +2247,7 @@ function aplicarPadraoTabelasCPAIG(container) {
     movement.querySelectorAll("table.custody-preview-table").forEach(table => {
       const title = table.querySelector("thead tr:first-child th:last-child")?.textContent.trim() || "";
       const isExit = /SAÍDA/i.test(title);
-      const widths = isExit ? [4.2,33.3,8.3,23.6,30.6] : [5.6,33.3,16.7,15.3,29.1];
+      const widths = isExit ? [5.28,34.14,9.52,21.53,29.53] : [5.30,34.02,9.51,21.15,30.02];
       const firstRow = table.querySelector("thead tr:first-child");
       if (firstRow && firstRow.children.length > 1) {
         const cells = [...firstRow.children];
@@ -3005,7 +3005,7 @@ function visualizarRelatorio(targetId=null){
       const total=String(rows.length).padStart(2,'0');
       const tituloTabela=tipo==='entrada'?'ENTRADA DE CUSTODIADOS':'SAÍDA DE CUSTODIADOS';
       const trs=rows.map((r,i)=>`<tr><td style="text-align:center;background:#fff;white-space:nowrap">${i+1}.</td><td style="text-align:left!important;white-space:nowrap;overflow-wrap:normal;word-break:keep-all;vertical-align:middle">${esc(r.nome)}</td><td>${esc(r.rgi)}</td><td>${esc(r.procedencia)}</td><td style="background:#d2d2d2">${esc(r.documento)}</td></tr>`).join('');
-      const larguras=tipo==='entrada'?[4,48,8,20,20]:[4,48,8,20,20];
+      const larguras=tipo==='entrada'?[5.30,34.02,9.51,21.15,30.02]:[5.28,34.14,9.52,21.53,29.53];
       return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table"><colgroup>${larguras.map(w=>`<col style="width:${w}%">`).join('')}</colgroup><thead><tr><th colspan="5" style="background:#d2d2d2;text-align:center">${tituloTabela}</th></tr><tr><th style="background:#d2d2d2"> </th><th style="background:#d2d2d2">NOME</th><th style="background:#d2d2d2">RGI</th><th style="background:#d2d2d2">${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th style="background:#d2d2d2">DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total" style="display:block;width:100%;text-align:right;text-align-last:right;font-family:Arial,Helvetica,sans-serif;font-size:9pt;font-weight:bold;margin:1mm 0 3mm;padding:0">Total de ${tipo==='entrada'?'entradas':'saídas'}: ${total}</div></section>`;
     }
     if(titulo.startsWith('36 – MATERIAL REPASSADO PARA CHEFIA')){
