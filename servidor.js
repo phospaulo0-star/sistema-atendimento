@@ -2098,9 +2098,11 @@ async function corrigirDocxParaWord2016(arquivo) {
       larguras[larguras.length - 1] += larguraRestanteJudicial - larguras.reduce((a, b) => a + b, 0);
       return [larguraOrdemJudicial, ...larguras];
     };
-    if (textoCompacto.includes('NOMEDOPRESOAUTOS') &&
-        textoCompacto.includes('RETORNOPREVISTO') && textoCompacto.includes('DIAS')) {
-      return aplicarLargurasHospDocx(tabela, distribuirLarguras(900, [42, 17, 19, 16]));
+    if ((textoCompacto.includes('NOMEDOPRESO') || textoCompacto.includes('NOMEDOINTERNO')) &&
+        textoCompacto.includes('RETORNOPREVISTO') &&
+        (textoCompacto.includes('QUANTIDADEDEDIAS') || textoCompacto.includes('DIAS'))) {
+      // Item 28: coluna de ordem com largura suficiente e sem quebra entre "01" e ".".
+      return aplicarLargurasHospDocx(tabela, distribuirLarguras(1100, [42, 17, 19, 16]), [0]);
     }
     if (textoCompacto.includes('NOMEDOINTERNO') &&
         textoCompacto.includes('SAIDA') && textoCompacto.includes('RETORNOPREVISTO')) {
