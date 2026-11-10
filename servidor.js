@@ -2098,6 +2098,17 @@ async function corrigirDocxParaWord2016(arquivo) {
       larguras[larguras.length - 1] += larguraRestanteJudicial - larguras.reduce((a, b) => a + b, 0);
       return [larguraOrdemJudicial, ...larguras];
     };
+    // Item 28 — novo modelo: Nº | Nome do preso | Saída | Retorno | Situação.
+    // Aplica cinco colunas proporcionais também na estrutura OOXML do Word.
+    if (textoCompacto.includes('NOMEDOPRESO') &&
+        textoCompacto.includes('SAIDA') &&
+        textoCompacto.includes('RETORNO') &&
+        textoCompacto.includes('SITUACAO') &&
+        !textoCompacto.includes('RETORNOPREVISTO') &&
+        gradeAtual.length >= 5) {
+      return aplicarLargurasHospDocx(tabela, [422, 4746, 1371, 1371, 2636], [0]);
+    }
+
     if ((textoCompacto.includes('NOMEDOPRESO') || textoCompacto.includes('NOMEDOINTERNO')) &&
         textoCompacto.includes('RETORNOPREVISTO') &&
         (textoCompacto.includes('QUANTIDADEDEDIAS') || textoCompacto.includes('DIAS'))) {
