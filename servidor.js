@@ -2072,21 +2072,20 @@ async function corrigirDocxParaWord2016(arquivo) {
     if (gradeAtual.length < 3) return tabela;
 
     let larguraNome, larguraFinal;
+    const larguraOrdem = 600; // aprox. 10,6 mm: comporta "01." sem quebrar a linha.
     if (textoCompacto.includes('SAIDA')) {
       larguraNome = 7835;
-      larguraFinal = larguraTabelaHospTwips - 340 - larguraNome;
+      larguraFinal = larguraTabelaHospTwips - larguraOrdem - larguraNome;
     } else if (textoCompacto.includes('DATA')) {
       larguraNome = 7572;
-      larguraFinal = larguraTabelaHospTwips - 340 - larguraNome;
+      larguraFinal = larguraTabelaHospTwips - larguraOrdem - larguraNome;
     } else {
       return tabela;
     }
 
-    // O html-to-docx pode gerar uma grade artificial com 15 colunas,
-    // embora cada linha tenha somente 3 células lógicas. O Word então
-    // comprime o conteúdo. Normalize a grade para exatamente 3 colunas.
-    // A primeira mede 6 mm; nome e data recebem larguras fixas proporcionais.
-    const largurasGrade = [340, larguraNome, larguraFinal];
+    // Grade normalizada para exatamente 3 colunas reais.
+    // A primeira mede aprox. 10,6 mm para manter número e ponto na mesma linha.
+    const largurasGrade = [larguraOrdem, larguraNome, larguraFinal];
     return aplicarLargurasHospDocx(tabela, largurasGrade);
   });
 
