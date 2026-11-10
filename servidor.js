@@ -1564,28 +1564,28 @@ async function corrigirDocxParaWord2016(arquivo) {
     }
 
     // Itens 31 e 32 — cabeçalho em duas faixas e cores conforme modelo enviado.
-    const textoTabelaMov = (tabela.match(/<w:t\\b[^>]*>[\\s\\S]*?<\\/w:t>/g) || [])
+    const textoTabelaMov = (tabela.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
       .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&')
-      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toUpperCase().replace(/\\s+/g, '');
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, '');
     const ehEntradaSaida = textoTabelaMov.includes('ENTRADADECUSTODIADOS') ||
       textoTabelaMov.includes('SAIDADECUSTODIADOS');
     if (ehEntradaSaida && gradeAtual.length === 5) {
       const definirFundoCelulaMov = (celula, cor) => {
         const sombreado = '<w:shd w:val="clear" w:color="auto" w:fill="' + cor + '"/>';
-        if (/<w:tcPr\\b[^>]*>[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
-          return celula.replace(/(<w:tcPr\\b[^>]*>[\\s\\S]*?)(<\\/w:tcPr>)/, (m, antes, fecha) => {
-            if (/<w:shd\\b[^>]*\\/>/.test(antes)) antes = antes.replace(/<w:shd\\b[^>]*\\/>/g, sombreado);
+        if (/<w:tcPr\b[^>]*>[\s\S]*?<\/w:tcPr>/.test(celula)) {
+          return celula.replace(/(<w:tcPr\b[^>]*>[\s\S]*?)(<\/w:tcPr>)/, (m, antes, fecha) => {
+            if (/<w:shd\b[^>]*\/>/.test(antes)) antes = antes.replace(/<w:shd\b[^>]*\/>/g, sombreado);
             else antes += sombreado;
             return antes + fecha;
           });
         }
-        return celula.replace(/<w:tc\\b[^>]*>/, m => m + '<w:tcPr>' + sombreado + '</w:tcPr>');
+        return celula.replace(/<w:tc\b[^>]*>/, m => m + '<w:tcPr>' + sombreado + '</w:tcPr>');
       };
       let linhaMov = 0;
-      tabela = tabela.replace(/<w:tr\\b[\\s\\S]*?<\\/w:tr>/g, linha => {
+      tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
         const atual = linhaMov++;
         let colunaMov = 0;
-        return linha.replace(/<w:tc\\b[\\s\\S]*?<\\/w:tc>/g, celula => {
+        return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
           const coluna = colunaMov++;
           // Faixa de título inteira cinza; nas demais linhas, somente a coluna Nº.
           const cinza = atual === 0 || coluna === 0;
