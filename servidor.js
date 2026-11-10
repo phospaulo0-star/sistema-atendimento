@@ -2111,11 +2111,13 @@ async function corrigirDocxParaWord2016(arquivo) {
 
     // Item 29.1 — retorno da licença judicial de 7 dias.
     // Mantém a coluna de ordem estreita e impede que o ponto desça para outra linha.
-    if (textoCompacto.includes('NOMEDOPRESO') &&
+    if (textoCompacto.includes('NOMEDOINTERNO') &&
         textoCompacto.includes('SAIDA') &&
         textoCompacto.includes('RETORNO') &&
         !textoCompacto.includes('RETORNOPREVISTO')) {
-      const larguraOrdemRetorno = 600;
+      // Item 29.1: mesma largura visual da coluna de ordem do Item 29.
+      // O cabeçalho correto desta tabela é NOME DO INTERNO (não NOME DO PRESO).
+      const larguraOrdemRetorno = 800;
       const restante = larguraTabelaHospTwips - larguraOrdemRetorno;
       return aplicarLargurasHospDocx(
         tabela,
