@@ -2164,6 +2164,18 @@ function aplicarPadraoTabelasCPAIG(container) {
         col.style.setProperty("width", colWidths[i], "important");
       });
 
+      // O conversor HTML -> DOCX do servidor pode ignorar medidas de <colgroup>.
+      // Por isso, grava a largura também como atributo HTML width em cada célula.
+      const larguraOrdemPx = 23; // aproximadamente 6 mm
+      const primeiraColuna = table.querySelector("colgroup")?.children?.[0];
+      if (primeiraColuna) {
+        primeiraColuna.setAttribute("width", String(larguraOrdemPx));
+        primeiraColuna.setAttribute("style", "width:23px;mso-width-alt:340");
+      }
+      table.querySelectorAll("thead tr:first-child th:first-child, tbody tr td:first-child").forEach(cell => {
+        cell.setAttribute("width", String(larguraOrdemPx));
+        cell.setAttribute("style", (cell.getAttribute("style") || "") + ";width:23px!important;min-width:23px!important;max-width:23px!important;mso-width-alt:340;white-space:nowrap");
+      });
       table.querySelectorAll("tbody tr").forEach(row => {
         const numberCell = row.cells[0];
         const nameCell = row.cells[1];
