@@ -500,13 +500,13 @@ body.admin-preview-mode #previewContent{display:block!important;max-width:100%!i
   table-layout:fixed!important;
 }
 #previewContent .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(1),
-body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(1){width:4%!important}
+body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(1){width:6mm!important}
 #previewContent .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(2),
 body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(2){width:74%!important}
 #previewContent .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(3),
 body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(3){width:22%!important}
 #previewContent .hospitalizado-preview-item25 .hospitalizado-preview-table tbody td:first-child{
-  width:4%!important;min-width:0!important;padding-left:1px!important;padding-right:1px!important;
+  width:6mm!important;min-width:0!important;padding-left:1px!important;padding-right:1px!important;
   white-space:nowrap!important;text-align:center!important;background:#d9d9d9!important;
 }
 #previewContent .hospitalizado-preview-item25 .hospitalizado-preview-table tbody td:nth-child(2){
@@ -521,7 +521,7 @@ body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col
   body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(1){width:4%!important}
   body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(2){width:74%!important}
   body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table col:nth-child(3){width:22%!important}
-  body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table tbody td:first-child{width:4%!important;padding-left:1px!important;padding-right:1px!important}
+  body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table tbody td:first-child{width:6mm!important;padding-left:1px!important;padding-right:1px!important}
   body.preview-mode .hospitalizado-preview-item25 .hospitalizado-preview-table thead th:last-child{
     background:#bfbfbf!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
   }
@@ -2159,7 +2159,7 @@ function aplicarPadraoTabelasCPAIG(container) {
         document.createElement("col"),
         document.createElement("col")
       );
-      const colWidths = isItem25 ? ["10mm", "calc(100% - 50mm)", "40mm"] : ["10mm", "calc(100% - 55mm)", "45mm"];
+      const colWidths = isItem25 ? ["6mm", "calc(100% - 46mm)", "40mm"] : ["6mm", "calc(100% - 51mm)", "45mm"];
       [...group.children].forEach((col, i) => {
         col.style.setProperty("width", colWidths[i], "important");
       });
@@ -2169,7 +2169,7 @@ function aplicarPadraoTabelasCPAIG(container) {
         const nameCell = row.cells[1];
         const dateCell = row.cells[2];
         if (numberCell) {
-          ["width","min-width","max-width"].forEach(prop => numberCell.style.setProperty(prop, "10mm", "important"));
+          ["width","min-width","max-width"].forEach(prop => numberCell.style.setProperty(prop, "6mm", "important"));
           numberCell.style.setProperty("box-sizing", "border-box", "important");
           numberCell.style.setProperty("padding", "2px 2px", "important");
           numberCell.style.setProperty("white-space", "nowrap", "important");
@@ -3040,7 +3040,7 @@ function visualizarRelatorio(targetId=null){
     if(titulo.startsWith('26 –') || titulo.startsWith('26 -')){
       const rows=listaRetornoHospitalizados;
       if(!rows.length)return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div>• N/C.</div></section>`;
-      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:34px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:left">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:20%">${esc(formatarDataHosp(r.saida))}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:20%">${esc(formatarDataHosp(r.retorno))}</td></tr>`).join('');
+      const trs=rows.map((r,i)=>`<tr><td style="border:1px solid #222;padding:2px 1px;text-align:center;width:6mm;white-space:nowrap">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:left">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:20%">${esc(formatarDataHosp(r.saida))}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:20%">${esc(formatarDataHosp(r.retorno))}</td></tr>`).join('');
       return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table style="width:100%;border-collapse:collapse!important;border:1px solid #222;table-layout:fixed;font-size:10pt"><thead><tr><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:34px"></th><th style="border:1px solid #222;background:#c6c6c6;padding:4px">NOME DO PRESO</th><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:20%">SAÍDA</th><th style="border:1px solid #222;background:#c6c6c6;padding:4px;width:20%">RETORNO</th></tr></thead><tbody>${trs}</tbody></table></section>`;
     }
     if(titulo.startsWith('25.1') || titulo.startsWith('25 –') || titulo.startsWith('25 -')){
@@ -3050,7 +3050,7 @@ function visualizarRelatorio(targetId=null){
         return `<section class="preview-section hospitalizado-preview"><h3>${esc(item.titulo)}:</h3><div class="hospitalizado-preview-nc">• N/C.</div></section>`;
       }
       const linhasHosp=arrHosp.map((r,i)=>`<tr><td style="border:1px solid #222;padding:4px;text-align:center;width:34px">${String(i+1).padStart(2,'0')}.</td><td style="border:1px solid #222;padding:4px;text-align:center;overflow-wrap:anywhere">${esc(r.nome||'')}</td><td style="border:1px solid #222;padding:4px;text-align:center;width:22%">${esc(formatarDataHosp(r.saida))}</td></tr>`).join('');
-      const classeConfirmar=' hospitalizado-preview-padrao'+(tipoHosp==='confirmar'?' hospitalizado-preview-confirmar':'');const classeItem25=tipoHosp==='hospitalizado'?' hospitalizado-preview-item25':'';const fonteTabela='font-family:"Times New Roman",Times,serif;font-size:11pt;';return `<section class="preview-section hospitalizado-preview${classeConfirmar}${classeItem25}"><h3>${esc(item.titulo)}:</h3><table class="hospitalizado-preview-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;${fonteTabela}table-layout:fixed"><colgroup><col style="width:4%"><col style="width:74%"><col style="width:22%"></colgroup><thead><tr><th style="border:1px solid #222;background:#d2d2d2;padding:4px;width:5.5%"></th><th style="border:1px solid #222;background:#d2d2d2;padding:4px;text-align:center">NOME DO PRESO</th><th style="border:1px solid #222;background:#d2d2d2;padding:4px;width:22.5%;text-align:center">SAÍDA</th></tr></thead><tbody>${linhasHosp}</tbody></table></section>`;
+      const classeConfirmar=' hospitalizado-preview-padrao'+(tipoHosp==='confirmar'?' hospitalizado-preview-confirmar':'');const classeItem25=tipoHosp==='hospitalizado'?' hospitalizado-preview-item25':'';const fonteTabela='font-family:"Times New Roman",Times,serif;font-size:11pt;';return `<section class="preview-section hospitalizado-preview${classeConfirmar}${classeItem25}"><h3>${esc(item.titulo)}:</h3><table class="hospitalizado-preview-table" style="width:100%;border-collapse:collapse!important;border:1px solid #222;${fonteTabela}table-layout:fixed"><colgroup><col style="width:6mm"><col style="width:auto"><col style="width:40mm"></colgroup><thead><tr><th style="border:1px solid #222;background:#d2d2d2;padding:4px;width:6mm"></th><th style="border:1px solid #222;background:#d2d2d2;padding:4px;text-align:center">NOME DO PRESO</th><th style="border:1px solid #222;background:#d2d2d2;padding:4px;width:22.5%;text-align:center">SAÍDA</th></tr></thead><tbody>${linhasHosp}</tbody></table></section>`;
     }
     if(titulo.startsWith('16')){
       const linhas=String(item.texto||'').split(/\r?\n/).filter(l=>l.trim()&&!/^N\/C\.?$/i.test(l.trim()));
