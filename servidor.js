@@ -1602,11 +1602,13 @@ async function corrigirDocxParaWord2016(arquivo) {
           const cinza = atual <= 1 || (atual >= 2 && coluna === totalColunas - 1);
           if (atual >= 2 && coluna === 1) {
             // Nome do custodiado em uma única linha no Word.
-            if (/<w:tcPr\\b[^>]*>[\\s\\S]*?<\\/w:tcPr>/.test(celula)) {
-              celula = celula.replace(/(<w:tcPr\\b[^>]*>[\\s\\S]*?)(<\\/w:tcPr>)/, (m, antes, fecha) => {
-                if (!/<w:noWrap\\b/.test(antes)) antes += '<w:noWrap/>';
-                return antes + fecha;
-              });
+            const inicioTcPr = celula.indexOf('<w:tcPr');
+            const fimTcPr = celula.indexOf('</w:tcPr>', inicioTcPr);
+            if (inicioTcPr >= 0 && fimTcPr >= 0) {
+              const propriedades = celula.slice(inicioTcPr, fimTcPr);
+              if (!propriedades.includes('<w:noWrap')) {
+                celula = celula.slice(0, fimTcPr) + '<w:noWrap/>' + celula.slice(fimTcPr);
+              }
             }
           }
           return definirFundoCelulaMov(celula, cinza ? 'D2D2D2' : 'FFFFFF');
