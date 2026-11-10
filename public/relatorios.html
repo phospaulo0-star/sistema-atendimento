@@ -2138,52 +2138,62 @@ function aplicarPadraoTabelasCPAIG(container) {
     }
     formatar(table, widths, opts);
 
-    // Formatação conforme o modelo visual aprovado: coluna curta para 01.,
-    // coluna ampla para o nome/CI e cabeçalhos cinza em toda a faixa.
-    const isItem25 = /^25(?:\\s|[–-])/.test(title);
-    const isItem27 = /^27(?:\\s|[–-])/.test(title);
+    // Ajuste definitivo dos Itens 25 e 27: largura física, não percentual.
+    // A coluna da ordem deve medir apenas o necessário para "01." e não crescer
+    // quando o navegador/Word recalcular as porcentagens da tabela.
+    const isItem25 = /^25(?:\s|[–-])/.test(title);
+    const isItem27 = /^27(?:\s|[–-])/.test(title);
     if (isItem25 || isItem27) {
       table.style.setProperty("width", "100%", "important");
       table.style.setProperty("max-width", "100%", "important");
       table.style.setProperty("table-layout", "fixed", "important");
       table.style.setProperty("border-collapse", "collapse", "important");
-      let cols = table.querySelector("colgroup");
-      if (!cols) { cols = document.createElement("colgroup"); table.insertBefore(cols, table.firstChild); }
-      while (cols.children.length < 3) cols.appendChild(document.createElement("col"));
-      cols.children[0].style.setProperty("width", "3.2%", "important");
-      cols.children[1].style.setProperty("width", isItem25 ? "74.3%" : "71.8%", "important");
-      cols.children[2].style.setProperty("width", isItem25 ? "22.5%" : "25%", "important");
-      table.querySelectorAll("tbody tr").forEach(row => {
-        const numero = row.cells[0];
-        if (numero) {
-          numero.style.setProperty("width", "3.2%", "important");
-          numero.style.setProperty("min-width", "0", "important");
-          numero.style.setProperty("max-width", "none", "important");
-          numero.style.setProperty("box-sizing", "border-box", "important");
-          numero.style.setProperty("padding", "2px 3px", "important");
-          numero.style.setProperty("white-space", "nowrap", "important");
-          numero.style.setProperty("word-break", "keep-all", "important");
-          numero.style.setProperty("overflow-wrap", "normal", "important");
-          numero.style.setProperty("text-align", "center", "important");
-          numero.style.setProperty("background-color", "#d9d9d9", "important");
-        }
-        const nome = row.cells[1];
-        if (nome) {
-          nome.style.setProperty("width", isItem25 ? "74.3%" : "71.8%", "important");
-          nome.style.setProperty("padding", "2px 6px", "important");
-          nome.style.setProperty("text-align", "left", "important");
-          nome.style.setProperty("white-space", "normal", "important");
-          nome.style.setProperty("overflow-wrap", "break-word", "important");
-          nome.style.setProperty("word-break", "normal", "important");
-        }
-        const data = row.cells[2];
-        if (data) data.style.setProperty("width", isItem25 ? "22.5%" : "25%", "important");
+
+      let group = table.querySelector("colgroup");
+      if (!group) {
+        group = document.createElement("colgroup");
+        table.insertBefore(group, table.firstChild);
+      }
+      group.replaceChildren(
+        document.createElement("col"),
+        document.createElement("col"),
+        document.createElement("col")
+      );
+      const colWidths = isItem25 ? ["10mm", "calc(100% - 50mm)", "40mm"] : ["10mm", "calc(100% - 55mm)", "45mm"];
+      [...group.children].forEach((col, i) => {
+        col.style.setProperty("width", colWidths[i], "important");
       });
-      const header = table.querySelector("thead tr:first-child");
-      if (header) {
-        [...header.cells].forEach(cell => {
+
+      table.querySelectorAll("tbody tr").forEach(row => {
+        const numberCell = row.cells[0];
+        const nameCell = row.cells[1];
+        const dateCell = row.cells[2];
+        if (numberCell) {
+          ["width","min-width","max-width"].forEach(prop => numberCell.style.setProperty(prop, "10mm", "important"));
+          numberCell.style.setProperty("box-sizing", "border-box", "important");
+          numberCell.style.setProperty("padding", "2px 2px", "important");
+          numberCell.style.setProperty("white-space", "nowrap", "important");
+          numberCell.style.setProperty("word-break", "keep-all", "important");
+          numberCell.style.setProperty("overflow-wrap", "normal", "important");
+          numberCell.style.setProperty("text-align", "center", "important");
+          numberCell.style.setProperty("background-color", "#d9d9d9", "important");
+        }
+        if (nameCell) {
+          nameCell.style.setProperty("width", colWidths[1], "important");
+          nameCell.style.setProperty("min-width", "0", "important");
+          nameCell.style.setProperty("padding", "2px 5px", "important");
+          nameCell.style.setProperty("text-align", "left", "important");
+          nameCell.style.setProperty("white-space", "normal", "important");
+          nameCell.style.setProperty("overflow-wrap", "break-word", "important");
+          nameCell.style.setProperty("word-break", "normal", "important");
+        }
+        if (dateCell) dateCell.style.setProperty("width", colWidths[2], "important");
+      });
+
+      const headerRow = table.querySelector("thead tr:first-child");
+      if (headerRow) {
+        [...headerRow.cells].forEach(cell => {
           cell.setAttribute("bgcolor", "#d2d2d2");
-          cell.style.setProperty("background", "#d2d2d2", "important");
           cell.style.setProperty("background-color", "#d2d2d2", "important");
           cell.style.setProperty("-webkit-print-color-adjust", "exact", "important");
           cell.style.setProperty("print-color-adjust", "exact", "important");
