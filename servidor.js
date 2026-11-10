@@ -1510,8 +1510,17 @@ async function corrigirDocxParaWord2016(arquivo) {
     const gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
       .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
     const totalGrade = gradeAtual.reduce((a, b) => a + b, 0);
+    const textoTabelaParaLargura = (tabela.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, '');
+    const tabelaItem31 = textoTabelaParaLargura.includes('ENTRADADECUSTODIADOS');
+    const tabelaItem32 = textoTabelaParaLargura.includes('SAIDADECUSTODIADOS');
     if (totalGrade > 0) {
-      const proporcoes = largurasModeloCPAIG[indiceTabela];
+      // Itens 31 e 32 são identificados pelo título, nunca pela posição da tabela no DOCX.
+      const proporcoesMovimentacao = tabelaItem31 ? [5, 32, 14, 23, 26]
+        : tabelaItem32 ? [5, 32, 9, 22, 32] : null;
+      const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
+        ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
       const base = proporcoes && proporcoes.length === gradeAtual.length
         ? proporcoes
         : gradeAtual.map(v => v * 100 / totalGrade);
@@ -1666,6 +1675,11 @@ async function corrigirDocxParaWord2016(arquivo) {
       return celula.replace('<w:tc>', '<w:tc><w:tcPr>' + bordasCelulaWord + '</w:tcPr>');
     });
 
+    // Nos Itens 31 e 32, as cores já foram definidas célula por célula
+    // conforme o modelo: título cinza, coluna Nº cinza e demais células brancas.
+    // Não executar a regra genérica de cabeçalhos, que confundia "Nº" dentro
+    // do texto de documentos com um cabeçalho e pintava a célula inteira.
+    if (!tabelaItem31 && !tabelaItem32) {
     // Cabeçalhos de tabelas (incluindo os títulos das duas tabelas finais)
     // recebem cinza CPAIG. O preenchimento é aplicado célula por célula.
     tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
@@ -1695,6 +1709,7 @@ async function corrigirDocxParaWord2016(arquivo) {
         return celula.replace('<w:tc>', '<w:tc><w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="D2D2D2"/></w:tcPr>');
       });
     });
+    }
 
     // Item 16: COLETES permanece sem negrito, mas recebe o fundo cinza
     // aplicado a toda a coluna ITENS na etapa final abaixo.
