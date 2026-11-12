@@ -583,31 +583,17 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
   }
 }
 
-/* MOVIMENTAÇÃO CARCERÁRIA — marcador físico de quebra antes da seção */
+/* MOVIMENTAÇÃO CARCERÁRIA — uma única quebra antes da seção */
 @media print {
-  body.preview-mode #previewContent .movement-page-break,
-  body.admin-preview-mode #previewContent .movement-page-break {
-    display:block !important;
-    visibility:visible !important;
-    height:1px !important;
-    min-height:1px !important;
-    margin:0 !important;
-    padding:0 !important;
-    border:0 !important;
-    break-before:page !important;
-    page-break-before:always !important;
-    -webkit-column-break-before:always !important;
-  }
-  body.preview-mode #previewContent .movement-page,
-  body.admin-preview-mode #previewContent .movement-page {
+  #previewContent .movement-page {
     display:block !important;
     visibility:visible !important;
     position:relative !important;
     float:none !important;
     clear:both !important;
-    break-before:auto !important;
-    page-break-before:auto !important;
-    -webkit-column-break-before:auto !important;
+    break-before:page !important;
+    page-break-before:always !important;
+    -webkit-column-break-before:always !important;
     break-after:auto !important;
     page-break-after:auto !important;
     break-inside:auto !important;
@@ -617,8 +603,7 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     overflow:visible !important;
     margin:0 !important;
   }
-  body.preview-mode #previewContent .movement-page > *,
-  body.admin-preview-mode #previewContent .movement-page > * {
+  #previewContent .movement-page > * {
     visibility:visible !important;
   }
 }
@@ -3307,7 +3292,7 @@ function gerarPaginaMovimentacao(dataExtenso){
  const assinaturaUnidade=String($('assinaturaUnidadeData')?.value||'').trim();
  const assinaturaMatricula=String($('assinaturaMatriculaData')?.value||'').trim();
  const assinatura=`<div class="movement-signature" style="text-align:center;margin:50px auto 0;max-width:100%;line-height:1.35;white-space:pre-wrap">${assinaturaNome?`<strong>${escMov(assinaturaNome)}</strong>`:''}${assinaturaFuncao?`<br><em>${escMov(assinaturaFuncao)}</em>`:''}${assinaturaUnidade?`<br><em>${escMov(assinaturaUnidade)}</em>`:''}${assinaturaMatricula?`<br><em>Matrícula: ${escMov(assinaturaMatricula)}</em>`:''}</div>`;
- return `<div class="movement-page-break" aria-hidden="true"></div><section id="paginaMovimentacaoCarceraria" class="movement-page" style="display:block!important;visibility:visible!important;position:static!important;color:#000!important;background:#fff!important;break-inside:auto!important;page-break-inside:auto!important;width:100%!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important;font-family:Arial,Helvetica,sans-serif;font-size:9pt;line-height:1.15"><h2 style="display:block!important;visibility:visible!important;color:#000!important">MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><p class="movement-initial" style="display:block!important;visibility:visible!important;color:#000!important"><strong><u>INICIAL / RECEBI:</u></strong>&nbsp;<span>${inicial}</span></p>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<p class="movement-final" style="display:block!important;visibility:visible!important;color:#000!important"><strong><u>FINAL / PASSO:</u></strong>&nbsp;<span>${final}</span></p><p class="movement-closing preview-text" style="display:block!important;visibility:visible!important;color:#000!important">${textoEncerramento}</p>${assinatura}</section>`;
+ return `<section id="paginaMovimentacaoCarceraria" class="movement-page" style="display:block!important;visibility:visible!important;position:static!important;color:#000!important;background:#fff!important;break-inside:auto!important;page-break-inside:auto!important;width:100%!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important;font-family:Arial,Helvetica,sans-serif;font-size:9pt;line-height:1.15"><h2 style="display:block!important;visibility:visible!important;color:#000!important">MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><p class="movement-initial" style="display:block!important;visibility:visible!important;color:#000!important"><strong><u>INICIAL / RECEBI:</u></strong>&nbsp;<span>${inicial}</span></p>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<p class="movement-final" style="display:block!important;visibility:visible!important;color:#000!important"><strong><u>FINAL / PASSO:</u></strong>&nbsp;<span>${final}</span></p><p class="movement-closing preview-text" style="display:block!important;visibility:visible!important;color:#000!important">${textoEncerramento}</p>${assinatura}</section>`;
 }
 
 // Inicialização do editor de documentos do Item 35 a partir do conteúdo salvo.
