@@ -3151,12 +3151,17 @@ function montarRotasPertencesVisitas(config) {
   });
 
   let timerFechamentoVisitasAtivo = false;
+  let ultimoDiaVisitasVerificado = '';
   function iniciarAgendamentoFechamentoVisitas() {
     if (timerFechamentoVisitasAtivo) return;
     timerFechamentoVisitasAtivo = true;
     const verificar = async () => {
       const hora = new Intl.DateTimeFormat('en-GB',{timeZone:'America/Campo_Grande',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date());
       if (hora < '12:00') return;
+      const hoje = hojeCampoGrande();
+      // Executa a rotina diária apenas uma vez por dia após concluir com sucesso.
+      // Assim, o agendamento não mantém o Neon ativo com consultas repetidas.
+      if (ultimoDiaVisitasVerificado === hoje) return;
       let client;
       try {
         client=await pool.connect();
@@ -3164,11 +3169,14 @@ function montarRotasPertencesVisitas(config) {
         await client.query('SELECT pg_advisory_xact_lock($1::bigint)',[26261015]);
         await atualizarFechamentoAutomaticoVisitas(client);
         await client.query('COMMIT');
+        ultimoDiaVisitasVerificado = hoje;
       } catch(e) {
         if(client)try{await client.query('ROLLBACK')}catch{}
         console.error('Falha no fechamento automático das visitas:',e.message);
       } finally { if(client)client.release(); }
     };
+    // A verificação do horário continua local; consultas ao banco só ocorrem
+    // até a primeira execução diária bem-sucedida, após as 12h.
     setInterval(verificar,30000);
     verificar();
   }
