@@ -3141,6 +3141,16 @@ function visualizarRelatorio(targetId=null){
   const botaoRetorno=targetId?`<div class="preview-return-wrap" style="margin:12px 0;text-align:center"><button type="button" class="primary" onclick="voltarEdicaoItem('${targetId}')">✏️ VOLTAR À EDIÇÃO DESTE ITEM</button></div>`:'';
   $('previewContent').innerHTML=cabecalho+corpo+paginaMovimentacao+botaoRetorno+rodape;
   aplicarPadraoTabelasCPAIG($('previewContent'));
+  // Garantia: após a formatação das tabelas, assegura que a página de movimentação
+  // esteja presente em toda visualização completa (equipe e administrador).
+  if(!targetId && !$('previewContent').querySelector('.movement-page')){
+    const paginaFinalMovimentacao=gerarPaginaMovimentacao(dataExtenso);
+    const rodapePreview=$('previewContent').querySelector('.preview-footer');
+    if(paginaFinalMovimentacao && rodapePreview){
+      rodapePreview.insertAdjacentHTML('beforebegin',paginaFinalMovimentacao);
+      aplicarPadraoTabelasCPAIG($('previewContent'));
+    }
+  }
   $('editor').classList.add('hidden');
   $('previewPanel').classList.remove('hidden');
   document.body.classList.add('preview-mode');
