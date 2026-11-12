@@ -583,7 +583,7 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
   }
 }
 
-/* MOVIMENTAÇÃO CARCERÁRIA — quebra aplicada uma única vez à seção */
+/* MOVIMENTAÇÃO CARCERÁRIA — quebra aplicada ao título para compatibilidade com Safari/iOS */
 @media print {
   body.preview-mode #previewContent .movement-page {
     display:block !important;
@@ -591,9 +591,9 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     position:relative !important;
     float:none !important;
     clear:both !important;
-    break-before:page !important;
-    page-break-before:always !important;
-    -webkit-column-break-before:always !important;
+    break-before:auto !important;
+    page-break-before:auto !important;
+    -webkit-column-break-before:auto !important;
     break-after:auto !important;
     page-break-after:auto !important;
     break-inside:auto !important;
@@ -603,8 +603,13 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     overflow:visible !important;
     margin:0 !important;
   }
-  body.preview-mode #previewContent .movement-page > * {
+  body.preview-mode #previewContent .movement-page > h2:first-child {
     display:block !important;
+    break-before:page !important;
+    page-break-before:always !important;
+    -webkit-column-break-before:always !important;
+  }
+  body.preview-mode #previewContent .movement-page > * {
     visibility:visible !important;
   }
 }
