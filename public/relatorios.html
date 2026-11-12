@@ -589,8 +589,11 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     display:block !important;
     visibility:visible !important;
     position:relative !important;
+    float:none !important;
+    clear:both !important;
     break-before:page !important;
     page-break-before:always !important;
+    -webkit-column-break-before:always !important;
     break-after:auto !important;
     page-break-after:auto !important;
     break-inside:auto !important;
@@ -600,7 +603,17 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     overflow:visible !important;
     margin:0 !important;
   }
+  /* O WebKit do iPhone pode ignorar a quebra aplicada diretamente à section.
+     Este bloco vazio força a quebra antes do primeiro conteúdo da movimentação. */
+  body.preview-mode #previewContent .movement-page::before {
+    content:"" !important;
+    display:block !important;
+    height:0 !important;
+    page-break-before:always !important;
+    break-before:page !important;
+  }
   body.preview-mode #previewContent .movement-page > * {
+    display:block !important;
     visibility:visible !important;
   }
 }
