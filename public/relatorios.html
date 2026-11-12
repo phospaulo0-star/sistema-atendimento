@@ -3147,14 +3147,23 @@ function visualizarRelatorio(targetId=null){
   // tentativas de separar a movimentação em outro contêiner.
   $('previewContent').innerHTML=cabecalho+corpo+paginaMovimentacao+botaoRetorno+rodape;
   aplicarPadraoTabelasCPAIG($('previewContent'));
-  // Garantia: após a formatação das tabelas, assegura que a página de movimentação
-  // esteja presente em toda visualização completa (equipe e administrador).
-  if(!targetId && !$('previewContent').querySelector('.movement-page')){
+  // Reconstrói a movimentação diretamente no DOM depois de montar os itens.
+  // Isso evita que a seção seja perdida ou fique dentro de um contêiner incorreto
+  // quando o navegador interpreta o HTML longo do relatório.
+  if(!targetId){
+    const preview=$('previewContent');
+    preview.querySelectorAll('#paginaMovimentacaoCarceraria,.movement-page').forEach(el=>el.remove());
+    const rodapePreview=preview.querySelector('.preview-footer');
     const paginaFinalMovimentacao=gerarPaginaMovimentacao(dataExtenso);
-    const rodapePreview=$('previewContent').querySelector('.preview-footer');
     if(paginaFinalMovimentacao && rodapePreview){
       rodapePreview.insertAdjacentHTML('beforebegin',paginaFinalMovimentacao);
-      aplicarPadraoTabelasCPAIG($('previewContent'));
+      const movimento=preview.querySelector('#paginaMovimentacaoCarceraria');
+      if(movimento){
+        movimento.style.setProperty('display','block','important');
+        movimento.style.setProperty('visibility','visible','important');
+        movimento.style.setProperty('position','static','important');
+      }
+      aplicarPadraoTabelasCPAIG(preview);
     }
   }
   $('editor').classList.add('hidden');
