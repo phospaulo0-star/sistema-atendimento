@@ -585,7 +585,8 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
 
 /* MOVIMENTAÇÃO CARCERÁRIA — marcador físico de quebra antes da seção */
 @media print {
-  body.preview-mode #previewContent .movement-page-break {
+  body.preview-mode #previewContent .movement-page-break,
+  body.admin-preview-mode #previewContent .movement-page-break {
     display:block !important;
     visibility:visible !important;
     height:1px !important;
@@ -597,7 +598,8 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     page-break-before:always !important;
     -webkit-column-break-before:always !important;
   }
-  body.preview-mode #previewContent .movement-page {
+  body.preview-mode #previewContent .movement-page,
+  body.admin-preview-mode #previewContent .movement-page {
     display:block !important;
     visibility:visible !important;
     position:relative !important;
@@ -615,7 +617,8 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     overflow:visible !important;
     margin:0 !important;
   }
-  body.preview-mode #previewContent .movement-page > * {
+  body.preview-mode #previewContent .movement-page > *,
+  body.admin-preview-mode #previewContent .movement-page > * {
     visibility:visible !important;
   }
 }
