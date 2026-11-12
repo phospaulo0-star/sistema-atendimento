@@ -583,7 +583,7 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
   }
 }
 
-/* MOVIMENTAÇÃO CARCERÁRIA — quebra única antes do primeiro conteúdo (compatível com iOS) */
+/* MOVIMENTAÇÃO CARCERÁRIA — quebra aplicada uma única vez à seção */
 @media print {
   body.preview-mode #previewContent .movement-page {
     display:block !important;
@@ -591,9 +591,9 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     position:relative !important;
     float:none !important;
     clear:both !important;
-    break-before:auto !important;
-    page-break-before:auto !important;
-    -webkit-column-break-before:auto !important;
+    break-before:page !important;
+    page-break-before:always !important;
+    -webkit-column-break-before:always !important;
     break-after:auto !important;
     page-break-after:auto !important;
     break-inside:auto !important;
@@ -602,12 +602,6 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     min-height:0 !important;
     overflow:visible !important;
     margin:0 !important;
-  }
-  /* A quebra ocorre somente no título, evitando a página vazia entre o relatório e a movimentação. */
-  body.preview-mode #previewContent .movement-page > h2:first-child {
-    break-before:page !important;
-    page-break-before:always !important;
-    -webkit-column-break-before:always !important;
   }
   body.preview-mode #previewContent .movement-page > * {
     display:block !important;
@@ -3299,7 +3293,7 @@ function gerarPaginaMovimentacao(dataExtenso){
  const assinaturaUnidade=String($('assinaturaUnidadeData')?.value||'').trim();
  const assinaturaMatricula=String($('assinaturaMatriculaData')?.value||'').trim();
  const assinatura=`<div class="movement-signature" style="text-align:center;margin:50px auto 0;max-width:100%;line-height:1.35;white-space:pre-wrap">${assinaturaNome?`<strong>${escMov(assinaturaNome)}</strong>`:''}${assinaturaFuncao?`<br><em>${escMov(assinaturaFuncao)}</em>`:''}${assinaturaUnidade?`<br><em>${escMov(assinaturaUnidade)}</em>`:''}${assinaturaMatricula?`<br><em>Matrícula: ${escMov(assinaturaMatricula)}</em>`:''}</div>`;
- return `<section id="paginaMovimentacaoCarceraria" class="movement-page" style="display:block!important;visibility:visible!important;position:static!important;color:#000!important;background:#fff!important;break-before:page!important;page-break-before:always!important;break-inside:auto!important;page-break-inside:auto!important;width:100%!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important;font-family:Arial,Helvetica,sans-serif;font-size:9pt;line-height:1.15"><h2 style="display:block!important;visibility:visible!important;color:#000!important">MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><p class="movement-initial" style="display:block!important;visibility:visible!important;color:#000!important"><strong><u>INICIAL / RECEBI:</u></strong>&nbsp;<span>${inicial}</span></p>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<p class="movement-final" style="display:block!important;visibility:visible!important;color:#000!important"><strong><u>FINAL / PASSO:</u></strong>&nbsp;<span>${final}</span></p><p class="movement-closing preview-text" style="display:block!important;visibility:visible!important;color:#000!important">${textoEncerramento}</p>${assinatura}</section>`;
+ return `<section id="paginaMovimentacaoCarceraria" class="movement-page" style="display:block!important;visibility:visible!important;position:static!important;color:#000!important;background:#fff!important;break-inside:auto!important;page-break-inside:auto!important;width:100%!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important;font-family:Arial,Helvetica,sans-serif;font-size:9pt;line-height:1.15"><h2 style="display:block!important;visibility:visible!important;color:#000!important">MOVIMENTAÇÃO CARCERÁRIA DO DIA ${data}</h2><p class="movement-initial" style="display:block!important;visibility:visible!important;color:#000!important"><strong><u>INICIAL / RECEBI:</u></strong>&nbsp;<span>${inicial}</span></p>${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}<p class="movement-final" style="display:block!important;visibility:visible!important;color:#000!important"><strong><u>FINAL / PASSO:</u></strong>&nbsp;<span>${final}</span></p><p class="movement-closing preview-text" style="display:block!important;visibility:visible!important;color:#000!important">${textoEncerramento}</p>${assinatura}</section>`;
 }
 
 // Inicialização do editor de documentos do Item 35 a partir do conteúdo salvo.
