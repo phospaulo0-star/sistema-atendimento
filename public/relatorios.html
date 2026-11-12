@@ -244,7 +244,7 @@ body.preview-mode #previewContent .material-carga-tabela td:first-child { text-a
   body.preview-mode .preview-letterhead { position: static !important; top:auto !important; left:auto !important; right:auto !important; height:auto !important; margin:0 0 10px !important; }
   body.preview-mode .preview-footer { position: static !important; bottom:auto !important; left:auto !important; right:auto !important; margin:16px 0 0 !important; break-inside:avoid; page-break-inside:avoid; }
   body.preview-mode .preview-document { padding:0 !important; }
-  body.preview-mode .movement-page { break-before:page; page-break-before:always; min-height:0 !important; }
+  body.preview-mode .movement-page { break-before:auto !important; page-break-before:auto !important; min-height:0 !important; }
   body.preview-mode .movement-signature { break-inside:avoid; page-break-inside:avoid; }
 }
 
@@ -583,28 +583,31 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
   }
 }
 
-/* MOVIMENTAÇÃO CARCERÁRIA — uma única quebra antes da seção */
+/* MOVIMENTAÇÃO CARCERÁRIA — documento independente para impressão */
 @media print {
-  #previewContent .movement-page {
+  body.preview-mode #previewContent .movement-print-document {
     display:block !important;
-    visibility:visible !important;
     position:relative !important;
     float:none !important;
     clear:both !important;
+    width:100% !important;
+    max-width:none !important;
+    margin:0 !important;
+    padding:0 !important;
     break-before:page !important;
     page-break-before:always !important;
     -webkit-column-break-before:always !important;
-    break-after:auto !important;
-    page-break-after:auto !important;
     break-inside:auto !important;
     page-break-inside:auto !important;
-    height:auto !important;
-    min-height:0 !important;
-    overflow:visible !important;
-    margin:0 !important;
   }
-  #previewContent .movement-page > * {
+  body.preview-mode #previewContent .movement-page {
+    display:block !important;
     visibility:visible !important;
+    position:static !important;
+    break-before:auto !important;
+    page-break-before:auto !important;
+    -webkit-column-break-before:auto !important;
+    margin:0 !important;
   }
 }
 </style>
@@ -3142,7 +3145,7 @@ function visualizarRelatorio(targetId=null){
   const paginaMovimentacao=(!targetId)?gerarPaginaMovimentacao(dataExtenso):'';
   const rodape=`<div class="preview-footer"><div>Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS<br>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</div><div class="page-number">Página <span class="page-current"></span> de <span class="page-total"></span></div></div></div>`;
   const botaoRetorno=targetId?`<div class="preview-return-wrap" style="margin:12px 0;text-align:center"><button type="button" class="primary" onclick="voltarEdicaoItem('${targetId}')">✏️ VOLTAR À EDIÇÃO DESTE ITEM</button></div>`:'';
-  $('previewContent').innerHTML=cabecalho+corpo+paginaMovimentacao+botaoRetorno+rodape;
+  $('previewContent').innerHTML=targetId?(cabecalho+corpo+botaoRetorno+rodape):(cabecalho+corpo+'</div><div class="preview-document movement-print-document">'+paginaMovimentacao+rodape);
   aplicarPadraoTabelasCPAIG($('previewContent'));
   // Garantia: após a formatação das tabelas, assegura que a página de movimentação
   // esteja presente em toda visualização completa (equipe e administrador).
