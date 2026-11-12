@@ -583,36 +583,20 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
   }
 }
 
-/* MOVIMENTAÇÃO CARCERÁRIA — documento independente para impressão */
+/* MOVIMENTAÇÃO CARCERÁRIA — quebra somente na impressão, no documento original */
 @media print {
-  body.preview-mode #previewContent .report-main-print-document {
-    break-after:page !important;
-    page-break-after:always !important;
-    -webkit-column-break-after:always !important;
-  }
-  body.preview-mode #previewContent .movement-print-document {
-    display:block !important;
-    position:relative !important;
-    float:none !important;
-    clear:both !important;
-    width:100% !important;
-    max-width:none !important;
-    margin:0 !important;
-    padding:0 !important;
-    break-before:auto !important;
-    page-break-before:auto !important;
-    -webkit-column-break-before:auto !important;
-    break-inside:auto !important;
-    page-break-inside:auto !important;
-  }
   body.preview-mode #previewContent .movement-page {
     display:block !important;
     visibility:visible !important;
     position:static !important;
-    break-before:auto !important;
-    page-break-before:auto !important;
-    -webkit-column-break-before:auto !important;
-    margin:0 !important;
+    float:none !important;
+    clear:both !important;
+    break-before:page !important;
+    page-break-before:always !important;
+    -webkit-column-break-before:always !important;
+    break-inside:auto !important;
+    page-break-inside:auto !important;
+    margin-top:0 !important;
   }
 }
 </style>
@@ -2632,47 +2616,18 @@ async function exportarWord(){
   }catch(e){console.error('Erro ao exportar DOCX:',e);alert('Não foi possível gerar o arquivo Word. '+(e&&e.message?e.message:'Tente novamente.'));}
 }
 function imprimirRelatorioCPAIG(){
-  const origem=$('previewContent');
-  if(!origem || !origem.innerHTML.trim()){
+  if(!$('previewContent')?.innerHTML.trim()){
     alert('Primeiro clique em VISUALIZAR RELATÓRIO.');
     return;
   }
-  const documentos=Array.from(origem.children).filter(el=>el.classList.contains('preview-document'));
-  if(documentos.length<2){
-    alert('Não foi possível separar o relatório da movimentação. Atualize a visualização e tente novamente.');
-    return;
-  }
-  const janela=window.open('','_blank');
-  if(!janela){
-    alert('O navegador bloqueou a janela de impressão. Permita pop-ups para este site e tente novamente.');
-    return;
-  }
-  const estilos=[...document.head.querySelectorAll('style,link[rel="stylesheet"]')].map(el=>el.outerHTML).join('\n');
-  const relatorio=documentos[0].outerHTML;
-  const movimentacao=documentos[1].outerHTML;
-  janela.document.open();
-  janela.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'+estilos+
-    '<style>'+
-    '@page{size:A4 portrait;margin:11mm 12mm 9mm 12mm}'+
-    'html,body{background:#fff!important;margin:0!important;padding:0!important}'+
-    'body.preview-mode{display:block!important;width:100%!important}'+
-    'body.preview-mode>.report-main-print-document{display:block!important;position:static!important;float:none!important;clear:both!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;break-after:page!important;page-break-after:always!important;-webkit-column-break-after:always!important}'+
-    'body.preview-mode>.movement-print-document{display:block!important;position:static!important;float:none!important;clear:both!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;break-before:page!important;page-break-before:always!important;-webkit-column-break-before:always!important}'+
-    'body.preview-mode .preview-document{position:static!important;float:none!important;transform:none!important;overflow:visible!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important}'+
-    'body.preview-mode .preview-letterhead{position:fixed!important;top:0!important;left:0!important;right:0!important;height:14mm!important;margin:0!important;padding:0!important;display:grid!important;grid-template-columns:14mm minmax(0,1fr) 14mm!important;align-items:center!important;gap:2mm!important;background:#fff!important;color:#000!important;z-index:9999!important}'+
-    'body.preview-mode .preview-letterhead .preview-logo{display:block!important;width:12mm!important;height:13mm!important;object-fit:contain!important}'+
-    'body.preview-mode .preview-letterhead-text,body.preview-mode .preview-letterhead-text div{display:block!important;color:#000!important;font-size:5.8pt!important;line-height:1.02!important;text-align:center!important;white-space:nowrap!important}'+
-    'body.preview-mode .preview-footer{position:fixed!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;display:block!important;margin:0!important;padding:.8mm 0 0!important;background:#fff!important;color:#000!important;border-top:.3mm solid #777!important;text-align:center!important;font-size:5.5pt!important;line-height:1!important;z-index:9999!important}'+
-    'body.preview-mode .movement-page{break-before:auto!important;page-break-before:auto!important;break-inside:auto!important;page-break-inside:auto!important}'+
-    '@media print{body.preview-mode>.report-main-print-document{page-break-after:always!important;break-after:page!important}body.preview-mode>.movement-print-document{page-break-before:always!important;break-before:page!important}}'+
-    '</style></head><body class="preview-mode">'+relatorio+movimentacao+
-    '<script>window.addEventListener("load",function(){setTimeout(function(){window.focus();window.print();},500);});<\\/script></body></html>');
-  janela.document.close();
+  // Mantém o fluxo nativo do navegador, que já era usado antes das tentativas
+  // de separar documentos e preserva as dimensões originais das tabelas.
+  window.print();
 }
 
 function exportarPDF(){
   if(!$('previewContent')?.innerHTML){alert('Primeiro clique em VISUALIZAR RELATÓRIO.');return;}
-  imprimirRelatorioCPAIG(); // Na janela de impressão, selecione “Salvar como PDF”.
+  window.print(); // Na janela de impressão, selecione “Salvar como PDF”.
 }
 async function iniciar(){const adminReportIdSolicitado=new URLSearchParams(location.search).get('adminReportId');try{carregarEscalaDiurna('');const j=await api('/api/auth/me');me=j.user;if(adminReportIdSolicitado&&me.role!=='admin'){throw new Error('Esta consulta é exclusiva da conta de administrador.');}atualizarTituloItem38Equipe();if(!['chefe','auxiliar','admin'].includes(me.role)){location.replace(me.role==='mesa'?'/mesa.html':me.role==='pertences'?'/pertences.html':'/index.html');return}readOnly=me.role==='admin';$('guicheShortcut').classList.toggle('hidden',!['chefe','auxiliar'].includes(me.role));$('mesaShortcut').classList.toggle('hidden',!['chefe','auxiliar'].includes(me.role));configurarNavegacaoItens();$('who').textContent=me.fullName+' · '+(readOnly?'ADMINISTRADOR (CONSULTA)':(me.role==='chefe'?'CHEFE':'AUXILIAR')+' · EQUIPE '+me.team);$('team').value=me.team||'Todas';$('newBtn').classList.toggle('hidden',readOnly);$('editor').classList.toggle('hidden',readOnly);$('saveBtn').classList.toggle('hidden',readOnly);$('closeBtn').classList.toggle('hidden',readOnly);$('reopenBtn').classList.toggle('hidden',readOnly);document.querySelectorAll('#reportDate,#shiftName,#title').forEach(el=>el.addEventListener('change',changed));document.querySelectorAll('#editor textarea').forEach(el=>el.addEventListener('input',()=>{changed();if(el.id==='s7'&&typeof renderListaTroca==='function')renderListaTroca()}));$('recebePlantao').addEventListener('change',atualizarTextoItem01);$('entregaPlantao').addEventListener('change',atualizarTextoItem01);$('item01Substitui').addEventListener('change',atualizarTextoItem01);$('item01Substituido').addEventListener('input',atualizarTextoItem01);$('quantidadeCustodiados').addEventListener('input',atualizarQuantidadeExtenso);$('s0Extra').addEventListener('input',atualizarTextoItem01);$('reportDate').addEventListener('change',()=>atualizarTextoItem01());if(readOnly){$('status').textContent='Modo consulta: o administrador não pode editar relatórios.';$('reportsPanel').querySelector('p').textContent='Consulta de relatórios de todas as equipes A, B, C e D.'}await carregarLista();if(readOnly){const adminReportId=new URLSearchParams(location.search).get('adminReportId');if(adminReportId){const rel=reports.find(x=>String(x.id)===String(adminReportId));if(rel){document.body.classList.add('admin-preview-mode');verAdmin(adminReportId);await carregarNomesHE();visualizarRelatorio();$('editor').classList.add('hidden');$('previewPanel').classList.remove('hidden');const acoes=$('previewPanel').querySelector('.preview-actions');if(acoes){acoes.innerHTML='<button type="button" class="blue admin-print-action" onclick="imprimirRelatorioCPAIG()">🖨️ IMPRIMIR</button><button type="button" class="primary admin-pdf-action" onclick="exportarPDF()">📕 BAIXAR PDF</button>';}window.scrollTo(0,0);}else msg('Relatório não encontrado para consulta administrativa.','bad');}}if(!readOnly){const localNovo=loadLocal();if(localNovo&&!localNovo.id&&String(localNovo.reportDate||'').slice(0,10)===String(currentShiftDate||'').slice(0,10)){const match=reports.find(r=>String(r.reportDate||'').slice(0,10)===String(localNovo.reportDate||'').slice(0,10)&&String(r.shiftName||'')===String(localNovo.shiftName||'')&&String(r.team||'').toUpperCase()===String(me.team||'').toUpperCase());if(match){abrir(match.id);const merged={...(match.content||{})};for(const [k,v] of Object.entries(localNovo.content||{})){if(v!==null&&v!==undefined&&String(v).trim()!=='')merged[k]=v;}preencherContent(merged);$('title').value=localNovo.title||match.title||'';$('reportDate').value=localNovo.reportDate||String(match.reportDate).slice(0,10);$('shiftName').value=localNovo.shiftName||match.shiftName;dirty=true;serverChanged=false;localSave();state('Rascunho local recuperado · confira e salve');msg('Recuperei o rascunho local e associei ao relatório já existente. Confira os campos e clique em SALVAR para gravar as alterações.','');$('saveBtn').disabled=false;inputsDisabled(false);}else{novoRelatorio();}}else{const relatorioDoPlantaoAtual=reports.find(r=>String(r.reportDate||'').slice(0,10)===String(currentShiftDate||'').slice(0,10));if(relatorioDoPlantaoAtual)abrir(relatorioDoPlantaoAtual.id);else novoRelatorio()}}refreshTimer=setInterval(poll,5000)}catch(e){msg(e.message,'bad');if(adminReportIdSolicitado){document.body.classList.add('admin-preview-mode');$('previewPanel').classList.remove('hidden');$('previewContent').innerHTML='<p style="padding:24px;color:#a00;text-align:center">Não foi possível carregar a consulta administrativa: '+esc(e.message)+'. Atualize a página ou entre novamente na conta de administrador.</p>';const acoes=$('previewPanel').querySelector('.preview-actions');if(acoes)acoes.innerHTML='';}}}
 async function carregarLista(){try{const j=await api('/api/relatorios');reports=j.reports||[];canWork=readOnly||j.canWork===true;onDutyTeam=j.onDutyTeam||'';currentShiftDate=j.shiftDate||'';if(!readOnly){try{dadosHerdadosRelatorio=await api('/api/relatorios/dados-herdados')}catch(e){dadosHerdadosRelatorio=null;console.warn('Não foi possível carregar dados herdados do plantão:',e.message)}}$('newBtn').disabled=!canWork;$('newBtn').title=canWork?'':`Abertura bloqueada. Equipe de plantão: ${onDutyTeam}.`;if(!readOnly&&!canWork)msg(`Abertura bloqueada. A equipe de plantão neste momento é a Equipe ${onDutyTeam}. Você pode consultar relatórios antigos, mas não criar nem alterar relatórios fora do seu plantão.`,'bad');renderList();return reports}catch(e){msg(e.message,'bad');return []}}
@@ -3189,8 +3144,9 @@ function visualizarRelatorio(targetId=null){
   const paginaMovimentacao=(!targetId)?gerarPaginaMovimentacao(dataExtenso):'';
   const rodape=`<div class="preview-footer"><div>Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS<br>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</div><div class="page-number">Página <span class="page-current"></span> de <span class="page-total"></span></div></div></div>`;
   const botaoRetorno=targetId?`<div class="preview-return-wrap" style="margin:12px 0;text-align:center"><button type="button" class="primary" onclick="voltarEdicaoItem('${targetId}')">✏️ VOLTAR À EDIÇÃO DESTE ITEM</button></div>`:'';
-  const cabecalhoImpressao=targetId?cabecalho:cabecalho.replace('class="preview-document"','class="preview-document report-main-print-document"');
-  $('previewContent').innerHTML=targetId?(cabecalho+corpo+botaoRetorno+rodape):(cabecalhoImpressao+corpo+'</div><div class="preview-document movement-print-document">'+paginaMovimentacao+rodape);
+  // Restaura a montagem original: um único documento, como antes das
+  // tentativas de separar a movimentação em outro contêiner.
+  $('previewContent').innerHTML=cabecalho+corpo+paginaMovimentacao+botaoRetorno+rodape;
   aplicarPadraoTabelasCPAIG($('previewContent'));
   // Garantia: após a formatação das tabelas, assegura que a página de movimentação
   // esteja presente em toda visualização completa (equipe e administrador).
