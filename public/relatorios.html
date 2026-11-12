@@ -585,6 +585,11 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
 
 /* MOVIMENTAÇÃO CARCERÁRIA — documento independente para impressão */
 @media print {
+  body.preview-mode #previewContent .report-main-print-document {
+    break-after:page !important;
+    page-break-after:always !important;
+    -webkit-column-break-after:always !important;
+  }
   body.preview-mode #previewContent .movement-print-document {
     display:block !important;
     position:relative !important;
@@ -594,9 +599,9 @@ body.preview-mode .hospitalizado-preview-item25 table.hospitalizado-preview-tabl
     max-width:none !important;
     margin:0 !important;
     padding:0 !important;
-    break-before:page !important;
-    page-break-before:always !important;
-    -webkit-column-break-before:always !important;
+    break-before:auto !important;
+    page-break-before:auto !important;
+    -webkit-column-break-before:auto !important;
     break-inside:auto !important;
     page-break-inside:auto !important;
   }
@@ -3145,7 +3150,8 @@ function visualizarRelatorio(targetId=null){
   const paginaMovimentacao=(!targetId)?gerarPaginaMovimentacao(dataExtenso):'';
   const rodape=`<div class="preview-footer"><div>Estrada da Gameleira – MS 455 – Km 1,5 – Zona Rural – Campo Grande/MS<br>Tel. (67) 3901-3467 – Fax: (67) 3901-3446 – e-mail: cpaig@agepen.ms.gov.br</div><div class="page-number">Página <span class="page-current"></span> de <span class="page-total"></span></div></div></div>`;
   const botaoRetorno=targetId?`<div class="preview-return-wrap" style="margin:12px 0;text-align:center"><button type="button" class="primary" onclick="voltarEdicaoItem('${targetId}')">✏️ VOLTAR À EDIÇÃO DESTE ITEM</button></div>`:'';
-  $('previewContent').innerHTML=targetId?(cabecalho+corpo+botaoRetorno+rodape):(cabecalho+corpo+'</div><div class="preview-document movement-print-document">'+paginaMovimentacao+rodape);
+  const cabecalhoImpressao=targetId?cabecalho:cabecalho.replace('class="preview-document"','class="preview-document report-main-print-document"');
+  $('previewContent').innerHTML=targetId?(cabecalho+corpo+botaoRetorno+rodape):(cabecalhoImpressao+corpo+'</div><div class="preview-document movement-print-document">'+paginaMovimentacao+rodape);
   aplicarPadraoTabelasCPAIG($('previewContent'));
   // Garantia: após a formatação das tabelas, assegura que a página de movimentação
   // esteja presente em toda visualização completa (equipe e administrador).
