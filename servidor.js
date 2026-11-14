@@ -2352,31 +2352,41 @@ async function corrigirDocxParaWord2016(arquivo) {
     return paragrafo.replace(/<w:p\b[^>]*>/, m => m + '<w:pPr>' + espacamento + '</w:pPr>');
   });
 
-  // Assinatura final da movimentação: quatro linhas centralizadas e compactas.
-  // O primeiro parágrafo contém o nome; os três seguintes, função, unidade e matrícula.
-  xml = xml.replace(
-    /(<w:p\b[^>]*>[\s\S]*?<\/w:p>)(<w:p\b[^>]*>[\s\S]*?<\/w:p>)(<w:p\b[^>]*>[\s\S]*?<\/w:p>)(<w:p\b[^>]*>[\s\S]*?<\/w:p>)/g,
-    (bloco, nome, funcao, unidade, matricula) => {
-      const textoFuncao = funcao.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
-      const textoUnidade = unidade.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
-      const textoMatricula = matricula.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
-      if (!textoFuncao.includes('POLICIAL PENAL') ||
-          !textoUnidade.includes('CPAIG/AGEPEN') ||
-          !textoMatricula.includes('MATRÍCULA')) return bloco;
-      const centralizar = paragrafo => {
+  // Assinatura final da movimentação: localizar as linhas pelo conteúdo,
+  // ignorando parágrafos vazios que o conversor HTML pode inserir entre elas.
+  {
+    const paragrafos = [...xml.matchAll(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g)];
+    const textos = paragrafos.map(m => (m[0].match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toUpperCase());
+    const indiceFuncao = textos.findIndex(t => t.includes('POLICIAL PENAL'));
+    if (indiceFuncao >= 0) {
+      const indices = [];
+      for (let i = indiceFuncao - 1; i >= 0 && indices.length < 1; i--) {
+        if (textos[i]) indices.unshift(i);
+      }
+      indices.push(indiceFuncao);
+      for (let i = indiceFuncao + 1; i < textos.length && indices.length < 4; i++) {
+        if (textos[i]) indices.push(i);
+      }
+      const alvos = new Set(indices);
+      let indice = 0;
+      xml = xml.replace(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g, paragrafo => {
+        const atual = indice++;
+        if (!alvos.has(atual)) return paragrafo;
+        const formatar = props => props
+          .replace(/<w:jc\b[^>]*\/>/g, '')
+          .replace(/<w:spacing\b[^>]*\/>/g, '')
+          .replace(/<w:keepNext\b[^>]*\/>/g, '');
+        const propriedades = '<w:jc w:val="center"/><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>';
         if (/<w:pPr\b[^>]*>[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
-          return paragrafo.replace(/<w:pPr\b([^>]*)>([\s\S]*?)<\/w:pPr>/, (m, attrs, props) => {
-            props = props.replace(/<w:jc\b[^>]*\/>/g, '').replace(/<w:spacing\b[^>]*\/>/g, '');
-            return '<w:pPr' + attrs + '>' + props +
-              '<w:jc w:val="center"/><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/></w:pPr>';
-          });
+          return paragrafo.replace(/<w:pPr\b([^>]*)>([\s\S]*?)<\/w:pPr>/,
+            (m, attrs, props) => '<w:pPr' + attrs + '>' + formatar(props) + propriedades + '</w:pPr>');
         }
-        return paragrafo.replace(/(<w:p\b[^>]*>)/,
-          '$1<w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/></w:pPr>');
-      };
-      return [nome, funcao, unidade, matricula].map(centralizar).join('');
+        return paragrafo.replace(/(<w:p\b[^>]*>)/, '$1<w:pPr>' + propriedades + '</w:pPr>');
+      });
     }
-  );
+  }
 
   // Movimentação carcerária: espaçamento real no Word entre título, inicial e título da tabela.
   // O conversor HTML pode ignorar margens CSS; por isso gravamos o espaçamento em OOXML.
