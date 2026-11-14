@@ -1526,9 +1526,9 @@ async function corrigirDocxParaWord2016(arquivo) {
     const ocorrenciaItem32 = tabelaItem32 ? (ocorrenciasSaidaCustodiados++) : -1;
     if (totalGrade > 0) {
       const proporcoesMovimentacao = tabelaItem31
-        ? [6, 43, 8, 18, 25]
+        ? [6, 41, 8, 17, 28]
         : tabelaItem32
-          ? [6, 40, 8, 22, 24]
+          ? [6, 38, 8, 21, 27]
           : null;
       const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
         ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
@@ -1619,7 +1619,7 @@ async function corrigirDocxParaWord2016(arquivo) {
           // Modelo CPAIG: título e cabeçalho de colunas cinza;
           // corpo branco, exceto a última coluna DOCUMENTO, também cinza.
           const totalColunas = gradeAtual.length;
-          const cinza = atual <= 1 || (atual >= 2 && coluna === totalColunas - 1);
+          const cinza = atual <= 1;
           if (atual >= 2 && coluna === 1) {
             // Nome do custodiado em uma única linha no Word.
             const inicioTcPr = celula.indexOf('<w:tcPr');
