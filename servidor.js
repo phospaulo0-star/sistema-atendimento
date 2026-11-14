@@ -1503,11 +1503,11 @@ async function corrigirDocxParaWord2016(arquivo) {
       6: [7.2, 37.8, 15, 15, 25],          // Item 28 - Licença Judicial
       7: [7.2, 42.5, 19.9, 30.4],          // Item 29 - Saída temporária
       8: [7.2, 42.5, 19.9, 30.4],          // Item 29.1 - Retorno
-      9: [5.38, 41.86, 8.34, 16.69, 27.72],   // Item 31 - Entrada (corpo do relatório)
-      10: [5.37, 34.35, 8.34, 23.08, 28.85], // Item 32 - Saída (corpo do relatório)
+      9: [5, 38, 8, 19, 30],                    // Item 31 - Entrada (nome ampliado)
+      10: [5, 38, 8, 22, 27],              // Item 32 - Saída (nome ampliado)
       11: [50, 50],                         // Assinaturas
-      12: [5.38, 36.49, 8.34, 20.73, 29.06], // Movimentação - Entradas
-      13: [5.37, 31.50, 8.34, 23.46, 31.34]  // Movimentação - Saídas
+      12: [5, 38, 8, 19, 30],                  // Movimentação - Entradas
+      13: [5, 38, 8, 22, 27]               // Movimentação - Saídas
     };
     const gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
       .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
@@ -1523,9 +1523,9 @@ async function corrigirDocxParaWord2016(arquivo) {
     const ocorrenciaItem32 = tabelaItem32 ? (ocorrenciasSaidaCustodiados++) : -1;
     if (totalGrade > 0) {
       const proporcoesMovimentacao = tabelaItem31
-        ? (ocorrenciaItem31 === 0 ? [5.38, 41.86, 8.34, 16.69, 27.72] : [5.38, 36.49, 8.34, 20.73, 29.06])
+        ? [5, 38, 8, 19, 30]
         : tabelaItem32
-          ? (ocorrenciaItem32 === 0 ? [5.37, 34.35, 8.34, 23.08, 28.85] : [5.37, 31.50, 8.34, 23.46, 31.34])
+          ? [5, 38, 8, 22, 27]
           : null;
       const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
         ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
@@ -1543,11 +1543,16 @@ async function corrigirDocxParaWord2016(arquivo) {
       } else {
         tabela = tabela.replace(/<w:tbl\b[^>]*>/, m => m + '<w:tblPr>' + larguraTabelaXml + '</w:tblPr>');
       }
-      let indiceGrade = 0;
-      tabela = tabela.replace(/<w:gridCol\b[^>]*w:w="\d+"[^>]*\/>/g, celula => {
-        const largura = largurasColunas[Math.min(indiceGrade++, largurasColunas.length - 1)];
-        return celula.replace(/w:w="\d+"/, 'w:w="' + largura + '"');
-      });
+      // Grade única e layout fixo: remove tblGrid duplicados gerados no DOCX.
+      const gradeXml = '<w:tblGrid>' + largurasColunas.map(l => '<w:gridCol w:w="' + l + '"/>').join('') + '</w:tblGrid>';
+      if (/<w:tblGrid\\b[\\s\\S]*?<\\/w:tblGrid>/.test(tabela)) {
+        tabela = tabela.replace(/(?:<w:tblGrid\\b[\\s\\S]*?<\\/w:tblGrid>\\s*)+/, gradeXml);
+      } else {
+        tabela = tabela.replace(/<w:tr\\b/, gradeXml + '<w:tr');
+      }
+      const layoutFixo = '<w:tblLayout w:type="fixed"/>';
+      if (/<w:tblLayout\\b[^>]*\\/>/.test(tabela)) tabela = tabela.replace(/<w:tblLayout\\b[^>]*\\/>/, layoutFixo);
+      else tabela = tabela.replace(/(<w:tblPr\\b[^>]*>)/, '$1' + layoutFixo);
       tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
         let indiceColuna = 0;
         return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
