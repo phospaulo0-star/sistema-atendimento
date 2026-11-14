@@ -2556,7 +2556,7 @@ async function exportarWord(){
   documento.querySelectorAll('.movement-total').forEach(total=>{
     const paragrafoTotal=document.createElement('p');
     paragrafoTotal.setAttribute('align','right');
-    paragrafoTotal.setAttribute('style','display:block;width:100%;text-align:right;text-align-last:right;white-space:nowrap;font-family:"Times New Roman",serif;font-size:9pt;font-weight:bold;line-height:1.0;margin:1mm 0 4mm;padding:0;border:0;color:#000');
+    paragrafoTotal.setAttribute('style','display:block;width:100%;text-align:right;text-align-last:right;white-space:nowrap;font-family:"Times New Roman",serif;font-size:9pt;font-weight:bold;line-height:1.0;margin:0 0 2mm;padding:0;border:0;color:#000');
     paragrafoTotal.innerHTML=total.innerHTML;
     total.replaceWith(paragrafoTotal);
   });
@@ -3056,7 +3056,7 @@ function visualizarRelatorio(targetId=null){
       const tituloTabela=tipo==='entrada'?'ENTRADA DE CUSTODIADOS':'SAÍDA DE CUSTODIADOS';
       const trs=rows.map((r,i)=>`<tr><td style="text-align:center;background:#fff;white-space:nowrap">${i+1}.</td><td style="text-align:left!important;white-space:nowrap;overflow-wrap:normal;word-break:keep-all;vertical-align:middle">${esc(r.nome)}</td><td>${esc(r.rgi)}</td><td>${esc(r.procedencia)}</td><td style="background:#d2d2d2">${esc(r.documento)}</td></tr>`).join('');
       const larguras=tipo==='entrada'?[5.30,34.02,9.51,21.15,30.02]:[5.28,34.14,9.52,21.53,29.53];
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table"><colgroup>${larguras.map(w=>`<col style="width:${w}%">`).join('')}</colgroup><thead><tr><th colspan="5" style="background:#d2d2d2;text-align:center">${tituloTabela}</th></tr><tr><th style="background:#d2d2d2"> </th><th style="background:#d2d2d2">NOME</th><th style="background:#d2d2d2">RGI</th><th style="background:#d2d2d2">${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th style="background:#d2d2d2">DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total" style="display:block;width:100%;text-align:right;text-align-last:right;font-family:Arial,Helvetica,sans-serif;font-size:9pt;font-weight:bold;margin:1mm 0 3mm;padding:0">Total de ${tipo==='entrada'?'entradas':'saídas'}: ${total}</div></section>`;
+      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table"><colgroup>${larguras.map(w=>`<col style="width:${w}%">`).join('')}</colgroup><thead><tr><th colspan="5" style="background:#d2d2d2;text-align:center">${tituloTabela}</th></tr><tr><th style="background:#d2d2d2"> </th><th style="background:#d2d2d2">NOME</th><th style="background:#d2d2d2">RGI</th><th style="background:#d2d2d2">${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th style="background:#d2d2d2">DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total" style="display:block;width:100%;text-align:right;text-align-last:right;font-family:Arial,Helvetica,sans-serif;font-size:9pt;font-weight:bold;margin:0 0 2mm;padding:0">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}</div></section>`;
     }
     if(titulo.startsWith('36 – MATERIAL REPASSADO PARA CHEFIA')){
       const texto=textoItem36(item.texto);
