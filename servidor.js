@@ -1468,6 +1468,8 @@ async function corrigirDocxParaWord2016(arquivo) {
   // O conversor aplica bordas padrão até na tabela usada apenas para alinhar
   // os logotipos. A primeira tabela é o cabeçalho: deve ficar sem contorno.
   let indiceTabela = -1;
+  let ocorrenciasEntradaCustodiados = 0;
+  let ocorrenciasSaidaCustodiados = 0;
   xml = xml.replace(/<w:tbl\b[\s\S]*?<\/w:tbl>/g, tabela => {
     indiceTabela++;
     if (indiceTabela === 0) {
@@ -1501,11 +1503,11 @@ async function corrigirDocxParaWord2016(arquivo) {
       6: [7.2, 37.8, 15, 15, 25],          // Item 28 - Licença Judicial
       7: [7.2, 42.5, 19.9, 30.4],          // Item 29 - Saída temporária
       8: [7.2, 42.5, 19.9, 30.4],          // Item 29.1 - Retorno
-      9: [5, 32, 14, 23, 26],              // Item 31 - Entrada
-      10: [5, 32, 9, 22, 32],              // Item 32 - Saída
-      11: [50, 50],                        // Assinaturas
-      12: [5, 28, 12, 30, 25],             // Movimentação - Entradas
-      13: [5, 28, 12, 30, 25]              // Movimentação - Saídas
+      9: [5.38, 41.86, 8.34, 16.69, 27.72],   // Item 31 - Entrada (corpo do relatório)
+      10: [5.37, 34.35, 8.34, 23.08, 28.85], // Item 32 - Saída (corpo do relatório)
+      11: [50, 50],                         // Assinaturas
+      12: [5.38, 36.49, 8.34, 20.73, 29.06], // Movimentação - Entradas
+      13: [5.37, 31.50, 8.34, 23.46, 31.34]  // Movimentação - Saídas
     };
     const gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
       .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
@@ -1515,10 +1517,16 @@ async function corrigirDocxParaWord2016(arquivo) {
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, '');
     const tabelaItem31 = textoTabelaParaLargura.includes('ENTRADADECUSTODIADOS');
     const tabelaItem32 = textoTabelaParaLargura.includes('SAIDADECUSTODIADOS');
+    // Cada título aparece duas vezes: primeiro no corpo do relatório e depois
+    // na página de movimentação. Aplicamos as proporções próprias de cada local.
+    const ocorrenciaItem31 = tabelaItem31 ? (ocorrenciasEntradaCustodiados++) : -1;
+    const ocorrenciaItem32 = tabelaItem32 ? (ocorrenciasSaidaCustodiados++) : -1;
     if (totalGrade > 0) {
-      // Itens 31 e 32 são identificados pelo título, nunca pela posição da tabela no DOCX.
-      const proporcoesMovimentacao = tabelaItem31 ? [4, 42, 9, 19, 26]
-        : tabelaItem32 ? [4, 42, 7, 19, 28] : null;
+      const proporcoesMovimentacao = tabelaItem31
+        ? (ocorrenciaItem31 === 0 ? [5.38, 41.86, 8.34, 16.69, 27.72] : [5.38, 36.49, 8.34, 20.73, 29.06])
+        : tabelaItem32
+          ? (ocorrenciaItem32 === 0 ? [5.37, 34.35, 8.34, 23.08, 28.85] : [5.37, 31.50, 8.34, 23.46, 31.34])
+          : null;
       const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
         ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
       const base = proporcoes && proporcoes.length === gradeAtual.length
