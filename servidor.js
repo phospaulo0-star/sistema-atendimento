@@ -1545,8 +1545,8 @@ async function corrigirDocxParaWord2016(arquivo) {
       }
       // Grade única e layout fixo: remove tblGrid duplicados gerados no DOCX.
       const gradeXml = '<w:tblGrid>' + largurasColunas.map(l => '<w:gridCol w:w="' + l + '"/>').join('') + '</w:tblGrid>';
-      if (/<w:tblGrid\\b[\\s\\S]*?<\\/w:tblGrid>/.test(tabela)) {
-        tabela = tabela.replace(/(?:<w:tblGrid\\b[\\s\\S]*?<\\/w:tblGrid>\\s*)+/, gradeXml);
+      if (/<w:tblGrid\b[\s\S]*?<\/w:tblGrid>/.test(tabela)) {
+        tabela = tabela.replace(/(?:<w:tblGrid\b[\s\S]*?<\/w:tblGrid>\s*)+/, gradeXml);
       } else {
         tabela = tabela.replace(/<w:tr\\b/, gradeXml + '<w:tr');
       }
