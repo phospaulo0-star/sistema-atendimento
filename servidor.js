@@ -2297,6 +2297,23 @@ async function corrigirDocxParaWord2016(arquivo) {
     return aplicarLargurasHospDocx(tabela, largurasGrade);
   });
 
+  // Itens 31 e 32: aproxima o total da tabela imediatamente anterior.
+  // O conversor pode ignorar as margens HTML do parágrafo e herdar espaçamento do Word.
+  xml = xml.replace(/<w:p\b[\s\S]*?<\/w:p>/g, paragrafo => {
+    const texto = (paragrafo.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+    if (!/^TOTAL DE (ENTRADAS|SAIDAS):?\s*\d+/.test(texto)) return paragrafo;
+    const espacamento = '<w:spacing w:before="0" w:after="0" w:line="160" w:lineRule="exact"/>';
+    if (/<w:pPr\b[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+      return paragrafo.replace(/<w:pPr\b([\s\S]*?)>([\s\S]*?)<\/w:pPr>/, (m, attrs, props) => {
+        props = props.replace(/<w:spacing\b[^>]*\/>/g, '');
+        return '<w:pPr' + attrs + '>' + props + espacamento + '</w:pPr>';
+      });
+    }
+    return paragrafo.replace(/<w:p\b[^>]*>/, m => m + '<w:pPr>' + espacamento + '</w:pPr>');
+  });
+
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
     type: 'nodebuffer',
