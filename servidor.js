@@ -1646,6 +1646,33 @@ async function corrigirDocxParaWord2016(arquivo) {
       });
     }
 
+    // Na tabela de SAÍDA da Movimentação, manter cada registro inteiro na mesma página.
+    // O espaçamento de linha é ligeiramente mais compacto para que a linha 6 termine
+    // na primeira página, como no Word modelo, sem dividir o conteúdo da célula DOCUMENTO.
+    if (tabelaItem32 && ocorrenciaItem32 > 0) {
+      tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
+        if (/<w:trPr\b[\s\S]*?<\/w:trPr>/.test(linha)) {
+          if (/<w:cantSplit\b/.test(linha)) return linha;
+          return linha.replace(/<w:trPr\b([^>]*)>([\s\S]*?)<\/w:trPr>/,
+            (m, attrs, props) => '<w:trPr' + attrs + '>' + props + '<w:cantSplit/></w:trPr>');
+        }
+        if (/<w:trPr\b[^>]*\/>/.test(linha)) {
+          return linha.replace(/<w:trPr\b[^>]*\/>/, '<w:trPr><w:cantSplit/></w:trPr>');
+        }
+        return linha.replace(/(<w:tr\b[^>]*>)/, '$1<w:trPr><w:cantSplit/></w:trPr>');
+      });
+      tabela = tabela.replace(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g, paragrafo => {
+        const spacing = '<w:spacing w:before="0" w:after="0" w:line="200" w:lineRule="exact"/>';
+        if (/<w:pPr\b[^>]*>[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+          if (/<w:spacing\b[^>]*\/>/.test(paragrafo)) {
+            return paragrafo.replace(/<w:spacing\b[^>]*\/>/, spacing);
+          }
+          return paragrafo.replace(/(<w:pPr\b[^>]*>)/, '$1' + spacing);
+        }
+        return paragrafo.replace(/(<w:p\b[^>]*>)/, '$1<w:pPr>' + spacing + '</w:pPr>');
+      });
+    }
+
     // Item 16 - Material Carga: localizar pelo conteúdo, não pelo índice,
     // pois o Word pode inserir tabelas auxiliares antes da tabela de materiais.
     const textoTabelaAtual = (tabela.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
@@ -2091,7 +2118,7 @@ async function corrigirDocxParaWord2016(arquivo) {
   xml = xml.replace(/<w:footerReference\b[^>]*\/>/g, '');
   if (/<w:sectPr\b[\s\S]*?<\/w:sectPr>/.test(xml)) {
     xml = xml.replace(/<w:sectPr\b([\s\S]*?)<\/w:sectPr>/, (secao, attrs) => {
-      const referencias = '<w:headerReference w:type="default" r:id="' + headerDocRelId + '"/><w:footerReference w:type="default" r:id="' + footerRelId + '"/>';
+      const referencias = '<w:headerReference w:type="first" r:id="' + headerDocRelId + '"/><w:headerReference w:type="default" r:id="' + headerDocRelId + '"/><w:footerReference w:type="default" r:id="' + footerRelId + '"/>';
       if (/<w:pgSz\b/.test(attrs)) return '<w:sectPr' + attrs.replace(/<w:pgSz\b/, referencias + '<w:pgSz') + '</w:sectPr>';
       if (/<w:pgMar\b/.test(attrs)) return '<w:sectPr' + attrs.replace(/<w:pgMar\b/, referencias + '<w:pgMar') + '</w:sectPr>';
       return '<w:sectPr' + attrs + referencias + '</w:sectPr>';
