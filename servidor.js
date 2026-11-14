@@ -2314,6 +2314,47 @@ async function corrigirDocxParaWord2016(arquivo) {
     return paragrafo.replace(/<w:p\b[^>]*>/, m => m + '<w:pPr>' + espacamento + '</w:pPr>');
   });
 
+  // Movimentação carcerária: espaçamento real no Word entre título, inicial e título da tabela.
+  // O conversor HTML pode ignorar margens CSS; por isso gravamos o espaçamento em OOXML.
+  xml = xml.replace(/<w:p\b[\s\S]*?<\/w:p>/g, paragrafo => {
+    const texto = (paragrafo.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+    let antes = 0, depois = 0, sublinhar = false;
+    if (texto.startsWith('MOVIMENTACAO CARCERARIA DO DIA')) {
+      depois = 220;
+      sublinhar = true;
+    } else if (texto.startsWith('INICIAL / RECEBI')) {
+      depois = 220;
+    } else if (texto === 'ENTRADA DE CUSTODIADOS') {
+      antes = 160;
+      depois = 120;
+    } else {
+      return paragrafo;
+    }
+    const espacamento = '<w:spacing w:before="' + antes + '" w:after="' + depois + '" w:line="240" w:lineRule="auto"/>';
+    if (/<w:pPr\b[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+      paragrafo = paragrafo.replace(/<w:pPr\b([\s\S]*?)>([\s\S]*?)<\/w:pPr>/, (m, attrs, props) => {
+        props = props.replace(/<w:spacing\b[^>]*\/>/g, '');
+        return '<w:pPr' + attrs + '>' + props + espacamento + '</w:pPr>';
+      });
+    } else {
+      paragrafo = paragrafo.replace(/<w:p\b[^>]*>/, m => m + '<w:pPr>' + espacamento + '</w:pPr>');
+    }
+    if (sublinhar) {
+      paragrafo = paragrafo.replace(/<w:r\b[\s\S]*?<\/w:r>/g, run => {
+        if (!/<w:t\b/.test(run)) return run;
+        if (/<w:rPr\b[\s\S]*?<\/w:rPr>/.test(run)) {
+          return run.replace(/<w:rPr>([\s\S]*?)<\/w:rPr>/, (m, props) =>
+            /<w:u\b/.test(props) ? '<w:rPr>' + props + '</w:rPr>' :
+              '<w:rPr>' + props + '<w:u w:val="single"/></w:rPr>');
+        }
+        return run.replace(/<w:r\b[^>]*>/, m => m + '<w:rPr><w:u w:val="single"/></w:rPr>');
+      });
+    }
+    return paragrafo;
+  });
+
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
     type: 'nodebuffer',
