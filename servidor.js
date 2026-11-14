@@ -1553,6 +1553,10 @@ async function corrigirDocxParaWord2016(arquivo) {
       const layoutFixo = '<w:tblLayout w:type="fixed"/>';
       if (/<w:tblLayout\\b[^>]*\\/>/.test(tabela)) tabela = tabela.replace(/<w:tblLayout\\b[^>]*\\/>/, layoutFixo);
       else tabela = tabela.replace(/(<w:tblPr\\b[^>]*>)/, '$1' + layoutFixo);
+      // Margens laterais compactas para que a numeração e o RGI não quebrem linha.
+      const margensCompactas = '<w:tblCellMar><w:top w:type="dxa" w:w="60"/><w:bottom w:type="dxa" w:w="60"/><w:left w:type="dxa" w:w="60"/><w:right w:type="dxa" w:w="60"/></w:tblCellMar>';
+      if (/<w:tblCellMar\\b[\\s\\S]*?<\\/w:tblCellMar>/.test(tabela)) tabela = tabela.replace(/<w:tblCellMar\\b[\\s\\S]*?<\\/w:tblCellMar>/, margensCompactas);
+      else tabela = tabela.replace(/(<w:tblPr\\b[^>]*>)/, '$1' + margensCompactas);
       tabela = tabela.replace(/<w:tr\b[\s\S]*?<\/w:tr>/g, linha => {
         let indiceColuna = 0;
         return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
