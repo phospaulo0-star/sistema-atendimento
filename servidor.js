@@ -2380,10 +2380,27 @@ async function corrigirDocxParaWord2016(arquivo) {
           .replace(/<w:keepNext\b[^>]*\/>/g, '');
         const propriedades = '<w:jc w:val="center"/><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>';
         if (/<w:pPr\b[^>]*>[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
-          return paragrafo.replace(/<w:pPr\b([^>]*)>([\s\S]*?)<\/w:pPr>/,
+          paragrafo = paragrafo.replace(/<w:pPr\b([^>]*)>([\s\S]*?)<\/w:pPr>/,
             (m, attrs, props) => '<w:pPr' + attrs + '>' + formatar(props) + propriedades + '</w:pPr>');
+        } else {
+          paragrafo = paragrafo.replace(/(<w:p\b[^>]*>)/, '$1<w:pPr>' + propriedades + '</w:pPr>');
         }
-        return paragrafo.replace(/(<w:p\b[^>]*>)/, '$1<w:pPr>' + propriedades + '</w:pPr>');
+        // Nome em negrito e fonte normal; as três linhas seguintes em itálico.
+        const ehNome = atual === indices[0];
+        paragrafo = paragrafo.replace(/<w:r\b[^>]*>[\s\S]*?<\/w:r>/g, run => {
+          if (!/<w:t\b/.test(run)) return run;
+          const ajustar = props => {
+            props = props.replace(/<w:b\b[^>]*\/>/g, '').replace(/<w:i\b[^>]*\/>/g, '');
+            return props + (ehNome ? '<w:b/>' : '<w:i/>');
+          };
+          if (/<w:rPr\b[^>]*>[\s\S]*?<\/w:rPr>/.test(run)) {
+            return run.replace(/<w:rPr\b[^>]*>([\s\S]*?)<\/w:rPr>/,
+              (m, props) => '<w:rPr>' + ajustar(props) + '</w:rPr>');
+          }
+          return run.replace(/(<w:r\b[^>]*>)/,
+            '$1<w:rPr>' + (ehNome ? '<w:b/>' : '<w:i/>') + '</w:rPr>');
+        });
+        return paragrafo;
       });
     }
   }
