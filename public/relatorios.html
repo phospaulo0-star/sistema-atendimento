@@ -2155,9 +2155,9 @@ function aplicarPadraoTabelasCPAIG(container) {
       widths = [4.2,63.8,17.4,16]; opts.nameLeft = true;
     } else if (/^31(?:\s|[–-])/.test(title)) {
       // Itens 31/32: reproduzir as larguras medidas no modelo Word aprovado.
-      widths = [5.30,34.02,9.51,21.15,30.02]; opts.movementHeader = true; opts.nameLeft = true;
+      widths = [5.38,41.86,8.34,16.69,27.72]; opts.movementHeader = true; opts.nameLeft = true;
     } else if (/^32(?:\s|[–-])/.test(title)) {
-      widths = [5.28,34.14,9.52,21.53,29.53]; opts.movementHeader = true; opts.nameLeft = true;
+      widths = [5.37,34.35,8.34,23.08,28.85]; opts.movementHeader = true; opts.nameLeft = true;
     } else return;
 
     const firstHeader = table.querySelector("thead tr");
@@ -2285,7 +2285,7 @@ function aplicarPadraoTabelasCPAIG(container) {
     movement.querySelectorAll("table.custody-preview-table").forEach(table => {
       const title = table.querySelector("thead tr:first-child th:last-child")?.textContent.trim() || "";
       const isExit = /SAÍDA/i.test(title);
-      const widths = isExit ? [5.28,34.14,9.52,21.53,29.53] : [5.30,34.02,9.51,21.15,30.02];
+      const widths = isExit ? [5.37,31.50,8.34,23.46,31.34] : [5.38,36.49,8.34,20.73,29.06];
       const firstRow = table.querySelector("thead tr:first-child");
       if (firstRow && firstRow.children.length > 1) {
         const cells = [...firstRow.children];
@@ -2549,6 +2549,8 @@ async function exportarWord(){
     });
   });
   documento.querySelectorAll('.custody-preview-table td:nth-child(2),.licenca-judicial-preview-table td:nth-child(2),.retorno-licenca-judicial-preview-table td:nth-child(2),.hospitalizado-preview-table td:nth-child(2),.material-carga-print-table tbody td:first-child,.viaturas-print-table tbody td:first-child').forEach(x=>x.style.textAlign='left');
+  // Itens 31 e 32: manter o nome do custodiado em uma única linha no Word, conforme o modelo aprovado.
+  documento.querySelectorAll('.custody-preview-table td:nth-child(2)').forEach(x=>{x.style.whiteSpace='nowrap';x.style.overflowWrap='normal';x.style.wordBreak='keep-all';});
   // Totais seguem o modelo oficial do PDF: texto simples, sem tabela/caixa,
   // imediatamente abaixo da tabela de movimentação e alinhado à direita.
   documento.querySelectorAll('.movement-total').forEach(total=>{
