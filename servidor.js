@@ -1509,23 +1509,26 @@ async function corrigirDocxParaWord2016(arquivo) {
       12: [5, 38, 8, 19, 30],                  // Movimentação - Entradas
       13: [5, 38, 8, 22, 27]               // Movimentação - Saídas
     };
-    const gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
+    let gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
       .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
-    const totalGrade = gradeAtual.reduce((a, b) => a + b, 0);
     const textoTabelaParaLargura = (tabela.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
       .join(' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&')
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, '');
     const tabelaItem31 = textoTabelaParaLargura.includes('ENTRADADECUSTODIADOS');
     const tabelaItem32 = textoTabelaParaLargura.includes('SAIDADECUSTODIADOS');
+    // O html-to-docx cria uma grade interna de 15 colunas, embora cada linha tenha 5 células.
+    // Normalizamos os Itens 31/32 para cinco colunas reais antes de calcular as larguras.
+    if (tabelaItem31 || tabelaItem32) gradeAtual = [1, 1, 1, 1, 1];
+    const totalGrade = gradeAtual.reduce((a, b) => a + b, 0);
     // Cada título aparece duas vezes: primeiro no corpo do relatório e depois
     // na página de movimentação. Aplicamos as proporções próprias de cada local.
     const ocorrenciaItem31 = tabelaItem31 ? (ocorrenciasEntradaCustodiados++) : -1;
     const ocorrenciaItem32 = tabelaItem32 ? (ocorrenciasSaidaCustodiados++) : -1;
     if (totalGrade > 0) {
       const proporcoesMovimentacao = tabelaItem31
-        ? [5, 38, 8, 19, 30]
+        ? [6, 43, 8, 18, 25]
         : tabelaItem32
-          ? [5, 38, 8, 22, 27]
+          ? [6, 40, 8, 22, 24]
           : null;
       const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
         ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
