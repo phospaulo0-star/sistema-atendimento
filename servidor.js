@@ -1526,9 +1526,9 @@ async function corrigirDocxParaWord2016(arquivo) {
     const ocorrenciaItem32 = tabelaItem32 ? (ocorrenciasSaidaCustodiados++) : -1;
     if (totalGrade > 0) {
       const proporcoesMovimentacao = tabelaItem31
-        ? [6, 41, 8, 17, 28]
+        ? (ocorrenciaItem31 === 0 ? [6, 41, 8, 17, 28] : [6, 40, 8, 18, 28])
         : tabelaItem32
-          ? [6, 38, 8, 21, 27]
+          ? (ocorrenciaItem32 === 0 ? [6, 38, 8, 21, 27] : [6, 38, 8, 22, 26])
           : null;
       const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
         ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
@@ -1619,16 +1619,27 @@ async function corrigirDocxParaWord2016(arquivo) {
           // Modelo CPAIG: título e cabeçalho cinza; no corpo, somente a coluna de numeração fica cinza.
           const totalColunas = gradeAtual.length;
           const cinza = atual <= 1 || (atual >= 2 && coluna === 0);
-          if (atual >= 2 && coluna === 1) {
-            // Nome do custodiado em uma única linha no Word.
+          const ehMovimentacao = (tabelaItem31 && ocorrenciaItem31 > 0) || (tabelaItem32 && ocorrenciaItem32 > 0);
+          if (atual >= 2 && coluna === 1 && !ehMovimentacao) {
+            // Nos Itens 31/32 do corpo, manter o nome em uma linha. Na movimentação,
+            // seguir o modelo Word e centralizar o nome, permitindo quebra quando necessária.
             const inicioTcPr = celula.indexOf('<w:tcPr');
             const fimTcPr = celula.indexOf('</w:tcPr>', inicioTcPr);
             if (inicioTcPr >= 0 && fimTcPr >= 0) {
               const propriedades = celula.slice(inicioTcPr, fimTcPr);
-              if (!propriedades.includes('<w:noWrap')) {
-                celula = celula.slice(0, fimTcPr) + '<w:noWrap/>' + celula.slice(fimTcPr);
-              }
+              if (!propriedades.includes('<w:noWrap')) celula = celula.slice(0, fimTcPr) + '<w:noWrap/>' + celula.slice(fimTcPr);
             }
+          }
+          if (ehMovimentacao && atual >= 2) {
+            celula = celula.replace(/<w:p\b[\s\S]*?<\/w:p>/g, paragrafo => {
+              if (/<w:pPr\b[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+                return paragrafo.replace(/<w:pPr\b([^>]*)>([\s\S]*?)<\/w:pPr>/, (m, attrs, props) => {
+                  props = props.replace(/<w:jc\b[^>]*\/>/g, '');
+                  return '<w:pPr' + attrs + '>' + props + '<w:jc w:val="center"/></w:pPr>';
+                });
+              }
+              return paragrafo.replace(/<w:p\b[^>]*>/, m => m + '<w:pPr><w:jc w:val="center"/></w:pPr>');
+            });
           }
           return definirFundoCelulaMov(celula, cinza ? 'D2D2D2' : 'FFFFFF');
         });
