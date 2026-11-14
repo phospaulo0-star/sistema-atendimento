@@ -1503,11 +1503,11 @@ async function corrigirDocxParaWord2016(arquivo) {
       6: [7.2, 37.8, 15, 15, 25],          // Item 28 - Licença Judicial
       7: [7.2, 42.5, 19.9, 30.4],          // Item 29 - Saída temporária
       8: [7.2, 42.5, 19.9, 30.4],          // Item 29.1 - Retorno
-      9: [5, 38, 8, 19, 30],                    // Item 31 - Entrada (nome ampliado)
-      10: [5, 38, 8, 22, 27],              // Item 32 - Saída (nome ampliado)
+      9: [5, 38, 8, 17, 32],                    // Item 31 - Entrada (nome ampliado)
+      10: [5, 38, 8, 17, 32],              // Item 32 - Saída (nome ampliado)
       11: [50, 50],                         // Assinaturas
-      12: [5, 38, 8, 19, 30],                  // Movimentação - Entradas
-      13: [5, 38, 8, 22, 27]               // Movimentação - Saídas
+      12: [5, 38, 8, 17, 32],                  // Movimentação - Entradas
+      13: [5, 38, 8, 17, 32]               // Movimentação - Saídas
     };
     let gradeAtual = [...(tabela.match(/<w:gridCol\b[^>]*w:w="(\d+)"/g) || [])]
       .map(x => Number((x.match(/w:w="(\d+)"/) || [])[1] || 0));
@@ -1526,9 +1526,9 @@ async function corrigirDocxParaWord2016(arquivo) {
     const ocorrenciaItem32 = tabelaItem32 ? (ocorrenciasSaidaCustodiados++) : -1;
     if (totalGrade > 0) {
       const proporcoesMovimentacao = tabelaItem31
-        ? (ocorrenciaItem31 === 0 ? [6, 41, 8, 17, 28] : [6, 40, 8, 18, 28])
+        ? (ocorrenciaItem31 === 0 ? [5, 38, 8, 17, 32] : [5, 38, 8, 17, 32])
         : tabelaItem32
-          ? (ocorrenciaItem32 === 0 ? [6, 38, 8, 21, 27] : [6, 38, 8, 22, 26])
+          ? (ocorrenciaItem32 === 0 ? [5, 38, 8, 17, 32] : [5, 38, 8, 17, 32])
           : null;
       const proporcoes = proporcoesMovimentacao && proporcoesMovimentacao.length === gradeAtual.length
         ? proporcoesMovimentacao : largurasModeloCPAIG[indiceTabela];
@@ -2351,6 +2351,32 @@ async function corrigirDocxParaWord2016(arquivo) {
     }
     return paragrafo.replace(/<w:p\b[^>]*>/, m => m + '<w:pPr>' + espacamento + '</w:pPr>');
   });
+
+  // Assinatura final da movimentação: quatro linhas centralizadas e compactas.
+  // O primeiro parágrafo contém o nome; os três seguintes, função, unidade e matrícula.
+  xml = xml.replace(
+    /(<w:p\b[^>]*>[\s\S]*?<\/w:p>)(<w:p\b[^>]*>[\s\S]*?<\/w:p>)(<w:p\b[^>]*>[\s\S]*?<\/w:p>)(<w:p\b[^>]*>[\s\S]*?<\/w:p>)/g,
+    (bloco, nome, funcao, unidade, matricula) => {
+      const textoFuncao = funcao.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+      const textoUnidade = unidade.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+      const textoMatricula = matricula.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+      if (!textoFuncao.includes('POLICIAL PENAL') ||
+          !textoUnidade.includes('CPAIG/AGEPEN') ||
+          !textoMatricula.includes('MATRÍCULA')) return bloco;
+      const centralizar = paragrafo => {
+        if (/<w:pPr\b[^>]*>[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+          return paragrafo.replace(/<w:pPr\b([^>]*)>([\s\S]*?)<\/w:pPr>/, (m, attrs, props) => {
+            props = props.replace(/<w:jc\b[^>]*\/>/g, '').replace(/<w:spacing\b[^>]*\/>/g, '');
+            return '<w:pPr' + attrs + '>' + props +
+              '<w:jc w:val="center"/><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/></w:pPr>';
+          });
+        }
+        return paragrafo.replace(/(<w:p\b[^>]*>)/,
+          '$1<w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/></w:pPr>');
+      };
+      return [nome, funcao, unidade, matricula].map(centralizar).join('');
+    }
+  );
 
   // Movimentação carcerária: espaçamento real no Word entre título, inicial e título da tabela.
   // O conversor HTML pode ignorar margens CSS; por isso gravamos o espaçamento em OOXML.
