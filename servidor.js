@@ -1616,10 +1616,9 @@ async function corrigirDocxParaWord2016(arquivo) {
         let colunaMov = 0;
         return linha.replace(/<w:tc\b[\s\S]*?<\/w:tc>/g, celula => {
           const coluna = colunaMov++;
-          // Modelo CPAIG: título e cabeçalho de colunas cinza;
-          // corpo branco, exceto a última coluna DOCUMENTO, também cinza.
+          // Modelo CPAIG: título e cabeçalho cinza; no corpo, somente a coluna de numeração fica cinza.
           const totalColunas = gradeAtual.length;
-          const cinza = atual <= 1;
+          const cinza = atual <= 1 || (atual >= 2 && coluna === 0);
           if (atual >= 2 && coluna === 1) {
             // Nome do custodiado em uma única linha no Word.
             const inicioTcPr = celula.indexOf('<w:tcPr');
