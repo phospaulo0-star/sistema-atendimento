@@ -3060,7 +3060,9 @@ function visualizarRelatorio(targetId=null){
     }
     if(titulo.startsWith('36 – MATERIAL REPASSADO PARA CHEFIA')){
       const texto=textoItem36(item.texto);
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><div class="preview-text" style="white-space:pre-line">${esc(texto)}</div></section>`;
+      const linhas=String(texto||'• N/C.').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      const cadastros=linhas.map(l=>`<p class="item36-line" style="margin:0;padding:0;line-height:1.0">${esc(l)}</p>`).join('');
+      return `<section class="preview-section item36-preview"><h3>${esc(item.titulo)}:</h3><div class="preview-text">${cadastros||'<p class="item36-line" style="margin:0;padding:0;line-height:1.0">• N/C.</p>'}</div></section>`;
     }
     if(titulo.startsWith('37 – MATERIAL RECEBIDO DA CHEFIA')){
       const texto=textoItem37(item.texto);
