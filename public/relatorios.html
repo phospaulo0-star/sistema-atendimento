@@ -2735,11 +2735,13 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  // Item 11: recuperar a escala noturna do relatório anterior da mesma equipe.
  const chave11='11 – ESCALA NOTURNA (MONITORAMENTO)';
  if(mesmaEquipe?.content&&String(mesmaEquipe.content[chave11]||'').trim())atualizado[chave11]=mesmaEquipe.content[chave11];
- // Item 19: copiar literalmente o conteúdo do Item 19 do relatório da equipe que entregou o plantão.
- // A origem é o relatório mais recente da equipe anterior, e não o texto padrão nem o relatório da mesma equipe.
+ // Item 19: usar exclusivamente o relatório retornado pelo servidor para o plantão
+ // imediatamente anterior (equipe anterior + data exata de quatro dias antes).
+ // Não recorrer a relatórios mais antigos nem a texto padrão.
  const chave19='19 – ROTINA DIÁRIA';
- if(relEquipeAnterior?.content && Object.prototype.hasOwnProperty.call(relEquipeAnterior.content,chave19)){
-  atualizado[chave19]=relEquipeAnterior.content[chave19];
+ const relatorioPlantaoAnterior=dadosHerdadosRelatorio?.previousTeamReport;
+ if(relatorioPlantaoAnterior?.content && Object.prototype.hasOwnProperty.call(relatorioPlantaoAnterior.content,chave19)){
+  atualizado[chave19]=relatorioPlantaoAnterior.content[chave19];
  }
  // Item 38: a partir de 01/11/2026, herdar o conteúdo do relatório do dia anterior (chefe que entregou o plantão).
  const chave38='38 – MATERIAL / DOCUMENTO REPASSADO PARA O CHEFE DE EQUIPE';
