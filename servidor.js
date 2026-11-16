@@ -2556,14 +2556,11 @@ app.get('/api/relatorios/dados-herdados', exigirBanco, exigirAutenticacao, exigi
       [req.user.team, escala.shiftDate]
     );
     const equipeAnteriorMaterial = ({A:'D',B:'A',C:'B',D:'C'})[String(req.user.team||'').toUpperCase()];
-    // Relatório do plantão imediatamente anterior: mesma sequência de equipes
-    // e data exata de quatro dias antes. Nunca buscar um relatório mais antigo
-    // caso o relatório do plantão imediatamente anterior não exista.
     const materialAnterior = equipeAnteriorMaterial ? await pool.query(
       `SELECT team, report_date, shift_name, title, content, revision
        FROM shift_reports
-       WHERE team = $1 AND report_date = ($2::date - INTERVAL '4 days')::date
-       ORDER BY revision DESC
+       WHERE team = $1 AND report_date < $2::date
+       ORDER BY report_date DESC, revision DESC
        LIMIT 1`,
       [equipeAnteriorMaterial, escala.shiftDate]
     ) : {rows:[]};
