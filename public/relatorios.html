@@ -2973,7 +2973,7 @@ function visualizarRelatorio(targetId=null){
       let ordem=0;
       return bruto.split(/\r?\n/).filter(l=>l.trim()).map(l=>{
         const continuacao=/^\s/.test(l);
-        const conteudo=l.trim().replace(/^\\d+\\s*[.)º-]\\s*/,'').trim();
+        const conteudo=l.trim().replace(/^\d+\s*[.)º-]\s*/,'').trim();
         return continuacao?'    '+conteudo:(++ordem)+'. '+conteudo;
       });
     }
