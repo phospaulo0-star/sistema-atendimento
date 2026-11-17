@@ -2971,8 +2971,8 @@ function visualizarRelatorio(targetId=null){
       // Item 30: a numeração identifica o documento/autorização, não cada interno.
       // Linhas indentadas são nomes adicionais do mesmo documento e ficam sem número.
       let ordem=0;
-      return bruto.split(/\\r?\\n/).filter(l=>l.trim()).map(l=>{
-        const continuacao=/^\\s/.test(l);
+      return bruto.split(/\r?\n/).filter(l=>l.trim()).map(l=>{
+        const continuacao=/^\s/.test(l);
         const conteudo=l.trim().replace(/^\\d+\\s*[.)º-]\\s*/,'').trim();
         return continuacao?'    '+conteudo:(++ordem)+'. '+conteudo;
       });
