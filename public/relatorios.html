@@ -2967,6 +2967,16 @@ function visualizarRelatorio(targetId=null){
   function linhasEmpilhadasWord(titulo,texto){
     const t=String(titulo||'').trim(), bruto=String(texto||'').trim();
     if(!bruto)return ['• N/C.'];
+    if(t.startsWith('30')){
+      // Item 30: a numeração identifica o documento/autorização, não cada interno.
+      // Linhas indentadas são nomes adicionais do mesmo documento e ficam sem número.
+      let ordem=0;
+      return bruto.split(/\\r?\\n/).filter(l=>l.trim()).map(l=>{
+        const continuacao=/^\\s/.test(l);
+        const conteudo=l.trim().replace(/^\\d+\\s*[.)º-]\\s*/,'').trim();
+        return continuacao?'    '+conteudo:(++ordem)+'. '+conteudo;
+      });
+    }
     if(t.startsWith('02')){
       const partes=bruto.replace(/\s+(?=\d+[.)]\s+)/g,'\n').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
       return partes.map((linha,i)=>{
