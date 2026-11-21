@@ -2638,6 +2638,16 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     const current=await client.query('SELECT * FROM shift_reports WHERE id=$1 FOR UPDATE',[id]);
     if(!current.rowCount){await client.query('ROLLBACK');return res.status(404).json({ok:false,message:'RelatÃÂ³rio nÃÂ£o encontrado.'});}
     const old=current.rows[0];
+    // Preserva campos exclusivos da Escala Noturna quando outra tela do relatório
+    // envia uma versão do conteúdo que ainda não conhece esses campos.
+    const contentFinal = { ...(old.content || {}), ...content };
+    for (const key of ['ESCALA NOTURNA INDEPENDENTE', 'ESCALA NOTURNA - TURNINHO']) {
+      if (Object.prototype.hasOwnProperty.call(content, key)) {
+        contentFinal[key] = content[key];
+      } else if (Object.prototype.hasOwnProperty.call(old.content || {}, key)) {
+        contentFinal[key] = old.content[key];
+      }
+    }
     if(old.team!==req.user.team){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Este relatÃÂ³rio pertence a outra equipe.'});}
     const escalaAtual = estadoPlantaoRelatorio();
     const equipeReabrindoRelatorioAnterior = action==='reabrir' && ['chefe','auxiliar'].includes(req.user.role);
@@ -2651,8 +2661,8 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     if(action==='reabrir' && !['chefe','auxiliar'].includes(req.user.role)){await client.query('ROLLBACK');return res.status(403).json({ok:false,message:'Somente chefe ou auxiliar da equipe podem reabrir um relatÃÂ³rio encerrado após a passagem do plantão.'});}
     const status=action==='encerrar'?'encerrado':action==='reabrir'?'aberto':old.status;
     const revision=old.revision+1;
-    const updated=await client.query(`UPDATE shift_reports SET report_date=$2,shift_name=$3,title=$4,content=$5::jsonb,status=$6,revision=$7,updated_by=$8,updated_at=NOW(),closed_at=CASE WHEN $6='encerrado' THEN NOW() WHEN $6='aberto' THEN NULL ELSE closed_at END,closed_by=CASE WHEN $6='encerrado' THEN $8 WHEN $6='aberto' THEN NULL ELSE closed_by END,reopened_at=CASE WHEN $9 THEN NOW() ELSE reopened_at END,reopened_by=CASE WHEN $9 THEN $8 ELSE reopened_by END WHERE id=$1 RETURNING *`,[id,reportDate,shiftName,title,JSON.stringify(content),status,revision,req.user.id,action==='reabrir']);
-    await client.query(`INSERT INTO shift_report_history(report_id,actor_user_id,action,revision,previous_content,new_content,details) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb)`,[id,req.user.id,action,revision,JSON.stringify(old.content||{}),JSON.stringify(content),JSON.stringify({previousTitle:old.title,title,previousDate:old.report_date,reportDate,previousShiftName:old.shift_name,shiftName,previousStatus:old.status,status,team:old.team})]);
+    const updated=await client.query(`UPDATE shift_reports SET report_date=$2,shift_name=$3,title=$4,content=$5::jsonb,status=$6,revision=$7,updated_by=$8,updated_at=NOW(),closed_at=CASE WHEN $6='encerrado' THEN NOW() WHEN $6='aberto' THEN NULL ELSE closed_at END,closed_by=CASE WHEN $6='encerrado' THEN $8 WHEN $6='aberto' THEN NULL ELSE closed_by END,reopened_at=CASE WHEN $9 THEN NOW() ELSE reopened_at END,reopened_by=CASE WHEN $9 THEN $8 ELSE reopened_by END WHERE id=$1 RETURNING *`,[id,reportDate,shiftName,title,JSON.stringify(contentFinal),status,revision,req.user.id,action==='reabrir']);
+    await client.query(`INSERT INTO shift_report_history(report_id,actor_user_id,action,revision,previous_content,new_content,details) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb)`,[id,req.user.id,action,revision,JSON.stringify(old.content||{}),JSON.stringify(contentFinal),JSON.stringify({previousTitle:old.title,title,previousDate:old.report_date,reportDate,previousShiftName:old.shift_name,shiftName,previousStatus:old.status,status,team:old.team})]);
     await client.query('COMMIT');
     // target_user_id referencia users.id, não shift_reports.id. O ID do
     // relatório fica em details. Falha na auditoria não deve transformar um
