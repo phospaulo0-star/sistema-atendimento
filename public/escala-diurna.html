@@ -50,7 +50,7 @@ function addMonitor(periodo){const arr=periodo===1?monitorRows1:monitorRows2;arr
 function removeMonitor(periodo,index){const arr=periodo===1?monitorRows1:monitorRows2;arr.splice(index,1);renderMonitorEditors();renderPreview();dirty=true;agendarAutoSave()}
 function preencherTodosNomesPlantao(){
  // A fonte é a tabela "Postos e policiais" da própria escala, incluindo Chefe e Auxiliar.
- const todos=[...new Set(rows.map(r=>String(r.nome||'').trim().toLocaleUpperCase('pt-BR')).filter(nome=>nome&&!/^SEM EFETIVO$/i.test(nome)&&!/^N\\/C\\.?$/i.test(nome)))];
+ const todos=[...new Set(rows.map(r=>String(r.nome||'').trim().toLocaleUpperCase('pt-BR')).filter(nome=>nome&&!/^SEM EFETIVO$/i.test(nome)&&!/^N\/C\.?$/i.test(nome)))];
  if(!todos.length){alert('Não há nomes preenchidos na tabela de postos e policiais acima. Inclua os nomes, inclusive Chefe e Auxiliar, e tente novamente.');return;}
  const existentes=[...monitorRows1,...monitorRows2].some(r=>String(r.name||'').trim()&& !/^SEM EFETIVO$/i.test(String(r.name).trim()));
  if(existentes&&!confirm('Esta ação substituirá os nomes atualmente preenchidos nos horários da manhã e da tarde pelos nomes da tabela de postos e policiais acima, incluindo Chefe e Auxiliar. Deseja continuar?'))return;
