@@ -95,11 +95,23 @@ function parseItem11(text){const out=[];String(text||'').split(/\r?\n/).map(x=>x
 function item11Text(){return turns.map((r,i)=>String(r.turno||((i+1)+'º TURNO')).trim()+': '+String(r.horario||'HORÁRIO NÃO INFORMADO').trim()+': '+(String(r.nome||'').trim()||'N/C.')).join('\n')||'N/C.'}
 function dataEscala(){const raw=String(report?.reportDate||'').trim();let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})/),d=m?new Date(+m[1],+m[2]-1,+m[3],12):null;if(!d){m=raw.match(/^(\d{2})[./-](\d{2})[./-](\d{4})$/);if(m)d=new Date(+m[3],+m[2]-1,+m[1],12)}if(!d||Number.isNaN(d.getTime()))d=new Date();return d.toLocaleDateString('pt-BR')+' ('+d.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()+')'}
 function availableNames(){return [...new Set(names.map(upper).filter(n=>n&&!/^N\/C\.?$/.test(n)&&!/^SEM EFETIVO$/.test(n)))].sort((a,b)=>a.localeCompare(b,'pt-BR'))}
+function nomesDosTurnosPrincipais(){
+ return [...new Set(turns.map(r=>upper(r.nome).trim()).filter(n=>n&&!/^N\/C\.?$/.test(n)&&!/^SEM EFETIVO$/.test(n)))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+}
+function renderTurninhoEditor(){
+ const opts=nomesDosTurnosPrincipais();
+ $('turninhoEditor').innerHTML=turninho.map((r,i)=>{
+  const atual=upper(r.nome).trim();
+  if(atual&&!opts.includes(atual))r.nome='';
+  const options='<option value="">SELECIONE UM NOME DA TABELA DE CIMA</option>'+opts.map(n=>'<option value="'+esc(n)+'" '+(n===r.nome?'selected':'')+'>'+esc(n)+'</option>').join('');
+  return '<div class="turninho-editor-row"><strong>'+(i+1)+'º</strong><select aria-label="Nome do turninho '+(i+1)+'" onchange="turninho['+i+'].nome=this.value;renderPreview();changed()">'+options+'</select><input aria-label="Horário do turninho '+(i+1)+'" value="'+esc(r.horario)+'" oninput="turninho['+i+'].horario=this.value;renderPreview();changed()"><button type="button" onclick="excluirTurninho('+i+')">EXCLUIR</button></div>';
+ }).join('');
+}
 function renderEditors(){
  const opts=availableNames();
- $('nightEditor').innerHTML=turns.map((r,i)=>'<div class="night-editor-row"><strong>'+(i+1)+'º</strong><input aria-label="Horário do turno '+(i+1)+'" value="'+esc(r.horario)+'" oninput="turns['+i+'].horario=this.value;renderPreview();changed()"><input aria-label="Nome do turno '+(i+1)+'" list="nightNames" value="'+esc(upper(r.nome))+'" placeholder="NOME DO POLICIAL" oninput="turns['+i+'].nome= this.value= this.value.toLocaleUpperCase(\'pt-BR\');renderPreview();changed()"><button type="button" onclick="excluirTurno('+i+')">EXCLUIR</button></div>').join('');
- $('turninhoEditor').innerHTML=turninho.map((r,i)=>'<div class="turninho-editor-row"><strong>'+(i+1)+'º</strong><input aria-label="Nome do turninho '+(i+1)+'" list="nightNames" value="'+esc(upper(r.nome))+'" placeholder="NOME DO POLICIAL" oninput="turninho['+i+'].nome=this.value=this.value.toLocaleUpperCase(\'pt-BR\');renderPreview();changed()"><input aria-label="Horário do turninho '+(i+1)+'" value="'+esc(r.horario)+'" oninput="turninho['+i+'].horario=this.value;renderPreview();changed()"><button type="button" onclick="excluirTurninho('+i+')">EXCLUIR</button></div>').join('');
+ $('nightEditor').innerHTML=turns.map((r,i)=>'<div class="night-editor-row"><strong>'+(i+1)+'º</strong><input aria-label="Horário do turno '+(i+1)+'" value="'+esc(r.horario)+'" oninput="turns['+i+'].horario=this.value;renderPreview();changed()"><input aria-label="Nome do turno '+(i+1)+'" list="nightNames" value="'+esc(upper(r.nome))+'" placeholder="NOME DO POLICIAL" oninput="turns['+i+'].nome=this.value=this.value.toLocaleUpperCase(\\'pt-BR\\');renderTurninhoEditor();renderPreview();changed()"><button type="button" onclick="excluirTurno('+i+')">EXCLUIR</button></div>').join('');
  let dl=$('nightNames');if(!dl){dl=document.createElement('datalist');dl.id='nightNames';document.body.appendChild(dl)}dl.innerHTML=opts.map(n=>'<option value="'+esc(n)+'"></option>').join('');
+ renderTurninhoEditor();
 }
 function renderPreview(){
  $('dateText').textContent=dataEscala();document.querySelectorAll('.dateText2').forEach(x=>x.textContent=dataEscala());
