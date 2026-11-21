@@ -34,6 +34,7 @@
 </main>
 <script>
 const $=id=>document.getElementById(id);let me=null,report=null,names=[],rows=[],saving=false,dirty=false,allReports=[],activeReport=null,readOnlyHistory=false;
+const MONITORAMENTO_KEY='ESCALA DIURNA - MONITORAMENTO SALA';
 const ORDERS='• ASSINAR A ESCALA DE SERVIÇO;\n• O AUXILIAR DA PORTARIA II DEVERÁ ASSUMIR O POSTO DA “PORTARIA I” A PARTIR DAS 07H DA MANHÃ DO DIA SEGUINTE AO PLANTÃO;\n• NÃO ABANDONAR O SEU POSTO SEM A DEVIDA AUTORIZAÇÃO;\n• MANTER TODOS OS PORTÕES FECHADOS E CADEADOS;\n• RENDER E RESPEITAR O HORÁRIO DO COMPANHEIRO E COM ANTECEDÊNCIA;\n• SUBSTITUIÇÕES NO MONITORAMENTO SOMENTE COM PRÉVIA AUTORIZAÇÃO;\n• NÃO PERMANECER MAIS DE 01 (UM) POLICIAL NA SALA DE MONITORAMENTO;\n• VEDADO A UTILIZAÇÃO DE APARELHOS DE TELEFONE CELULAR NO SETOR DE MONITORAMENTO;\n• OS POLICIAIS DE HE E PLANTÃO DEVEM REVEZAR NO MONITORAMENTO DE CÂMERAS E REVISTAS DOS INTERNOS.';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function api(url,opt={}){const r=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},...opt});let j={};try{j=await r.json()}catch{}if(!r.ok){const e=Error(j.message||'Falha na comunicação');e.status=r.status;e.data=j;throw e}return j}
@@ -77,7 +78,7 @@ function preencherEscalaDoRelatorio(r,consulta=false){
  const nomesItem05=textoItem05.split(/\r?\n/).map(x=>x.trim().replace(/^\s*(?:[•*-]|\d+[.)-])\s*/,'').replace(/\s*\(HE\)\s*$/i,'').trim()).filter(x=>x&&x.toUpperCase()!=='N/C.'&&x.toUpperCase()!=='N/C');
  names=[...new Set(nomesItem05)].map(name=>({name})).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
  rows=parseRows(r.content?.['10 – ESCALA DIURNA']);if(!rows.length)rows=[{posto:'',nome:'',he:false}];
- loadExtra(r.content?.['ESCALA DIURNA INDEPENDENTE'],r.content?.['ESCALA DIURNA MONITORAMENTO']);
+ loadExtra(r.content?.['ESCALA DIURNA INDEPENDENTE'],r.content?.[MONITORAMENTO_KEY]||r.content?.['ESCALA DIURNA MONITORAMENTO']);
  render();dirty=false;
  $('returnCurrentBtn').style.display=consulta?'inline-block':'none';
  $('saveScaleBtn').disabled=consulta;
@@ -131,6 +132,10 @@ async function salvar(){
    '10 – ESCALA DIURNA':item10(),
    'ESCALA DIURNA INDEPENDENTE':extra(),
    'ESCALA DIURNA MONITORAMENTO':{
+    manha:monitorRows1.map(r=>({time:String(r.time||''),name:String(r.name||'')})),
+    tarde:monitorRows2.map(r=>({time:String(r.time||''),name:String(r.name||'')}))
+   },
+   [MONITORAMENTO_KEY]:{
     manha:monitorRows1.map(r=>({time:String(r.time||''),name:String(r.name||'')})),
     tarde:monitorRows2.map(r=>({time:String(r.time||''),name:String(r.name||'')}))
    }
