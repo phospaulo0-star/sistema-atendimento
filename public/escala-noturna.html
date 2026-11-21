@@ -109,7 +109,7 @@ function renderTurninhoEditor(){
 }
 function renderEditors(){
  const opts=availableNames();
- $('nightEditor').innerHTML=turns.map((r,i)=>'<div class="night-editor-row"><strong>'+(i+1)+'º</strong><input aria-label="Horário do turno '+(i+1)+'" value="'+esc(r.horario)+'" oninput="turns['+i+'].horario=this.value;renderPreview();changed()"><input aria-label="Nome do turno '+(i+1)+'" list="nightNames" value="'+esc(upper(r.nome))+'" placeholder="NOME DO POLICIAL" oninput="turns['+i+'].nome=this.value=this.value.toLocaleUpperCase(\\'pt-BR\\');renderTurninhoEditor();renderPreview();changed()"><button type="button" onclick="excluirTurno('+i+')">EXCLUIR</button></div>').join('');
+ $('nightEditor').innerHTML=turns.map((r,i)=>'<div class="night-editor-row"><strong>'+(i+1)+'º</strong><input aria-label="Horário do turno '+(i+1)+'" value="'+esc(r.horario)+'" oninput="turns['+i+'].horario=this.value;renderPreview();changed()"><input aria-label="Nome do turno '+(i+1)+'" list="nightNames" value="'+esc(upper(r.nome))+'" placeholder="NOME DO POLICIAL" oninput="turns['+i+'].nome=this.value=this.value.toLocaleUpperCase(\'pt-BR\');renderTurninhoEditor();renderPreview();changed()"><button type="button" onclick="excluirTurno('+i+')">EXCLUIR</button></div>').join('');
  let dl=$('nightNames');if(!dl){dl=document.createElement('datalist');dl.id='nightNames';document.body.appendChild(dl)}dl.innerHTML=opts.map(n=>'<option value="'+esc(n)+'"></option>').join('');
  renderTurninhoEditor();
 }
