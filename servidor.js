@@ -2641,7 +2641,7 @@ app.patch('/api/relatorios/:id', exigirBanco, exigirAutenticacao, exigirPerfilRe
     // Preserva campos exclusivos da Escala Noturna quando outra tela do relatório
     // envia uma versão do conteúdo que ainda não conhece esses campos.
     const contentFinal = { ...(old.content || {}), ...content };
-    for (const key of ['ESCALA NOTURNA INDEPENDENTE', 'ESCALA NOTURNA - TURNINHO']) {
+    for (const key of ['ESCALA NOTURNA INDEPENDENTE', 'ESCALA NOTURNA - TURNINHO', 'ESCALA DIURNA - MONITORAMENTO SALA']) {
       if (Object.prototype.hasOwnProperty.call(content, key)) {
         contentFinal[key] = content[key];
       } else if (Object.prototype.hasOwnProperty.call(old.content || {}, key)) {
