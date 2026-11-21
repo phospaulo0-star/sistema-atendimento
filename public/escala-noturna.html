@@ -62,6 +62,7 @@
 const $=id=>document.getElementById(id);
 const ITEM11='11 – ESCALA NOTURNA (MONITORAMENTO)';
 const EXTRA='ESCALA NOTURNA INDEPENDENTE';
+const TURNINHO_KEY='ESCALA NOTURNA - TURNINHO';
 const DEFAULT_TURNS=[
  {turno:'1º TURNO',horario:'21h00min às 22h30min',nome:''},
  {turno:'2º TURNO',horario:'22h30min às 00h00min',nome:''},
@@ -91,7 +92,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const upper=s=>String(s??'').toLocaleUpperCase('pt-BR');
 async function api(url,opt={}){const r=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},...opt});let j={};try{j=await r.json()}catch{}if(!r.ok){const e=Error(j.message||'Falha na comunicação');e.status=r.status;e.data=j;throw e}return j}
 function status(t){$('status').textContent=t}
-let me=null,report=null,activeReport=null,allReports=[],turns=[],turninho=[],names=[],guidelines=[],saving=false,dirty=false,readOnlyHistory=false,baseItem11='',baseExtra='',editVersion=0,timer=null;
+let me=null,report=null,activeReport=null,allReports=[],turns=[],turninho=[],names=[],guidelines=[],saving=false,dirty=false,readOnlyHistory=false,baseItem11='',baseExtra='',baseTurninho='',editVersion=0,timer=null;
 function parseItem11(text){const out=[];String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach((line,i)=>{if(/^N\/C\.?$/i.test(line))return;const m=line.match(/^(.+?)\s*:\s*(.+?)\s*:\s*(.*)$/);if(m)out.push({turno:m[1].trim(),horario:m[2].trim(),nome:/^N\/C\.?$/i.test(m[3].trim())?'':m[3].trim()});else out.push({turno:(out.length+1)+'º TURNO',horario:'',nome:line})});return out}
 function item11Text(){return turns.map((r,i)=>String(r.turno||((i+1)+'º TURNO')).trim()+': '+String(r.horario||'HORÁRIO NÃO INFORMADO').trim()+': '+(String(r.nome||'').trim()||'N/C.')).join('\n')||'N/C.'}
 function dataEscala(){const raw=String(report?.reportDate||'').trim();let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})/),d=m?new Date(+m[1],+m[2]-1,+m[3],12):null;if(!d){m=raw.match(/^(\d{2})[./-](\d{2})[./-](\d{4})$/);if(m)d=new Date(+m[3],+m[2]-1,+m[1],12)}if(!d||Number.isNaN(d.getTime()))d=new Date();return d.toLocaleDateString('pt-BR')+' ('+d.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()+')'}
@@ -128,8 +129,8 @@ function excluirTurno(i){turns.splice(i,1);turns.forEach((r,n)=>r.turno=(n+1)+'�
 function adicionarTurninho(){turninho.push({nome:'',horario:''});renderEditors();renderPreview();changed(true)}
 function excluirTurninho(i){turninho.splice(i,1);renderEditors();renderPreview();changed(true)}
 function preencherTodosNomesPlantao(){const todos=availableNames();if(!todos.length){alert('Não há nomes no Item 05 ou no Item 10 do relatório.');return}if(turns.some(r=>r.nome.trim())&&!confirm('Substituir os nomes dos turnos pelos nomes da escala diurna, incluindo chefia e auxiliar?'))return;while(turns.length<todos.length)turns.push({turno:(turns.length+1)+'º TURNO',horario:'',nome:''});turns.forEach((r,i)=>r.nome=todos[i]||'');renderEditors();renderPreview();changed()}
-function collectExtra(){return JSON.stringify({turninho,guidelines,signatures:{sig1:$('sig1').value,sig2:$('sig2').value,role1:$('role1').value,role2:$('role2').value,mat1:$('mat1').value,mat2:$('mat2').value}})}
-function loadReport(r,consulta=false){report=r;readOnlyHistory=consulta;const c=r.content||{};baseItem11=String(c[ITEM11]||'');baseExtra=String(c[EXTRA]||'');const savedTurns=parseItem11(baseItem11);turns=savedTurns.length?savedTurns.map(x=>({...x,nome:upper(x.nome)})):DEFAULT_TURNS.map(x=>({...x}));let extra={};try{extra=JSON.parse(baseExtra||'{}')}catch{}turninho=Array.isArray(extra.turninho)?extra.turninho.map(x=>({...x,nome:upper(x.nome)})):DEFAULT_TURNINHO.map(x=>({...x}));guidelines=Array.isArray(extra.guidelines)?extra.guidelines.slice():DEFAULT_GUIDELINES.slice();const sig=extra.signatures||{};const defaults={sig1:'SAMUEL SILVA DOS SANTOS',sig2:'PAULO HENRIQUE OLIVEIRA DE SOUZA',role1:'CHEFE DE EQUIPE/CPAIG',role2:'AUX. CHEFE DE EQUIPE/CPAIG',mat1:'444580022',mat2:'477702022'};Object.keys(defaults).forEach(k=>$(k).value=sig[k]??defaults[k]);$('guidelines').value=guidelines.join('\n');$('guidelines').oninput=()=>{guidelines=$('guidelines').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);renderPreview();changed()};['sig1','sig2','role1','role2','mat1','mat2'].forEach(k=>$(k).oninput=()=>{renderPreview();changed()});renderEditors();renderPreview();$('returnCurrentBtn').style.display=consulta?'inline-block':'none';$('saveScaleBtn').disabled=consulta;document.querySelectorAll('#editorPanel input,#editorPanel textarea,#editorPanel select,#editorPanel button').forEach(el=>el.disabled=consulta);status((consulta?'CONSULTA SOMENTE LEITURA · ':'')+'Relatório '+r.reportDate+' · Equipe '+r.team+' · revisão '+r.revision)}
+function collectExtra(){return JSON.stringify({guidelines,signatures:{sig1:$('sig1').value,sig2:$('sig2').value,role1:$('role1').value,role2:$('role2').value,mat1:$('mat1').value,mat2:$('mat2').value}})}
+function loadReport(r,consulta=false){report=r;readOnlyHistory=consulta;const c=r.content||{};baseItem11=String(c[ITEM11]||'');baseExtra=String(c[EXTRA]||'');baseTurninho=String(c[TURNINHO_KEY]||'');const savedTurns=parseItem11(baseItem11);turns=savedTurns.length?savedTurns.map(x=>({...x,nome:upper(x.nome)})):DEFAULT_TURNS.map(x=>({...x}));let extra={};try{extra=JSON.parse(baseExtra||'{}')}catch{}let savedTurninho=[];try{savedTurninho=JSON.parse(baseTurninho||'[]')}catch{}if(!Array.isArray(savedTurninho))savedTurninho=[];if(!savedTurninho.length&&Array.isArray(extra.turninho))savedTurninho=extra.turninho;turninho=savedTurninho.length?savedTurninho.map(x=>({...x,nome:upper(x.nome)})):DEFAULT_TURNINHO.map(x=>({...x}));guidelines=Array.isArray(extra.guidelines)?extra.guidelines.slice():DEFAULT_GUIDELINES.slice();const sig=extra.signatures||{};const defaults={sig1:'SAMUEL SILVA DOS SANTOS',sig2:'PAULO HENRIQUE OLIVEIRA DE SOUZA',role1:'CHEFE DE EQUIPE/CPAIG',role2:'AUX. CHEFE DE EQUIPE/CPAIG',mat1:'444580022',mat2:'477702022'};Object.keys(defaults).forEach(k=>$(k).value=sig[k]??defaults[k]);$('guidelines').value=guidelines.join('\n');$('guidelines').oninput=()=>{guidelines=$('guidelines').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);renderPreview();changed()};['sig1','sig2','role1','role2','mat1','mat2'].forEach(k=>$(k).oninput=()=>{renderPreview();changed()});renderEditors();renderPreview();$('returnCurrentBtn').style.display=consulta?'inline-block':'none';$('saveScaleBtn').disabled=consulta;document.querySelectorAll('#editorPanel input,#editorPanel textarea,#editorPanel select,#editorPanel button').forEach(el=>el.disabled=consulta);status((consulta?'CONSULTA SOMENTE LEITURA · ':'')+'Relatório '+r.reportDate+' · Equipe '+r.team+' · revisão '+r.revision)}
 function renderHistorico(){const root=$('historyList');const opened=new Set([...root.querySelectorAll('details[open]')].map(x=>x.dataset.folderKey));const list=allReports.filter(r=>String(r.team||'').toUpperCase()===String(me.team||'').toUpperCase()&&r.content&&(r.content[ITEM11]||r.content[EXTRA])).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||'')));const months=['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];const groups=new Map();list.forEach(r=>{const raw=String(r.reportDate||'').trim(),m=raw.match(/^(\d{4})-(\d{2})-(\d{2})/),year=m?m[1]:'SEM DATA',month=m?m[2]:'00';if(!groups.has(year))groups.set(year,new Map());if(!groups.get(year).has(month))groups.get(year).set(month,[]);groups.get(year).get(month).push(r)});root.innerHTML=[...groups.keys()].sort((a,b)=>b.localeCompare(a)).map(year=>{const monthsHtml=[...groups.get(year).keys()].sort((a,b)=>Number(b)-Number(a)).map(month=>{const entries=groups.get(year).get(month),label=months[Number(month)-1]||'SEM DATA',key='night-month-'+year+'-'+month;return '<details class="reports-month" data-folder-key="'+key+'" '+(opened.has(key)?'open':'')+'><summary>'+label+' ('+entries.length+')</summary>'+entries.map(r=>{const m=String(r.reportDate||'').match(/^(\d{4})-(\d{2})-(\d{2})/),date=m?m[3]+'/'+m[2]+'/'+m[1]:'DATA NÃO INFORMADA';return '<div class="toolbar" style="justify-content:space-between;border-bottom:1px solid #e0e4e8;padding:7px 0"><span><strong>'+date+'</strong> · Equipe '+esc(r.team)+' · '+esc(r.status==='encerrado'?'ENCERRADO':'ABERTO')+'</span><button type="button" onclick="consultarHistorico(\''+esc(r.id)+'\')">CONSULTAR</button></div>'}).join('')+'</details>'}).join('');const key='night-year-'+year;return '<details class="reports-year" data-folder-key="'+key+'" '+(opened.has(key)?'open':'')+'><summary>📁 '+esc(year)+' ('+[...groups.get(year).values()].reduce((n,a)=>n+a.length,0)+')</summary>'+monthsHtml+'</details>'}).join('')||'<p class="muted">Nenhuma escala noturna anterior encontrada.</p>'}
 function consultarHistorico(id){const r=allReports.find(x=>String(x.id)===String(id));if(r)loadReport(r,true);window.scrollTo({top:0,behavior:'smooth'})}
 function voltarEscalaAtual(){if(activeReport)loadReport(activeReport,false)}
@@ -140,7 +141,8 @@ async function salvar(automatic=false){
  const version=editVersion;
  const localItem11=item11Text();
  const localExtra=collectExtra();
- const contentKeys={[ITEM11]:localItem11,[EXTRA]:localExtra};
+ const localTurninho=JSON.stringify(turninho);
+ const contentKeys={[ITEM11]:localItem11,[EXTRA]:localExtra,[TURNINHO_KEY]:localTurninho};
  const send=async(base,keys)=>api('/api/relatorios/'+encodeURIComponent(base.id),{method:'PATCH',body:JSON.stringify({revision:Number(base.revision),reportDate:base.reportDate,shiftName:base.shiftName,title:base.title||'',content:{...(base.content||{}),...keys},action:'salvar'})});
  try{
   let result;
@@ -153,25 +155,33 @@ async function salvar(automatic=false){
    if(!latest)throw e;
    const remoteItem11=String(latest.content?.[ITEM11]||'');
    const remoteExtra=String(latest.content?.[EXTRA]||'');
+   const remoteTurninho=String(latest.content?.[TURNINHO_KEY]||'');
    const localItemChanged=localItem11!==baseItem11;
    const remoteItemChanged=remoteItem11!==baseItem11;
    const localExtraChanged=localExtra!==baseExtra;
    const remoteExtraChanged=remoteExtra!==baseExtra;
+   const localTurninhoChanged=localTurninho!==baseTurninho;
+   const remoteTurninhoChanged=remoteTurninho!==baseTurninho;
+   const conflictTurninho=localTurninhoChanged&&remoteTurninhoChanged&&localTurninho!==remoteTurninho;
    const conflictItem=localItemChanged&&remoteItemChanged&&localItem11!==remoteItem11;
    const conflictExtra=localExtraChanged&&remoteExtraChanged&&localExtra!==remoteExtra;
-   if(conflictItem||conflictExtra){
-    status('Conflito real: '+(conflictItem?'o Item 11 foi alterado':'')+(conflictItem&&conflictExtra?' e ':'')+(conflictExtra?'os dados do Turninho foram alterados':'')+' em outra tela. Atualize e confira antes de continuar.');
+   if(conflictItem||conflictExtra||conflictTurninho){
+    status('Conflito real: '+([conflictItem?'o Item 11':null,conflictExtra?'os dados gerais da escala':null,conflictTurninho?'o Turninho':null].filter(Boolean).join(', '))+' foi alterado em outra tela. Atualize e confira antes de continuar.');
     return;
    }
    const mergedKeys={
     [ITEM11]:localItemChanged?localItem11:remoteItem11,
-    [EXTRA]:localExtraChanged?localExtra:remoteExtra
+    [EXTRA]:localExtraChanged?localExtra:remoteExtra,
+    [TURNINHO_KEY]:localTurninhoChanged?localTurninho:remoteTurninho
    };
    result=await send(latest,mergedKeys);
    if(!localItemChanged&&remoteItemChanged){
     const updatedTurns=parseItem11(mergedKeys[ITEM11]);
     if(updatedTurns.length)turns=updatedTurns.map(x=>({...x,nome:upper(x.nome)}));
     renderEditors();
+   }
+   if(!localTurninhoChanged&&remoteTurninhoChanged){
+    try{const remoteRows=JSON.parse(mergedKeys[TURNINHO_KEY]||'[]');if(Array.isArray(remoteRows))turninho=remoteRows.map(x=>({...x,nome:upper(x.nome)}))}catch{}
    }
    if(!localExtraChanged&&remoteExtraChanged){
     let remoteState={};try{remoteState=JSON.parse(mergedKeys[EXTRA]||'{}')}catch{}
@@ -189,6 +199,7 @@ async function salvar(automatic=false){
   activeReport=result.report;
   baseItem11=String(report.content?.[ITEM11]||'');
   baseExtra=String(report.content?.[EXTRA]||'');
+  baseTurninho=String(report.content?.[TURNINHO_KEY]||'');
   const idx=allReports.findIndex(x=>String(x.id)===String(report.id));
   if(idx>=0)allReports[idx]=report;
   dirty=editVersion!==version;
