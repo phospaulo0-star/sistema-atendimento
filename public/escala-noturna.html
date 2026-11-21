@@ -134,7 +134,70 @@ function renderHistorico(){const root=$('historyList');const opened=new Set([...
 function consultarHistorico(id){const r=allReports.find(x=>String(x.id)===String(id));if(r)loadReport(r,true);window.scrollTo({top:0,behavior:'smooth'})}
 function voltarEscalaAtual(){if(activeReport)loadReport(activeReport,false)}
 async function load(){const a=await api('/api/auth/me');me=a.user;if(!['chefe','auxiliar'].includes(me.role)){location.replace('/relatorios.html');return}$('who').textContent=me.fullName+' · EQUIPE '+me.team;const list=await api('/api/relatorios');allReports=list.reports||[];renderHistorico();const active=allReports.filter(r=>String(r.team||'').trim().toUpperCase()===String(me.team||'').trim().toUpperCase()&&String(r.reportDate||'').slice(0,10)===String(list.shiftDate||'').slice(0,10)&&String(r.status||'').trim().toLowerCase()==='aberto').sort((x,y)=>Number(y.revision)-Number(x.revision))[0];if(!active){status('Não há relatório aberto para a equipe '+me.team+' na data '+String(list.shiftDate||'').slice(0,10)+'. Abra ou confira o relatório do plantão vigente.');$('saveScaleBtn').disabled=true;return}activeReport=active;let roster=[];try{const h=await api('/api/relatorios/he-nomes?team='+encodeURIComponent(me.team));roster=(h.names||[]).map(x=>typeof x==='string'?x:x.name).filter(Boolean)}catch(e){console.warn(e)}const item10=String(active.content?.['10 – ESCALA DIURNA']||'');const dayNames=item10.split(/\r?\n/).map(l=>{const m=l.match(/^[^:]+:\s*(.*)$/);return(m?m[1]:l).replace(/\s*\(HE\)\s*$/i,'').trim()}).filter(Boolean);names=[...new Set([...roster,...dayNames])];loadReport(active,false)}
-async function salvar(automatic=false){if(readOnlyHistory||!report||saving||!dirty)return;saving=true;const version=editVersion;const contentKeys={[ITEM11]:item11Text(),[EXTRA]:collectExtra()};const send=async base=>api('/api/relatorios/'+encodeURIComponent(base.id),{method:'PATCH',body:JSON.stringify({revision:Number(base.revision),reportDate:base.reportDate,shiftName:base.shiftName,title:base.title||'',content:{...(base.content||{}),...contentKeys},action:'salvar'})});try{let result;try{result=await send(report)}catch(e){if(e.status!==409||!e.data?.conflict)throw e;const latestList=await api('/api/relatorios');const latest=(latestList.reports||[]).find(x=>String(x.id)===String(report.id));if(!latest)throw e;const remoteItem11=String(latest.content?.[ITEM11]||''),remoteExtra=String(latest.content?.[EXTRA]||'');if(remoteItem11!==baseItem11||remoteExtra!==baseExtra){status('Conflito: o Item 11 ou a Escala Noturna foi alterado em outra tela. Atualize a página e confira antes de salvar.');return}result=await send(latest)}report=result.report;activeReport=result.report;baseItem11=String(report.content?.[ITEM11]||'');baseExtra=String(report.content?.[EXTRA]||'');const idx=allReports.findIndex(x=>String(x.id)===String(report.id));if(idx>=0)allReports[idx]=report;dirty=editVersion!==version;status('Escala noturna salva · revisão '+report.revision+' · '+new Date().toLocaleTimeString('pt-BR'));if(dirty)changed()}catch(e){status('Não foi possível salvar a escala: '+e.message+(e.status===409?' Atualize e confira os dados.':''))}finally{saving=false}}
+async function salvar(automatic=false){
+ if(readOnlyHistory||!report||saving||!dirty)return;
+ saving=true;
+ const version=editVersion;
+ const localItem11=item11Text();
+ const localExtra=collectExtra();
+ const contentKeys={[ITEM11]:localItem11,[EXTRA]:localExtra};
+ const send=async(base,keys)=>api('/api/relatorios/'+encodeURIComponent(base.id),{method:'PATCH',body:JSON.stringify({revision:Number(base.revision),reportDate:base.reportDate,shiftName:base.shiftName,title:base.title||'',content:{...(base.content||{}),...keys},action:'salvar'})});
+ try{
+  let result;
+  try{
+   result=await send(report,contentKeys);
+  }catch(e){
+   if(e.status!==409||!e.data?.conflict)throw e;
+   const latestList=await api('/api/relatorios');
+   const latest=(latestList.reports||[]).find(x=>String(x.id)===String(report.id));
+   if(!latest)throw e;
+   const remoteItem11=String(latest.content?.[ITEM11]||'');
+   const remoteExtra=String(latest.content?.[EXTRA]||'');
+   const localItemChanged=localItem11!==baseItem11;
+   const remoteItemChanged=remoteItem11!==baseItem11;
+   const localExtraChanged=localExtra!==baseExtra;
+   const remoteExtraChanged=remoteExtra!==baseExtra;
+   const conflictItem=localItemChanged&&remoteItemChanged&&localItem11!==remoteItem11;
+   const conflictExtra=localExtraChanged&&remoteExtraChanged&&localExtra!==remoteExtra;
+   if(conflictItem||conflictExtra){
+    status('Conflito real: '+(conflictItem?'o Item 11 foi alterado':'')+(conflictItem&&conflictExtra?' e ':'')+(conflictExtra?'os dados do Turninho foram alterados':'')+' em outra tela. Atualize e confira antes de continuar.');
+    return;
+   }
+   const mergedKeys={
+    [ITEM11]:localItemChanged?localItem11:remoteItem11,
+    [EXTRA]:localExtraChanged?localExtra:remoteExtra
+   };
+   result=await send(latest,mergedKeys);
+   if(!localItemChanged&&remoteItemChanged){
+    const updatedTurns=parseItem11(mergedKeys[ITEM11]);
+    if(updatedTurns.length)turns=updatedTurns.map(x=>({...x,nome:upper(x.nome)}));
+    renderEditors();
+   }
+   if(!localExtraChanged&&remoteExtraChanged){
+    let remoteState={};try{remoteState=JSON.parse(mergedKeys[EXTRA]||'{}')}catch{}
+    if(Array.isArray(remoteState.turninho))turninho=remoteState.turninho.map(x=>({...x,nome:upper(x.nome)}));
+    if(Array.isArray(remoteState.guidelines))guidelines=remoteState.guidelines.slice();
+    if(remoteState.signatures){
+     ['sig1','sig2','role1','role2','mat1','mat2'].forEach(k=>{if(remoteState.signatures[k]!==undefined)$(k).value=remoteState.signatures[k]});
+     $('guidelines').value=guidelines.join('\n');
+    }
+    renderEditors();
+   }
+   renderPreview();
+  }
+  report=result.report;
+  activeReport=result.report;
+  baseItem11=String(report.content?.[ITEM11]||'');
+  baseExtra=String(report.content?.[EXTRA]||'');
+  const idx=allReports.findIndex(x=>String(x.id)===String(report.id));
+  if(idx>=0)allReports[idx]=report;
+  dirty=editVersion!==version;
+  status('Escala noturna salva · revisão '+report.revision+' · '+new Date().toLocaleTimeString('pt-BR'));
+  if(dirty)changed();
+ }catch(e){
+  status('Não foi possível salvar a escala: '+e.message+(e.status===409?' Atualize e confira os dados.':''));
+ }finally{saving=false}
+}
 function consultarHistorico(id){const r=allReports.find(x=>String(x.id)===String(id));if(r)loadReport(r,true);window.scrollTo({top:0,behavior:'smooth'})}
 function sair(){location.href='/relatorios.html'}
 load().catch(e=>status('Erro ao carregar: '+e.message));
