@@ -2567,7 +2567,8 @@ async function exportarWord(){
     grupoAssinaturas.setAttribute('border','0');
     grupoAssinaturas.setAttribute('style','width:100%;border-collapse:collapse;table-layout:fixed;margin:5mm 0 0;font-family:"Times New Roman",serif;font-size:9pt;break-inside:avoid;page-break-inside:avoid');
     grupoAssinaturas.querySelectorAll('td').forEach(td=>{
-      td.setAttribute('style','width:50%;border:1px solid #000;padding:2mm;text-align:center;vertical-align:top;font-family:"Times New Roman",serif;font-size:9pt;line-height:1.2');
+      td.setAttribute('style','width:50%;border:1px solid #000;padding:2mm;text-align:center;vertical-align:top;font-family:"Times New Roman",serif;font-size:9pt;font-style:normal;line-height:1.2');
+      td.querySelectorAll('p').forEach(p=>p.style.fontStyle='normal');
     });
   }
 
@@ -3170,7 +3171,7 @@ function visualizarRelatorio(targetId=null){
       const pm=String($('passaMatriculaData')?.value||'').trim();
       const rn=String($('recebeNomeAssData')?.value||$('item40RecebeData')?.value||'').trim();
       const rm=String($('recebeMatriculaData')?.value||'').trim();
-      const bloco=(nome,matricula,frase)=>`<td style="width:50%;border:1px solid #000;padding:8px;text-align:center;vertical-align:top;font-family:Times New Roman,serif;font-size:9pt;line-height:1.2">
+      const bloco=(nome,matricula,frase)=>`<td style="width:50%;border:1px solid #000;padding:8px;text-align:center;vertical-align:top;font-family:Times New Roman,serif;font-size:9pt;font-style:normal;line-height:1.2">
         <p style="margin:0 0 9mm">&nbsp;</p>
         <p style="margin:0 0 2mm">________________________________</p>
         <p style="margin:0;font-weight:bold">${esc(nome||'Nome do Policial Penal')}</p>
