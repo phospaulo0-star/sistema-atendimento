@@ -37,18 +37,9 @@ const $=id=>document.getElementById(id);let me=null,report=null,names=[],rows=[]
 const MONITORAMENTO_KEY='ESCALA DIURNA - MONITORAMENTO SALA';
 const SCALE_DATE_KEY='ESCALA DIURNA - DATA DO PLANTÃO';
 function dataPlantaoEscala(r=report){
- const salvo=String(r?.content?.[SCALE_DATE_KEY]||'').slice(0,10);
- if(/^\d{4}-\d{2}-\d{2}$/.test(salvo))return salvo;
- const dataRel=String(r?.reportDate||'').slice(0,10);
- const criado=r?.createdAt?new Date(r.createdAt):null;
- if(criado&&!Number.isNaN(criado.getTime())&&/^\d{4}-\d{2}-\d{2}$/.test(dataRel)){
-  const partes=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Campo_Grande',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(criado);
-  const p=Object.fromEntries(partes.map(x=>[x.type,x.value]));
-  const dataCriacao=p.year+'-'+p.month+'-'+p.day;
-  const proximo=new Date(dataCriacao+'T12:00:00');proximo.setDate(proximo.getDate()+1);
-  if(proximo.toISOString().slice(0,10)===dataRel)return dataCriacao;
- }
- return dataRel||new Date().toLocaleDateString('en-CA',{timeZone:'America/Campo_Grande'});
+ const dataRel=String(r?.reportDate||'').trim().slice(0,10);
+ if(/^\d{4}-\d{2}-\d{2}$/.test(dataRel))return dataRel;
+ return new Date().toLocaleDateString('en-CA',{timeZone:'America/Campo_Grande'});
 }
 function assinaturasEscalaDiurnaAnterior(r){
  const anteriores=allReports.filter(x=>String(x.team||'').toUpperCase()===String(r?.team||me?.team||'').toUpperCase()&&String(x.reportDate||'').slice(0,10)<String(r?.reportDate||'').slice(0,10)).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||''))||Number(b.revision||0)-Number(a.revision||0));
