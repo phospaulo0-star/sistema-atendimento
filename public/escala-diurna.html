@@ -35,6 +35,27 @@
 <script>
 const $=id=>document.getElementById(id);let me=null,report=null,names=[],rows=[],saving=false,dirty=false,allReports=[],activeReport=null,readOnlyHistory=false;
 const MONITORAMENTO_KEY='ESCALA DIURNA - MONITORAMENTO SALA';
+const SCALE_DATE_KEY='ESCALA DIURNA - DATA DO PLANTÃO';
+function dataPlantaoEscala(r=report){
+ const salvo=String(r?.content?.[SCALE_DATE_KEY]||'').slice(0,10);
+ if(/^\d{4}-\d{2}-\d{2}$/.test(salvo))return salvo;
+ const dataRel=String(r?.reportDate||'').slice(0,10);
+ const criado=r?.createdAt?new Date(r.createdAt):null;
+ if(criado&&!Number.isNaN(criado.getTime())&&/^\d{4}-\d{2}-\d{2}$/.test(dataRel)){
+  const partes=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Campo_Grande',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(criado);
+  const p=Object.fromEntries(partes.map(x=>[x.type,x.value]));
+  const dataCriacao=p.year+'-'+p.month+'-'+p.day;
+  const proximo=new Date(dataCriacao+'T12:00:00');proximo.setDate(proximo.getDate()+1);
+  if(proximo.toISOString().slice(0,10)===dataRel)return dataCriacao;
+ }
+ return dataRel||new Date().toLocaleDateString('en-CA',{timeZone:'America/Campo_Grande'});
+}
+function assinaturasEscalaDiurnaAnterior(r){
+ const anteriores=allReports.filter(x=>String(x.team||'').toUpperCase()===String(r?.team||me?.team||'').toUpperCase()&&String(x.reportDate||'').slice(0,10)<String(r?.reportDate||'').slice(0,10)).sort((a,b)=>String(b.reportDate||'').localeCompare(String(a.reportDate||''))||Number(b.revision||0)-Number(a.revision||0));
+ for(const anterior of anteriores){let dados={};try{const bruto=anterior.content?.['ESCALA DIURNA INDEPENDENTE'];dados=typeof bruto==='string'?JSON.parse(bruto||'{}'):(bruto||{})}catch{}if(['sig1','sig2','role1','role2','mat1','mat2'].some(k=>String(dados[k]||'').trim()))return dados}
+ return {};
+}
+
 const ORDERS='• ASSINAR A ESCALA DE SERVIÇO;\n• O AUXILIAR DA PORTARIA II DEVERÁ ASSUMIR O POSTO DA “PORTARIA I” A PARTIR DAS 07H DA MANHÃ DO DIA SEGUINTE AO PLANTÃO;\n• NÃO ABANDONAR O SEU POSTO SEM A DEVIDA AUTORIZAÇÃO;\n• MANTER TODOS OS PORTÕES FECHADOS E CADEADOS;\n• RENDER E RESPEITAR O HORÁRIO DO COMPANHEIRO E COM ANTECEDÊNCIA;\n• SUBSTITUIÇÕES NO MONITORAMENTO SOMENTE COM PRÉVIA AUTORIZAÇÃO;\n• NÃO PERMANECER MAIS DE 01 (UM) POLICIAL NA SALA DE MONITORAMENTO;\n• VEDADO A UTILIZAÇÃO DE APARELHOS DE TELEFONE CELULAR NO SETOR DE MONITORAMENTO;\n• OS POLICIAIS DE HE E PLANTÃO DEVEM REVEZAR NO MONITORAMENTO DE CÂMERAS E REVISTAS DOS INTERNOS.';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function api(url,opt={}){const r=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json'},...opt});let j={};try{j=await r.json()}catch{}if(!r.ok){const e=Error(j.message||'Falha na comunicação');e.status=r.status;e.data=j;throw e}return j}
@@ -42,7 +63,7 @@ function status(t){$('status').textContent=t}
 function parseRows(text){return String(text||'').split(/\r?\n/).map(l=>{let t=l.trim().replace(/^\s*\d+\s*[.)-]\s*/,'');if(!t)return null;let m=t.match(/^([^:]+):\s*(.*)$/);let p=m?m[1].trim():'';let n=m?m[2].trim():t;let he=/\(HE\)\s*$/i.test(n);n=n.replace(/\s*\(HE\)\s*$/i,'');return{posto:p,nome:n,he}}).filter(Boolean)}
 function item10(){return rows.map(r=>(r.posto.trim()?r.posto.trim()+': ':'')+r.nome.trim()+(r.he?' (HE)':'')).filter(Boolean).join('\n')||'N/C.'}
 function renderRows(){ $('rows').innerHTML=rows.map((r,i)=>'<div class="row"><input aria-label="Posto" placeholder="Posto / função" value="'+esc(r.posto)+'" oninput="rows['+i+'].posto=this.value;renderPreview()"><select aria-label="Nome do Item 05" onchange="rows['+i+'].nome=this.value;renderPreview()"><option value="">Selecionar nome do Item 05</option>'+names.map(n=>'<option '+(n.name===r.nome?'selected':'')+' value="'+esc(n.name)+'">'+esc(n.name)+'</option>').join('')+'</select><input placeholder="Ou digite o nome" value="'+esc(r.nome)+'" oninput="rows['+i+'].nome=this.value;renderPreview()"><button type="button" onclick="rows.splice('+i+',1);render()">Excluir</button><label><input type="checkbox" '+(r.he?'checked':'')+' onchange="rows['+i+'].he=this.checked;renderPreview()"> (HE)</label></div>').join('');}
-function dataEscala(){const raw=String(report?.reportDate||'').trim();let d=null;let m=raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);if(m)d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12);else{m=raw.match(/^(\\d{2})[./-](\\d{2})[./-](\\d{4})$/);if(m)d=new Date(Number(m[3]),Number(m[2])-1,Number(m[1]),12)}if(!d||Number.isNaN(d.getTime()))d=new Date();return d.toLocaleDateString('pt-BR')+' ('+d.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()+')'}
+function dataEscala(){const raw=String(dataPlantaoEscala(report)||'').trim();let d=null;let m=raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);if(m)d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12);else{m=raw.match(/^(\\d{2})[./-](\\d{2})[./-](\\d{4})$/);if(m)d=new Date(Number(m[3]),Number(m[2])-1,Number(m[1]),12)}if(!d||Number.isNaN(d.getTime()))d=new Date();return d.toLocaleDateString('pt-BR')+' ('+d.toLocaleDateString('pt-BR',{weekday:'long'}).toUpperCase()+')'}
 function defaultMonitorRows(periodo){const hs=periodo===1?['09:00 h / 10:00 h','10:00 h / 11:00 h','11:00 h / 12:00 h','12:00 h / 13:00 h','13:00 h / 14:00 h']:['14:00 h / 15:00 h','15:00 h / 16:00 h','16:00 h / 17:00 h','17:00 h / 18:00 h','18:00 h / 19:00 h'];return hs.map(time=>({time,name:'SEM EFETIVO'}))}
 function parseMonitorLegacy(v,periodo){const base=defaultMonitorRows(periodo);const lines=String(v||'').split(String.fromCharCode(10)).map(x=>x.trim()).filter(Boolean);if(!lines.length)return base;return lines.map((line,i)=>{const m=line.match(/^(.*?)\s*(?:[-–:]\s*)?(PP\s+.+|SEM EFETIVO)?$/i);return{time:base[i]?.time||('Horário '+(i+1)),name:(m&&m[2]?m[2]:line).trim()||'SEM EFETIVO'}})}
 function nomesDisponiveisMonitoramento(){
@@ -70,7 +91,7 @@ function monitorMarkup(){const a=monitorRows1,b=monitorRows2,total=Math.max(a.le
 function renderPreview(){const postos=rows.filter(r=>{const p=String(r.posto||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();return !p.includes('chefe de equipe')});$('previewPosts').innerHTML=postos.map((r,i)=>'<tr><td class="post-name">'+esc(r.posto||'')+'</td><td class="post-number">'+String(i+1).padStart(2,'0')+'-</td><td class="post-person">'+esc(r.nome||'')+(r.he?' (HE)':'')+'</td><td class="post-sign">'+(/\bSEM\s+EFETIVO\b/i.test(String(r.nome||''))?'----':(i===0&&!r.nome?'---':''))+'</td></tr>').join('');const mon=monitorMarkup();$('monitorBlock1').innerHTML=mon;$('monitorBlock2').innerHTML=mon;const orderLines=String($('orders').value||'').split(String.fromCharCode(10)).flatMap(part=>part.split(';')).map(s=>{s=s.trim();if(s.startsWith('•')||s.startsWith('*')||s.startsWith('-'))s=s.slice(1).trim();return s}).filter(Boolean);const list=orderLines.map((s,i)=>'<li class="'+([2,3].includes(i)?'bold':'')+'">'+esc(s)+'</li>').join('');$('previewOrders').innerHTML=list;$('previewOrders2').innerHTML=list;const date=dataEscala();$('dateText').textContent=date;document.querySelectorAll('.dateText2').forEach(el=>el.textContent=date);$('previewSig1').textContent=$('sig1').value;$('previewSig2').textContent=$('sig2').value;$('previewRole1').textContent=$('role1').value;$('previewRole2').textContent=$('role2').value;$('previewMat1').textContent=$('mat1').value;$('previewMat2').textContent=$('mat2').value;dirty=true}
 function render(){renderRows();renderPreview()} 
 function addRow(){rows.push({posto:'',nome:'',he:false});render()}
-function loadExtra(v,monitoramentoSalvo){let d={};try{d=typeof v==='string'?JSON.parse(v||'{}'):(v&&typeof v==='object'?v:{})}catch{};let m=monitoramentoSalvo&&typeof monitoramentoSalvo==='object'?monitoramentoSalvo:{};monitorRows1=Array.isArray(m.manha)?m.manha:(Array.isArray(d.monitorRows1)?d.monitorRows1:parseMonitorLegacy(d.monitor1,1));monitorRows2=Array.isArray(m.tarde)?m.tarde:(Array.isArray(d.monitorRows2)?d.monitorRows2:parseMonitorLegacy(d.monitor2,2));monitorRows1.forEach(r=>r.name=String(r.name||'').toLocaleUpperCase('pt-BR'));monitorRows2.forEach(r=>r.name=String(r.name||'').toLocaleUpperCase('pt-BR'));const defaults={orders:ORDERS,sig1:'SAMUEL SILVA DOS SANTOS',sig2:'PAULO HENRIQUE OLIVEIRA DE SOUZA',role1:'CHEFE DE EQUIPE/CPAIG',role2:'AUX. CHEFE DE EQUIPE/CPAIG',mat1:'444580022',mat2:'477702022'};['orders','sig1','sig2','role1','role2','mat1','mat2'].forEach(k=>$(k).value=d[k]??defaults[k]??'');renderMonitorEditors()}
+function loadExtra(v,monitoramentoSalvo,assinaturasAnteriores={}){let d={};try{d=typeof v==='string'?JSON.parse(v||'{}'):(v&&typeof v==='object'?v:{})}catch{};let m=monitoramentoSalvo&&typeof monitoramentoSalvo==='object'?monitoramentoSalvo:{};monitorRows1=Array.isArray(m.manha)?m.manha:(Array.isArray(d.monitorRows1)?d.monitorRows1:parseMonitorLegacy(d.monitor1,1));monitorRows2=Array.isArray(m.tarde)?m.tarde:(Array.isArray(d.monitorRows2)?d.monitorRows2:parseMonitorLegacy(d.monitor2,2));monitorRows1.forEach(r=>r.name=String(r.name||'').toLocaleUpperCase('pt-BR'));monitorRows2.forEach(r=>r.name=String(r.name||'').toLocaleUpperCase('pt-BR'));const defaults={orders:ORDERS,sig1:'SAMUEL SILVA DOS SANTOS',sig2:'PAULO HENRIQUE OLIVEIRA DE SOUZA',role1:'CHEFE DE EQUIPE/CPAIG',role2:'AUX. CHEFE DE EQUIPE/CPAIG',mat1:'444580022',mat2:'477702022'};['orders','sig1','sig2','role1','role2','mat1','mat2'].forEach(k=>$(k).value=d[k]??assinaturasAnteriores[k]??defaults[k]??'');renderMonitorEditors()}
 function extra(){let o={monitorRows1,monitorRows2};['orders','sig1','sig2','role1','role2','mat1','mat2'].forEach(k=>o[k]=$(k).value);return JSON.stringify(o)}
 function preencherEscalaDoRelatorio(r,consulta=false){
  report=r;readOnlyHistory=consulta;
@@ -78,7 +99,7 @@ function preencherEscalaDoRelatorio(r,consulta=false){
  const nomesItem05=textoItem05.split(/\r?\n/).map(x=>x.trim().replace(/^\s*(?:[•*-]|\d+[.)-])\s*/,'').replace(/\s*\(HE\)\s*$/i,'').trim()).filter(x=>x&&x.toUpperCase()!=='N/C.'&&x.toUpperCase()!=='N/C');
  names=[...new Set(nomesItem05)].map(name=>({name})).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
  rows=parseRows(r.content?.['10 – ESCALA DIURNA']);if(!rows.length)rows=[{posto:'',nome:'',he:false}];
- loadExtra(r.content?.['ESCALA DIURNA INDEPENDENTE'],r.content?.[MONITORAMENTO_KEY]||r.content?.['ESCALA DIURNA MONITORAMENTO']);
+ loadExtra(r.content?.['ESCALA DIURNA INDEPENDENTE'],r.content?.[MONITORAMENTO_KEY]||r.content?.['ESCALA DIURNA MONITORAMENTO'],assinaturasEscalaDiurnaAnterior(r));
  render();dirty=false;
  $('returnCurrentBtn').style.display=consulta?'inline-block':'none';
  $('saveScaleBtn').disabled=consulta;
@@ -129,6 +150,7 @@ async function salvar(){
  const versaoEnviada=editVersion;
  try{
   const escalaContent={
+   [SCALE_DATE_KEY]:dataPlantaoEscala(report),
    '10 – ESCALA DIURNA':item10(),
    'ESCALA DIURNA INDEPENDENTE':extra(),
    'ESCALA DIURNA MONITORAMENTO':{
