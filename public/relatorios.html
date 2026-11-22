@@ -191,7 +191,7 @@ body.preview-mode #previewContent .material-carga-tabela td:first-child { text-a
  .autorizacao-linha button{display:none!important}
 }
 
-.custody-editor-table{width:100%;border-collapse:collapse;table-layout:fixed;margin:8px 0}.custody-editor-table th,.custody-editor-table td{border:1px solid #888;padding:5px}.custody-editor-table th{background:#e7e7e7}.custody-editor-table input{width:100%;min-width:0;padding:7px;box-sizing:border-box}.custody-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}.custody-delete{padding:5px 8px!important}.custody-preview-table{width:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,sans-serif;font-size:9.5pt}.custody-preview-table th,.custody-preview-table td{border:1px solid #222;padding:4px;overflow-wrap:anywhere;vertical-align:top}.custody-preview-table th{background:#d9d9d9;text-align:center}.movement-page{break-before:page;page-break-before:always}.movement-page h2{text-align:center;font-size:13pt;margin:0 0 14px}.movement-page h3{font-size:11pt;margin:12px 0 5px}.movement-total{text-align:right;font-weight:bold;margin-top:5px}.movement-page table{break-inside:auto;page-break-inside:auto}.movement-page tr{break-inside:avoid;page-break-inside:avoid}
+.custody-editor-table{width:100%;border-collapse:collapse;table-layout:fixed;margin:8px 0}.custody-editor-table th,.custody-editor-table td{border:1px solid #888;padding:5px}.custody-editor-table th{background:#e7e7e7}.custody-editor-table input{width:100%;min-width:0;padding:7px;box-sizing:border-box}.custody-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}.custody-delete{padding:5px 8px!important}.custody-preview-table{width:100%;border-collapse:collapse;table-layout:fixed;font-family:Arial,sans-serif;font-size:9.5pt}.custody-preview-table th,.custody-preview-table td{border:1px solid #222;padding:4px;overflow-wrap:anywhere;vertical-align:top}.custody-preview-table th{background:#d9d9d9;text-align:center}.movement-page{break-before:page;page-break-before:always}.movement-page h2{text-align:center;font-size:13pt;margin:0 0 14px}.movement-page h3{font-size:11pt;margin:12px 0 5px}.movement-total{text-align:right!important;text-align-last:right!important;font-weight:bold;margin:0!important;padding:0!important;line-height:1.0} .movement-item-table .movement-total{display:block;width:100%;text-align:right!important;text-align-last:right!important;margin:0!important;padding:0!important}.movement-page table{break-inside:auto;page-break-inside:auto}.movement-page tr{break-inside:avoid;page-break-inside:avoid}
 
 /* Ajuste de layout do Item 28 e 28.1: botões legíveis, sem sobrepor as tabelas. */
 .hospitalizado-actions{display:flex!important;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;flex-wrap:wrap;width:100%;clear:both;position:static;margin:8px 0 12px!important}
@@ -2642,14 +2642,14 @@ async function exportarWord(){
   aplicarPadraoTabelasCPAIG(documento);
 
   // Reaplica alinhamento e espaçamento após o formatador geral, que centraliza células e normaliza parágrafos.
-  documento.querySelectorAll('.movement-page .movement-data-table tbody tr').forEach(linha=>{
+  documento.querySelectorAll('.movement-data-table tbody tr').forEach(linha=>{
     const celulaNome=linha.cells && linha.cells.length>1 ? linha.cells[1] : null;
     if(celulaNome){
       celulaNome.setAttribute('style','text-align:left!important;text-align-last:left!important;vertical-align:middle;padding:3px 4px 3px 6px;font-family:Arial,sans-serif;font-size:8pt;line-height:1.25;border:0.5pt solid #555;white-space:normal;overflow-wrap:anywhere');
       celulaNome.querySelectorAll('*').forEach(el=>el.style.setProperty('text-align','left','important'));
     }
   });
-  documento.querySelectorAll('.movement-page p.movement-total-word').forEach(total=>{
+  documento.querySelectorAll('p.movement-total-word').forEach(total=>{
     const tabelaAnterior=total.previousElementSibling;
     if(tabelaAnterior && tabelaAnterior.tagName==='TABLE'){
       tabelaAnterior.style.setProperty('margin-top','0','important');
@@ -3118,7 +3118,7 @@ function visualizarRelatorio(targetId=null){
       const tituloTabela=tipo==='entrada'?'ENTRADA DE CUSTODIADOS':'SAÍDA DE CUSTODIADOS';
       const trs=rows.map((r,i)=>`<tr><td style="text-align:center;background:#fff;white-space:nowrap">${i+1}.</td><td style="text-align:left!important;white-space:nowrap;overflow-wrap:normal;word-break:keep-all;vertical-align:middle">${esc(r.nome)}</td><td>${esc(r.rgi)}</td><td>${esc(r.procedencia)}</td><td style="background:#d2d2d2">${esc(r.documento)}</td></tr>`).join('');
       const larguras=tipo==='entrada'?[5.30,34.02,9.51,21.15,30.02]:[5.28,34.14,9.52,21.53,29.53];
-      return `<section class="preview-section"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table"><colgroup>${larguras.map(w=>`<col style="width:${w}%">`).join('')}</colgroup><thead><tr><th colspan="5" style="background:#d2d2d2;text-align:center">${tituloTabela}</th></tr><tr><th style="background:#d2d2d2"> </th><th style="background:#d2d2d2">NOME</th><th style="background:#d2d2d2">RGI</th><th style="background:#d2d2d2">${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th style="background:#d2d2d2">DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total" style="display:block;width:100%;text-align:right;text-align-last:right;font-family:Arial,Helvetica,sans-serif;font-size:9pt;font-weight:bold;margin:0 0 2mm;padding:0">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}</div></section>`;
+      return `<section class="preview-section movement-item-table"><h3>${esc(item.titulo)}:</h3><table class="custody-preview-table movement-data-table"><colgroup>${larguras.map(w=>`<col style="width:${w}%">`).join('')}</colgroup><thead><tr><th colspan="5" style="background:#d2d2d2;text-align:center">${tituloTabela}</th></tr><tr><th style="background:#d2d2d2"> </th><th style="background:#d2d2d2">NOME</th><th style="background:#d2d2d2">RGI</th><th style="background:#d2d2d2">${tipo==='saida'?'DESTINO/MOTIVO':'PROCEDÊNCIA'}</th><th style="background:#d2d2d2">DOCUMENTO</th></tr></thead><tbody>${trs||'<tr><td colspan="5" style="text-align:center">N/C.</td></tr>'}</tbody></table><div class="movement-total" style="display:block;width:100%;text-align:right;text-align-last:right;font-family:Arial,Helvetica,sans-serif;font-size:9pt;font-weight:bold;margin:0 0 2mm;padding:0">TOTAL DE ${tipo==='entrada'?'ENTRADAS':'SAÍDAS'}: ${total}</div></section>`;
     }
     if(titulo.startsWith('36 – MATERIAL REPASSADO PARA CHEFIA')){
       const texto=textoItem36(item.texto);
