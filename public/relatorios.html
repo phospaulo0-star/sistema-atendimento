@@ -3353,6 +3353,11 @@ function gerarPaginaMovimentacao(dataExtenso){
  const data=escMov(String(dataExtenso||'DATA NÃO INFORMADA').toLocaleUpperCase('pt-BR'));
  atualizarItem40();
  const textoEncerramento=escMov(textoEncerramentoItem40());
+ const nomePPEntrega=escMov(String($('item40Entrega')?.value||$('item40Entrega')?.dataset.pendingName||$('item40EntregaData')?.value||'').trim());
+ const nomePPRecebe=escMov(String($('item40Recebe')?.value||$('item40Recebe')?.dataset.pendingName||$('item40RecebeData')?.value||'').trim());
+ let textoEncerramentoHtml=textoEncerramento;
+ if(nomePPEntrega)textoEncerramentoHtml=textoEncerramentoHtml.replace(nomePPEntrega,'<strong>'+nomePPEntrega+'</strong>');
+ if(nomePPRecebe)textoEncerramentoHtml=textoEncerramentoHtml.replace(nomePPRecebe,'<strong>'+nomePPRecebe+'</strong>');
  const assinaturaNome=String($('assinaturaNomeData')?.value||'').trim();
  const assinaturaFuncao=String($('assinaturaFuncaoData')?.value||'').trim();
  const assinaturaUnidade=String($('assinaturaUnidadeData')?.value||'').trim();
@@ -3364,7 +3369,7 @@ function gerarPaginaMovimentacao(dataExtenso){
   ${tabela('entrada','ENTRADA DE CUSTODIADOS',entradas)}
   ${tabela('saida','SAÍDA DE CUSTODIADOS',saidas)}
   <p class="movement-final" style="display:block!important;visibility:visible!important;color:#000!important;text-align:left;font-family:'Times New Roman',serif;font-size:10pt;line-height:1.15;margin:8mm 0 4mm;padding:0"><strong><u>FINAL / PASSO:</u></strong>&nbsp;<span>${final}</span></p>
-  <p class="movement-closing preview-text" style="display:block!important;visibility:visible!important;color:#000!important;text-align:justify;text-align-last:left;text-indent:0;margin:0;padding:0;font-family:'Times New Roman',serif;font-size:10pt;line-height:1.15">${textoEncerramento}</p>
+  <p class="movement-closing preview-text" style="display:block!important;visibility:visible!important;color:#000!important;text-align:justify;text-align-last:left;text-indent:0;margin:0;padding:0;font-family:'Times New Roman',serif;font-size:10pt;line-height:1.15">${textoEncerramentoHtml}</p>
   ${assinatura}
  </section>`;
 }
