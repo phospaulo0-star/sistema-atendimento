@@ -2825,10 +2825,13 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
    const nome=p[0]||'',saida=p[1]||'',retornoPrevisto=p[2]||'',retornoReal=p[3]||'';
    if(!nome.trim())return;
    const retornoCalculado=calcularRetornoTemporaria(saida);
+   // Preserva os metadados do Item 29 do chefe anterior, especialmente a marcação UMMVE (coluna 9).
+   const camposBase=[nome,saida,'',retornoReal,p[4]||'',p[5]||'',p[6]||'',p[7]||'',p[8]||''];
    if(retornoCalculado===dataAtual||retornoPrevisto===dataAtual){
-    retornos.push([nome,saida,retornoCalculado,retornoCalculado].join('\t'));
+    retornos.push([nome,saida,retornoCalculado,retornoCalculado,p[4]||'',p[5]||'',p[6]||'',p[7]||'',p[8]||''].join('\t'));
    }else{
-    emLicenca.push([nome,saida,retornoCalculado||retornoPrevisto,retornoReal].join('\t'));
+    camposBase[2]=retornoCalculado||retornoPrevisto;
+    emLicenca.push(camposBase.join('\t'));
    }
   });
   atualizado[chave29]=emLicenca.length?emLicenca.join('\n'):'N/C.';
