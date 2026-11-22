@@ -2446,6 +2446,25 @@ async function corrigirDocxParaWord2016(arquivo) {
     return paragrafo;
   });
 
+  // Força os totais dos Itens 31 e 32 à direita no OOXML final.
+  // O html-to-docx pode ignorar o atributo align e o text-align do HTML.
+  xml = xml.replace(/<w:p\b[\s\S]*?<\/w:p>/g, paragrafo => {
+    const texto = (paragrafo.match(/<w:t\b[^>]*>[\s\S]*?<\/w:t>/g) || [])
+      .join(' ').replace(/<[^>]+>/g, ' ')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+    if (!/TOTAL DE (ENTRADAS|SAIDAS):?/.test(texto)) return paragrafo;
+    const alinhamento = '<w:jc w:val="right"/>';
+    const espacamentoZero = '<w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>';
+    if (/<w:pPr\b[\s\S]*?<\/w:pPr>/.test(paragrafo)) {
+      return paragrafo.replace(/<w:pPr\b([^>]*)>([\s\S]*?)<\/w:pPr>/, (m, attrs, props) => {
+        props = props.replace(/<w:jc\b[^>]*\/>/g, '').replace(/<w:spacing\b[^>]*\/>/g, '');
+        return '<w:pPr' + attrs + '>' + props + alinhamento + espacamentoZero + '</w:pPr>';
+      });
+    }
+    return paragrafo.replace(/<w:p\b[^>]*>/, m => m + '<w:pPr>' + alinhamento + espacamentoZero + '</w:pPr>');
+  });
+
   zip.file('word/document.xml', xml);
   return zip.generateAsync({
     type: 'nodebuffer',
