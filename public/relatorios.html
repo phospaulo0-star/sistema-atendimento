@@ -2590,8 +2590,25 @@ async function exportarWord(){
         x.setAttribute('style','font-family:"Times New Roman",serif;font-size:8pt;line-height:1.0;text-align:right;text-align-last:right;white-space:nowrap;font-weight:bold;margin:1mm 0 2mm;padding:0;border:0');
       }else x.setAttribute('style','font-family:"Times New Roman",serif;font-size:9pt;line-height:1.0;margin:0 0 1mm;padding:0');
     });
+    // Espaçadores em parágrafos reais: o Word respeita melhor estes intervalos
+    // do que margens superiores aplicadas diretamente a DIVs.
+    const criarEspacadorWord=(linhas=1)=>{
+      const p=document.createElement('p');
+      p.innerHTML='&nbsp;';
+      p.setAttribute('style','display:block;font-family:"Times New Roman",Times,serif;font-size:10pt;line-height:1.0;mso-line-height-rule:exactly;height:12pt;margin:0;padding:0;border:0');
+      p.dataset.wordSpacer='1';
+      p.dataset.lines=String(linhas);
+      return Array.from({length:linhas},()=>p.cloneNode(true));
+    };
+    const finalMovimento=movimento.querySelector('.movement-final');
+    const encerramentoMovimento=movimento.querySelector('.movement-closing');
     const assinaturaMovimento=movimento.querySelector('.movement-signature');
+    if(finalMovimento){
+      criarEspacadorWord(1).forEach(p=>finalMovimento.parentNode.insertBefore(p,finalMovimento));
+      if(encerramentoMovimento)criarEspacadorWord(1).forEach(p=>finalMovimento.parentNode.insertBefore(p,encerramentoMovimento));
+    }
     if(assinaturaMovimento){
+      criarEspacadorWord(4).forEach(p=>assinaturaMovimento.parentNode.insertBefore(p,assinaturaMovimento));
       assinaturaMovimento.setAttribute('style','display:block;width:100%;text-align:center;text-align-last:center;margin:38mm auto 0;padding:0;font-family:"Times New Roman",Times,serif;font-size:10pt;font-weight:normal;line-height:1.0;white-space:normal');
       assinaturaMovimento.querySelectorAll('strong,em').forEach(el=>el.setAttribute('style','display:inline;font-family:"Times New Roman",Times,serif;font-size:10pt;font-weight:'+ (el.tagName==='STRONG'?'bold':'normal') +';font-style:normal;line-height:1.0;text-align:center;margin:0;padding:0'));
     }
