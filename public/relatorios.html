@@ -2826,9 +2826,11 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
    if(!nome.trim())return;
    const retornoCalculado=calcularRetornoTemporaria(saida);
    // Preserva os metadados do Item 29 do chefe anterior, especialmente a marcação UMMVE (coluna 9).
-   const camposBase=[nome,saida,'',retornoReal,p[4]||'',p[5]||'',p[6]||'',p[7]||'',p[8]||''];
+   const camposBase=[nome,saida,'',retornoReal,p[4]||'',p[5]||'',p[6]||'','',p[8]||''];
    if(retornoCalculado===dataAtual||retornoPrevisto===dataAtual){
-    retornos.push([nome,saida,retornoCalculado,retornoCalculado,p[4]||'',p[5]||'',p[6]||'',p[7]||'',p[8]||''].join('\t'));
+    // A marcação CONTAR NO ITEM 35 vale somente no relatório em que foi feita.
+    // Ao herdar o registro, limpa a coluna 8 (PLANTAO), mas preserva a coluna 9 (UMMVE).
+    retornos.push([nome,saida,retornoCalculado,retornoCalculado,p[4]||'',p[5]||'',p[6]||'','',p[8]||''].join('\t'));
    }else{
     camposBase[2]=retornoCalculado||retornoPrevisto;
     emLicenca.push(camposBase.join('\t'));
