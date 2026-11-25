@@ -1040,17 +1040,17 @@ function carregarItem36DoTexto(valor){
  const bruto=String(valor||'').trim();let dados=[];
  if(bruto&&!/^N\/C\.?$/i.test(bruto)){
   try{const x=JSON.parse(bruto);if(Array.isArray(x))dados=x;}catch{}
-  if(!dados.length){bruto.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach(l=>{const m=l.match(/^\s*\d+[.)]\s*01\s*\(um\)\s*ventilador\s*40\s*cm,\s*marca\s*(.*?)\s*-\s*interno\s*(.*?),\s*cela\s*(.*?)\s*do\s*pavilh[aã]o\s*["“]?(.+?)["”]?\.?$/i);if(m)dados.push({id:++seqItem36,marca:m[1],nome:m[2],cela:m[3],pavilhao:m[4]});else dados.push({id:++seqItem36,marca:'',nome:l.replace(/^\s*\d+[.)]\s*/,''),cela:'',pavilhao:''});});}
+  if(!dados.length){bruto.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach(l=>{const m=l.match(/^\s*\d+[.)]\s*01\s*\(um\)\s*(ventilador\s*40\s*cm|televis[aã]o)\s*,?\s*marca\s*(.*?)\s*-\s*interno\s*(.*?),\s*cela\s*(.*?)\s*do\s*pavilh[aã]o\s*["“]?(.+?)["”]?\.?$/i);if(m)dados.push({id:++seqItem36,tipo:/televis/i.test(m[1])?'televisao':'ventilador',marca:m[2],nome:m[3],cela:m[4],pavilhao:m[5]});else dados.push({id:++seqItem36,marca:'',nome:l.replace(/^\s*\d+[.)]\s*/,''),cela:'',pavilhao:''});});}
  }
- listaItem36=dados.map(r=>({id:r.id||++seqItem36,tipo:r.tipo||((r.nome||r.marca||r.cela||r.pavilhao)?'interno':'livre'),descricao:r.descricao||'',marca:r.marca||'',nome:r.nome||'',cela:r.cela||'',pavilhao:r.pavilhao||''}));
- if(!listaItem36.length)listaItem36=[{id:++seqItem36,tipo:'interno',descricao:'',marca:'',nome:'',cela:'',pavilhao:''}];
+ listaItem36=dados.map(r=>({id:r.id||++seqItem36,tipo:r.tipo==='interno'?'ventilador':(r.tipo||((r.nome||r.marca||r.cela||r.pavilhao)?'ventilador':'livre')),descricao:r.descricao||'',marca:r.marca||'',nome:r.nome||'',cela:r.cela||'',pavilhao:r.pavilhao||''}));
+ if(!listaItem36.length)listaItem36=[{id:++seqItem36,tipo:'ventilador',descricao:'',marca:'',nome:'',cela:'',pavilhao:''}];
  renderItem36();
 }
 function renderItem36(){
  const c=$('item36Container');if(!c)return;c.innerHTML='';
  listaItem36.forEach((r,i)=>{
   const box=document.createElement('div');box.className='item36-row';box.style.cssText='border:1px solid #cbd5e1;border-radius:8px;padding:10px;margin:8px 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px';
-  const modeWrap=document.createElement('div');modeWrap.style.gridColumn='1/-1';const modeLabel=document.createElement('label');modeLabel.textContent='TIPO DE CADASTRO';modeLabel.style.fontSize='12px';const mode=document.createElement('select');mode.style.width='100%';mode.innerHTML='<option value="interno">Ventilador</option><option value="livre">outros materiais / documentos</option>';mode.value=r.tipo||'interno';mode.addEventListener('change',()=>{r.tipo=mode.value;renderItem36();sincronizarItem36()});modeWrap.append(modeLabel,mode);
+  const modeWrap=document.createElement('div');modeWrap.style.gridColumn='1/-1';const modeLabel=document.createElement('label');modeLabel.textContent='TIPO DE CADASTRO';modeLabel.style.fontSize='12px';const mode=document.createElement('select');mode.style.width='100%';mode.innerHTML='<option value="ventilador">Ventilador</option><option value="televisao">Televisão</option><option value="livre">outros materiais / documentos</option>';mode.value=r.tipo||'ventilador';mode.addEventListener('change',()=>{r.tipo=mode.value;renderItem36();sincronizarItem36()});modeWrap.append(modeLabel,mode);
   const make=(label,field,placeholder='',readonly=false)=>{const wrap=document.createElement('div');const lab=document.createElement('label');lab.textContent=label;lab.style.fontSize='12px';const inp=document.createElement('input');inp.type='text';inp.value=r[field]||'';inp.placeholder=placeholder;inp.autocomplete='off';inp.style.width='100%';if(readonly){inp.readOnly=true;inp.classList.add('readonly-field');}inp.addEventListener('input',()=>{r[field]=inp.value;sincronizarItem36();});wrap.append(lab,inp);return {wrap,inp};};
   const descricao=make('DESCRIÇÃO LIVRE DO MATERIAL / DOCUMENTO','descricao','Ex.: 02 cadeiras de escritório');
   const marca=make('MARCA / COMPLEMENTO','marca','Digite a marca livremente');
@@ -1073,7 +1073,7 @@ function atualizarLocalizacaoItem36(r,nome){
 }
 function adicionarItem36(){if(listaItem36.length===1&&!listaItem36[0].marca&&!listaItem36[0].nome&&!listaItem36[0].cela&&!listaItem36[0].pavilhao&&!listaItem36[0].descricao)listaItem36=[];listaItem36.push({id:++seqItem36,tipo:'interno',descricao:'',marca:'',nome:'',cela:'',pavilhao:''});renderItem36();sincronizarItem36();}
 function excluirItem36(i){listaItem36.splice(i,1);if(!listaItem36.length)listaItem36=[{id:++seqItem36,tipo:'interno',descricao:'',marca:'',nome:'',cela:'',pavilhao:''}];renderItem36();sincronizarItem36();}
-function sincronizarItem36(){const rows=listaItem36.filter(r=>String(r.descricao||'').trim()||String(r.marca||'').trim()||String(r.nome||'').trim()||String(r.cela||'').trim()||String(r.pavilhao||'').trim()).map(r=>({...r,tipo:r.tipo||'interno'}));$('s35').value=rows.length?JSON.stringify(rows):'N/C.';changed();}
+function sincronizarItem36(){const rows=listaItem36.filter(r=>String(r.descricao||'').trim()||String(r.marca||'').trim()||String(r.nome||'').trim()||String(r.cela||'').trim()||String(r.pavilhao||'').trim()).map(r=>({...r,tipo:r.tipo==='interno'?'ventilador':(r.tipo||'ventilador')}));$('s35').value=rows.length?JSON.stringify(rows):'N/C.';changed();}
 function carregarItem37DoTexto(valor){
  const bruto=String(valor||'').trim();let dados=[];
  if(bruto&&!/^N\/C\.?$/i.test(bruto)){try{const x=JSON.parse(bruto);if(Array.isArray(x))dados=x;}catch{}if(!dados.length)dados=bruto.split(/\r?\n/).map(l=>l.replace(/^\s*\d+[.)]\s*/, '').trim()).filter(Boolean).map(texto=>({id:++seqItem37,texto}));}
@@ -1083,7 +1083,7 @@ function renderItem37(){const c=$('item37Container');if(!c)return;c.innerHTML=''
 function adicionarItem37(){if(listaItem37.length===1&&!listaItem37[0].texto.trim())listaItem37=[];listaItem37.push({id:++seqItem37,texto:''});renderItem37();sincronizarItem37();}
 function excluirItem37(i){listaItem37.splice(i,1);if(!listaItem37.length)listaItem37=[{id:++seqItem37,texto:''}];renderItem37();sincronizarItem37();}
 function sincronizarItem37(){const rows=listaItem37.filter(r=>String(r.texto||'').trim());$('s36').value=rows.length?JSON.stringify(rows):'N/C.';changed();}
-function textoItem36(valor){let rows=[];try{const x=JSON.parse(String(valor||''));if(Array.isArray(x))rows=x;}catch{}rows=rows.filter(r=>r.descricao||r.marca||r.nome||r.cela||r.pavilhao);if(!rows.length)return '• N/C.';return rows.map(r=>'• '+(r.tipo==='livre'?String(r.descricao||'').trim():`01 (um) ventilador 40 cm, marca ${String(r.marca||'').trim()||'XXX'} - interno ${String(r.nome||'').trim()||'YYY'}, cela ${String(r.cela||'').trim()||'ZZZ'} do pavilhão "${String(r.pavilhao||'').trim()||'W'}".`)).join('\n');}
+function textoItem36(valor){let rows=[];try{const x=JSON.parse(String(valor||''));if(Array.isArray(x))rows=x;}catch{}rows=rows.filter(r=>r.descricao||r.marca||r.nome||r.cela||r.pavilhao);if(!rows.length)return '• N/C.';return rows.map(r=>'• '+(r.tipo==='livre'?String(r.descricao||'').trim():`01 (um) ${r.tipo==='televisao'?'televisão':'ventilador 40 cm'}, marca ${String(r.marca||'').trim()||'XXX'} - interno ${String(r.nome||'').trim()||'YYY'}, cela ${String(r.cela||'').trim()||'ZZZ'} do pavilhão "${String(r.pavilhao||'').trim()||'W'}".`)).join('\\n');}
 function textoItem37(valor){let rows=[];try{const x=JSON.parse(String(valor||''));if(Array.isArray(x))rows=x;}catch{}rows=rows.map(r=>String(r.texto||'').trim()).filter(Boolean);if(!rows.length)return '• N/C.';return rows.map(t=>'• '+t).join('\n');}
 
 // Item 38 — OF e CI padrão com número editável, além de documentos livres.
