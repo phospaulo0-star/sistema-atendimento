@@ -38,6 +38,15 @@ function obterConfiguracao() {
     throw new Error('A conexão do CONFERE não pode reutilizar DATABASE_URL do sistema principal.');
   }
 
+  let principalParsed = null;
+  if (databasePrincipal) {
+    try {
+      principalParsed = new URL(databasePrincipal);
+    } catch {
+      throw new Error('DATABASE_URL principal não pôde ser validada; conexão do CONFERE bloqueada por segurança.');
+    }
+  }
+
   let parsed;
   try {
     parsed = new URL(connectionString);
@@ -52,6 +61,10 @@ function obterConfiguracao() {
   const hostname = parsed.hostname.toLowerCase();
   if (hostname !== hostPermitido) {
     throw new Error('O hostname do banco não corresponde a CONFERE_DB_ALLOWED_HOST. Conexão bloqueada.');
+  }
+
+  if (principalParsed && hostname === principalParsed.hostname.toLowerCase()) {
+    throw new Error('O banco do CONFERE não pode compartilhar o mesmo servidor/hostname do banco principal.');
   }
 
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
