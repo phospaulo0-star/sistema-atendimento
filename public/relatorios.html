@@ -2816,6 +2816,22 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
  // Retornos previstos para a data de abertura migram para o Item 29.1.
  const chave29='29 – LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)';
  const chave291='29.1 – RETORNO DE LICENÇA JUDICIAL 7 DIAS (SAÍDA TEMPORÁRIA)';
+ // UMMVE é uma marcação acumulada entre os plantões: consultar relatórios
+ // anteriores de todas as equipes, inclusive registros que já passaram ao Item 29.1.
+ // A coluna CONTAR NO ITEM 35 (índice 7) continua exclusiva do relatório atual.
+ const ummveHistorico=new Set();
+ const historicoUMMVE=reports.filter(r=>r&&r.content&&String(r.reportDate||'').slice(0,10)<dataAtual)
+  .sort((a,b)=>String(a.reportDate||'').slice(0,10).localeCompare(String(b.reportDate||'').slice(0,10))||Number(a.revision||0)-Number(b.revision||0));
+ historicoUMMVE.forEach(rel=>{
+  [chave29,chave291].forEach(chave=>{
+   String(rel.content[chave]||'').split(/\r?\n/).forEach(linha=>{
+    const p=linha.split(/\t+/);
+    const nome=String(p[0]||'').trim();
+    const marcado=p.slice(8).some(c=>String(c||'').trim().toUpperCase()==='UMMVE');
+    if(nome&&marcado)ummveHistorico.add(normalizarNomeInterno(nome));
+   });
+  });
+ });
  if(relEquipeAnterior?.content){
   const linhas29=String(relEquipeAnterior.content[chave29]||'N/C.').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const emLicenca=[],retornos=[];
@@ -2826,11 +2842,12 @@ function aplicarDadosDiaAnteriorNoNovoRelatorio(){
    if(!nome.trim())return;
    const retornoCalculado=calcularRetornoTemporaria(saida);
    // Preserva os metadados do Item 29 do chefe anterior, especialmente a marcação UMMVE (coluna 9).
-   const camposBase=[nome,saida,'',retornoReal,p[4]||'',p[5]||'',p[6]||'','',p[8]||''];
+   const marcaUMMVE=(p.slice(8).some(c=>String(c||'').trim().toUpperCase()==='UMMVE')||ummveHistorico.has(normalizarNomeInterno(nome)))?'UMMVE':'';
+   const camposBase=[nome,saida,'',retornoReal,p[4]||'',p[5]||'',p[6]||'','',marcaUMMVE];
    if(retornoCalculado===dataAtual||retornoPrevisto===dataAtual){
     // A marcação CONTAR NO ITEM 35 vale somente no relatório em que foi feita.
     // Ao herdar o registro, limpa a coluna 8 (PLANTAO), mas preserva a coluna 9 (UMMVE).
-    retornos.push([nome,saida,retornoCalculado,retornoCalculado,p[4]||'',p[5]||'',p[6]||'','',p[8]||''].join('\t'));
+    retornos.push([nome,saida,retornoCalculado,retornoCalculado,p[4]||'',p[5]||'',p[6]||'','',marcaUMMVE].join('\t'));
    }else{
     camposBase[2]=retornoCalculado||retornoPrevisto;
     emLicenca.push(camposBase.join('\t'));
