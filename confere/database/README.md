@@ -51,3 +51,13 @@ Não imprimir `CONFERE_DATABASE_URL`, credenciais, tokens ou objetos de configur
 - Executar migrações somente após revisão e autorização explícita.
 
 Nenhuma conexão é realizada por este arquivo enquanto ele não for chamado pela aplicação.
+
+
+## Documentos do fluxo de importação PDF
+
+- `ESPECIFICACAO-VALIDACAO-PDF-COMPLETO-V1.md`: critérios para aceitar somente PDFs completos e impedir ausências em arquivos parciais.
+- `FLUXO-IMPORTACAO-CONCILIACAO-PDF-V1.md`: etapas de upload, staging, conciliação, revisão humana e aplicação.
+- `migrations/TESTES-COMPORTAMENTAIS-IMPORTACAO-RODADA-1.md`: resultados dos testes estruturais isolados em branch Neon temporária.
+- `CONTRATO-TRANSACIONAL-APLICACAO-IMPORTACAO-V1.md`: bloqueios, validações, idempotência, fotografia-base, rollback e matriz de testes para a futura API.
+
+Esses documentos são especificações e relatórios; não significam que o parser, os endpoints ou o serviço de aplicação já estejam implementados.
