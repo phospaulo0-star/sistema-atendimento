@@ -64,6 +64,7 @@ function validarPreCondicoesAplicacao({
   exigir(paginas.length === total, 'CONTAGEM_PAGINAS_DIVERGENTE', 'A quantidade de páginas processadas não corresponde ao total validado.', 409);
 
   const numeros = new Set();
+  const contagemLinhasPorPagina = new Map();
   for (const pagina of paginas) {
     exigir(Number.isInteger(pagina.numero_pagina) && pagina.numero_pagina >= 1 && pagina.numero_pagina <= total,
       'NUMERACAO_PAGINA_INVALIDA', 'Há página com numeração inválida.', 409);
@@ -72,6 +73,10 @@ function validarPreCondicoesAplicacao({
     exigir(ESTADOS_PAGINA_VALIDOS.has(pagina.status_extracao),
       'PAGINA_NAO_PROCESSADA', 'Todas as páginas precisam estar processadas ou validadas como vazias.', 409);
     exigir(pagina.processada_em, 'PAGINA_SEM_DATA_PROCESSAMENTO', 'Há página sem confirmação de processamento.', 409);
+    contagemLinhasPorPagina.set(pagina.numero_pagina, 0);
+    if (pagina.status_extracao === 'VAZIA_VALIDADA') {
+      exigir(pagina.quantidade_linhas === 0, 'PAGINA_VAZIA_COM_LINHAS', 'Página validada como vazia não pode declarar linhas extraídas.', 409);
+    }
   }
   for (let n = 1; n <= total; n++) {
     exigir(numeros.has(n), 'LACUNA_PAGINACAO', 'A sequência de páginas contém lacuna.', 409);
@@ -84,16 +89,27 @@ function validarPreCondicoesAplicacao({
 
   exigir(Array.isArray(linhas) && linhas.length > 0, 'LINHAS_AUSENTES', 'O lote não possui linhas para revisão.', 409);
   for (const linha of linhas) {
+    exigir(Number.isInteger(linha.pagina) && contagemLinhasPorPagina.has(linha.pagina),
+      'LINHA_SEM_PAGINA_VALIDA', 'Há linha extraída sem página física válida.', 409);
+    contagemLinhasPorPagina.set(linha.pagina, contagemLinhasPorPagina.get(linha.pagina) + 1);
     exigir(linha.status_linha === 'APROVADA' && DECISOES_FINAIS.has(linha.decisao),
       'LINHA_PENDENTE', 'Há linha sem decisão final aprovada.', 409);
-    exigir(linha.decidido_por && linha.decidido_em,
-      'DECISAO_SEM_RESPONSAVEL', 'Há decisão sem responsável ou data de registro.', 409);
+    exigir(linha.decidido_por === usuario.id && linha.decidido_em,
+      'DECISAO_SEM_RESPONSAVEL', 'A decisão precisa estar registrada pelo Responsável autenticado, com data.', 409);
+    if (['ATUALIZAR', 'MOVER', 'EXCLUIR', 'VINCULAR'].includes(linha.decisao)) {
+      exigir(Boolean(linha.interno_sugerido_id), 'INTERNO_ALVO_AUSENTE',
+        'Esta decisão exige a identificação do cadastro interno de destino.', 409);
+    }
     if (linha.decisao === 'EXCLUIR') {
       exigir(typeof linha.motivo_decisao === 'string' && linha.motivo_decisao.trim().length > 0,
         'EXCLUSAO_SEM_MOTIVO', 'Toda exclusão lógica exige justificativa.', 409);
     }
     exigir(linha.aplicacao_status !== 'APLICADA',
       'LINHA_JA_APLICADA', 'O lote contém linha já aplicada; verificar idempotência antes de continuar.', 409);
+  }
+  for (const pagina of paginas) {
+    exigir(contagemLinhasPorPagina.get(pagina.numero_pagina) === pagina.quantidade_linhas,
+      'CONTAGEM_LINHAS_DIVERGENTE', 'A quantidade de linhas extraídas não confere com o registro da página.', 409);
   }
 
   return {
