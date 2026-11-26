@@ -91,3 +91,5 @@ Os testes correspondentes foram acrescentados em `confere/importacao/regras-apli
 ## Estado real do ambiente Neon
 
 - `ESTADO-REAL-NEON-2026-11-26.md`: fotografia de estado do banco dedicado, objetos encontrados, migrations ausentes e próximos passos seguros. Este relatório é somente diagnóstico; não autoriza aplicar migrations.
+
+- `migrations/VALIDACAO-003-004-2026-11-26.md`: revisão e testes comportamentais das migrations 003 e 004 em branch Neon temporária descartada; a branch permanente não foi alterada.
