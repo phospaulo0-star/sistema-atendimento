@@ -93,3 +93,11 @@ Os testes correspondentes foram acrescentados em `confere/importacao/regras-apli
 - `ESTADO-REAL-NEON-2026-11-26.md`: fotografia de estado do banco dedicado, objetos encontrados, migrations ausentes e próximos passos seguros. Este relatório é somente diagnóstico; não autoriza aplicar migrations.
 
 - `migrations/VALIDACAO-003-004-2026-11-26.md`: revisão e testes comportamentais das migrations 003 e 004 em branch Neon temporária descartada; a branch permanente não foi alterada.
+
+
+## Regra de transferência entre áreas (revisada em 26/11/2026)
+
+- Entre áreas da mesma conta (C ou D): Responsável da área de origem efetiva diretamente, sem aceite do destino.
+- Entre contas distintas: exige aceite do Responsável da área de destino.
+- A revisão e os testes sintéticos estão registrados em `migrations/REVISAO-MIGRACAO-004.md`.
+- A função SQL está versionada, mas não foi aplicada à branch permanente `confere-dev`.
