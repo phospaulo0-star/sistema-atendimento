@@ -162,6 +162,8 @@ A autorização é verificada em toda rota da API. Não confiar em botões ocult
 - Linhas sem cela existente/ativa ou com dados insuficientes permanecem como divergência.
 - Correspondência ambígua/homônimo exige decisão humana.
 
+**Autorização para envio e aprovação:** Responsável de área pode enviar/iniciar importação somente para sua área vinculada; Chefe e Auxiliar podem enviar/iniciar importação para qualquer uma das oito áreas. A permissão do Administrador para enviar/iniciar o lote permanece pendente. O envio/início não aprova divergências: Responsável de área aprova inclusões, alterações e exclusões propostas somente na própria área, com revisão, motivo obrigatório para exclusões e auditoria.
+
 **Fluxo de importação**
 1. Receber o PDF destinado a uma única área; validar tipo, tamanho e integridade; calcular SHA-256.
 2. Criar lote e extrair todas as páginas/linhas para staging, sem tocar nos cadastros ativos.
@@ -309,7 +311,7 @@ O serviço deve recuperar fechamento perdido por indisponibilidade e não duplic
 
 1. Quais tipos adicionais de ocorrência devem existir além dos já listados?
 2. Onde guardar os PDFs originais e por quanto tempo?
-3. Completar a matriz detalhada de permissões por perfil (administrador, chefe, auxiliar e responsável de área), incluindo quem pode executar o envio/importação do PDF.
+3. Completar a matriz detalhada de permissões por perfil (administrador, chefe, auxiliar e responsável de área), incluindo se o Administrador pode enviar/iniciar importações PDF.
 4. Definir se correções de conferência finalizada exigem aprovação de segundo usuário ou apenas justificativa e auditoria.
 
 ## 9. Limite desta etapa
