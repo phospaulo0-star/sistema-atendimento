@@ -104,23 +104,40 @@ Transformar as permissões já confirmadas em cenários verificáveis antes de i
 7. Confirmar que falha ao gravar histórico/auditoria cancela a operação inteira.
 8. Confirmar que respostas de erro não revelam dados de internos de áreas não autorizadas.
 
-## 9. Evidências que devem ser coletadas na implementação
+## 9. Testes de finalização e retificação de conferência física
+
+| ID | Cenário | Resultado esperado |
+|---|---|---|
+| CNF-01 | Responsável finaliza conferência da própria área | Permitido; grava horário, usuário e auditoria |
+| CNF-02 | Responsável tenta finalizar conferência de outra área | Negado no servidor |
+| CNF-03 | Administrador, Chefe ou Auxiliar tenta finalizar diretamente | Negado; a competência de finalização é do Responsável da área |
+| CNF-04 | Responsável tenta editar marcações após finalizar sem iniciar retificação | Negado; snapshot final permanece preservado |
+| CNF-05 | Responsável retifica conferência finalizada de sua área com justificativa | Permitido somente pelo fluxo formal de retificação, com histórico e auditoria |
+| CNF-06 | Responsável tenta retificar conferência de outra área | Negado no servidor |
+| CNF-07 | Retificação sem justificativa | Negada |
+| CNF-08 | Falha ao registrar auditoria durante retificação | Operação inteira revertida |
+| CNF-09 | Retificação altera resultado histórico | Preservar versão anterior e registrar valores anteriores/novos; nunca sobrescrever sem trilha |
+
+**Ponto ainda pendente:** decidir se a retificação também exige aprovação de um segundo usuário. Até essa decisão, não implementar retificação como edição livre nem presumir aprovação automática.
+
+## 10. Evidências que devem ser coletadas na implementação
 
 Para cada teste: usuário/perfil de teste, área vinculada, requisição sem segredos, resposta HTTP, estado antes/depois, registros de histórico e auditoria, e confirmação de ausência de gravações parciais em falhas.
 
 Não registrar senhas, hashes, cookies, tokens ou URLs de conexão nas evidências.
 
-## 10. Fora do escopo / decisões ainda pendentes
+## 11. Fora do escopo / decisões ainda pendentes
 
 - Quem pode aprovar inclusões, alterações e exclusões sugeridas pela importação PDF.
 - Quais ações específicas Chefe e Auxiliar podem executar em nome de qualquer área, além das permissões já confirmadas.
 - Se o Administrador também poderá enviar/iniciar importações PDF.
+- Se retificação de conferência finalizada exige segundo aprovador.
 - Quem pode finalizar conferências e quem pode autorizar retificações.
 - Tipos adicionais de movimentação/ocorrência.
 - Armazenamento e prazo de retenção dos PDFs.
 
 Os itens pendentes não devem ser tratados como permissões liberadas por inferência.
 
-## 11. Limite desta etapa
+## 12. Limite desta etapa
 
 Este documento é um plano de testes. Não implementa endpoints, não altera tabelas e não aplica migrations. O banco Neon `confere-dev` permanece sem alterações de schema; o banco do Sistema Atendimento CPAIG principal não é utilizado.
