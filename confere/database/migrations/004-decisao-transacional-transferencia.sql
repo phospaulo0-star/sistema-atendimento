@@ -2,7 +2,7 @@
 -- Migration 004 — decisão transacional de transferência.
 -- Depende das migrations 001 e 002.
 -- A função é SECURITY INVOKER: permissões da role chamadora são respeitadas.
--- A role da aplicação deve receber EXECUTE e os privilégios mínimos necessários.
+-- Somente Responsável ativo e vinculado à área de destino pode decidir.
 
 CREATE OR REPLACE FUNCTION confere.fn_decidir_transferencia(
  p_transferencia_id UUID,
@@ -33,13 +33,41 @@ BEGIN
  IF v_t.status <> 'PENDENTE' THEN RAISE EXCEPTION 'Transferencia nao esta pendente'; END IF;
 
  PERFORM 1 FROM confere.usuarios
-  WHERE id = p_usuario_id AND ativo = TRUE;
- IF NOT FOUND THEN RAISE EXCEPTION 'Usuario inexistente ou inativo'; END IF;
+  WHERE id = p_usuario_id AND ativo = TRUE AND perfil = 'RESPONSAVEL_AREA';
+ IF NOT FOUND THEN RAISE EXCEPTION 'Somente Responsavel de area ativo pode decidir a transferencia'; END IF;
 
  PERFORM 1 FROM confere.usuario_areas
   WHERE usuario_id = p_usuario_id AND area_id = v_t.area_destino_id;
  IF NOT FOUND THEN RAISE EXCEPTION 'Usuario nao autorizado na area de destino'; END IF;
 
+ -- A recusa apenas registra a decisão; não depende de a cela de destino continuar ativa.
+ IF p_decisao = 'RECUSADA' THEN
+  INSERT INTO confere.transferencias_aprovacoes
+   (transferencia_id, decisao, usuario_destino_id, decidido_em, observacao)
+  VALUES (v_t.id, p_decisao, p_usuario_id, v_agora, trim(p_observacao));
+
+  UPDATE confere.transferencias SET status='RECUSADA' WHERE id=v_t.id;
+
+  INSERT INTO confere.historico_eventos
+   (interno_id, area_id, tipo_evento, ocorrido_em, responsavel_id, motivo,
+    dados_anteriores, dados_novos, referencia_tipo, referencia_id, operation_id)
+  VALUES
+   (v_t.interno_id, v_t.area_origem_id, 'TRANSFERENCIA_RECUSADA', v_agora, p_usuario_id,
+    trim(p_observacao),
+    jsonb_build_object('area_destino_id',v_t.area_destino_id,'cela_destino_id',v_t.cela_destino_id),
+    jsonb_build_object('status','RECUSADA'),
+    'TRANSFERENCIA',v_t.id,v_t.operation_id);
+
+  INSERT INTO confere.auditoria
+   (ator_id, acao, entidade, entidade_id, ocorrido_em, correlation_id, detalhes)
+  VALUES
+   (p_usuario_id,'RECUSAR','TRANSFERENCIA',v_t.id,v_agora,v_t.operation_id,
+    jsonb_build_object('interno_id',v_t.interno_id,'observacao',trim(p_observacao)));
+
+  RETURN jsonb_build_object('status','RECUSADA','localizacao_alterada',false);
+ END IF;
+
+ -- Somente ACEITA exige validar e alterar a localização atual.
  SELECT * INTO v_i FROM confere.internos
   WHERE id = v_t.interno_id FOR UPDATE;
  IF NOT FOUND OR v_i.status_cadastro <> 'ATIVO' THEN
@@ -67,25 +95,6 @@ BEGIN
  INSERT INTO confere.transferencias_aprovacoes
   (transferencia_id, decisao, usuario_destino_id, decidido_em, observacao)
  VALUES (v_t.id, p_decisao, p_usuario_id, v_agora, trim(p_observacao));
-
- IF p_decisao = 'RECUSADA' THEN
-  UPDATE confere.transferencias SET status='RECUSADA' WHERE id=v_t.id;
-  INSERT INTO confere.historico_eventos
-   (interno_id, area_id, tipo_evento, ocorrido_em, responsavel_id, motivo,
-    dados_anteriores, dados_novos, referencia_tipo, referencia_id, operation_id)
-  VALUES
-   (v_t.interno_id, v_t.area_origem_id, 'TRANSFERENCIA_RECUSADA', v_agora, p_usuario_id,
-    trim(p_observacao),
-    jsonb_build_object('area_destino_id',v_t.area_destino_id,'cela_destino_id',v_t.cela_destino_id),
-    jsonb_build_object('status','RECUSADA'),
-    'TRANSFERENCIA',v_t.id,v_t.operation_id);
-  INSERT INTO confere.auditoria
-   (ator_id, acao, entidade, entidade_id, ocorrido_em, correlation_id, detalhes)
-  VALUES
-   (p_usuario_id,'RECUSAR','TRANSFERENCIA',v_t.id,v_agora,v_t.operation_id,
-    jsonb_build_object('interno_id',v_t.interno_id,'observacao',trim(p_observacao)));
-  RETURN jsonb_build_object('status','RECUSADA','localizacao_alterada',false);
- END IF;
 
  UPDATE confere.localizacoes SET fim_em=v_agora
   WHERE id=v_l.id AND fim_em IS NULL;
