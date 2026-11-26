@@ -30,10 +30,10 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 | Excluir interno (exclusão lógica) | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
 | Reativar interno excluído | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
 | Iniciar e marcar conferência física | Sim | Sim | Sim | Área vinculada |
-| Finalizar conferência | Sim | Sim | Sim | A definir |
+| Finalizar conferência física | Não | Não | Não | **Sim, somente na própria área vinculada** |
 | Consultar relatórios de plantão | Sim | Sim | Sim | Relatórios da área, se autorizados |
 | Consultar auditoria geral | Sim | Sim, escopo a definir | Sim, escopo a definir | Não |
-| Retificar conferência finalizada | A definir, sempre auditado | A definir | A definir | Não confirmado |
+| Retificar conferência finalizada | Não | Não | Não | **Sim, somente na própria área vinculada, com justificativa e auditoria; regra de segundo aprovador ainda pendente** |
 
 ## Regras obrigatórias de autorização
 
@@ -50,7 +50,7 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 ## Pontos que precisam de definição funcional
 
 - Quais ações exatas Chefe e Auxiliar podem executar em nome de qualquer área.
-- Quem pode finalizar conferências e quem pode autorizar retificações.
+- Se a retificação de conferência finalizada exigirá segundo aprovador ou apenas justificativa e auditoria.
 - Se Administrador pode executar qualquer operação operacional ou apenas administrar e auditar.
 - Se o Administrador também poderá enviar/iniciar importações PDF (Chefe, Auxiliar e Responsável de área já estão autorizados).
 
