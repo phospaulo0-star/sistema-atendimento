@@ -34,6 +34,7 @@ Concentrar o código próprio do CONFERE DOS PAVILHÕES sem alterar o funcioname
 - As migrations 003 e 004 tiveram testes comportamentais em branch temporária com dados sintéticos.
 - As regras puras de pré-validação da importação PDF estão em `importacao/regras-aplicacao.js`.
 - A primeira camada de autorização de domínio está em `seguranca/autorizacao.js`, com testes em `seguranca/autorizacao.test.js`.
+- O contrato de autenticação, sessão e senha diária está especificado em `seguranca/CONTRATO-AUTENTICACAO-SESSAO-SENHA-DIARIA-V1.md`; ainda não há login ativo.
 - O plano de privilégios do banco está em `database/PLANO-PERMISSOES-RUNTIME-2026-11-26.md`.
 
 **Limite atual:** ainda não há login HTTP, gestão de sessão, validação da senha diária, endpoints, parser PDF, interface web nem serviço Render exclusivo. A camada de autorização criada é lógica de domínio e não substitui autenticação, consultas ao banco ou revalidação transacional.
@@ -41,9 +42,9 @@ Concentrar o código próprio do CONFERE DOS PAVILHÕES sem alterar o funcioname
 ## Próximas etapas
 
 1. Executar os testes Node dos módulos puros e corrigir eventuais falhas.
-2. Fechar o contrato de autenticação, sessão e senha diária.
-3. Implementar serviços e repositórios com consultas parametrizadas e transações.
+2. Confirmar as decisões pendentes do contrato de senha diária e expiração de sessão.
+3. Implementar autenticação/sessões e a migration de sessões em branch Neon temporária.
 4. Preparar e testar privilégios mínimos em branch Neon temporária.
-5. Implementar endpoints exclusivos e testes de integração.
-6. Criar interface própria e ambiente de homologação separado.
+5. Implementar serviços, repositórios, endpoints e testes de integração.
+6. Criar parser PDF, interface própria e ambiente de homologação separado.
 7. Integrar/deploy somente após revisão de segurança e autorização expressa.
