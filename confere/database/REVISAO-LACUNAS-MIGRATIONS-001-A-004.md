@@ -117,7 +117,11 @@ Os campos de snapshot existem e a migration 003 protege alterações posteriores
 
 Foi criada a especificação `confere/database/ESPECIFICACAO-VALIDACAO-PDF-COMPLETO-V1.md`, com etapas de integridade, extração de todas as páginas, validação estrutural, comparação de plausibilidade, confirmação humana, estados do lote e 18 casos de teste. Ela não implementa o parser nem altera o schema. A especificação também identifica os metadados por página/lote que provavelmente precisarão de migration futura.
 
-## 5. Ordem recomendada de trabalho
+## 5. Fluxo de importação e conciliação
+
+Foi criada a especificação `confere/database/FLUXO-IMPORTACAO-CONCILIACAO-PDF-V1.md`. Ela define estados do lote, envio, extração em staging, conciliação, revisão por linha, aplicação transacional, idempotência, concorrência, contrato lógico dos serviços e critérios de aceite. É desenho técnico; ainda não implementa rotas, parser ou migration.
+
+## 6. Ordem recomendada de trabalho
 
 1. Fechar as decisões de permissões ainda pendentes, sem assumir autorização implícita.
 2. Especificar a validação de PDF completo e o fluxo de importação staged.
@@ -128,14 +132,14 @@ Foi criada a especificação `confere/database/ESPECIFICACAO-VALIDACAO-PDF-COMPL
 7. Só depois preparar uma migration consolidada e testá-la em branch Neon temporária.
 8. Após testes e aprovação explícita, avaliar aplicação na branch permanente `confere-dev`. Nunca no banco principal CPAIG.
 
-## 6. Decisões ainda pendentes
+## 7. Decisões ainda pendentes
 
 1. O Administrador poderá enviar/iniciar importações PDF?
 
 4. Onde armazenar os PDFs originais e por quanto tempo?
 5. Quais tipos adicionais de ocorrência devem aparecer como opções próprias?
 
-## 7. Estado de segurança desta revisão
+## 8. Estado de segurança desta revisão
 
 - Nenhuma consulta de escrita foi executada no Neon nesta etapa.
 - Nenhuma migration foi aplicada à branch permanente `confere-dev`.
