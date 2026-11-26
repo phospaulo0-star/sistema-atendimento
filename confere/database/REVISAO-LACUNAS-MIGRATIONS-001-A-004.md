@@ -95,7 +95,7 @@ A função 004 implementa uma base transacional para aceitar/recusar transferên
 Os campos de snapshot existem e a migration 003 protege alterações posteriores dos itens, mas ainda é necessário:
 - Criar a rotina transacional de início que copia a relação completa da área/cela para os itens da conferência.
 - Testar que mudanças de cadastro/localização posteriores não alteram o snapshot.
-- Somente o Responsável da área vinculada pode finalizar e retificar conferências daquela área. Retificação exige justificativa e auditoria; ainda falta decidir se exige também aprovação de segundo usuário.
+- Somente o Responsável da área vinculada pode finalizar e retificar conferências daquela área. Retificação exige justificativa do próprio Responsável e auditoria, sem aprovação de segundo usuário.
 - Garantir que cancelamento/finalização não apaguem itens nem registros.
 - Validar relatório final e totais de conferidos, não localizados e outras situações.
 
@@ -127,7 +127,7 @@ Os campos de snapshot existem e a migration 003 protege alterações posteriores
 ## 5. Decisões ainda pendentes
 
 1. O Administrador poderá enviar/iniciar importações PDF?
-2. Retificação de conferência finalizada pelo Responsável da área exige segundo aprovador ou apenas justificativa e auditoria?
+
 4. Onde armazenar os PDFs originais e por quanto tempo?
 5. Quais tipos adicionais de ocorrência devem aparecer como opções próprias?
 
