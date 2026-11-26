@@ -17,6 +17,7 @@ Transformar as permissões já confirmadas em cenários verificáveis antes de i
 - Responsável de área pode excluir logicamente e reativar internos somente em suas áreas vinculadas; ambas as operações exigem motivo e auditoria.
 - UUID é a identidade técnica do interno; nome não é único.
 - A importação posterior deve completar/atualizar o cadastro existente, sem duplicá-lo. Correspondência ambígua ou homônimo exige revisão humana.
+- Responsável de área pode aprovar inclusões, alterações e exclusões propostas pelo PDF, exclusivamente na área vinculada, após revisar as divergências.
 - A senha diária vigente é exigida para mutações; a sessão pode permanecer aberta após as 08h, mas a API bloqueia novas mutações até a atualização da senha.
 
 ## 3. Cenários de inclusão manual
@@ -61,7 +62,26 @@ Transformar as permissões já confirmadas em cenários verificáveis antes de i
 | PDF-05 | PDF está truncado/incompleto | Falhar validação; não propor exclusões nem aplicar atualização como fotografia completa |
 | PDF-06 | Cadastro manual não aparece no PDF completo | Apresentar divergência/candidato para revisão; não excluir automaticamente |
 
-## 6. Testes transversais de autorização
+## 6. Aprovação das divergências da importação PDF
+
+| ID | Cenário | Resultado esperado |
+|---|---|---|
+| APR-01 | Responsável aprova inclusão proposta em PDF da própria área | Permitido; registrar decisão por linha, usuário, data/hora e auditoria |
+| APR-02 | Responsável tenta aprovar lote de outra área | Negado no servidor |
+| APR-03 | Responsável aprova alteração cadastral em sua área | Permitido após revisão; preservar UUID e dados históricos pertinentes |
+| APR-04 | Responsável confirma exclusão de interno ausente em PDF completo | Exigir motivo; exclusão lógica auditada |
+| APR-05 | Responsável tenta confirmar exclusão sem motivo | Rejeitar |
+| APR-06 | PDF incompleto/truncado apresenta internos ausentes | Não permitir aprovação de exclusões; lote deve falhar na validação de completude |
+| APR-07 | Linha apresenta homônimo ou correspondência ambígua | Exigir decisão humana explícita antes da aprovação |
+| APR-08 | Lote contém linhas aprovadas e linhas ainda pendentes | Aplicar somente decisões explicitamente aprovadas, conforme regra de atomicidade definida para o lote; nunca aplicar pendências silenciosamente |
+| APR-09 | A aprovação é enviada com usuário_id adulterado no payload | Ignorar/rejeitar; usar identidade da sessão autenticada |
+| APR-10 | Aprovação repetida com mesma chave de operação | Idempotente; não duplicar eventos nem efeitos |
+| APR-11 | Aprovação tenta alterar decisão já aplicada sem fluxo de retificação | Rejeitar e preservar auditoria anterior |
+| APR-12 | Falha ao gravar histórico/auditoria durante aplicação | Rollback integral das alterações do lote |
+
+**Observação:** a permissão para enviar/iniciar a importação do PDF é distinta da permissão para aprovar suas divergências e continua pendente de definição. Estes testes não presumem que todo Responsável de área pode importar o arquivo.
+
+## 7. Testes transversais de autorização
 
 1. Testar cada operação diretamente na API, sem depender da interface.
 2. Alterar no payload o identificador da área/cela para outra área e confirmar que o servidor ignora ou rejeita a tentativa.
@@ -82,12 +102,13 @@ Não registrar senhas, hashes, cookies, tokens ou URLs de conexão nas evidênci
 
 - Quem pode aprovar inclusões, alterações e exclusões sugeridas pela importação PDF.
 - Quais ações específicas Chefe e Auxiliar podem executar em nome de qualquer área, além das permissões já confirmadas.
+- Quem pode enviar/iniciar a importação do PDF; a aprovação pelo Responsável da área já está confirmada, mas não define automaticamente quem pode fazer o upload/início do lote.
 - Quem pode finalizar conferências e quem pode autorizar retificações.
 - Tipos adicionais de movimentação/ocorrência.
 - Armazenamento e prazo de retenção dos PDFs.
 
 Os itens pendentes não devem ser tratados como permissões liberadas por inferência.
 
-## 9. Limite desta etapa
+## 10. Limite desta etapa
 
 Este documento é um plano de testes. Não implementa endpoints, não altera tabelas e não aplica migrations. O banco Neon `confere-dev` permanece sem alterações de schema; o banco do Sistema Atendimento CPAIG principal não é utilizado.
