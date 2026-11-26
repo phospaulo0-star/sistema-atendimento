@@ -118,7 +118,7 @@ Transformar as permissões já confirmadas em cenários verificáveis antes de i
 | CNF-08 | Falha ao registrar auditoria durante retificação | Operação inteira revertida |
 | CNF-09 | Retificação altera resultado histórico | Preservar versão anterior e registrar valores anteriores/novos; nunca sobrescrever sem trilha |
 
-**Ponto ainda pendente:** decidir se a retificação também exige aprovação de um segundo usuário. Até essa decisão, não implementar retificação como edição livre nem presumir aprovação automática.
+**Regra confirmada:** a retificação é autorizada pelo próprio Responsável da área, com sua justificativa e registro de auditoria. Não exige aprovação de segundo usuário. Continua sendo um fluxo formal, com preservação da versão anterior e registro dos valores anteriores e novos; não é edição livre.
 
 ## 10. Evidências que devem ser coletadas na implementação
 
@@ -131,7 +131,7 @@ Não registrar senhas, hashes, cookies, tokens ou URLs de conexão nas evidênci
 - Quem pode aprovar inclusões, alterações e exclusões sugeridas pela importação PDF.
 - Quais ações específicas Chefe e Auxiliar podem executar em nome de qualquer área, além das permissões já confirmadas.
 - Se o Administrador também poderá enviar/iniciar importações PDF.
-- Se retificação de conferência finalizada exige segundo aprovador.
+
 - Quem pode finalizar conferências e quem pode autorizar retificações.
 - Tipos adicionais de movimentação/ocorrência.
 - Armazenamento e prazo de retenção dos PDFs.
