@@ -38,3 +38,42 @@ Não insere usuários, senhas, áreas ou dados reais. Não instala extensões. N
 O teste da migration valida sintaxe e criação das estruturas no PostgreSQL. Não comprova, sozinho, as regras transacionais, segurança, autorização, imutabilidade, rotina de plantão, extração de PDF ou sincronização offline. Essas regras exigem implementação e testes de integração.
 
 A próxima etapa é revisar e corrigir os pontos acima em migrations incrementais e testes isolados. Não aplicar esta migration na branch permanente sem autorização específica.
+
+
+## Migration 002 — reforço de integridade
+
+Arquivo: `002-reforco-integridade-v1.sql`  
+Commit: `54832e0770dca90f1a613a5822dd1459e500226c`
+
+A migration complementar adiciona:
+- correspondência obrigatória entre cada código de área e sua conta (A/B/C/D/Virtual);
+- FK composta para garantir que a localização de origem da transferência corresponde à mesma área e cela registradas;
+- FKs compostas para garantir que as celas de origem e destino pertencem às áreas informadas;
+- uma aprovação registrada por transferência;
+- unicidade de hash de PDF dentro da mesma área;
+- alvo exclusivo de senha diária (por usuário ou por conta);
+- unicidade do início de validade de senha por usuário/conta;
+- coerência entre resultado de conferência e identificação/data de quem marcou;
+- coerência entre encerramento de movimentação e responsável pelo encerramento.
+
+### Resultado do teste combinado
+
+As migrations 001 + 002 foram executadas em branch Neon temporária isolada:
+- 19 tabelas;
+- 50 índices;
+- 242 restrições;
+- 185 colunas.
+
+A branch temporária foi descartada depois da consulta de validação. Nenhuma alteração foi aplicada na branch permanente `confere-dev`.
+
+### Limites que permanecem
+
+As constraints não substituem:
+- transação de transferência com bloqueios e validação de status/origem atual;
+- autorização do responsável da área de destino;
+- trilha append-only protegida por role/permissões;
+- bloqueio de edição de conferência finalizada e processo de retificação;
+- validação de completude do PDF antes de gerar candidatos a ausência;
+- validação de senha diária em toda mutação pela API.
+
+Esses pontos precisam ser implementados e testados na camada de serviço, com desenho específico de permissões do banco. Ainda não foi criada role de aplicação nem concedidos privilégios.
