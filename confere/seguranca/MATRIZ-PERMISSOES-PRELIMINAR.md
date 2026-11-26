@@ -26,7 +26,8 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 | Solicitar transferência | Sim | Sim | Sim | Somente área vinculada |
 | Aceitar transferência entre contas diferentes | Sim, com justificativa | Sim, se designado | Sim, se designado | Responsável autorizado no destino |
 | Executar transferência entre áreas da mesma conta | Sim | Sim | Sim | Se autorizado nas duas áreas |
-| Incluir interno manualmente na cela | Sim | Sim | Sim | **Sim, somente nas celas/áreas vinculadas; nome obrigatório; demais dados podem ficar pendentes para a importação do PDF** |\n| Excluir interno (exclusão lógica) | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
+| Incluir interno manualmente na cela | Sim | Sim | Sim | **Sim, somente nas celas/áreas vinculadas; nome obrigatório; demais dados podem ficar pendentes para a importação do PDF** |
+| Excluir interno (exclusão lógica) | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
 | Reativar interno excluído | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
 | Iniciar e marcar conferência física | Sim | Sim | Sim | Área vinculada |
 | Finalizar conferência | Sim | Sim | Sim | A definir |
