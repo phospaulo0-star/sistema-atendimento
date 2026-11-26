@@ -44,7 +44,8 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 5. Transferência dentro da mesma conta exige autorização para as duas áreas, sem aprovação externa do destino, conforme regra funcional já definida.
 6. Exclusão pelo Responsável de área só pode ocorrer dentro das áreas vinculadas ao usuário e exige motivo, responsável autenticado, data/hora e evento de auditoria. A exclusão é lógica: não apaga ficha, localizações históricas, movimentações ou eventos.
 7. Reativação pelo Responsável de área só pode ocorrer dentro das áreas vinculadas ao usuário e exige motivo, responsável autenticado, data/hora e evento de auditoria. A reativação não apaga o evento de exclusão nem o histórico anterior.
-8. O Responsável de área pode aprovar as inclusões, alterações e exclusões propostas pelo PDF somente na área vinculada. A aprovação ocorre após a revisão das divergências; ausência no PDF nunca gera exclusão automática. Exclusões confirmadas exigem motivo e auditoria.\n9. Operações offline são revalidadas na sincronização; permissões e senha diária não são presumidas válidas pelo horário gravado no dispositivo.
+8. O Responsável de área pode aprovar as inclusões, alterações e exclusões propostas pelo PDF somente na área vinculada. A aprovação ocorre após a revisão das divergências; ausência no PDF nunca gera exclusão automática. Exclusões confirmadas exigem motivo e auditoria.
+9. Operações offline são revalidadas na sincronização; permissões e senha diária não são presumidas válidas pelo horário gravado no dispositivo.
 
 ## Pontos que precisam de definição funcional
 
