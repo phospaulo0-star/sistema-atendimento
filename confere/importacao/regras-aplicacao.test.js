@@ -20,7 +20,7 @@ function contexto(overrides = {}) {
     { numero_pagina: 2, status_extracao: 'VAZIA_VALIDADA', processada_em: '2026-11-26T00:00:00Z' }
   ];
   const linhas = [{
-    id: 'line1', status_linha: 'APROVADA', decisao: 'INCLUIR',
+    id: 'line1', pagina: 1, status_linha: 'APROVADA', decisao: 'INCLUIR',
     decidido_por: 'u1', decidido_em: '2026-11-26T00:00:00Z',
     aplicacao_status: 'NAO_APLICADA'
   }];
@@ -86,13 +86,13 @@ test('nega fotografia-base obsoleta', () => {
 });
 
 test('nega linha pendente', () => {
-  const c = contexto({ linhas: [{ status_linha: 'POSSIVEL_HOMONIMO', decisao: null }] });
+  const c = contexto({ linhas: [{ pagina: 1, status_linha: 'POSSIVEL_HOMONIMO', decisao: null }] });
   erroCodigo(() => validarPreCondicoesAplicacao(c), 'LINHA_PENDENTE');
 });
 
 test('nega exclusão sem justificativa', () => {
   const c = contexto({ linhas: [{
-    status_linha: 'APROVADA', decisao: 'EXCLUIR', decidido_por: 'u1',
+    pagina: 1, status_linha: 'APROVADA', decisao: 'EXCLUIR', decidido_por: 'u1',
     decidido_em: '2026-11-26T00:00:00Z', motivo_decisao: '  ',
     aplicacao_status: 'NAO_APLICADA'
   }]});
@@ -101,7 +101,7 @@ test('nega exclusão sem justificativa', () => {
 
 test('nega linha já aplicada', () => {
   const c = contexto({ linhas: [{
-    status_linha: 'APROVADA', decisao: 'IGNORAR', decidido_por: 'u1',
+    pagina: 1, status_linha: 'APROVADA', decisao: 'IGNORAR', decidido_por: 'u1',
     decidido_em: '2026-11-26T00:00:00Z', aplicacao_status: 'APLICADA'
   }]});
   erroCodigo(() => validarPreCondicoesAplicacao(c), 'LINHA_JA_APLICADA');
