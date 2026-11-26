@@ -220,7 +220,7 @@ Recusa não altera localização. Repetir a mesma operação idempotente devolve
 - outra_situacao nullable; marcado_por e marcado_em.
 - UNIQUE (`conferencia_id`, `interno_id`).
 
-Ao iniciar, criar snapshot transacional da relação aplicável. Relatório final usa somente snapshot, nunca a localização atual. Mudanças posteriores não alteram os itens. Somente o Responsável da área vinculada pode finalizar a conferência e retificar uma conferência finalizada daquela área. A finalização encerra a edição comum. Retificação é excepcional, exige justificativa e auditoria; ainda falta definir se também exigirá aprovação de segundo usuário.
+Ao iniciar, criar snapshot transacional da relação aplicável. Relatório final usa somente snapshot, nunca a localização atual. Mudanças posteriores não alteram os itens. Somente o Responsável da área vinculada pode finalizar a conferência e retificar uma conferência finalizada daquela área. A finalização encerra a edição comum. Retificação é excepcional e pode ser realizada pelo próprio Responsável da área, com justificativa própria e auditoria. Não exige aprovação de segundo usuário. Deve preservar a versão anterior e registrar os valores anteriores e novos.
 
 ### 2.9 Plantões, senhas e resumos
 
@@ -312,7 +312,7 @@ O serviço deve recuperar fechamento perdido por indisponibilidade e não duplic
 1. Quais tipos adicionais de ocorrência devem existir além dos já listados?
 2. Onde guardar os PDFs originais e por quanto tempo?
 3. Completar a matriz detalhada de permissões por perfil (administrador, chefe, auxiliar e responsável de área), incluindo se o Administrador pode enviar/iniciar importações PDF.
-4. Definir se a retificação feita pelo Responsável da área em conferência finalizada exige aprovação de segundo usuário ou apenas justificativa e auditoria.
+
 
 ## 9. Limite desta etapa
 
