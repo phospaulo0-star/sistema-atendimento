@@ -20,7 +20,7 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 | Consultar ficha e histórico | Sim | Sim | Sim | Somente áreas vinculadas |
 | Gerenciar usuários e vínculos de área | Sim | Não definido | Não definido | Não |
 | Gerenciar senhas diárias das contas | Sim | Não definido | Não definido | Não |
-| Importar PDF da área | A definir | A definir | A definir | Somente área vinculada |
+| Enviar/iniciar importação do PDF | A definir | **Sim, nas oito áreas** | **Sim, nas oito áreas** | **Sim, somente na área vinculada** |
 | Aprovar inclusão/alteração/exclusão em importação | A definir | A definir | A definir | **Sim, somente na área vinculada, com revisão das divergências e auditoria** |
 | Registrar movimentação | Sim, com auditoria | Sim, com auditoria | Sim, com auditoria | A definir por tipo e área |
 | Solicitar transferência | Sim | Sim | Sim | Somente área vinculada |
@@ -52,6 +52,6 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 - Quais ações exatas Chefe e Auxiliar podem executar em nome de qualquer área.
 - Quem pode finalizar conferências e quem pode autorizar retificações.
 - Se Administrador pode executar qualquer operação operacional ou apenas administrar e auditar.
-- Se a importação PDF é exclusiva do Responsável da área ou também pode ser executada por Chefe/Auxiliar.
+- Se o Administrador também poderá enviar/iniciar importações PDF (Chefe, Auxiliar e Responsável de área já estão autorizados).
 
 Até essa definição, os itens marcados como “A definir” não devem ser codificados como permissões liberadas.
