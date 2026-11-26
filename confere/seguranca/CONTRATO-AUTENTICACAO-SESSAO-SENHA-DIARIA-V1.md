@@ -58,7 +58,7 @@ A senha diária não deve ser enviada em texto claro para outros usuários, regi
 
 ## 5. Administração e geração diária
 
-A política de quem gera/entrega a senha diária, como ocorre a distribuição segura e como é feita a recuperação em caso de perda precisa ser definida antes da ativação. A geração não pode depender de um botão público nem de um valor previsível.
+A geração e a distribuição das senhas diárias ficam autorizadas aos perfis **ADMINISTRADOR, CHEFE e AUXILIAR**. O sistema deverá registrar qual desses responsáveis gerou/renovou a senha, para qual conta operacional, e quando isso ocorreu, sem armazenar a senha em texto claro na auditoria. A forma de geração, a distribuição segura e a recuperação em caso de perda ainda precisam ser definidas antes da ativação. A geração não pode depender de um valor previsível nem ficar disponível a perfis não autorizados.
 
 O banco atual contém `senhas_diarias`, com hash e intervalo de validade, mas ainda não há serviço de autenticação, sessão, verificação nem rotina de rotação. Não executar job automático até a regra de geração/distribuição e o tratamento de indisponibilidade estarem testados.
 
@@ -105,10 +105,9 @@ Todas as rotas mutáveis do domínio devem exigir sessão válida, autorização
 
 ## 9. Decisões pendentes antes de codificar o login
 
-- Quem pode gerar e distribuir a senha diária para cada uma das cinco contas?
 - A senha diária é única por conta operacional ou haverá uma senha individual por usuário?
 - Prazo de expiração por inatividade e limite absoluto da sessão.
 - Política de recuperação/troca da senha pessoal.
 - Procedimento de contingência se Neon estiver indisponível no momento da virada das 08:00.
 
-Até essas decisões serem confirmadas, manter login e senha diária desativados e não criar credenciais reais.
+A autorização de geração/distribuição está definida; as demais decisões pendentes precisam ser confirmadas antes de ativar login e senha diária. Até lá, manter login e senha diária desativados e não criar credenciais reais.
