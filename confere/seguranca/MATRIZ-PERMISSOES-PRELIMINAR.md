@@ -50,7 +50,6 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 ## Pontos que precisam de definição funcional
 
 - Quais ações exatas Chefe e Auxiliar podem executar em nome de qualquer área.
-- Permissões do Responsável de área para aprovar inclusões/alterações/exclusões propostas pela importação PDF.
 - Quem pode finalizar conferências e quem pode autorizar retificações.
 - Se Administrador pode executar qualquer operação operacional ou apenas administrar e auditar.
 - Se a importação PDF é exclusiva do Responsável da área ou também pode ser executada por Chefe/Auxiliar.
