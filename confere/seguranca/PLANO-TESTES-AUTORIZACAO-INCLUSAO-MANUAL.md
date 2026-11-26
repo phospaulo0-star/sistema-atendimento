@@ -138,6 +138,31 @@ Não registrar senhas, hashes, cookies, tokens ou URLs de conexão nas evidênci
 
 Os itens pendentes não devem ser tratados como permissões liberadas por inferência.
 
-## 12. Limite desta etapa
+## 12. Testes de fluxo transacional da importação PDF
+
+Os testes de completude do arquivo estão detalhados em `ESPECIFICACAO-VALIDACAO-PDF-COMPLETO-V1.md`. Os testes abaixo cobrem o fluxo entre upload, staging, conciliação e aplicação:
+
+| ID | Cenário | Resultado esperado |
+|---|---|---|
+| IMP-F01 | Usuário informa outro `enviado_por` no payload | Backend usa somente o ator da sessão |
+| IMP-F02 | Responsável envia para área sem vínculo | Negado no backend |
+| IMP-F03 | Chefe/Auxiliar envia para qualquer área | Permitido, com área e ator registrados |
+| IMP-F04 | Administrador tenta enviar enquanto a permissão não foi definida | Negado por padrão |
+| IMP-F05 | Lote ainda está extraindo e usuário tenta aprovar | Negado por estado inválido |
+| IMP-F06 | Lote incompleto tenta gerar ausências | Nenhum candidato de ausência |
+| IMP-F07 | Responsável tenta aprovar lote de outra área | Negado |
+| IMP-F08 | Correspondência ambígua/homônimo sem decisão | Linha permanece pendente |
+| IMP-F09 | Exclusão sem motivo | Negada |
+| IMP-F10 | Fotografia-base muda antes da aplicação | Bloquear aplicação e exigir nova conciliação |
+| IMP-F11 | Duas aplicações concorrentes do mesmo lote | Uma aplicação; repetição idempotente |
+| IMP-F12 | Mesmo identificador de operação com payload diferente | Rejeitar |
+| IMP-F13 | Falha ao gravar auditoria | Rollback integral |
+| IMP-F14 | Erro em linha durante aplicação | Nenhuma alteração parcial; lote não fica aplicado |
+| IMP-F15 | Lote cancelado antes da aplicação | Dados ativos inalterados |
+| IMP-F16 | Lote antigo tenta aplicar após fotografia mais recente | Bloquear por base obsoleta |
+| IMP-F17 | Responsável salva decisões parciais | Staging preservado; ativos inalterados |
+| IMP-F18 | Repetição após aplicação concluída | Retornar resultado anterior sem duplicar efeitos |
+
+## 13. Limite desta etapa
 
 Este documento é um plano de testes. Não implementa endpoints, não altera tabelas e não aplica migrations. O banco Neon `confere-dev` permanece sem alterações de schema; o banco do Sistema Atendimento CPAIG principal não é utilizado.
