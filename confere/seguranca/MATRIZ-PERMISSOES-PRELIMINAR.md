@@ -33,7 +33,7 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 | Finalizar conferência física | Não | Não | Não | **Sim, somente na própria área vinculada** |
 | Consultar relatórios de plantão | Sim | Sim | Sim | Relatórios da área, se autorizados |
 | Consultar auditoria geral | Sim | Sim, escopo a definir | Sim, escopo a definir | Não |
-| Retificar conferência finalizada | Não | Não | Não | **Sim, somente na própria área vinculada, com justificativa e auditoria; regra de segundo aprovador ainda pendente** |
+| Retificar conferência finalizada | Não | Não | Não | **Sim, somente na própria área vinculada, com justificativa do próprio Responsável e auditoria; não exige segundo aprovador** |
 
 ## Regras obrigatórias de autorização
 
@@ -50,7 +50,7 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 ## Pontos que precisam de definição funcional
 
 - Quais ações exatas Chefe e Auxiliar podem executar em nome de qualquer área.
-- Se a retificação de conferência finalizada exigirá segundo aprovador ou apenas justificativa e auditoria.
+- Nenhuma pendência quanto ao segundo aprovador: a retificação é feita pelo próprio Responsável da área, com justificativa e auditoria, sem segundo aprovador.
 - Se Administrador pode executar qualquer operação operacional ou apenas administrar e auditar.
 - Se o Administrador também poderá enviar/iniciar importações PDF (Chefe, Auxiliar e Responsável de área já estão autorizados).
 
