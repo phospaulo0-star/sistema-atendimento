@@ -36,7 +36,11 @@ Manter apenas `internos.id UUID PRIMARY KEY DEFAULT gen_random_uuid()` como iden
 
 Isso impede localização sem cela e vínculo de cela pertencente a outra área.
 
-### 1.4 Localização atual e histórico
+### 1.4 Identidade permanente da cela
+
+**Decisão confirmada:** o código identifica sempre a mesma cela dentro do mesmo pavilhão/área. O código de uma cela que deixar de existir não poderá ser reutilizado para identificar outra cela na mesma área. O cadastro da cela deve ser inativado, preservando sua identidade e histórico. A mesma numeração pode existir em áreas diferentes, pois a identidade é contextualizada pela área. Manter UNIQUE (`area_id`, `codigo`) também sobre registros inativos, sem apagar a cela antiga.
+
+### 1.5 Localização atual e histórico
 
 - Índice único parcial em `localizacoes(interno_id) WHERE fim_em IS NULL`.
 - Toda mudança encerra a localização anterior e abre a nova na mesma transação.
@@ -44,7 +48,7 @@ Isso impede localização sem cela e vínculo de cela pertencente a outra área.
 - Nunca atualizar o registro histórico para fingir que aquela sempre foi a localização atual.
 - FKs históricas usam `ON DELETE RESTRICT`; desativar em vez de apagar.
 
-### 1.5 Exclusão e reativação
+### 1.6 Exclusão e reativação
 
 - `internos.status_cadastro`: ATIVO ou EXCLUIDO.
 - Exclusão exige motivo e responsável, grava histórico e auditoria e encerra localização ativa na mesma transação.
@@ -110,6 +114,8 @@ Manter duas trilhas separadas:
 Para operações sensíveis, ambas são gravadas na mesma transação da alteração. Se a auditoria falhar, a operação sensível também falha. Não armazenar senha, token, cookie ou URL de conexão em logs ou JSONB. Toda autorização é validada no servidor, inclusive quando a API é chamada diretamente.
 
 ## 5. Importação PDF — fluxo seguro
+
+**Decisão confirmada sobre os arquivos:** haverá um PDF individual para cada área, inclusive quando várias áreas estiverem agrupadas na mesma conta. Portanto, serão oito PDFs: A, B, C, Disciplinar Risco, Disciplinar, D, CP e Virtual. Cada arquivo será processado exclusivamente contra a área correspondente; os três PDFs da conta C e os dois PDFs da conta D não serão combinados.
 
 1. Receber PDF e calcular SHA-256 no servidor.
 2. Criar importação com área, operador, nome, hash e estado.
@@ -194,12 +200,13 @@ Testes obrigatórios:
 | Acesso de chefe e auxiliar | Acesso às oito áreas |
 | Senha diária às 08h | Sessão permanece; ações bloqueadas até atualizar/informar a senha vigente |
 | Reativação de excluído | Administrador, chefe e auxiliar podem reativar, com motivo e auditoria |
+| Identidade da cela | Código é permanente dentro da área; não pode ser reutilizado após inativação |
+| PDFs de importação | Um PDF separado para cada uma das oito áreas, mesmo nas contas agrupadas |
 
 ## 13. Pendências funcionais antes da migration
 
-1. PDF diário: representa sempre a relação completa da área ou pode ser parcial?
-2. Celas: o código de uma cela pode ser reutilizado em outro momento dentro da mesma área?
-3. Quais tipos adicionais de ocorrência devem existir além dos já listados?
-4. Onde guardar o PDF original e por quanto tempo?
+1. PDF de cada área: representa sempre a relação completa daquela área ou pode ser parcial?
+2. Quais tipos adicionais de ocorrência devem existir além dos já listados?
+3. Onde guardar o PDF original e por quanto tempo?
 
 **Limite desta etapa:** nenhuma tabela, extensão, role adicional ou migration foi criada/aplicada. Este documento é revisão técnica para aprovação antes de gerar SQL.
