@@ -50,7 +50,9 @@ Nenhum interno pode permanecer cadastrado/ativo em uma área sem cela definida. 
 
 ### 1.5 Exclusão e reativação
 
-Exclusão é lógica, exige motivo e responsável, remove o interno da listagem ativa e preserva ficha, localizações, movimentações e eventos. Administrador, Chefe, Auxiliar e Responsável de área podem excluir internamente (exclusão lógica) e reativar, sempre com motivo, responsável, data/hora e auditoria. O Responsável de área só pode executar exclusão e reativação dentro das áreas vinculadas à sua conta. Reativação exige localização/cela válida e não reabre automaticamente uma localização histórica.\n\nO Responsável de área também pode incluir manualmente um interno em uma cela sob sua responsabilidade. Na inclusão inicial, somente o nome do interno e a cela são obrigatórios; `data_entrada`, `procedencia` e `setor_trabalho` podem ficar NULL/pendentes até a próxima importação do PDF completo daquela área. A inclusão manual deve registrar `created_by`, instante, área/cela e evento de histórico/auditoria. A importação posterior deve completar/atualizar o cadastro existente, sem duplicá-lo; correspondência por nome ambígua ou homônimo exige revisão humana. A autorização é validada no servidor contra o vínculo do Responsável com a área e a cela deve pertencer à área autorizada.
+Exclusão é lógica, exige motivo e responsável, remove o interno da listagem ativa e preserva ficha, localizações, movimentações e eventos. Administrador, Chefe, Auxiliar e Responsável de área podem excluir internamente (exclusão lógica) e reativar, sempre com motivo, responsável, data/hora e auditoria. O Responsável de área só pode executar exclusão e reativação dentro das áreas vinculadas à sua conta. Reativação exige localização/cela válida e não reabre automaticamente uma localização histórica.
+
+O Responsável de área também pode incluir manualmente um interno em uma cela sob sua responsabilidade. Na inclusão inicial, somente o nome do interno e a cela são obrigatórios; `data_entrada`, `procedencia` e `setor_trabalho` podem ficar NULL/pendentes até a próxima importação do PDF completo daquela área. A inclusão manual deve registrar `created_by`, instante, área/cela e evento de histórico/auditoria. A importação posterior deve completar/atualizar o cadastro existente, sem duplicá-lo; correspondência por nome ambígua ou homônimo exige revisão humana. A autorização é validada no servidor contra o vínculo do Responsável com a área e a cela deve pertencer à área autorizada.
 
 ### 1.6 Senha diária e sessão
 
@@ -96,7 +98,8 @@ Os nomes abaixo são nomes lógicos propostos. Tipos, nomes finais e SQL serão 
 - `status_cadastro` TEXT NOT NULL CHECK em ATIVO/EXCLUIDO.
 - `created_at`, `updated_at` TIMESTAMPTZ NOT NULL.
 - `created_by`, `updated_by` UUID FK usuários.
-- Sem UNIQUE em nome; sem RGI como chave.\n- Inclusão manual por Responsável de área: nome obrigatório; dados do PDF (`data_entrada`, `procedencia`, `setor_trabalho`) aceitam NULL até a próxima importação. Registrar usuário e instante da inclusão.
+- Sem UNIQUE em nome; sem RGI como chave.
+- Inclusão manual por Responsável de área: nome obrigatório; dados do PDF (`data_entrada`, `procedencia`, `setor_trabalho`) aceitam NULL até a próxima importação. Registrar usuário e instante da inclusão.
 
 **`localizacoes`**
 - `id` UUID PK.
@@ -290,7 +293,8 @@ O serviço deve recuperar fechamento perdido por indisponibilidade e não duplic
 - Homônimos não são vinculados automaticamente.
 - Código de cela inativada não pode ser reutilizado na mesma área; código igual em área diferente é permitido.
 - Localização sem cela e cela de outra área são rejeitadas.
-- Inclusão manual pelo Responsável de área só é permitida em cela de área vinculada; nome e cela obrigatórios, demais dados podem aguardar o PDF seguinte; histórico/auditoria obrigatórios; importação posterior completa o cadastro sem duplicar e ambiguidades exigem revisão humana.\n- Exclusão lógica preserva ficha e histórico; Administrador, Chefe, Auxiliar e Responsável de área podem excluir e reativar; o Responsável de área somente nas áreas vinculadas; ambas as ações exigem motivo e auditoria.
+- Inclusão manual pelo Responsável de área só é permitida em cela de área vinculada; nome e cela obrigatórios, demais dados podem aguardar o PDF seguinte; histórico/auditoria obrigatórios; importação posterior completa o cadastro sem duplicar e ambiguidades exigem revisão humana.
+- Exclusão lógica preserva ficha e histórico; Administrador, Chefe, Auxiliar e Responsável de área podem excluir e reativar; o Responsável de área somente nas áreas vinculadas; ambas as ações exigem motivo e auditoria.
 - Múltiplas movimentações são independentes.
 - Transferência pendente/recusada não muda localização; aceite é atômico.
 - Reenvio offline não duplica efeitos; payload diferente com mesmo ID é rejeitado.
