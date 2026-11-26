@@ -50,7 +50,7 @@ Nenhum interno pode permanecer cadastrado/ativo em uma área sem cela definida. 
 
 ### 1.5 Exclusão e reativação
 
-Exclusão é lógica, exige motivo e responsável, remove o interno da listagem ativa e preserva ficha, localizações, movimentações e eventos. Administrador, chefe e auxiliar podem reativar, sempre com motivo, localização/cela válida e auditoria. Reativação não reabre automaticamente uma localização histórica.
+Exclusão é lógica, exige motivo e responsável, remove o interno da listagem ativa e preserva ficha, localizações, movimentações e eventos. Administrador, chefe, auxiliar e Responsável de área podem reativar, sempre com motivo, localização/cela válida e auditoria. O Responsável de área só pode reativar internos dentro das áreas vinculadas à sua conta. Reativação não reabre automaticamente uma localização histórica.
 
 ### 1.6 Senha diária e sessão
 
@@ -290,7 +290,7 @@ O serviço deve recuperar fechamento perdido por indisponibilidade e não duplic
 - Homônimos não são vinculados automaticamente.
 - Código de cela inativada não pode ser reutilizado na mesma área; código igual em área diferente é permitido.
 - Localização sem cela e cela de outra área são rejeitadas.
-- Exclusão preserva ficha e histórico; reativação exige motivo e auditoria.
+- Exclusão preserva ficha e histórico; Administrador, Chefe, Auxiliar e Responsável de área podem reativar; o Responsável de área somente nas áreas vinculadas; reativação exige motivo e auditoria.
 - Múltiplas movimentações são independentes.
 - Transferência pendente/recusada não muda localização; aceite é atômico.
 - Reenvio offline não duplica efeitos; payload diferente com mesmo ID é rejeitado.
