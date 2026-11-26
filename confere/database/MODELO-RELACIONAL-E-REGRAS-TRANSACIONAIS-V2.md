@@ -169,8 +169,8 @@ A autorização é verificada em toda rota da API. Não confiar em botões ocult
 4. Comparar a fotografia recebida com os internos ativos e suas localizações atuais na mesma área.
 5. Apresentar inclusão, alteração cadastral, mudança de cela, possível homônimo, linha inválida e interno ausente do PDF.
 6. Ausência é candidata a exclusão; nunca excluir automaticamente. Exigir confirmação e motivo.
-7. Operador revisa ambiguidades, corrige linhas inválidas e confirma as ações propostas.
-8. Aplicar lote confirmado numa transação: bloquear lote, validar novamente o estado atual, executar mudanças, gravar eventos/auditoria e marcar lote aplicado.
+7. O Responsável de área pode revisar e aprovar as inclusões, alterações e exclusões propostas para a própria área, desde que esteja vinculado a ela. Ambiguidades e homônimos exigem decisão humana explícita; linhas inválidas devem ser corrigidas antes da aplicação. A aprovação registra usuário, data/hora e decisões por linha.
+8. Aplicar lote aprovado numa transação: bloquear lote, validar novamente o estado atual e a autorização do aprovador, executar somente as decisões confirmadas, gravar eventos/auditoria e marcar lote aplicado. Exclusões confirmadas exigem motivo obrigatório.
 9. Se qualquer etapa transacional falhar, rollback integral. O staging permanece para diagnóstico.
 10. Repetição do mesmo SHA-256 na mesma área gera alerta e não reaplica automaticamente. Reprocessamento intencional exige comando explícito e nova revisão.
 
@@ -293,7 +293,7 @@ O serviço deve recuperar fechamento perdido por indisponibilidade e não duplic
 - Homônimos não são vinculados automaticamente.
 - Código de cela inativada não pode ser reutilizado na mesma área; código igual em área diferente é permitido.
 - Localização sem cela e cela de outra área são rejeitadas.
-- Inclusão manual pelo Responsável de área só é permitida em cela de área vinculada; nome e cela obrigatórios, demais dados podem aguardar o PDF seguinte; histórico/auditoria obrigatórios; importação posterior completa o cadastro sem duplicar e ambiguidades exigem revisão humana.
+- Inclusão manual pelo Responsável de área só é permitida em cela de área vinculada; nome e cela obrigatórios, demais dados podem aguardar o PDF seguinte; histórico/auditoria obrigatórios; importação posterior completa o cadastro sem duplicar e ambiguidades exigem revisão humana.\n- Responsável de área pode aprovar inclusões, alterações e exclusões propostas pelo PDF somente na área vinculada; decisões por linha, usuário, data/hora e auditoria são obrigatórios; exclusão confirmada exige motivo.
 - Exclusão lógica preserva ficha e histórico; Administrador, Chefe, Auxiliar e Responsável de área podem excluir e reativar; o Responsável de área somente nas áreas vinculadas; ambas as ações exigem motivo e auditoria.
 - Múltiplas movimentações são independentes.
 - Transferência pendente/recusada não muda localização; aceite é atômico.
@@ -308,7 +308,7 @@ O serviço deve recuperar fechamento perdido por indisponibilidade e não duplic
 
 1. Quais tipos adicionais de ocorrência devem existir além dos já listados?
 2. Onde guardar os PDFs originais e por quanto tempo?
-3. Completar a matriz detalhada de permissões por perfil (administrador, chefe, auxiliar e responsável de área), inclusive quem pode aprovar as divergências propostas pela importação.
+3. Completar a matriz detalhada de permissões por perfil (administrador, chefe, auxiliar e responsável de área), incluindo quem pode executar o envio/importação do PDF.
 4. Definir se correções de conferência finalizada exigem aprovação de segundo usuário ou apenas justificativa e auditoria.
 
 ## 9. Limite desta etapa
