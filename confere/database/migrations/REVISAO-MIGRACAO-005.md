@@ -53,3 +53,15 @@
 ## Validação e implantação
 
 Esta migration deve ser validada em branch Neon temporária derivada de `confere-dev`. A branch temporária será descartada após inspeção. A branch permanente `confere-dev` e o banco do Sistema Atendimento CPAIG não serão alterados nesta etapa.
+
+
+## Resultado da validação estrutural em Neon (26/11/2026)
+
+- Migration 001 + 002 + 005 executadas em uma branch temporária derivada de `confere-dev`.
+- Estrutura observada: 21 tabelas no schema `confere` (19 da base + 2 novas).
+- As tabelas novas `importacao_paginas` e `fotografias_area` foram inspecionadas; colunas e tipos esperados presentes.
+- Foram confirmados os três índices principais: unicidade de página por lote, uma fotografia vigente por área e operação única por linha.
+- Foram confirmadas as quatro constraints principais: chave composta da importação/área, vínculo da fotografia com lote/área, vínculo da fotografia-base com área e coerência da aplicação por linha.
+- A branch temporária foi descartada com `apply_changes=false`.
+- **Não aplicada** à branch permanente `confere-dev`; nenhum dado operacional foi inserido.
+- O teste foi estrutural/DDL e de catálogo. Não substitui testes comportamentais com fixtures para concorrência, transações, completude de PDF e autorização.
