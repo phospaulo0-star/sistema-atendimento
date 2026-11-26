@@ -79,9 +79,21 @@ Transformar as permissões já confirmadas em cenários verificáveis antes de i
 | APR-11 | Aprovação tenta alterar decisão já aplicada sem fluxo de retificação | Rejeitar e preservar auditoria anterior |
 | APR-12 | Falha ao gravar histórico/auditoria durante aplicação | Rollback integral das alterações do lote |
 
-**Observação:** a permissão para enviar/iniciar a importação do PDF é distinta da permissão para aprovar suas divergências e continua pendente de definição. Estes testes não presumem que todo Responsável de área pode importar o arquivo.
+**Permissão de envio confirmada:** Responsável de área pode enviar/iniciar a importação somente para sua área vinculada; Chefe e Auxiliar podem enviar/iniciar importação para qualquer uma das oito áreas. Enviar/iniciar o lote não significa aprovar suas divergências. A permissão do Administrador para enviar/iniciar importações permanece pendente de definição.
 
-## 7. Testes transversais de autorização
+## 7. Cenários de envio/início da importação
+
+| ID | Cenário | Resultado esperado |
+|---|---|---|
+| ENV-01 | Responsável envia PDF da própria área | Permitido; lote fica associado à área e ao usuário autenticado |
+| ENV-02 | Responsável tenta enviar PDF para outra área | Negado no servidor |
+| ENV-03 | Chefe envia PDF de qualquer uma das oito áreas | Permitido |
+| ENV-04 | Auxiliar envia PDF de qualquer uma das oito áreas | Permitido |
+| ENV-05 | Chefe ou Auxiliar altera a área no payload para uma área diferente da selecionada | Servidor valida escopo e registra a área efetivamente selecionada; não aceitar inconsistência |
+| ENV-06 | Usuário sem autenticação ou com senha diária vencida tenta iniciar importação | Negar mutação |
+| ENV-07 | Mesmo PDF/hash da mesma área é enviado novamente | Alertar duplicidade e não reaplicar automaticamente |
+
+## 8. Testes transversais de autorização
 
 1. Testar cada operação diretamente na API, sem depender da interface.
 2. Alterar no payload o identificador da área/cela para outra área e confirmar que o servidor ignora ou rejeita a tentativa.
@@ -92,23 +104,23 @@ Transformar as permissões já confirmadas em cenários verificáveis antes de i
 7. Confirmar que falha ao gravar histórico/auditoria cancela a operação inteira.
 8. Confirmar que respostas de erro não revelam dados de internos de áreas não autorizadas.
 
-## 8. Evidências que devem ser coletadas na implementação
+## 9. Evidências que devem ser coletadas na implementação
 
 Para cada teste: usuário/perfil de teste, área vinculada, requisição sem segredos, resposta HTTP, estado antes/depois, registros de histórico e auditoria, e confirmação de ausência de gravações parciais em falhas.
 
 Não registrar senhas, hashes, cookies, tokens ou URLs de conexão nas evidências.
 
-## 9. Fora do escopo / decisões ainda pendentes
+## 10. Fora do escopo / decisões ainda pendentes
 
 - Quem pode aprovar inclusões, alterações e exclusões sugeridas pela importação PDF.
 - Quais ações específicas Chefe e Auxiliar podem executar em nome de qualquer área, além das permissões já confirmadas.
-- Quem pode enviar/iniciar a importação do PDF; a aprovação pelo Responsável da área já está confirmada, mas não define automaticamente quem pode fazer o upload/início do lote.
+- Se o Administrador também poderá enviar/iniciar importações PDF.
 - Quem pode finalizar conferências e quem pode autorizar retificações.
 - Tipos adicionais de movimentação/ocorrência.
 - Armazenamento e prazo de retenção dos PDFs.
 
 Os itens pendentes não devem ser tratados como permissões liberadas por inferência.
 
-## 10. Limite desta etapa
+## 11. Limite desta etapa
 
 Este documento é um plano de testes. Não implementa endpoints, não altera tabelas e não aplica migrations. O banco Neon `confere-dev` permanece sem alterações de schema; o banco do Sistema Atendimento CPAIG principal não é utilizado.
