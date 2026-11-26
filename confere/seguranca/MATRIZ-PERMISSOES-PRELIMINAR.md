@@ -7,7 +7,8 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 - Administrador, Chefe e Auxiliar podem consultar as oito áreas.
 - Cada conta operacional de área fica limitada às áreas vinculadas àquela conta.
 - As contas A, B, C, D e Virtual possuem escopos próprios.
-- O acesso a uma área não concede automaticamente permissão para decidir transferências, excluir internos ou reativar cadastros.
+- O acesso a uma área não concede automaticamente permissão para decidir transferências ou excluir internos.
+- O Responsável de área PODE reativar internos excluídos, desde que informe o motivo; a operação registra responsável, data/hora e auditoria.
 - Toda mutação deve ser validada no servidor com o usuário autenticado; nunca confiar em perfil, usuário ou área enviados livremente pelo navegador.
 - A senha diária vigente é uma condição adicional para mutações; não substitui autenticação nem autorização.
 
@@ -25,7 +26,7 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 | Solicitar transferência | Sim | Sim | Sim | Somente área vinculada |
 | Aceitar transferência entre contas diferentes | Sim, com justificativa | Sim, se designado | Sim, se designado | Responsável autorizado no destino |
 | Executar transferência entre áreas da mesma conta | Sim | Sim | Sim | Se autorizado nas duas áreas |
-| Reativar interno excluído | Sim | Sim | Sim | Não confirmado |
+| Reativar interno excluído | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
 | Iniciar e marcar conferência física | Sim | Sim | Sim | Área vinculada |
 | Finalizar conferência | Sim | Sim | Sim | A definir |
 | Consultar relatórios de plantão | Sim | Sim | Sim | Relatórios da área, se autorizados |
@@ -39,13 +40,13 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 3. Acesso a múltiplas áreas exige vínculo explícito por área ou privilégio global de Chefe/Auxiliar/Administrador.
 4. Decisão de transferência entre contas exige vínculo e permissão de decisão na área de destino.
 5. Transferência dentro da mesma conta exige autorização para as duas áreas, sem aprovação externa do destino, conforme regra funcional já definida.
-6. Reativação exige motivo, responsável, data/hora e evento de auditoria.
+6. Reativação pelo Responsável de área só pode ocorrer dentro das áreas vinculadas ao usuário e exige motivo, responsável autenticado, data/hora e evento de auditoria. A reativação não apaga o evento de exclusão nem o histórico anterior.
 7. Operações offline são revalidadas na sincronização; permissões e senha diária não são presumidas válidas pelo horário gravado no dispositivo.
 
 ## Pontos que precisam de definição funcional
 
 - Quais ações exatas Chefe e Auxiliar podem executar em nome de qualquer área.
-- Se Responsável de área pode incluir, excluir, reativar e aprovar importações, ou apenas registrar movimentações e conferências.
+- Se Responsável de área pode incluir e excluir internos, e aprovar inclusões/alterações/exclusões em importação, ou apenas registrar movimentações e conferências.
 - Quem pode finalizar conferências e quem pode autorizar retificações.
 - Se Administrador pode executar qualquer operação operacional ou apenas administrar e auditar.
 - Se a importação PDF é exclusiva do Responsável da área ou também pode ser executada por Chefe/Auxiliar.
