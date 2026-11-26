@@ -74,3 +74,15 @@ node --test confere/importacao/regras-aplicacao.test.js
 ```
 
 **Limite importante:** essas regras não fazem autenticação, consultas, bloqueios, transação, parser de PDF nem escrita no banco. A API deverá consultar os dados sob bloqueio no PostgreSQL e só então chamar a validação. Os testes foram adicionados ao repositório, mas ainda não foram executados em um ambiente Node nesta etapa.
+
+
+### Reforços da pré-validação (rodada seguinte)
+
+O módulo `confere/importacao/regras-aplicacao.js` também verifica:
+- vínculo de cada linha com uma página física válida;
+- reconciliação da quantidade de linhas por página;
+- página marcada como vazia sem linhas extraídas;
+- autoria das decisões pelo Responsável autenticado;
+- presença de cadastro-alvo para ATUALIZAR, MOVER, EXCLUIR e VINCULAR.
+
+Os testes correspondentes foram acrescentados em `confere/importacao/regras-aplicacao.test.js`. Ainda precisam ser executados em Node e, depois, repetidos como testes de integração com PostgreSQL. A função permanece uma pré-validação pura: não substitui transação, locks, autorização consultada no banco nem idempotência do comando.
