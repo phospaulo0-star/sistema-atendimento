@@ -26,7 +26,7 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 | Solicitar transferência | Sim | Sim | Sim | Somente área vinculada |
 | Aceitar transferência entre contas diferentes | Sim, com justificativa | Sim, se designado | Sim, se designado | Responsável autorizado no destino |
 | Executar transferência entre áreas da mesma conta | Sim | Sim | Sim | Se autorizado nas duas áreas |
-| Excluir interno (exclusão lógica) | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
+| Incluir interno manualmente na cela | Sim | Sim | Sim | **Sim, somente nas celas/áreas vinculadas; nome obrigatório; demais dados podem ficar pendentes para a importação do PDF** |\n| Excluir interno (exclusão lógica) | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
 | Reativar interno excluído | Sim | Sim | Sim | **Sim, somente nas áreas vinculadas, com motivo obrigatório e auditoria** |
 | Iniciar e marcar conferência física | Sim | Sim | Sim | Área vinculada |
 | Finalizar conferência | Sim | Sim | Sim | A definir |
@@ -48,7 +48,7 @@ Status: proposta técnica para revisão. Não representa concessão de permissõ
 ## Pontos que precisam de definição funcional
 
 - Quais ações exatas Chefe e Auxiliar podem executar em nome de qualquer área.
-- Se Responsável de área pode incluir internos e aprovar inclusões/alterações/exclusões em importação.
+- Permissões do Responsável de área para aprovar inclusões/alterações/exclusões propostas pela importação PDF.
 - Quem pode finalizar conferências e quem pode autorizar retificações.
 - Se Administrador pode executar qualquer operação operacional ou apenas administrar e auditar.
 - Se a importação PDF é exclusiva do Responsável da área ou também pode ser executada por Chefe/Auxiliar.
