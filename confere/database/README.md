@@ -86,3 +86,8 @@ O módulo `confere/importacao/regras-aplicacao.js` também verifica:
 - presença de cadastro-alvo para ATUALIZAR, MOVER, EXCLUIR e VINCULAR.
 
 Os testes correspondentes foram acrescentados em `confere/importacao/regras-aplicacao.test.js`. Ainda precisam ser executados em Node e, depois, repetidos como testes de integração com PostgreSQL. A função permanece uma pré-validação pura: não substitui transação, locks, autorização consultada no banco nem idempotência do comando.
+
+
+## Estado real do ambiente Neon
+
+- `ESTADO-REAL-NEON-2026-11-26.md`: fotografia de estado do banco dedicado, objetos encontrados, migrations ausentes e próximos passos seguros. Este relatório é somente diagnóstico; não autoriza aplicar migrations.
