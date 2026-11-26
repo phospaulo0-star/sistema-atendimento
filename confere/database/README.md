@@ -61,3 +61,16 @@ Nenhuma conexão é realizada por este arquivo enquanto ele não for chamado pel
 - `CONTRATO-TRANSACIONAL-APLICACAO-IMPORTACAO-V1.md`: bloqueios, validações, idempotência, fotografia-base, rollback e matriz de testes para a futura API.
 
 Esses documentos são especificações e relatórios; não significam que o parser, os endpoints ou o serviço de aplicação já estejam implementados.
+
+
+## Módulo inicial de regras de importação
+
+Foi criado `../importacao/regras-aplicacao.js` com validações puras de pré-condições para a futura aplicação de lotes e `../importacao/regras-aplicacao.test.js` com testes usando o módulo nativo `node:test`.
+
+Para executar localmente a partir da raiz do repositório:
+
+```bash
+node --test confere/importacao/regras-aplicacao.test.js
+```
+
+**Limite importante:** essas regras não fazem autenticação, consultas, bloqueios, transação, parser de PDF nem escrita no banco. A API deverá consultar os dados sob bloqueio no PostgreSQL e só então chamar a validação. Os testes foram adicionados ao repositório, mas ainda não foram executados em um ambiente Node nesta etapa.
