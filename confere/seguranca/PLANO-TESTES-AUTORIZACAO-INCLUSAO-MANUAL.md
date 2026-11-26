@@ -92,13 +92,13 @@ Transformar as permissões já confirmadas em cenários verificáveis antes de i
 7. Confirmar que falha ao gravar histórico/auditoria cancela a operação inteira.
 8. Confirmar que respostas de erro não revelam dados de internos de áreas não autorizadas.
 
-## 7. Evidências que devem ser coletadas na implementação
+## 8. Evidências que devem ser coletadas na implementação
 
 Para cada teste: usuário/perfil de teste, área vinculada, requisição sem segredos, resposta HTTP, estado antes/depois, registros de histórico e auditoria, e confirmação de ausência de gravações parciais em falhas.
 
 Não registrar senhas, hashes, cookies, tokens ou URLs de conexão nas evidências.
 
-## 8. Fora do escopo / decisões ainda pendentes
+## 9. Fora do escopo / decisões ainda pendentes
 
 - Quem pode aprovar inclusões, alterações e exclusões sugeridas pela importação PDF.
 - Quais ações específicas Chefe e Auxiliar podem executar em nome de qualquer área, além das permissões já confirmadas.
