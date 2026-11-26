@@ -16,7 +16,7 @@ function contexto(overrides = {}) {
   };
   const fotografiaVigente = { id: 'f1' };
   const paginas = [
-    { numero_pagina: 1, status_extracao: 'PROCESSADA', processada_em: '2026-11-26T00:00:00Z' },
+    { numero_pagina: 1, quantidade_linhas: 1, status_extracao: 'PROCESSADA', processada_em: '2026-11-26T00:00:00Z' },
     { numero_pagina: 2, status_extracao: 'VAZIA_VALIDADA', processada_em: '2026-11-26T00:00:00Z' }
   ];
   const linhas = [{
@@ -105,4 +105,30 @@ test('nega linha já aplicada', () => {
     decidido_em: '2026-11-26T00:00:00Z', aplicacao_status: 'APLICADA'
   }]});
   erroCodigo(() => validarPreCondicoesAplicacao(c), 'LINHA_JA_APLICADA');
+});
+
+test('nega decisão registrada por usuário diferente do responsável autenticado', () => {
+  const c = contexto({ linhas: [{
+    id: 'line1', pagina: 1, status_linha: 'APROVADA', decisao: 'INCLUIR',
+    decidido_por: 'outro-usuario', decidido_em: '2026-11-26T00:00:00Z',
+    aplicacao_status: 'NAO_APLICADA'
+  }]});
+  erroCodigo(() => validarPreCondicoesAplicacao(c), 'DECISAO_SEM_RESPONSAVEL');
+});
+
+test('nega contagem de linhas divergente entre página e extração', () => {
+  const c = contexto({ paginas: [
+    { numero_pagina: 1, quantidade_linhas: 0, status_extracao: 'PROCESSADA', processada_em: '2026-11-26T00:00:00Z' },
+    { numero_pagina: 2, quantidade_linhas: 0, status_extracao: 'VAZIA_VALIDADA', processada_em: '2026-11-26T00:00:00Z' }
+  ]});
+  erroCodigo(() => validarPreCondicoesAplicacao(c), 'CONTAGEM_LINHAS_DIVERGENTE');
+});
+
+test('nega decisão que exige interno sem cadastro de destino', () => {
+  const c = contexto({ linhas: [{
+    id: 'line1', pagina: 1, status_linha: 'APROVADA', decisao: 'MOVER',
+    decidido_por: 'u1', decidido_em: '2026-11-26T00:00:00Z',
+    aplicacao_status: 'NAO_APLICADA', interno_sugerido_id: null
+  }]});
+  erroCodigo(() => validarPreCondicoesAplicacao(c), 'INTERNO_ALVO_AUSENTE');
 });
