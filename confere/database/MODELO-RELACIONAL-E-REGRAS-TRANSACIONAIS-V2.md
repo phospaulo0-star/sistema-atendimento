@@ -293,7 +293,8 @@ O serviço deve recuperar fechamento perdido por indisponibilidade e não duplic
 - Homônimos não são vinculados automaticamente.
 - Código de cela inativada não pode ser reutilizado na mesma área; código igual em área diferente é permitido.
 - Localização sem cela e cela de outra área são rejeitadas.
-- Inclusão manual pelo Responsável de área só é permitida em cela de área vinculada; nome e cela obrigatórios, demais dados podem aguardar o PDF seguinte; histórico/auditoria obrigatórios; importação posterior completa o cadastro sem duplicar e ambiguidades exigem revisão humana.\n- Responsável de área pode aprovar inclusões, alterações e exclusões propostas pelo PDF somente na área vinculada; decisões por linha, usuário, data/hora e auditoria são obrigatórios; exclusão confirmada exige motivo.
+- Inclusão manual pelo Responsável de área só é permitida em cela de área vinculada; nome e cela obrigatórios, demais dados podem aguardar o PDF seguinte; histórico/auditoria obrigatórios; importação posterior completa o cadastro sem duplicar e ambiguidades exigem revisão humana.
+- Responsável de área pode aprovar inclusões, alterações e exclusões propostas pelo PDF somente na área vinculada; decisões por linha, usuário, data/hora e auditoria são obrigatórios; exclusão confirmada exige motivo.
 - Exclusão lógica preserva ficha e histórico; Administrador, Chefe, Auxiliar e Responsável de área podem excluir e reativar; o Responsável de área somente nas áreas vinculadas; ambas as ações exigem motivo e auditoria.
 - Múltiplas movimentações são independentes.
 - Transferência pendente/recusada não muda localização; aceite é atômico.
