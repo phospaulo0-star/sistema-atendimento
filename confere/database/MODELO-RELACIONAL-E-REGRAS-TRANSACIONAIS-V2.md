@@ -197,15 +197,11 @@ A importação completa só pode propor ausência/exclusão quando a extração 
 **`transferencias_aprovacoes`**
 - `id` UUID PK; transferência FK; decisão; usuário destino; instante; observação.
 
-Aceite entre contas distintas:
-1. bloquear a transferência e o interno/localização com FOR UPDATE;
-2. confirmar status PENDENTE, origem ainda atual, destino autorizado e cela ativa;
-3. encerrar origem e abrir destino;
-4. gravar histórico, aprovação e auditoria;
-5. marcar ACEITA;
-6. commit único.
+Transferências entre áreas da mesma conta (ex.: Pavilhão C → Disciplinar/Disciplinar Risco; Pavilhão D → CP): o Responsável ativo vinculado à área de origem pode efetivar diretamente, sem aguardar aceite do destino. O servidor bloqueia a transferência e o interno/localização, confirma status PENDENTE, origem atual e destino/cela ativos, encerra origem, abre destino e grava histórico/auditoria na mesma transação. Não registrar aprovação fictícia do destino.
 
-Recusa não altera localização. Repetir a mesma operação idempotente devolve o resultado original. Transferências entre áreas da mesma conta podem dispensar aceite externo, mas continuam auditadas. Movimentações abertas acompanham o interno e não são encerradas pela transferência.
+Transferências entre contas distintas exigem aceite do Responsável ativo vinculado à área de destino. O servidor bloqueia a transferência e o interno/localização, confirma status PENDENTE, origem ainda atual, destino autorizado e cela ativa, encerra origem, abre destino, grava histórico, aprovação e auditoria e marca ACEITA em commit único.
+
+Recusa não altera localização. Repetir a mesma operação idempotente devolve o resultado original. Movimentações abertas acompanham o interno e não são encerradas pela transferência.
 
 ### 2.8 Conferência física e snapshot
 
