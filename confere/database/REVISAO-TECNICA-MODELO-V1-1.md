@@ -121,7 +121,7 @@ Para operações sensíveis, ambas são gravadas na mesma transação da altera�
 2. Criar importação com área, operador, nome, hash e estado.
 3. Extrair linhas para staging; não alterar cadastros/localizações.
 4. Validar estrutura e se a importação é completa ou parcial — decisão funcional ainda pendente.
-5. Comparar novos, possíveis correspondentes, alterações, mudanças de cela, ausentes e ambiguidades.
+5. Comparar novos, possíveis correspondentes, alterações, mudanças de cela, internos ausentes da relação completa e ambiguidades.
 6. Homônimos e casos duvidosos exigem decisão humana.
 7. Exibir prévia com contagens e mudanças exatas.
 8. Ao confirmar, bloquear o lote e aplicar decisões aprovadas em transação.
@@ -201,12 +201,11 @@ Testes obrigatórios:
 | Senha diária às 08h | Sessão permanece; ações bloqueadas até atualizar/informar a senha vigente |
 | Reativação de excluído | Administrador, chefe e auxiliar podem reativar, com motivo e auditoria |
 | Identidade da cela | Código é permanente dentro da área; não pode ser reutilizado após inativação |
-| PDFs de importação | Um PDF separado para cada uma das oito áreas, mesmo nas contas agrupadas |
+| PDFs de importação | Um PDF separado para cada uma das oito áreas, mesmo nas contas agrupadas; cada PDF sempre contém a relação completa daquela área |
 
 ## 13. Pendências funcionais antes da migration
 
-1. PDF de cada área: representa sempre a relação completa daquela área ou pode ser parcial?
-2. Quais tipos adicionais de ocorrência devem existir além dos já listados?
-3. Onde guardar o PDF original e por quanto tempo?
+1. Quais tipos adicionais de ocorrência devem existir além dos já listados?
+2. Onde guardar o PDF original e por quanto tempo?
 
 **Limite desta etapa:** nenhuma tabela, extensão, role adicional ou migration foi criada/aplicada. Este documento é revisão técnica para aprovação antes de gerar SQL.
